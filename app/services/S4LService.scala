@@ -18,8 +18,7 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import cats.data.OptionT
-import connectors.{KeystoreConnect, KeystoreConnector, OptionalResponse, S4LConnect, S4LConnector}
+import connectors.S4LConnector
 import models.{CurrentProfile, S4LKey, ViewModelFormat}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -29,11 +28,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class S4LService @Inject()(val s4LConnector: S4LConnector) extends S4LSrv
-
-trait S4LSrv {
-
-  private[services] val s4LConnector: S4LConnect
+class S4LService @Inject()(val s4LConnector: S4LConnector) {
 
   def save[T: S4LKey](data: T)(implicit profile: CurrentProfile, hc: HeaderCarrier, format: Format[T]): Future[CacheMap] =
     s4LConnector.save[T](profile.registrationId, S4LKey[T].key, data)
@@ -50,11 +45,11 @@ trait S4LSrv {
     } yield cm
 
   def fetchAndGet[T: S4LKey]()(implicit profile: CurrentProfile, hc: HeaderCarrier, format: Format[T]): Future[Option[T]] =
-    s4LConnector.fetchAndGet[T](profile.registrationId, S4LKey[T].key)
+    s4LConnector.fetchAndGet[T](profile.registrationId, S4LKey[T].key).value
 
   def getViewModel[T, G](container: Future[G])
-                        (implicit r: ViewModelFormat.Aux[T, G], f: Format[G]): OptionalResponse[T] =
-    OptionT(container.map(r.read))
+                        (implicit r: ViewModelFormat.Aux[T, G], f: Format[G]): Future[Option[T]] =
+    container.map(r.read)
 
   def clear()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[HttpResponse] =
     s4LConnector.clear(profile.registrationId)

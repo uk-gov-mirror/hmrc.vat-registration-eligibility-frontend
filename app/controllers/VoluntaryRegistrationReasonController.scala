@@ -55,7 +55,8 @@ class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: 
             goodForm => (goodForm.reason == VoluntaryRegistrationReason.NEITHER).pure.ifM(
               s4l.clear().flatMap(_ => vrs.deleteVatScheme()).map(_ => vatRegFrontendService.buildVatRegFrontendUrlWelcome),
               save(goodForm).map(_ => vatRegFrontendService.buildVatRegFrontendUrlEntry)
-            ).map(Redirect(_)))
+            ).map{
+              case x => println(x); Redirect(x)})
         }
   }
 }

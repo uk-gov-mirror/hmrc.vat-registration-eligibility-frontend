@@ -26,6 +26,6 @@ import services.VatRegFrontendService
 class FeedbackController @Inject()(implicit val messagesApi: MessagesApi,
                                    val vatRegFrontendService: VatRegFrontendService) extends VatRegistrationController {
 
-  def show: Action[AnyContent] = authorised(implicit user => implicit request => Ok(vatRegFrontendService.buildVatRegFrontendUrlWelcome))
+  def show: Action[AnyContent] = authorised(implicit user => implicit request => Redirect(vatRegFrontendService.buildVatRegFrontendUrlWelcome))
 
 }

@@ -28,7 +28,7 @@ import models.api._
 import models.external.IncorporationInfo
 import play.api.libs.json.Format
 import uk.gov.hmrc.play.http.HeaderCarrier
-import common.enums.CacheKeys.{CurrentProfile => CurrentProfileKey}
+import common.enums.CacheKeys.CurrentProfile
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -64,13 +64,13 @@ class VatRegistrationService @Inject()(val s4LService: S4LService,
     vatRegConnector.getIncorporationInfo(txId).value
 
   def getIncorporationDate(txId: String)(implicit headerCarrier: HeaderCarrier): Future[Option[LocalDate]] =
-    keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey.toString) flatMap { profile =>
+    keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfile.toString) flatMap { profile =>
       profile
         .getOrElse(throw new IllegalStateException("Current Profile expected to be found"))
         .incorporationDate match {
         case None => for {
           incorpDate <- OptionT(getIncorporationInfo(txId)).subflatMap(_.statusEvent.incorporationDate).value
-          _ <- keystoreConnector.cache[CurrentProfile](CurrentProfileKey.toString, profile.get.copy(incorporationDate = incorpDate))
+          _ <- keystoreConnector.cache[CurrentProfile](CurrentProfile.toString, profile.get.copy(incorporationDate = incorpDate))
         } yield incorpDate
         case o@_ => Future.successful(o)
       }

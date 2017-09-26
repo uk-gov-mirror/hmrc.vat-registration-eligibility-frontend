@@ -40,6 +40,7 @@ case class S4LVatEligibility
 
 object S4LVatEligibility {
   implicit val format: OFormat[S4LVatEligibility] = Json.format[S4LVatEligibility]
+  implicit val vatServiceEligibility: S4LKey[S4LVatEligibility] = S4LKey("VatServiceEligibility")
 
   implicit val modelT = new S4LModelTransformer[S4LVatEligibility] {
     override def toS4LModel(vs: VatScheme): S4LVatEligibility =
@@ -75,7 +76,9 @@ object S4LTradingDetails {
     override def toS4LModel(vs: VatScheme): S4LTradingDetails =
       S4LTradingDetails(
         taxableTurnover = ApiModelTransformer[TaxableTurnover].toViewModel(vs),
-        overThreshold = ApiModelTransformer[OverThresholdView].toViewModel(vs)
+        voluntaryRegistration = ApiModelTransformer[VoluntaryRegistration].toViewModel(vs),
+        overThreshold = ApiModelTransformer[OverThresholdView].toViewModel(vs),
+        voluntaryRegistrationReason = ApiModelTransformer[VoluntaryRegistrationReason].toViewModel(vs)
       )
   }
 

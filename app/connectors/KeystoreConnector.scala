@@ -26,10 +26,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.Future
 
 @Singleton
-class KeystoreConnector @Inject()(val sessionCache: VatSessionCache) extends KeystoreConnect
-
-trait KeystoreConnect {
-  val sessionCache: SessionCache
+class KeystoreConnector @Inject()(val sessionCache: VatSessionCache) {
 
   def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
     sessionCache.cache[T](formId, body)

@@ -16,8 +16,6 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
-
 import auth.VatTaxRegime
 import cats.data.OptionT
 import cats.instances.FutureInstances
@@ -73,7 +71,7 @@ abstract class VatRegistrationController extends FrontendController
                  hc: HeaderCarrier,
                  s4lTransformer: S4LModelTransformer[G]
                 ): OptionT[Future, T] =
-      s4l.getViewModel[T, G](s4lContainer[G]())
+      OptionT(s4l.getViewModel[T, G](s4lContainer[G]()))
   }
 
   /****

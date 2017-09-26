@@ -16,7 +16,8 @@
 
 package mocks
 
-import connectors.S4LConnector
+import cats.data.OptionT
+import connectors.{OptionalResponse, S4LConnector}
 import models.S4LKey
 import org.mockito.Matchers
 import org.mockito.Mockito.when
@@ -33,9 +34,9 @@ trait SaveForLaterMock {
 
   lazy val mockS4LConnector = mock[S4LConnector]
 
-  def mockS4LFetchAndGet[T](formId: String, model: Option[T], mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[Future[Option[T]]] = {
+  def mockS4LFetchAndGet[T](formId: String, model: Option[T], mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[OptionalResponse[T]] = {
     when(mockS4LConnector.fetchAndGet[T](Matchers.anyString(), Matchers.contains(formId))(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
-      .thenReturn(Future.successful(model))
+      .thenReturn(OptionT(Future.successful(model)))
   }
 
   def mockS4LFetchAll(cacheMap: Option[CacheMap], mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[Option[CacheMap]]] = {

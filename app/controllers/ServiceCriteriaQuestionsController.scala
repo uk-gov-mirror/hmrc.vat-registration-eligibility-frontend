@@ -18,6 +18,7 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import common.enums.CacheKeys.IneligibilityReason
 import cats.data.OptionT
 import connectors.KeystoreConnector
 import forms.ServiceCriteriaFormFactory
@@ -32,8 +33,7 @@ import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRe
 import utils.SessionProfile
 
 @Singleton
-class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaFormFactory,
-                                                   val keystoreConnector: KeystoreConnector,
+class ServiceCriteriaQuestionsController @Inject()(val keystoreConnector: KeystoreConnector,
                                                    val currentProfileService: CurrentProfileService,
                                                    val vatRegFrontendService: VatRegFrontendService,
                                                    implicit val messagesApi: MessagesApi,
@@ -41,14 +41,12 @@ class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaF
                                                    implicit val s4l: S4LService)
   extends VatRegistrationController with SessionProfile {
 
-  val INELIGIBILITY_REASON_KEY: String = "ineligibility-reason"
-
   private def nextQuestion(question: EligibilityQuestion): Call = question match {
-    case HaveNinoQuestion            => routes.ServiceCriteriaQuestionsController.show(DoingBusinessAbroadQuestion.name)
-    case DoingBusinessAbroadQuestion => routes.ServiceCriteriaQuestionsController.show(DoAnyApplyToYouQuestion.name)
-    case DoAnyApplyToYouQuestion     => routes.ServiceCriteriaQuestionsController.show(ApplyingForAnyOfQuestion.name)
-    case ApplyingForAnyOfQuestion    => routes.ServiceCriteriaQuestionsController.show(CompanyWillDoAnyOfQuestion.name)
-    case CompanyWillDoAnyOfQuestion  => routes.EligibilitySuccessController.show
+    case HaveNinoQuestion            => controllers.routes.ServiceCriteriaQuestionsController.show(DoingBusinessAbroadQuestion.name)
+    case DoingBusinessAbroadQuestion => controllers.routes.ServiceCriteriaQuestionsController.show(DoAnyApplyToYouQuestion.name)
+    case DoAnyApplyToYouQuestion     => controllers.routes.ServiceCriteriaQuestionsController.show(ApplyingForAnyOfQuestion.name)
+    case ApplyingForAnyOfQuestion    => controllers.routes.ServiceCriteriaQuestionsController.show(CompanyWillDoAnyOfQuestion.name)
+    case CompanyWillDoAnyOfQuestion  => controllers.routes.EligibilitySuccessController.show
   }
 
   private def viewForQuestion(q: EligibilityQuestion, form: Form[YesOrNoQuestion])(implicit r: Request[AnyContent]) = q match {
@@ -64,7 +62,7 @@ class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaF
       implicit request =>
         withCurrentProfile { implicit profile =>
           val question = EligibilityQuestion(q)
-          val form: Form[YesOrNoQuestion] = formFactory.form(question.name)
+          val form: Form[YesOrNoQuestion] = ServiceCriteriaFormFactory.form(question.name)
           viewModel[VatServiceEligibility]()
             .flatMap(e => OptionT.fromOption(e.getAnswer(question)))
             .fold(form)(answer => form.fill(YesOrNoQuestion(question.name, answer)))
@@ -78,20 +76,20 @@ class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaF
         withCurrentProfile { implicit profile =>
           val question = EligibilityQuestion(q)
           import common.ConditionalFlatMap._
-          formFactory.form(question.name).bindFromRequest().fold(
+          ServiceCriteriaFormFactory.form(question.name).bindFromRequest().fold(
             badForm => BadRequest(viewForQuestion(question, badForm)).pure,
             data => for {
               vatEligibility <- viewModel[VatServiceEligibility]().getOrElse(VatServiceEligibility())
               _ <- save(vatEligibility.setAnswer(question, data.answer))
               exit = data.answer == question.exitAnswer
-              _ <- keystoreConnector.cache(INELIGIBILITY_REASON_KEY, question.name) onlyIf exit
+              _ <- keystoreConnector.cache(IneligibilityReason.toString, question.name) onlyIf exit
               _ <- vrs.submitVatEligibility() onlyIf question == CompanyWillDoAnyOfQuestion
             } yield Redirect(if(exit) routes.ServiceCriteriaQuestionsController.ineligible() else nextQuestion(question)))
         }
   }
 
   def ineligible(): Action[AnyContent] = authorised.async(implicit user => implicit request =>
-    OptionT(keystoreConnector.fetchAndGet[String](INELIGIBILITY_REASON_KEY)).getOrElse("")
+    OptionT(keystoreConnector.fetchAndGet[String](IneligibilityReason.toString)).getOrElse("")
       .map(failedQuestion => Ok(views.html.pages.ineligible(failedQuestion))))
 
 }

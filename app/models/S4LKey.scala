@@ -23,12 +23,9 @@ trait S4LKey[T] {
 }
 
 object S4LKey {
-
   def apply[T](implicit cacheKey: S4LKey[T]): S4LKey[T] = cacheKey
 
   def apply[T](k: String): S4LKey[T] = new S4LKey[T] {
     override val key = k
   }
-
-  implicit val vatServiceEligibility: S4LKey[S4LVatEligibility] = S4LKey("VatServiceEligibility")
 }

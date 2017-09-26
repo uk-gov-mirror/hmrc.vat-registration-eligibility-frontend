@@ -36,13 +36,13 @@ class IncorporationInformationConnector extends ServicesConfig {
 
   val className = this.getClass.getSimpleName
 
-  def getCompanyName(redId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
+  def getCompanyName(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
     http.GET[JsValue](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile") recover {
       case notFound: NotFoundException =>
-        Logger.error(s"[IncorporationInformationConnector] - [getCompanyName] - Could not find company name for regId $redId (txId: $transactionId)")
+        Logger.error(s"[IncorporationInformationConnector] - [getCompanyName] - Could not find company name for regId $regId (txId: $transactionId)")
         throw notFound
       case e =>
-        Logger.error(s"[IncorporationInformationConnector] - [getCompanyName] - There was a problem getting company for regId $redId (txId: $transactionId)", e)
+        Logger.error(s"[IncorporationInformationConnector] - [getCompanyName] - There was a problem getting company for regId $regId (txId: $transactionId)", e)
         throw e
     }
   }
