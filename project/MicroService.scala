@@ -2,6 +2,7 @@ import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
 import play.routes.compiler.{InjectedRoutesGenerator, StaticRoutesGenerator}
+import play.sbt.PlayImport.PlayKeys
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
@@ -34,6 +35,7 @@ trait MicroService {
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(Seq(play.sbt.PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins : _*)
     .settings(playSettings ++ scoverageSettings : _*)
+    .settings(PlayKeys.playDefaultPort := 9894)
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
