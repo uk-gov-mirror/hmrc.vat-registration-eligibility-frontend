@@ -19,7 +19,7 @@ package models.views
 import fixtures.VatRegistrationFixture
 import models.view.VoluntaryRegistrationReason
 import models.view.VoluntaryRegistrationReason._
-import models.{ApiModelTransformer, S4LTradingDetails}
+import models.{ApiModelTransformer, S4LVatChoice}
 import org.scalatest.{Inspectors, Matchers}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -31,19 +31,19 @@ class VoluntaryRegistrationReasonSpec extends UnitSpec with Matchers with Inspec
 
     "produce empty view model from an empty voluntary registration reason" in {
       val vm = ApiModelTransformer[VoluntaryRegistrationReason]
-        .toViewModel(vatScheme(vatTradingDetails = Some(tradingDetails())))
+        .toViewModel(vatScheme(vatServiceEligibility = Some(vatServiceEligibility())))
       vm shouldBe None
     }
 
     "produce a view model from a vatScheme with voluntary registration reason (sells)" in {
       val vm = ApiModelTransformer[VoluntaryRegistrationReason]
-        .toViewModel(vatScheme(vatTradingDetails = Some(tradingDetails(reason = Some(SELLS)))))
+        .toViewModel(vatScheme(vatServiceEligibility = Some(vatServiceEligibility(reason = Some(SELLS)))))
       vm shouldBe Some(VoluntaryRegistrationReason.sells)
     }
 
     "produce a view model from a vatScheme with voluntary registration reason (intends to sell)" in {
       val vm = ApiModelTransformer[VoluntaryRegistrationReason]
-        .toViewModel(vatScheme(vatTradingDetails = Some(tradingDetails(reason = Some(INTENDS_TO_SELL)))))
+        .toViewModel(vatScheme(vatServiceEligibility = Some(vatServiceEligibility(reason = Some(INTENDS_TO_SELL)))))
       vm shouldBe Some(VoluntaryRegistrationReason.intendsToSell)
     }
 
@@ -71,18 +71,18 @@ class VoluntaryRegistrationReasonSpec extends UnitSpec with Matchers with Inspec
 
   "ViewModelFormat" should {
     val validVoluntaryRegistrationReason = VoluntaryRegistrationReason(VoluntaryRegistrationReason.INTENDS_TO_SELL)
-    val s4LTradingDetails: S4LTradingDetails = S4LTradingDetails(voluntaryRegistrationReason = Some(validVoluntaryRegistrationReason))
+    val s4LVatChoice: S4LVatChoice = S4LVatChoice(voluntaryRegistrationReason = Some(validVoluntaryRegistrationReason))
 
-    "extract voluntaryRegistrationReason from vatTradingDetails" in {
-      VoluntaryRegistrationReason.viewModelFormat.read(s4LTradingDetails) shouldBe Some(validVoluntaryRegistrationReason)
+    "extract voluntaryRegistrationReason from vatChoice" in {
+      VoluntaryRegistrationReason.viewModelFormat.read(s4LVatChoice) shouldBe Some(validVoluntaryRegistrationReason)
     }
 
     "update empty vatContact with voluntaryRegistrationReason" in {
-      VoluntaryRegistrationReason.viewModelFormat.update(validVoluntaryRegistrationReason, Option.empty[S4LTradingDetails]).voluntaryRegistrationReason shouldBe Some(validVoluntaryRegistrationReason)
+      VoluntaryRegistrationReason.viewModelFormat.update(validVoluntaryRegistrationReason, Option.empty[S4LVatChoice]).voluntaryRegistrationReason shouldBe Some(validVoluntaryRegistrationReason)
     }
 
     "update non-empty vatContact with voluntaryRegistrationReason" in {
-      VoluntaryRegistrationReason.viewModelFormat.update(validVoluntaryRegistrationReason, Some(s4LTradingDetails)).voluntaryRegistrationReason shouldBe Some(validVoluntaryRegistrationReason)
+      VoluntaryRegistrationReason.viewModelFormat.update(validVoluntaryRegistrationReason, Some(s4LVatChoice)).voluntaryRegistrationReason shouldBe Some(validVoluntaryRegistrationReason)
     }
 
   }

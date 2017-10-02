@@ -18,8 +18,9 @@ package controllers
 
 import fixtures.VatRegistrationFixture
 import helpers.{S4LMockSugar, VatRegSpec}
-import models.view.OverThresholdView
-import models.{CurrentProfile, S4LTradingDetails}
+import models.api.VatChoice
+import models.view.{OverThresholdView, Summary, TaxableTurnover, VoluntaryRegistration}
+import models.{CurrentProfile, S4LVatChoice}
 import org.mockito.Mockito._
 import org.mockito.Matchers
 import play.api.mvc.{Request, Result}
@@ -30,61 +31,77 @@ import scala.concurrent.Future
 
 class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
 
-  object TestThresholdSummaryController extends ThresholdSummaryController() {
-    override val authConnector = mockAuthConnector
+  class Setup {
 
-    override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-      f(currentProfile)
+    val testController = new ThresholdSummaryController()(
+      mockMessages,
+      mockS4LService,
+      mockVatRegistrationService,
+      mockCurrentProfileService,
+      mockVatRegFrontendService
+    ) {
+      override val authConnector = mockAuthConnector
+
+      override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(currentProfile)
+      }
     }
+
   }
 
   val fakeRequest = FakeRequest(controllers.routes.ThresholdSummaryController.show())
 
   "Calling threshold summary to show the threshold summary page" should {
-    "return HTML with a valid threshold summary view" in {
-      save4laterReturns(S4LTradingDetails(
+    "return HTML with a valid threshold summary view" in new Setup {
+      save4laterReturns(S4LVatChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
 
-      callAuthorised(TestThresholdSummaryController.show)(_ includesText "Check and confirm your answers")
+      callAuthorised(testController.show)(_ includesText "Check and confirm your answers")
     }
 
-    "getVatThresholdPostIncorp returns a valid VatThresholdPostIncorp" in {
-      save4laterReturns(S4LTradingDetails(
+    "getVatThresholdPostIncorp returns a valid VatThresholdPostIncorp" in new Setup {
+      save4laterReturns(S4LVatChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
 
-      TestThresholdSummaryController.getVatThresholdPostIncorp() returns validVatThresholdPostIncorp
+      testController.getVatThresholdPostIncorp() returns validVatThresholdPostIncorp
     }
 
-    "getThresholdSummary maps a valid VatThresholdSummary object to a Summary object" in {
-      save4laterReturns(S4LTradingDetails(
+    "getThresholdSummary maps a valid VatThresholdSummary object to a Summary object" in new Setup {
+      save4laterReturns(S4LVatChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
 
-      TestThresholdSummaryController.getThresholdSummary().map(summary => summary.sections.length shouldBe 1)
+      testController.getThresholdSummary().map(summary => summary.sections.length shouldBe 1)
     }
   }
 
   s"POST ${controllers.routes.ThresholdSummaryController.submit()}" should {
-    "redirect the user to the voluntary registration page if all answers to threshold questions are no" in {
-      save4laterReturns(S4LTradingDetails(
+    "redirect the user to the voluntary registration page if all answers to threshold questions are no" in new Setup {
+      save4laterReturns(S4LVatChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
 
-      callAuthorised(TestThresholdSummaryController.submit) {
+
+      callAuthorised(testController.submit) {
         _ redirectsTo controllers.routes.VoluntaryRegistrationController.show.url
       }
     }
 
-    "redirect the user to the completion capacity page if any answers to threshold questions are yes" in {
-      save4laterReturns(S4LTradingDetails(
+    "redirect the user to the completion capacity page if any answers to threshold questions are yes" in new Setup {
+
+      save4laterExpectsSave[VoluntaryRegistration]()
+      save4laterReturns(S4LVatChoice(
         overThreshold = Some(OverThresholdView(true, Some(testDate)))
       ))
 
+      when(mockVatRegistrationService.submitVatEligibility()(Matchers.any(), Matchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
+      when(mockVatRegistrationService.deleteVatScheme()(Matchers.any(), Matchers.any())).thenReturn(Future.successful())
+
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(Matchers.any())).thenReturn("someEntryUrl")
 
-      callAuthorised(TestThresholdSummaryController.submit) {
+      callAuthorised(testController.submit) {
         _ redirectsTo s"someEntryUrl"
       }
     }

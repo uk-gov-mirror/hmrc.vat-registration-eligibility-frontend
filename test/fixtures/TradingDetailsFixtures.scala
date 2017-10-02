@@ -33,13 +33,13 @@ trait TradingDetailsFixture {
     vatThresholdPostIncorp = Some(VatThresholdPostIncorp(true, Some(testDate)))
   )
 
-  val validVatTradingDetails = VatTradingDetails(vatChoice = validVatChoice)
+  val validVatServiceEligibility = VatServiceEligibility(vatChoice = Some(validVatChoice))
 
-  def tradingDetails(necessity: String = VatChoice.NECESSITY_VOLUNTARY, reason: Option[String] = None): VatTradingDetails =
-    VatTradingDetails(
-      vatChoice = VatChoice(
+  def vatServiceEligibility(necessity: String = VatChoice.NECESSITY_VOLUNTARY, reason: Option[String] = None): VatServiceEligibility =
+    VatServiceEligibility(
+      vatChoice = Some(VatChoice(
         necessity = necessity,
         reason = reason
-      )
+      ))
     )
 }

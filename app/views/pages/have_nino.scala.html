@@ -23,12 +23,12 @@
 
     <div class="column-one-third">
 
-        <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.eligibility.haveNino.heading")</h1>
-
         @errorSummary(
             messages("app.common.errorSummaryLabel"),
             haveNinoForm
         )
+
+        <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.eligibility.haveNino.heading")</h1>
 
         @govHelpers.form(action = controllers.routes.ServiceCriteriaQuestionsController.submit("haveNino")) {
             <div class="form-group">

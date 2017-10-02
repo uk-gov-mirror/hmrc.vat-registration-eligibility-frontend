@@ -109,6 +109,9 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
       save4laterExpectsSave[TaxableTurnover]()
       save4laterExpectsSave[VoluntaryRegistration]()
 
+      when(mockVatRegistrationService.submitVatEligibility()(Matchers.any(), Matchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
+      when(mockVatRegistrationService.deleteVatScheme()(Matchers.any(), Matchers.any())).thenReturn(Future.successful())
+
       when(mockCurrentProfileService.getCurrentProfile()(Matchers.any())).thenReturn(Future.successful(currentProfile))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(Matchers.any())).thenReturn("someUrl")

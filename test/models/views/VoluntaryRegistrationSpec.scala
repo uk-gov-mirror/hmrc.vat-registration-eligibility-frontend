@@ -17,7 +17,7 @@
 package models.views
 
 import fixtures.VatRegistrationFixture
-import models.S4LTradingDetails
+import models.{S4LVatChoice}
 import models.view.VoluntaryRegistration
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -25,18 +25,18 @@ class VoluntaryRegistrationSpec extends UnitSpec with VatRegistrationFixture {
 
   "ViewModelFormat" should {
     val validVoluntaryRegistration = VoluntaryRegistration(VoluntaryRegistration.REGISTER_YES)
-    val s4LTradingDetails: S4LTradingDetails = S4LTradingDetails(voluntaryRegistration = Some(validVoluntaryRegistration))
+    val s4LVatChoice: S4LVatChoice = S4LVatChoice(voluntaryRegistration = Some(validVoluntaryRegistration))
 
-    "extract voluntaryRegistration from vatTradingDetails" in {
-      VoluntaryRegistration.viewModelFormat.read(s4LTradingDetails) shouldBe Some(validVoluntaryRegistration)
+    "extract voluntaryRegistration from vatChoice" in {
+      VoluntaryRegistration.viewModelFormat.read(s4LVatChoice) shouldBe Some(validVoluntaryRegistration)
     }
 
     "update empty vatContact with voluntaryRegistration" in {
-      VoluntaryRegistration.viewModelFormat.update(validVoluntaryRegistration, Option.empty[S4LTradingDetails]).voluntaryRegistration shouldBe Some(validVoluntaryRegistration)
+      VoluntaryRegistration.viewModelFormat.update(validVoluntaryRegistration, Option.empty[S4LVatChoice]).voluntaryRegistration shouldBe Some(validVoluntaryRegistration)
     }
 
     "update non-empty vatContact with voluntaryRegistration" in {
-      VoluntaryRegistration.viewModelFormat.update(validVoluntaryRegistration, Some(s4LTradingDetails)).voluntaryRegistration shouldBe Some(validVoluntaryRegistration)
+      VoluntaryRegistration.viewModelFormat.update(validVoluntaryRegistration, Some(s4LVatChoice)).voluntaryRegistration shouldBe Some(validVoluntaryRegistration)
     }
 
   }

@@ -413,7 +413,10 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
                |        "doingBusinessAbroad" : false,
                |        "doAnyApplyToYou" : false,
                |        "applyingForAnyOf" : false,
-               |        "companyWillDoAnyOf" : false
+               |        "companyWillDoAnyOf" : false,
+               |        "vatChoice" : {
+               |                "necessity" : "voluntary"
+               |        }
                |    }}""".stripMargin
           )))
       builder
@@ -431,6 +434,9 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
                |        "doingBusinessAbroad" : false,
                |        "doAnyApplyToYou" : false,
                |        "applyingForAnyOf" : false
+               |        "vatChoice" : {
+               |                "necessity" : "voluntary"
+               |        }
                |    }}""".stripMargin
           )))
       builder

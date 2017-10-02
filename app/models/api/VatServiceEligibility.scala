@@ -17,6 +17,7 @@
 package models.api
 
 import models.{ApiModelTransformer, S4LVatEligibility, ViewModelFormat, _}
+import models.api.VatChoice.NECESSITY_VOLUNTARY
 import models.view.EligibilityQuestion
 import models.view.EligibilityQuestion._
 import play.api.libs.json.{Json, OFormat}
@@ -25,7 +26,8 @@ case class VatServiceEligibility(haveNino: Option[Boolean] = None,
                                  doingBusinessAbroad: Option[Boolean] = None,
                                  doAnyApplyToYou: Option[Boolean] = None,
                                  applyingForAnyOf: Option[Boolean] = None,
-                                 companyWillDoAnyOf: Option[Boolean] = None) {
+                                 companyWillDoAnyOf: Option[Boolean] = None,
+                                 vatChoice: Option[VatChoice] = None) {
 
   def getAnswer(question: EligibilityQuestion): Option[Boolean] = question match {
     case HaveNinoQuestion => haveNino
@@ -47,7 +49,6 @@ case class VatServiceEligibility(haveNino: Option[Boolean] = None,
 
 
 object VatServiceEligibility {
-
 
   implicit val format: OFormat[VatServiceEligibility] = Json.format
 

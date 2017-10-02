@@ -31,14 +31,15 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
   val validHttpResponse = HttpResponse(OK)
 
   //Api models
-  val validServiceEligibility = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false))
-  val validVatThresholdPostIncorp = VatThresholdPostIncorp(overThresholdSelection = false, None)
+  val validServiceEligibility          = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(validVatChoice))
+  val validServiceEligibilityNoChoice  = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false))
+  val validVatThresholdPostIncorp      = VatThresholdPostIncorp(overThresholdSelection = false, None)
 
   val emptyVatScheme = VatScheme(testRegId)
 
   val validVatScheme = VatScheme(
     id = testRegId,
-    tradingDetails = Some(validVatTradingDetails)
+    vatServiceEligibility = Some(validServiceEligibility)
   )
 
   val testIncorporationInfo = IncorporationInfo(
@@ -53,10 +54,10 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
       incorporationDate = Some(LocalDate.of(2016, 8, 5)),
       description = Some("Some description")))
 
-  def vatScheme(id: String = testRegId, vatTradingDetails: Option[VatTradingDetails] = None): VatScheme =
+  def vatScheme(id: String = testRegId, vatServiceEligibility: Option[VatServiceEligibility] = None): VatScheme =
     VatScheme(
       id = id,
-      tradingDetails = vatTradingDetails
+      vatServiceEligibility = vatServiceEligibility
     )
 
 }

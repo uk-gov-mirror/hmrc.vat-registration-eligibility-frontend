@@ -16,7 +16,7 @@
 
 package models
 
-import models.api.{VatChoice, VatScheme, VatServiceEligibility, VatThresholdPostIncorp, VatTradingDetails}
+import models.api.{VatChoice, VatScheme, VatServiceEligibility, VatThresholdPostIncorp}
 import play.api.libs.json.{Json, OFormat}
 import common.ErrorUtil.fail
 import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
@@ -56,25 +56,25 @@ object S4LVatEligibility {
         doingBusinessAbroad = ve.doingBusinessAbroad,
         doAnyApplyToYou = ve.doAnyApplyToYou,
         applyingForAnyOf = ve.applyingForAnyOf,
-        companyWillDoAnyOf = ve.companyWillDoAnyOf)
+        companyWillDoAnyOf = ve.companyWillDoAnyOf,
+        vatChoice = ve.vatChoice)
       ).getOrElse(error)
     }
   }
 }
 
-case class S4LTradingDetails(taxableTurnover: Option[TaxableTurnover] = None,
-                             voluntaryRegistration: Option[VoluntaryRegistration] = None,
-                             voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
-                             overThreshold: Option[OverThresholdView] = None)
+case class S4LVatChoice(taxableTurnover: Option[TaxableTurnover] = None,
+                        voluntaryRegistration: Option[VoluntaryRegistration] = None,
+                        voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
+                        overThreshold: Option[OverThresholdView] = None)
 
-object S4LTradingDetails {
-  implicit val format: OFormat[S4LTradingDetails] = Json.format[S4LTradingDetails]
-  implicit val tradingDetails: S4LKey[S4LTradingDetails] = S4LKey("VatTradingDetails")
+object S4LVatChoice {
+  implicit val format: OFormat[S4LVatChoice] = Json.format[S4LVatChoice]
+  implicit val tradingDetails: S4LKey[S4LVatChoice] = S4LKey("VatChoice")
 
-  implicit val modelT = new S4LModelTransformer[S4LTradingDetails] {
-    // map VatScheme to VatTradingDetails
-    override def toS4LModel(vs: VatScheme): S4LTradingDetails =
-      S4LTradingDetails(
+  implicit val modelT = new S4LModelTransformer[S4LVatChoice] {
+    override def toS4LModel(vs: VatScheme): S4LVatChoice =
+      S4LVatChoice(
         taxableTurnover = ApiModelTransformer[TaxableTurnover].toViewModel(vs),
         voluntaryRegistration = ApiModelTransformer[VoluntaryRegistration].toViewModel(vs),
         overThreshold = ApiModelTransformer[OverThresholdView].toViewModel(vs),
@@ -82,12 +82,10 @@ object S4LTradingDetails {
       )
   }
 
-  def error = throw fail("VatTradingDetails")
+  def error = throw fail("VatChoice")
 
-  implicit val apiT = new S4LApiTransformer[S4LTradingDetails, VatTradingDetails] {
-    // map S4LTradingDetails to VatTradingDetails
-    override def toApi(c: S4LTradingDetails): VatTradingDetails =
-      VatTradingDetails(
+  implicit val apiT = new S4LApiTransformer[S4LVatChoice, VatChoice] {
+    override def toApi(c: S4LVatChoice): VatChoice =
         VatChoice(
           necessity = c.voluntaryRegistration.map(vr =>
             if (vr.yesNo == REGISTER_YES) NECESSITY_VOLUNTARY else NECESSITY_OBLIGATORY).getOrElse(NECESSITY_OBLIGATORY),
@@ -99,6 +97,5 @@ object S4LTradingDetails {
             )
           )
         )
-      )
   }
 }

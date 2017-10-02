@@ -53,10 +53,15 @@ class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: 
           form.bindFromRequest().fold(
             badForm => BadRequest(views.html.pages.voluntary_registration_reason(badForm)).pure,
             goodForm => (goodForm.reason == VoluntaryRegistrationReason.NEITHER).pure.ifM(
-              s4l.clear().flatMap(_ => vrs.deleteVatScheme()).map(_ => vatRegFrontendService.buildVatRegFrontendUrlWelcome),
-              save(goodForm).map(_ => vatRegFrontendService.buildVatRegFrontendUrlEntry)
-            ).map{
-              case x => println(x); Redirect(x)})
+              for{
+                _ <- s4l.clear()
+                _ <- vrs.deleteVatScheme()
+              } yield vatRegFrontendService.buildVatRegFrontendUrlWelcome,
+              for {
+                _ <- save(goodForm)
+                _ <- vrs.submitVatEligibility()
+              } yield vatRegFrontendService.buildVatRegFrontendUrlEntry
+            ).map(Redirect(_)))
         }
   }
 }

@@ -21,13 +21,11 @@ import play.api.libs.json._
 
 
 case class VatScheme(id: String,
-                     tradingDetails: Option[VatTradingDetails] = None,
                      vatServiceEligibility: Option[VatServiceEligibility] = None)
 
 object VatScheme {
   implicit val format: OFormat[VatScheme] = (
     (__ \ "registrationId").format[String] and
-    (__ \ "tradingDetails").formatNullable[VatTradingDetails] and
     (__ \ "vatEligibility").formatNullable[VatServiceEligibility]
   )(VatScheme.apply, unlift(VatScheme.unapply))
 }
