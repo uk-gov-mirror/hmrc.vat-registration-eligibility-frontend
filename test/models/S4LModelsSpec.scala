@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import fixtures.VatRegistrationFixture
 import models.api._
-import models.api.VatChoice._
+import models.api.VatEligibilityChoice._
 import models.view._
 import models.view.VoluntaryRegistrationReason._
 import models.view.TaxableTurnover._
@@ -37,7 +37,7 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
     "transform VatScheme to S4L container" in {
       val vs = emptyVatScheme.copy(
         vatServiceEligibility = Some(VatServiceEligibility(
-          vatChoice = Some(VatChoice(
+          vatEligibilityChoice = Some(VatEligibilityChoice(
             necessity = NECESSITY_VOLUNTARY,
             reason = Some(INTENDS_TO_SELL),
             vatThresholdPostIncorp = Some(validVatThresholdPostIncorp))
@@ -68,7 +68,7 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
     )
 
     "transform complete S4L with voluntary registration model to API" in {
-      val expected = VatChoice(
+      val expected = VatEligibilityChoice(
           necessity = NECESSITY_VOLUNTARY,
           reason = Some(INTENDS_TO_SELL),
           vatThresholdPostIncorp = Some(validVatThresholdPostIncorp))
@@ -78,7 +78,7 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
 
     "transform complete S4L with mandatory registration model to API" in {
 
-      val expected = VatChoice(
+      val expected = VatEligibilityChoice(
           necessity = NECESSITY_OBLIGATORY,
           reason = None,
           vatThresholdPostIncorp = Some(validVatThresholdPostIncorp))

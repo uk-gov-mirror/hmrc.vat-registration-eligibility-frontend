@@ -18,7 +18,7 @@ package models.view
 
 import models.{ApiModelTransformer, S4LVatChoice, ViewModelFormat}
 import models.api.VatScheme
-import models.api.VatChoice.NECESSITY_VOLUNTARY
+import models.api.VatEligibilityChoice.NECESSITY_VOLUNTARY
 import play.api.libs.json.Json
 
 case class VoluntaryRegistration(yesNo: String)
@@ -42,7 +42,7 @@ object VoluntaryRegistration {
   )
 
   implicit val modelTransformer = ApiModelTransformer { vs: VatScheme =>
-    vs.vatServiceEligibility.flatMap(_.vatChoice.map{_.necessity}).collect {
+    vs.vatServiceEligibility.flatMap(_.vatEligibilityChoice.map{_.necessity}).collect {
       case NECESSITY_VOLUNTARY => VoluntaryRegistration(REGISTER_YES)
     }
   }

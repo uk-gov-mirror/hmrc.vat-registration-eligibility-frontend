@@ -17,7 +17,7 @@
 package models.views
 
 import fixtures.VatRegistrationFixture
-import models.api.{VatChoice, VatScheme}
+import models.api.{VatEligibilityChoice, VatScheme}
 import models.view.TaxableTurnover
 import models.view.TaxableTurnover._
 import models.{ApiModelTransformer, S4LVatChoice}
@@ -27,12 +27,12 @@ class TaxableTurnoverSpec extends UnitSpec with VatRegistrationFixture {
 
   "apply" should {
     "convert a VatChoice (Obligatory) to view model" in {
-      val vatSchemeObligatory = vatScheme(vatServiceEligibility = Some(vatServiceEligibility(necessity = VatChoice.NECESSITY_OBLIGATORY)))
+      val vatSchemeObligatory = vatScheme(vatServiceEligibility = Some(vatServiceEligibility(necessity = VatEligibilityChoice.NECESSITY_OBLIGATORY)))
       ApiModelTransformer[TaxableTurnover].toViewModel(vatSchemeObligatory) shouldBe Some(TaxableTurnover(TAXABLE_YES))
     }
 
     "convert a VatChoice (Voluntary) to view model" in {
-      val vatSchemeVoluntary = vatScheme(vatServiceEligibility = Some(vatServiceEligibility(necessity = VatChoice.NECESSITY_VOLUNTARY)))
+      val vatSchemeVoluntary = vatScheme(vatServiceEligibility = Some(vatServiceEligibility(necessity = VatEligibilityChoice.NECESSITY_VOLUNTARY)))
       ApiModelTransformer[TaxableTurnover].toViewModel(vatSchemeVoluntary) shouldBe Some(TaxableTurnover(TAXABLE_NO))
     }
 

@@ -44,7 +44,7 @@ object VoluntaryRegistrationReason {
   )
 
   implicit val modelTransformer = ApiModelTransformer { vs: VatScheme =>
-    vs.vatServiceEligibility.flatMap(_.vatChoice.flatMap{_.reason}).collect {
+    vs.vatServiceEligibility.flatMap(_.vatEligibilityChoice.flatMap{_.reason}).collect {
       case SELLS => sells
       case INTENDS_TO_SELL => intendsToSell
     }

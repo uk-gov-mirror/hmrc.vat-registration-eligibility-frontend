@@ -1,7 +1,7 @@
 
 package controllers
 
-import models.api.{VatChoice, VatServiceEligibility}
+import models.api.{VatEligibilityChoice, VatServiceEligibility}
 import models.{S4LKey, S4LVatChoice, S4LVatEligibility}
 import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
 import org.scalatest.concurrent.ScalaFutures
@@ -31,7 +31,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
   "/vat-taxable-sales-over-threshold POST" should {
     "return 303" when {
       "user successfully submits a valid form" in {
-        val optVatChoice = Some(VatChoice(necessity = "obligatory"))
+        val optVatChoice = Some(VatEligibilityChoice(necessity = "obligatory"))
 
         val eligibility = VatServiceEligibility(Some(true),Some(false),Some(false),Some(false),Some(false),optVatChoice)
 
@@ -187,7 +187,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
   "/reason-for-registering POST" should {
     "return 303" when {
       "when the request is valid" in {
-        val optVatChoice = Some(VatChoice(necessity = "obligatory"))
+        val optVatChoice = Some(VatEligibilityChoice(necessity = "obligatory"))
 
         val eligibility = VatServiceEligibility(Some(true),Some(false),Some(false),Some(false),Some(false),optVatChoice)
 

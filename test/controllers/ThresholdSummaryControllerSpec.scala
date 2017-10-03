@@ -18,7 +18,7 @@ package controllers
 
 import fixtures.VatRegistrationFixture
 import helpers.{S4LMockSugar, VatRegSpec}
-import models.api.VatChoice
+import models.api.VatEligibilityChoice
 import models.view.{OverThresholdView, Summary, TaxableTurnover, VoluntaryRegistration}
 import models.{CurrentProfile, S4LVatChoice}
 import org.mockito.Mockito._

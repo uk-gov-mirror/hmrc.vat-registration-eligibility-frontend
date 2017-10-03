@@ -85,7 +85,7 @@ class OverThresholdViewSpec extends UnitSpec with VatRegistrationFixture with In
       "produce a view model from a vatScheme with an over threshold date set" in {
         val vm = ApiModelTransformer[OverThresholdView]
           .toViewModel(vatScheme(vatServiceEligibility = Some(validServiceEligibility.copy(
-            vatChoice = Some(validVatChoice.copy(vatThresholdPostIncorp =
+            vatEligibilityChoice = Some(validVatChoice.copy(vatThresholdPostIncorp =
               Some(VatThresholdPostIncorp(overThresholdSelection = true, overThresholdDate = Some(date)))))
           ))))
         vm shouldBe Some(OverThresholdView(true, Some(date)))
@@ -94,7 +94,7 @@ class OverThresholdViewSpec extends UnitSpec with VatRegistrationFixture with In
       "produce a view model from a vatScheme with no over threshold date" in {
         val vm = ApiModelTransformer[OverThresholdView]
           .toViewModel(vatScheme(vatServiceEligibility = Some(validServiceEligibility.copy(
-            vatChoice = Some(validVatChoice.copy(vatThresholdPostIncorp =
+            vatEligibilityChoice = Some(validVatChoice.copy(vatThresholdPostIncorp =
               Some(VatThresholdPostIncorp(overThresholdSelection = false, None))))
           ))))
         vm shouldBe Some(OverThresholdView(false, None))

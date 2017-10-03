@@ -45,6 +45,7 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
   "Calling submitEligibility" should {
     "return a success response when VatEligibility is submitted" in new Setup {
       save4laterReturns(S4LVatEligibility(Some(validServiceEligibility)))
+      save4laterReturns(S4LVatChoice.modelT.toS4LModel(validVatScheme))
 
       when(mockRegConnector.getRegistration(Matchers.eq(testRegId))(any(), any())).thenReturn(validVatScheme.pure)
       when(mockRegConnector.upsertVatEligibility(any(), any())(any(), any())).thenReturn(validServiceEligibility.pure)
@@ -67,12 +68,14 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
       when(mockRegConnector.getRegistration(Matchers.eq(testRegId))(any(), any())).thenReturn(emptyVatScheme.pure)
       when(mockRegConnector.upsertVatEligibility(any(), any())(any(), any())).thenReturn(validServiceEligibility.pure)
       save4laterReturns(S4LVatEligibility(Some(validServiceEligibility)))
+      save4laterReturns(S4LVatChoice.modelT.toS4LModel(validVatScheme))
       service.submitVatEligibility() returns validServiceEligibility
     }
 
     "submitVatEligibility should fail if there's not trace of VatEligibility in neither backend nor S4L" in new Setup {
       when(mockRegConnector.getRegistration(Matchers.eq(testRegId))(any(), any())).thenReturn(emptyVatScheme.pure)
       save4laterReturnsNothing[S4LVatEligibility]()
+      save4laterReturnsNothing[S4LVatChoice]()
 
       service.submitVatEligibility() failedWith classOf[IllegalStateException]
     }
