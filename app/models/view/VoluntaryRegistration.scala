@@ -16,7 +16,7 @@
 
 package models.view
 
-import models.{ApiModelTransformer, S4LVatChoice, ViewModelFormat}
+import models.{ApiModelTransformer, S4LVatEligibilityChoice, ViewModelFormat}
 import models.api.VatScheme
 import models.api.VatEligibilityChoice.NECESSITY_VOLUNTARY
 import play.api.libs.json.Json
@@ -36,9 +36,9 @@ object VoluntaryRegistration {
   implicit val format = Json.format[VoluntaryRegistration]
 
   implicit val viewModelFormat = ViewModelFormat(
-    readF = (group: S4LVatChoice) => group.voluntaryRegistration,
-    updateF = (c: VoluntaryRegistration, g: Option[S4LVatChoice]) =>
-      g.getOrElse(S4LVatChoice()).copy(voluntaryRegistration = Some(c))
+    readF = (group: S4LVatEligibilityChoice) => group.voluntaryRegistration,
+    updateF = (c: VoluntaryRegistration, g: Option[S4LVatEligibilityChoice]) =>
+      g.getOrElse(S4LVatEligibilityChoice()).copy(voluntaryRegistration = Some(c))
   )
 
   implicit val modelTransformer = ApiModelTransformer { vs: VatScheme =>

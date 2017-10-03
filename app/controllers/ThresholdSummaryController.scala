@@ -22,7 +22,7 @@ import controllers.builders.SummaryVatThresholdBuilder
 import models.api.VatThresholdPostIncorp
 import models.view.{Summary, VoluntaryRegistration}
 import models.view.VoluntaryRegistration.REGISTER_NO
-import models.{CurrentProfile, MonthYearModel, S4LVatChoice}
+import models.{CurrentProfile, MonthYearModel, S4LVatEligibilityChoice}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
@@ -85,7 +85,7 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
 
   def getVatThresholdPostIncorp()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[VatThresholdPostIncorp] = {
     for {
-      vatChoice <- s4LService.fetchAndGet[S4LVatChoice]()
+      vatChoice <- s4LService.fetchAndGet[S4LVatEligibilityChoice]()
       overThreshold <- vatChoice.flatMap(_.overThreshold).pure
     } yield overThreshold.map(o => VatThresholdPostIncorp(o.selection, o.date)).get
   }

@@ -19,7 +19,7 @@ package models.views
 import fixtures.VatRegistrationFixture
 import models.view.VoluntaryRegistrationReason
 import models.view.VoluntaryRegistrationReason._
-import models.{ApiModelTransformer, S4LVatChoice}
+import models.{ApiModelTransformer, S4LVatEligibilityChoice}
 import org.scalatest.{Inspectors, Matchers}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -71,14 +71,14 @@ class VoluntaryRegistrationReasonSpec extends UnitSpec with Matchers with Inspec
 
   "ViewModelFormat" should {
     val validVoluntaryRegistrationReason = VoluntaryRegistrationReason(VoluntaryRegistrationReason.INTENDS_TO_SELL)
-    val s4LVatChoice: S4LVatChoice = S4LVatChoice(voluntaryRegistrationReason = Some(validVoluntaryRegistrationReason))
+    val s4LVatChoice: S4LVatEligibilityChoice = S4LVatEligibilityChoice(voluntaryRegistrationReason = Some(validVoluntaryRegistrationReason))
 
     "extract voluntaryRegistrationReason from vatChoice" in {
       VoluntaryRegistrationReason.viewModelFormat.read(s4LVatChoice) shouldBe Some(validVoluntaryRegistrationReason)
     }
 
     "update empty vatContact with voluntaryRegistrationReason" in {
-      VoluntaryRegistrationReason.viewModelFormat.update(validVoluntaryRegistrationReason, Option.empty[S4LVatChoice]).voluntaryRegistrationReason shouldBe Some(validVoluntaryRegistrationReason)
+      VoluntaryRegistrationReason.viewModelFormat.update(validVoluntaryRegistrationReason, Option.empty[S4LVatEligibilityChoice]).voluntaryRegistrationReason shouldBe Some(validVoluntaryRegistrationReason)
     }
 
     "update non-empty vatContact with voluntaryRegistrationReason" in {

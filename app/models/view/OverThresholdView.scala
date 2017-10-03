@@ -41,9 +41,9 @@ object OverThresholdView {
   implicit val format = Json.format[OverThresholdView]
 
   implicit val viewModelFormat = ViewModelFormat(
-    readF = (group: S4LVatChoice) => group.overThreshold,
-    updateF = (c: OverThresholdView, g: Option[S4LVatChoice]) =>
-      g.getOrElse(S4LVatChoice()).copy(overThreshold = Some(c))
+    readF = (group: S4LVatEligibilityChoice) => group.overThreshold,
+    updateF = (c: OverThresholdView, g: Option[S4LVatEligibilityChoice]) =>
+      g.getOrElse(S4LVatEligibilityChoice()).copy(overThreshold = Some(c))
   )
 
   // Returns a view model for a specific part of a given VatScheme API model

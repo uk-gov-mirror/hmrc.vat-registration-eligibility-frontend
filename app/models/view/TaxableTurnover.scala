@@ -18,7 +18,7 @@ package models.view
 
 import models.api.VatEligibilityChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
 import models.api.VatScheme
-import models.{ApiModelTransformer, S4LVatChoice, ViewModelFormat}
+import models.{ApiModelTransformer, S4LVatEligibilityChoice, ViewModelFormat}
 import play.api.libs.json.Json
 
 case class TaxableTurnover(yesNo: String)
@@ -33,9 +33,9 @@ object TaxableTurnover {
   implicit val format = Json.format[TaxableTurnover]
 
   implicit val viewModelFormat = ViewModelFormat(
-    readF = (group: S4LVatChoice) => group.taxableTurnover,
-    updateF = (c: TaxableTurnover, g: Option[S4LVatChoice]) =>
-      g.getOrElse(S4LVatChoice()).copy(taxableTurnover = Option(c))
+    readF = (group: S4LVatEligibilityChoice) => group.taxableTurnover,
+    updateF = (c: TaxableTurnover, g: Option[S4LVatEligibilityChoice]) =>
+      g.getOrElse(S4LVatEligibilityChoice()).copy(taxableTurnover = Option(c))
   )
 
   implicit val modelTransformer = ApiModelTransformer[TaxableTurnover] { (vs: VatScheme) =>

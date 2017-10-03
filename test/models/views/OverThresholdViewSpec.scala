@@ -21,7 +21,7 @@ import java.time.LocalDate
 import fixtures.VatRegistrationFixture
 import models.api.VatThresholdPostIncorp
 import models.view.OverThresholdView
-import models.{ApiModelTransformer, MonthYearModel, S4LVatChoice}
+import models.{ApiModelTransformer, MonthYearModel, S4LVatEligibilityChoice}
 import org.scalatest.Inside
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -60,14 +60,14 @@ class OverThresholdViewSpec extends UnitSpec with VatRegistrationFixture with In
 
   "ViewModelFormat" should {
     val validOverThresholdView = OverThresholdView(false, None)
-    val s4LVatChoice: S4LVatChoice = S4LVatChoice(overThreshold = Some(validOverThresholdView))
+    val s4LVatChoice: S4LVatEligibilityChoice = S4LVatEligibilityChoice(overThreshold = Some(validOverThresholdView))
 
     "extract over threshold from vatChoice" in {
       OverThresholdView.viewModelFormat.read(s4LVatChoice) shouldBe Some(validOverThresholdView)
     }
 
     "update empty vatChoice with over threshold" in {
-      OverThresholdView.viewModelFormat.update(validOverThresholdView, Option.empty[S4LVatChoice]).overThreshold shouldBe Some(validOverThresholdView)
+      OverThresholdView.viewModelFormat.update(validOverThresholdView, Option.empty[S4LVatEligibilityChoice]).overThreshold shouldBe Some(validOverThresholdView)
     }
 
     "update non-empty vatChoice with over threshold" in {

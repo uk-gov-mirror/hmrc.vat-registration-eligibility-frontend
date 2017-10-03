@@ -63,18 +63,18 @@ object S4LVatEligibility {
   }
 }
 
-case class S4LVatChoice(taxableTurnover: Option[TaxableTurnover] = None,
-                        voluntaryRegistration: Option[VoluntaryRegistration] = None,
-                        voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
-                        overThreshold: Option[OverThresholdView] = None)
+case class S4LVatEligibilityChoice(taxableTurnover: Option[TaxableTurnover] = None,
+                                   voluntaryRegistration: Option[VoluntaryRegistration] = None,
+                                   voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
+                                   overThreshold: Option[OverThresholdView] = None)
 
-object S4LVatChoice {
-  implicit val format: OFormat[S4LVatChoice] = Json.format[S4LVatChoice]
-  implicit val tradingDetails: S4LKey[S4LVatChoice] = S4LKey("VatChoice")
+object S4LVatEligibilityChoice {
+  implicit val format: OFormat[S4LVatEligibilityChoice] = Json.format[S4LVatEligibilityChoice]
+  implicit val tradingDetails: S4LKey[S4LVatEligibilityChoice] = S4LKey("VatChoice")
 
-  implicit val modelT = new S4LModelTransformer[S4LVatChoice] {
-    override def toS4LModel(vs: VatScheme): S4LVatChoice =
-      S4LVatChoice(
+  implicit val modelT = new S4LModelTransformer[S4LVatEligibilityChoice] {
+    override def toS4LModel(vs: VatScheme): S4LVatEligibilityChoice =
+      S4LVatEligibilityChoice(
         taxableTurnover = ApiModelTransformer[TaxableTurnover].toViewModel(vs),
         voluntaryRegistration = ApiModelTransformer[VoluntaryRegistration].toViewModel(vs),
         overThreshold = ApiModelTransformer[OverThresholdView].toViewModel(vs),
@@ -84,8 +84,8 @@ object S4LVatChoice {
 
   def error = throw fail("VatChoice")
 
-  implicit val apiT = new S4LApiTransformer[S4LVatChoice, VatEligibilityChoice] {
-    override def toApi(c: S4LVatChoice): VatEligibilityChoice =
+  implicit val apiT = new S4LApiTransformer[S4LVatEligibilityChoice, VatEligibilityChoice] {
+    override def toApi(c: S4LVatEligibilityChoice): VatEligibilityChoice =
         VatEligibilityChoice(
           necessity = c.voluntaryRegistration.map(vr =>
             if (vr.yesNo == REGISTER_YES) NECESSITY_VOLUNTARY else NECESSITY_OBLIGATORY).getOrElse(NECESSITY_OBLIGATORY),

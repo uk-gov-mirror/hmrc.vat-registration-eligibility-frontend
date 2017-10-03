@@ -239,7 +239,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
         whenReady(response){
           res =>
             res.status mustBe 303
-            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/gone-over-threshold")
+            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/vat-taxable-turnover-gone-over")
         }
       }
 

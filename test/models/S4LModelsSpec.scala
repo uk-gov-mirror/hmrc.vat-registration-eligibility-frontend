@@ -44,14 +44,14 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
         )))
       )
 
-      val expected = S4LVatChoice(
+      val expected = S4LVatEligibilityChoice(
         taxableTurnover = Some(TaxableTurnover(TAXABLE_NO)),
         voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
         voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(INTENDS_TO_SELL)),
         overThreshold = Some(OverThresholdView(false, None))
       )
 
-      S4LVatChoice.modelT.toS4LModel(vs) shouldBe expected
+      S4LVatEligibilityChoice.modelT.toS4LModel(vs) shouldBe expected
     }
   }
 
@@ -60,7 +60,7 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
     val tradingName = "name"
 
 
-    val s4l = S4LVatChoice(
+    val s4l = S4LVatEligibilityChoice(
       taxableTurnover = Some(TaxableTurnover(TAXABLE_NO)),
       voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
       voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(INTENDS_TO_SELL)),
@@ -73,7 +73,7 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
           reason = Some(INTENDS_TO_SELL),
           vatThresholdPostIncorp = Some(validVatThresholdPostIncorp))
 
-      S4LVatChoice.apiT.toApi(s4l) shouldBe expected
+      S4LVatEligibilityChoice.apiT.toApi(s4l) shouldBe expected
     }
 
     "transform complete S4L with mandatory registration model to API" in {
@@ -84,10 +84,10 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
           vatThresholdPostIncorp = Some(validVatThresholdPostIncorp))
 
       val s4lMandatoryBydefault = s4l.copy(voluntaryRegistration = None, voluntaryRegistrationReason = None)
-      S4LVatChoice.apiT.toApi(s4lMandatoryBydefault) shouldBe expected
+      S4LVatEligibilityChoice.apiT.toApi(s4lMandatoryBydefault) shouldBe expected
 
       val s4lMandatoryExplicit = s4l.copy(voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_NO)), voluntaryRegistrationReason = None)
-      S4LVatChoice.apiT.toApi(s4lMandatoryExplicit) shouldBe expected
+      S4LVatEligibilityChoice.apiT.toApi(s4lMandatoryExplicit) shouldBe expected
 
     }
   }

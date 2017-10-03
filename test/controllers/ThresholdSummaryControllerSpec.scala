@@ -20,7 +20,7 @@ import fixtures.VatRegistrationFixture
 import helpers.{S4LMockSugar, VatRegSpec}
 import models.api.VatEligibilityChoice
 import models.view.{OverThresholdView, Summary, TaxableTurnover, VoluntaryRegistration}
-import models.{CurrentProfile, S4LVatChoice}
+import models.{CurrentProfile, S4LVatEligibilityChoice}
 import org.mockito.Mockito._
 import org.mockito.Matchers
 import play.api.mvc.{Request, Result}
@@ -53,7 +53,7 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
 
   "Calling threshold summary to show the threshold summary page" should {
     "return HTML with a valid threshold summary view" in new Setup {
-      save4laterReturns(S4LVatChoice(
+      save4laterReturns(S4LVatEligibilityChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
 
@@ -61,7 +61,7 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
     }
 
     "getVatThresholdPostIncorp returns a valid VatThresholdPostIncorp" in new Setup {
-      save4laterReturns(S4LVatChoice(
+      save4laterReturns(S4LVatEligibilityChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
 
@@ -69,7 +69,7 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
     }
 
     "getThresholdSummary maps a valid VatThresholdSummary object to a Summary object" in new Setup {
-      save4laterReturns(S4LVatChoice(
+      save4laterReturns(S4LVatEligibilityChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
 
@@ -79,7 +79,7 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
 
   s"POST ${controllers.routes.ThresholdSummaryController.submit()}" should {
     "redirect the user to the voluntary registration page if all answers to threshold questions are no" in new Setup {
-      save4laterReturns(S4LVatChoice(
+      save4laterReturns(S4LVatEligibilityChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
 
@@ -92,7 +92,7 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
     "redirect the user to the completion capacity page if any answers to threshold questions are yes" in new Setup {
 
       save4laterExpectsSave[VoluntaryRegistration]()
-      save4laterReturns(S4LVatChoice(
+      save4laterReturns(S4LVatEligibilityChoice(
         overThreshold = Some(OverThresholdView(true, Some(testDate)))
       ))
 

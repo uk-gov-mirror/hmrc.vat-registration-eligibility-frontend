@@ -20,7 +20,7 @@ import fixtures.VatRegistrationFixture
 import models.api.{VatEligibilityChoice, VatScheme}
 import models.view.TaxableTurnover
 import models.view.TaxableTurnover._
-import models.{ApiModelTransformer, S4LVatChoice}
+import models.{ApiModelTransformer, S4LVatEligibilityChoice}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class TaxableTurnoverSpec extends UnitSpec with VatRegistrationFixture {
@@ -43,14 +43,14 @@ class TaxableTurnoverSpec extends UnitSpec with VatRegistrationFixture {
   }
 
   "ViewModelFormat" should {
-    val s4LVatChoice: S4LVatChoice = S4LVatChoice(taxableTurnover = Some(validTaxableTurnover))
+    val s4LVatChoice: S4LVatEligibilityChoice = S4LVatEligibilityChoice(taxableTurnover = Some(validTaxableTurnover))
 
     "extract taxableTurnover from vatChoice" in {
       TaxableTurnover.viewModelFormat.read(s4LVatChoice) shouldBe Some(validTaxableTurnover)
     }
 
     "update empty vatContact with taxableTurnover" in {
-      TaxableTurnover.viewModelFormat.update(validTaxableTurnover, Option.empty[S4LVatChoice]).taxableTurnover shouldBe Some(validTaxableTurnover)
+      TaxableTurnover.viewModelFormat.update(validTaxableTurnover, Option.empty[S4LVatEligibilityChoice]).taxableTurnover shouldBe Some(validTaxableTurnover)
     }
 
     "update non-empty vatContact with taxableTurnover" in {

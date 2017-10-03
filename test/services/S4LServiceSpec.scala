@@ -87,15 +87,15 @@ class S4LServiceSpec extends VatRegSpec with VatRegistrationFixture {
 
   "getting a View Model from Save 4 Later" should {
     "yield a None given a unpopulated Container" in new Setup {
-      val container = S4LVatChoice(None)
-      service.getViewModel[TaxableTurnover, S4LVatChoice](Future.successful(container)) returns None
+      val container = S4LVatEligibilityChoice(None)
+      service.getViewModel[TaxableTurnover, S4LVatEligibilityChoice](Future.successful(container)) returns None
     }
 
     "yield a ViewModel given a populated Container" in new Setup {
       private val taxableTurnover = TaxableTurnover(yesNo = TaxableTurnover.TAXABLE_NO)
-      val container = S4LVatChoice(Some(taxableTurnover))
+      val container = S4LVatEligibilityChoice(Some(taxableTurnover))
 
-      service.getViewModel[TaxableTurnover, S4LVatChoice](Future.successful(container)) returns Some(taxableTurnover)
+      service.getViewModel[TaxableTurnover, S4LVatEligibilityChoice](Future.successful(container)) returns Some(taxableTurnover)
     }
 
   }
