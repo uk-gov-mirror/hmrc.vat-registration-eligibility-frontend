@@ -56,7 +56,9 @@ class VatRegistrationService @Inject()(val s4LService: S4LService,
     for {
       vs       <- getVatScheme()
       ve       <- s4l[S4LVatEligibility]()
-      response <- vatRegConnector.upsertVatEligibility(profile.registrationId, merge(ve, vs))
+      s4lVC    <- s4l[S4LVatEligibilityChoice]()
+      vc       = s4lVC.map(S4LVatEligibilityChoice.apiT.toApi(_))
+      response <- vatRegConnector.upsertVatEligibility(profile.registrationId, merge(ve, vs).copy(vatEligibilityChoice = vc))
     } yield response
   }
 

@@ -1,6 +1,8 @@
+
 package controllers
 
-import models.{S4LKey, S4LTradingDetails}
+import models.api.{VatEligibilityChoice, VatServiceEligibility}
+import models.{S4LKey, S4LVatEligibilityChoice, S4LVatEligibility}
 import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
@@ -19,7 +21,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
           .currentProfile.withProfile
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[TaxableTurnover](S4LKey("VatTradingDetails")).isEmpty
+          .s4lContainer[TaxableTurnover](S4LKey("VatChoice")).isEmpty
 
         val response = buildClient("/vat-taxable-sales-over-threshold").get()
         whenReady(response)(_.status) mustBe 200
@@ -29,21 +31,36 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
   "/vat-taxable-sales-over-threshold POST" should {
     "return 303" when {
       "user successfully submits a valid form" in {
+        val optVatChoice = Some(VatEligibilityChoice(necessity = "obligatory"))
+
+        val eligibility = VatServiceEligibility(Some(true),Some(false),Some(false),Some(false),Some(false),optVatChoice)
+
+        val s4lEligibility = Json.toJson(S4LVatEligibility(Some(eligibility)))
+
+
+        val s4lData = Json.toJson(S4LVatEligibilityChoice(Some(
+          TaxableTurnover("TAXABLE_YES"))
+          ,Some(VoluntaryRegistration("REGISTER_NO"))
+          ,None
+          ,Some(OverThresholdView(false))))
+
         given()
           .user.isAuthorised
           .currentProfile.withProfile
           .vatScheme.isBlank
-          .s4lContainer[TaxableTurnover](S4LKey("VatTradingDetails")).isEmpty
-          .s4lContainer[TaxableTurnover](S4LKey("VatTradingDetails")).isUpdatedWith(TaxableTurnover("TAXABLE_YES"))(S4LKey("VatTradingDetails"),TaxableTurnover.format)
-          .s4lContainer[TaxableTurnover](S4LKey("VatTradingDetails")).isUpdatedWith(VoluntaryRegistration("REGISTER_NO"))(S4LKey("VatTradingDetails"),VoluntaryRegistration.format)
+          .s4lContainer[TaxableTurnover](S4LKey("VatChoice")).contains(s4lData)
+          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).contains(s4lEligibility)
+          .s4lContainer[TaxableTurnover](S4LKey("VatChoice")).isUpdatedWith(TaxableTurnover("TAXABLE_YES"))(S4LKey("VatChoice"),TaxableTurnover.format)
+          .s4lContainer[TaxableTurnover](S4LKey("VatChoice")).isUpdatedWith(VoluntaryRegistration("REGISTER_NO"))(S4LKey("VatChoice"),VoluntaryRegistration.format)
+          .vatScheme.isUpdatedWith(eligibility)
           .audit.writesAudit()
-          .audit.writesAudit()
+
          val response = buildClient("/vat-taxable-sales-over-threshold").post(Map("taxableTurnoverRadio" -> Seq("TAXABLE_YES")))
         whenReady(response)(_.status) mustBe 303
       }
     }
   }
-  "/gone-over-threshold  GET" should {
+  "/vat-taxable-turnover-gone-over  GET" should {
     "return 200" when {
       "when user is authorised and has a date of incorporation" in {
         given()
@@ -52,13 +69,13 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
           .currentProfile.withProfileAndIncorpDate
           .audit.writesAudit()
 
-        val response = buildClient("/gone-over-threshold").get()
+        val response = buildClient("/vat-taxable-turnover-gone-over").get()
         whenReady(response)(_.status) mustBe 200
       }
     }
   }
 
-  "/gone-over-threshold POST" should{
+  "/vat-taxable-turnover-gone-over POST" should{
     "return 303" when {
       "when the request is valid" in {
         given()
@@ -66,10 +83,10 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
           .currentProfile.withProfileAndIncorpDate
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[OverThresholdView](S4LKey("VatTradingDetails")).isEmpty
-          .s4lContainer[OverThresholdView](S4LKey("VatTradingDetails")).isUpdatedWith(OverThresholdView(false))(S4LKey("VatTradingDetails"),OverThresholdView.format)
+          .s4lContainer[OverThresholdView](S4LKey("VatChoice")).isEmpty
+          .s4lContainer[OverThresholdView](S4LKey("VatChoice")).isUpdatedWith(OverThresholdView(false))(S4LKey("VatChoice"),OverThresholdView.format)
 
-        val response = buildClient("/gone-over-threshold").post(Map("overThresholdRadio" ->Seq("false")))
+        val response = buildClient("/vat-taxable-turnover-gone-over").post(Map("overThresholdRadio" ->Seq("false")))
         whenReady(response)(_.status) mustBe 303
       }
     }
@@ -77,7 +94,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
   "/check-confirm-answers GET" should {
     "return 200" when {
       "when the request is valid" in {
-        val s4lData = Json.toJson(S4LTradingDetails(Some(
+        val s4lData = Json.toJson(S4LVatEligibilityChoice(Some(
           TaxableTurnover("TAXABLE_YES"))
           ,Some(VoluntaryRegistration("REGISTER_NO"))
           ,None
@@ -88,7 +105,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
             .currentProfile.withProfileAndIncorpDate
             .vatScheme.isBlank
             .audit.writesAudit()
-            .s4lContainer[S4LTradingDetails](S4LKey("VatTradingDetails")).contains(s4lData)
+            .s4lContainer[S4LVatEligibilityChoice](S4LKey("VatChoice")).contains(s4lData)
 
         val response = buildClient("/check-confirm-answers").get()
         whenReady(response)(_.status) mustBe 200
@@ -98,7 +115,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
   "/check-confirm-answers POST" should {
     "return 303" when {
       "when the request is valid" in {
-        val s4lData = Json.toJson(S4LTradingDetails(Some(
+        val s4lData = Json.toJson(S4LVatEligibilityChoice(Some(
           TaxableTurnover("TAXABLE_YES"))
           ,Some(VoluntaryRegistration("REGISTER_NO"))
           ,None
@@ -109,18 +126,18 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
           .currentProfile.withProfileAndIncorpDate
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[S4LTradingDetails](S4LKey("VatTradingDetails")).contains(s4lData)
+          .s4lContainer[S4LVatEligibilityChoice](S4LKey("VatChoice")).contains(s4lData)
 
         val response = buildClient("/check-confirm-answers").post(Map("" -> Seq("")))
         whenReady(response){ res =>
          res.status mustBe 303
          res.header(HeaderNames.LOCATION) mustBe
-           Some("/check-if-you-can-register-for-vat/do-you-want-to-register-voluntarily")
+           Some("/check-if-you-can-register-for-vat/register-voluntarily")
         }
       }
     }
   }
-  "/do-you-want-to-register-voluntarily GET" should {
+  "/register-voluntarily GET" should {
     "return 200" when {
       "when the request is valid" in {
         given()
@@ -128,14 +145,14 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
           .vatScheme.isBlank
           .currentProfile.withProfile
           .audit.writesAudit()
-          .s4lContainer[VoluntaryRegistration](S4LKey("VatTradingDetails")).isEmpty
+          .s4lContainer[VoluntaryRegistration](S4LKey("VatChoice")).isEmpty
 
-        val response = buildClient("/do-you-want-to-register-voluntarily").get()
+        val response = buildClient("/register-voluntarily").get()
         whenReady(response)(_.status) mustBe 200
       }
     }
   }
-  "/do-you-want-to-register-voluntarily POST" should {
+  "/register-voluntarily POST" should {
     "return 303" when {
       "when the request is valid" in {
         given()
@@ -143,16 +160,16 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
           .currentProfile.withProfile
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[VoluntaryRegistration](S4LKey("VatTradingDetails")).isEmpty
-          .s4lContainer[VoluntaryRegistration](S4LKey("VatTradingDetails")).isUpdatedWith(VoluntaryRegistration("REGISTER_YES"))(S4LKey("VatTradingDetails"),VoluntaryRegistration.format)
+          .s4lContainer[VoluntaryRegistrationReason](S4LKey("VatChoice")).isEmpty
+          .s4lContainer[VoluntaryRegistration](S4LKey("VatChoice")).isUpdatedWith(VoluntaryRegistration("REGISTER_YES"))(S4LKey("VatChoice"),VoluntaryRegistration.format)
 
-        val response = buildClient("/do-you-want-to-register-voluntarily").post(Map("voluntaryRegistrationRadio" -> Seq("REGISTER_YES")))
+        val response = buildClient("/register-voluntarily").post(Map("voluntaryRegistrationRadio" -> Seq("REGISTER_YES")))
         whenReady(response)(_.status) mustBe 303
 
       }
     }
   }
-  "/reason-for-registering GET" should {
+  "/applies-company GET" should {
     "return 200" when {
       "when the request is valid" in {
         given()
@@ -160,25 +177,40 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
           .vatScheme.isBlank
           .currentProfile.withProfile
           .audit.writesAudit()
-          .s4lContainer[VoluntaryRegistrationReason](S4LKey("VatTradingDetails")).isEmpty
+          .s4lContainer[VoluntaryRegistrationReason](S4LKey("VatChoice")).isEmpty
 
-        val response = buildClient("/reason-for-registering").get()
+        val response = buildClient("/applies-company").get()
         whenReady(response)(_.status) mustBe 200
       }
     }
   }
-  "/reason-for-registering POST" should {
+  "/applies-company POST" should {
     "return 303" when {
       "when the request is valid" in {
+        val optVatChoice = Some(VatEligibilityChoice(necessity = "obligatory"))
+
+        val eligibility = VatServiceEligibility(Some(true),Some(false),Some(false),Some(false),Some(false),optVatChoice)
+
+        val s4lEligibility = Json.toJson(S4LVatEligibility(Some(eligibility)))
+
+
+        val s4lData = Json.toJson(S4LVatEligibilityChoice(Some(
+          TaxableTurnover("TAXABLE_YES"))
+          ,Some(VoluntaryRegistration("REGISTER_NO"))
+          ,None
+          ,Some(OverThresholdView(false))))
+
         given()
           .user.isAuthorised
           .vatScheme.isBlank
           .currentProfile.withProfile
           .audit.writesAudit()
-          .s4lContainer[VoluntaryRegistrationReason](S4LKey("VatTradingDetails")).isEmpty
-          .s4lContainer[VoluntaryRegistrationReason](S4LKey("VatTradingDetails")).isUpdatedWith(VoluntaryRegistrationReason("COMPANY_ALREADY_SELLS_TAXABLE_GOODS_OR_SERVICES"))(S4LKey("VatTradingDetails"),VoluntaryRegistrationReason.format)
+          .s4lContainer[VoluntaryRegistrationReason](S4LKey("VatChoice")).contains(s4lData)
+          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).contains(s4lEligibility)
+          .s4lContainer[VoluntaryRegistrationReason](S4LKey("VatChoice")).isUpdatedWith(VoluntaryRegistrationReason("COMPANY_ALREADY_SELLS_TAXABLE_GOODS_OR_SERVICES"))(S4LKey("VatChoice"),VoluntaryRegistrationReason.format)
+          .vatScheme.isUpdatedWith(eligibility)
 
-        val response = buildClient("/reason-for-registering").post(Map("voluntaryRegistrationReasonRadio" -> Seq("COMPANY_ALREADY_SELLS_TAXABLE_GOODS_OR_SERVICES")))
+        val response = buildClient("/applies-company").post(Map("voluntaryRegistrationReasonRadio" -> Seq("COMPANY_ALREADY_SELLS_TAXABLE_GOODS_OR_SERVICES")))
         whenReady(response)(_.status) mustBe 303
       }
     }

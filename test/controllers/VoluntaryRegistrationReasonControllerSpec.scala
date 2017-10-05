@@ -102,6 +102,9 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
     "return 303" in new Setup {
       when(mockCurrentProfileService.getCurrentProfile()(Matchers.any())).thenReturn(Future.successful(currentProfile))
 
+      when(mockVatRegistrationService.submitVatEligibility()(Matchers.any(), Matchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
+      when(mockVatRegistrationService.deleteVatScheme()(Matchers.any(), Matchers.any())).thenReturn(Future.successful())
+
       save4laterExpectsSave[VoluntaryRegistrationReason]()
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(Matchers.any())).thenReturn(s"someUrl")
 
@@ -114,6 +117,9 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
   s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Voluntary Registration Reason selected Intends to sell" should {
     "return 303" in new Setup {
       when(mockCurrentProfileService.getCurrentProfile()(Matchers.any())).thenReturn(Future.successful(currentProfile))
+
+      when(mockVatRegistrationService.submitVatEligibility()(Matchers.any(), Matchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
+      when(mockVatRegistrationService.deleteVatScheme()(Matchers.any(), Matchers.any())).thenReturn(Future.successful())
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(Matchers.any())).thenReturn(s"someUrl")
       save4laterExpectsSave[VoluntaryRegistrationReason]()

@@ -18,7 +18,6 @@ package controllers
 
 import models.S4LKey
 import models.api.VatServiceEligibility
-import models.view.TaxableTurnover
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
@@ -26,7 +25,6 @@ import support.AppAndStubs
 import play.api.http._
 import play.api.libs.json.Json
 
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFutures {
 
@@ -241,7 +239,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
         whenReady(response){
           res =>
             res.status mustBe 303
-            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/gone-over-threshold")
+            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/vat-taxable-turnover-gone-over")
         }
       }
 

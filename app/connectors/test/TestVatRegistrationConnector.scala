@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package models.api
+package connectors.test
 
-import play.api.libs.json.{Json, OFormat}
+import javax.inject.Singleton
 
-case class VatChoice(necessity: String, // "obligatory" or "voluntary"
-                     reason: Option[String] = None,
-                     vatThresholdPostIncorp: Option[VatThresholdPostIncorp] = None)
+import config.WSHttp
+import play.api.mvc.{Result, Results}
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http._
 
-object VatChoice {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-  val NECESSITY_OBLIGATORY = "obligatory"
-  val NECESSITY_VOLUNTARY = "voluntary"
+@Singleton
+class TestVatRegistrationConnector extends ServicesConfig {
+  val vatRegUrl = baseUrl("vat-registration")
+  val http = WSHttp
 
-  implicit val format: OFormat[VatChoice] = Json.format[VatChoice]
+  def dropCollection()(implicit hc: HeaderCarrier): Future[Result] =
+    http.POSTEmpty[HttpResponse](s"$vatRegUrl/vatreg/test-only/clear").map { _ => Results.Ok }
 
 }

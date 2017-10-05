@@ -17,22 +17,22 @@
 package models.views
 
 import fixtures.VatRegistrationFixture
-import models.api.{VatChoice, VatScheme}
+import models.api.{VatEligibilityChoice, VatScheme}
 import models.view.TaxableTurnover
 import models.view.TaxableTurnover._
-import models.{ApiModelTransformer, S4LTradingDetails}
+import models.{ApiModelTransformer, S4LVatEligibilityChoice}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class TaxableTurnoverSpec extends UnitSpec with VatRegistrationFixture {
 
   "apply" should {
     "convert a VatChoice (Obligatory) to view model" in {
-      val vatSchemeObligatory = vatScheme(vatTradingDetails = Some(tradingDetails(necessity = VatChoice.NECESSITY_OBLIGATORY)))
+      val vatSchemeObligatory = vatScheme(vatServiceEligibility = Some(vatServiceEligibility(necessity = VatEligibilityChoice.NECESSITY_OBLIGATORY)))
       ApiModelTransformer[TaxableTurnover].toViewModel(vatSchemeObligatory) shouldBe Some(TaxableTurnover(TAXABLE_YES))
     }
 
     "convert a VatChoice (Voluntary) to view model" in {
-      val vatSchemeVoluntary = vatScheme(vatTradingDetails = Some(tradingDetails(necessity = VatChoice.NECESSITY_VOLUNTARY)))
+      val vatSchemeVoluntary = vatScheme(vatServiceEligibility = Some(vatServiceEligibility(necessity = VatEligibilityChoice.NECESSITY_VOLUNTARY)))
       ApiModelTransformer[TaxableTurnover].toViewModel(vatSchemeVoluntary) shouldBe Some(TaxableTurnover(TAXABLE_NO))
     }
 
@@ -43,18 +43,18 @@ class TaxableTurnoverSpec extends UnitSpec with VatRegistrationFixture {
   }
 
   "ViewModelFormat" should {
-    val s4LTradingDetails: S4LTradingDetails = S4LTradingDetails(taxableTurnover = Some(validTaxableTurnover))
+    val s4LVatChoice: S4LVatEligibilityChoice = S4LVatEligibilityChoice(taxableTurnover = Some(validTaxableTurnover))
 
-    "extract taxableTurnover from vatTradingDetails" in {
-      TaxableTurnover.viewModelFormat.read(s4LTradingDetails) shouldBe Some(validTaxableTurnover)
+    "extract taxableTurnover from vatChoice" in {
+      TaxableTurnover.viewModelFormat.read(s4LVatChoice) shouldBe Some(validTaxableTurnover)
     }
 
     "update empty vatContact with taxableTurnover" in {
-      TaxableTurnover.viewModelFormat.update(validTaxableTurnover, Option.empty[S4LTradingDetails]).taxableTurnover shouldBe Some(validTaxableTurnover)
+      TaxableTurnover.viewModelFormat.update(validTaxableTurnover, Option.empty[S4LVatEligibilityChoice]).taxableTurnover shouldBe Some(validTaxableTurnover)
     }
 
     "update non-empty vatContact with taxableTurnover" in {
-      TaxableTurnover.viewModelFormat.update(validTaxableTurnover, Some(s4LTradingDetails)).taxableTurnover shouldBe Some(validTaxableTurnover)
+      TaxableTurnover.viewModelFormat.update(validTaxableTurnover, Some(s4LVatChoice)).taxableTurnover shouldBe Some(validTaxableTurnover)
     }
 
   }

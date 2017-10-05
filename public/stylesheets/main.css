@@ -1,0 +1,60 @@
+@import 'form-validation.css';
+/* position labels above input fields in cascading forms */
+label.cascading span {
+	display: block;
+}
+
+
+.hidden {
+	display: none;
+}
+
+.change-answer {
+	text-align: right;
+	font-weight: bold;
+	padding-right: 0;
+}
+
+.notice {
+	position: relative;
+}
+.notice .icon {
+	position: absolute;
+	left: 0;
+	top: 50%;
+	margin-top: -17px;
+}
+
+.icon-important {
+	width: 35px;
+	height: 35px;
+}
+
+.notice strong {
+	display: block;
+	padding-left: 65px;
+	margin-left: -15px;
+}
+
+.white--color {
+	color: #fff
+}
+
+td {
+	width: 50%;
+	vertical-align: top
+}
+
+#sort-code legend{
+	margin-bottom: 0;
+}
+
+.form-bank-details .form-hint {
+	margin-top: 0;
+	margin-bottom:0;
+}
+
+
+.fill-width {
+	width: 95%
+}

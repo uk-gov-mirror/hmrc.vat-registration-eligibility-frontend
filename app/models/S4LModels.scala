@@ -16,12 +16,12 @@
 
 package models
 
-import models.api.{VatChoice, VatScheme, VatServiceEligibility, VatThresholdPostIncorp, VatTradingDetails}
+import models.api.{VatEligibilityChoice, VatScheme, VatServiceEligibility, VatThresholdPostIncorp}
 import play.api.libs.json.{Json, OFormat}
 import common.ErrorUtil.fail
 import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
 import models.view.VoluntaryRegistration.REGISTER_YES
-import models.api.VatChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
+import models.api.VatEligibilityChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
 
 trait S4LModelTransformer[C] {
   // Returns an S4L container for a logical group given a VatScheme
@@ -56,25 +56,25 @@ object S4LVatEligibility {
         doingBusinessAbroad = ve.doingBusinessAbroad,
         doAnyApplyToYou = ve.doAnyApplyToYou,
         applyingForAnyOf = ve.applyingForAnyOf,
-        companyWillDoAnyOf = ve.companyWillDoAnyOf)
+        companyWillDoAnyOf = ve.companyWillDoAnyOf,
+        vatEligibilityChoice = ve.vatEligibilityChoice)
       ).getOrElse(error)
     }
   }
 }
 
-case class S4LTradingDetails(taxableTurnover: Option[TaxableTurnover] = None,
-                             voluntaryRegistration: Option[VoluntaryRegistration] = None,
-                             voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
-                             overThreshold: Option[OverThresholdView] = None)
+case class S4LVatEligibilityChoice(taxableTurnover: Option[TaxableTurnover] = None,
+                                   voluntaryRegistration: Option[VoluntaryRegistration] = None,
+                                   voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
+                                   overThreshold: Option[OverThresholdView] = None)
 
-object S4LTradingDetails {
-  implicit val format: OFormat[S4LTradingDetails] = Json.format[S4LTradingDetails]
-  implicit val tradingDetails: S4LKey[S4LTradingDetails] = S4LKey("VatTradingDetails")
+object S4LVatEligibilityChoice {
+  implicit val format: OFormat[S4LVatEligibilityChoice] = Json.format[S4LVatEligibilityChoice]
+  implicit val tradingDetails: S4LKey[S4LVatEligibilityChoice] = S4LKey("VatChoice")
 
-  implicit val modelT = new S4LModelTransformer[S4LTradingDetails] {
-    // map VatScheme to VatTradingDetails
-    override def toS4LModel(vs: VatScheme): S4LTradingDetails =
-      S4LTradingDetails(
+  implicit val modelT = new S4LModelTransformer[S4LVatEligibilityChoice] {
+    override def toS4LModel(vs: VatScheme): S4LVatEligibilityChoice =
+      S4LVatEligibilityChoice(
         taxableTurnover = ApiModelTransformer[TaxableTurnover].toViewModel(vs),
         voluntaryRegistration = ApiModelTransformer[VoluntaryRegistration].toViewModel(vs),
         overThreshold = ApiModelTransformer[OverThresholdView].toViewModel(vs),
@@ -82,13 +82,11 @@ object S4LTradingDetails {
       )
   }
 
-  def error = throw fail("VatTradingDetails")
+  def error = throw fail("VatChoice")
 
-  implicit val apiT = new S4LApiTransformer[S4LTradingDetails, VatTradingDetails] {
-    // map S4LTradingDetails to VatTradingDetails
-    override def toApi(c: S4LTradingDetails): VatTradingDetails =
-      VatTradingDetails(
-        VatChoice(
+  implicit val apiT = new S4LApiTransformer[S4LVatEligibilityChoice, VatEligibilityChoice] {
+    override def toApi(c: S4LVatEligibilityChoice): VatEligibilityChoice =
+        VatEligibilityChoice(
           necessity = c.voluntaryRegistration.map(vr =>
             if (vr.yesNo == REGISTER_YES) NECESSITY_VOLUNTARY else NECESSITY_OBLIGATORY).getOrElse(NECESSITY_OBLIGATORY),
           reason = c.voluntaryRegistrationReason.map(_.reason),
@@ -99,6 +97,5 @@ object S4LTradingDetails {
             )
           )
         )
-      )
   }
 }

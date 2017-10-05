@@ -21,7 +21,7 @@ import fixtures.VatRegistrationFixture
 import helpers.VatRegSpec
 import models.api.VatServiceEligibility
 import models.view.TaxableTurnover
-import models.{S4LKey, S4LTradingDetails, S4LVatEligibility, ViewModelFormat}
+import models._
 import org.mockito.Matchers.{any, eq => =~=}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -87,15 +87,15 @@ class S4LServiceSpec extends VatRegSpec with VatRegistrationFixture {
 
   "getting a View Model from Save 4 Later" should {
     "yield a None given a unpopulated Container" in new Setup {
-      val container = S4LTradingDetails(None)
-      service.getViewModel[TaxableTurnover, S4LTradingDetails](Future.successful(container)) returns None
+      val container = S4LVatEligibilityChoice(None)
+      service.getViewModel[TaxableTurnover, S4LVatEligibilityChoice](Future.successful(container)) returns None
     }
 
     "yield a ViewModel given a populated Container" in new Setup {
       private val taxableTurnover = TaxableTurnover(yesNo = TaxableTurnover.TAXABLE_NO)
-      val container = S4LTradingDetails(Some(taxableTurnover))
+      val container = S4LVatEligibilityChoice(Some(taxableTurnover))
 
-      service.getViewModel[TaxableTurnover, S4LTradingDetails](Future.successful(container)) returns Some(taxableTurnover)
+      service.getViewModel[TaxableTurnover, S4LVatEligibilityChoice](Future.successful(container)) returns Some(taxableTurnover)
     }
 
   }

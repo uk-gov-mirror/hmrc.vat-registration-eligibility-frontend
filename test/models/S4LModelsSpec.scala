@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import fixtures.VatRegistrationFixture
 import models.api._
-import models.api.VatChoice._
+import models.api.VatEligibilityChoice._
 import models.view._
 import models.view.VoluntaryRegistrationReason._
 import models.view.TaxableTurnover._
@@ -36,30 +36,31 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
 
     "transform VatScheme to S4L container" in {
       val vs = emptyVatScheme.copy(
-        tradingDetails = Some(VatTradingDetails(
-          vatChoice = VatChoice(
+        vatServiceEligibility = Some(VatServiceEligibility(
+          vatEligibilityChoice = Some(VatEligibilityChoice(
             necessity = NECESSITY_VOLUNTARY,
             reason = Some(INTENDS_TO_SELL),
             vatThresholdPostIncorp = Some(validVatThresholdPostIncorp))
-        ))
+        )))
       )
 
-      val expected = S4LTradingDetails(
+      val expected = S4LVatEligibilityChoice(
         taxableTurnover = Some(TaxableTurnover(TAXABLE_NO)),
         voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
         voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(INTENDS_TO_SELL)),
         overThreshold = Some(OverThresholdView(false, None))
       )
 
-      S4LTradingDetails.modelT.toS4LModel(vs) shouldBe expected
+      S4LVatEligibilityChoice.modelT.toS4LModel(vs) shouldBe expected
     }
   }
 
-  "S4LTradingDetails.S4LApiTransformer.toApi" should {
+  "S4LVatChoice.S4LApiTransformer.toApi" should {
     val specificDate = LocalDate.of(2017, 11, 12)
     val tradingName = "name"
 
-    val s4l = S4LTradingDetails(
+
+    val s4l = S4LVatEligibilityChoice(
       taxableTurnover = Some(TaxableTurnover(TAXABLE_NO)),
       voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
       voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(INTENDS_TO_SELL)),
@@ -67,38 +68,39 @@ class S4LModelsSpec  extends UnitSpec with Inspectors with VatRegistrationFixtur
     )
 
     "transform complete S4L with voluntary registration model to API" in {
-      val expected = VatTradingDetails(
-        vatChoice = VatChoice(
+      val expected = VatEligibilityChoice(
           necessity = NECESSITY_VOLUNTARY,
           reason = Some(INTENDS_TO_SELL),
           vatThresholdPostIncorp = Some(validVatThresholdPostIncorp))
-      )
 
-      S4LTradingDetails.apiT.toApi(s4l) shouldBe expected
+      S4LVatEligibilityChoice.apiT.toApi(s4l) shouldBe expected
     }
 
     "transform complete S4L with mandatory registration model to API" in {
 
-      val expected = VatTradingDetails(
-        vatChoice = VatChoice(
+      val expected = VatEligibilityChoice(
           necessity = NECESSITY_OBLIGATORY,
           reason = None,
           vatThresholdPostIncorp = Some(validVatThresholdPostIncorp))
-      )
 
       val s4lMandatoryBydefault = s4l.copy(voluntaryRegistration = None, voluntaryRegistrationReason = None)
-      S4LTradingDetails.apiT.toApi(s4lMandatoryBydefault) shouldBe expected
+      S4LVatEligibilityChoice.apiT.toApi(s4lMandatoryBydefault) shouldBe expected
 
       val s4lMandatoryExplicit = s4l.copy(voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_NO)), voluntaryRegistrationReason = None)
-      S4LTradingDetails.apiT.toApi(s4lMandatoryExplicit) shouldBe expected
+      S4LVatEligibilityChoice.apiT.toApi(s4lMandatoryExplicit) shouldBe expected
 
     }
   }
 
   "S4LVatEligibility.S4LModelTransformer.toApi" should {
-    "transform complete s4l container to API" in {
+    "transform complete s4l container to API with a vatChoice" in {
       val s4l = S4LVatEligibility(Some(validServiceEligibility))
       S4LVatEligibility.apiT.toApi(s4l) shouldBe validServiceEligibility
+    }
+
+    "transform complete s4l container to API without a vatChoice" in {
+      val s4l = S4LVatEligibility(Some(validServiceEligibilityNoChoice))
+      S4LVatEligibility.apiT.toApi(s4l) shouldBe validServiceEligibilityNoChoice
     }
 
     "transform s4l container with incomplete data error" in {

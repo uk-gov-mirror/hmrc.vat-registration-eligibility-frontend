@@ -28,18 +28,18 @@ trait TradingDetailsFixture {
   val validTaxableTurnover = TaxableTurnover("TAXABLE_YES")
 
   // Api models
-  val validVatChoice = VatChoice(
-    VatChoice.NECESSITY_VOLUNTARY,
+  val validVatChoice = VatEligibilityChoice(
+    VatEligibilityChoice.NECESSITY_VOLUNTARY,
     vatThresholdPostIncorp = Some(VatThresholdPostIncorp(true, Some(testDate)))
   )
 
-  val validVatTradingDetails = VatTradingDetails(vatChoice = validVatChoice)
+  val validVatServiceEligibility = VatServiceEligibility(vatEligibilityChoice = Some(validVatChoice))
 
-  def tradingDetails(necessity: String = VatChoice.NECESSITY_VOLUNTARY, reason: Option[String] = None): VatTradingDetails =
-    VatTradingDetails(
-      vatChoice = VatChoice(
+  def vatServiceEligibility(necessity: String = VatEligibilityChoice.NECESSITY_VOLUNTARY, reason: Option[String] = None): VatServiceEligibility =
+    VatServiceEligibility(
+      vatEligibilityChoice = Some(VatEligibilityChoice(
         necessity = necessity,
         reason = reason
-      )
+      ))
     )
 }

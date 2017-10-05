@@ -18,7 +18,7 @@ package models.view
 
 import java.time.LocalDate
 
-import models.{ApiModelTransformer, MonthYearModel, S4LTradingDetails, ViewModelFormat}
+import models._
 import models.api.{VatScheme, VatThresholdPostIncorp}
 import play.api.libs.json.Json
 
@@ -41,14 +41,14 @@ object OverThresholdView {
   implicit val format = Json.format[OverThresholdView]
 
   implicit val viewModelFormat = ViewModelFormat(
-    readF = (group: S4LTradingDetails) => group.overThreshold,
-    updateF = (c: OverThresholdView, g: Option[S4LTradingDetails]) =>
-      g.getOrElse(S4LTradingDetails()).copy(overThreshold = Some(c))
+    readF = (group: S4LVatEligibilityChoice) => group.overThreshold,
+    updateF = (c: OverThresholdView, g: Option[S4LVatEligibilityChoice]) =>
+      g.getOrElse(S4LVatEligibilityChoice()).copy(overThreshold = Some(c))
   )
 
   // Returns a view model for a specific part of a given VatScheme API model
   implicit val modelTransformer = ApiModelTransformer[OverThresholdView] { vs: VatScheme =>
-    vs.tradingDetails.map(_.vatChoice.vatThresholdPostIncorp).collect {
+    vs.vatServiceEligibility.flatMap(_.vatEligibilityChoice.map{_.vatThresholdPostIncorp}).collect {
       case Some(VatThresholdPostIncorp(selection, d@_)) => OverThresholdView(selection, d)
     }
   }

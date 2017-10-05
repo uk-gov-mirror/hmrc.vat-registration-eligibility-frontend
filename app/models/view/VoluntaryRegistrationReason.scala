@@ -16,7 +16,7 @@
 
 package models.view
 
-import models.{ApiModelTransformer, S4LTradingDetails, ViewModelFormat}
+import models.{ApiModelTransformer, S4LVatEligibilityChoice, ViewModelFormat}
 import models.api.VatScheme
 import play.api.libs.json.Json
 
@@ -38,13 +38,13 @@ object VoluntaryRegistrationReason {
   implicit val format = Json.format[VoluntaryRegistrationReason]
 
   implicit val viewModelFormat = ViewModelFormat(
-    readF = (group: S4LTradingDetails) => group.voluntaryRegistrationReason,
-    updateF = (c: VoluntaryRegistrationReason, g: Option[S4LTradingDetails]) =>
-      g.getOrElse(S4LTradingDetails()).copy(voluntaryRegistrationReason = Some(c))
+    readF = (group: S4LVatEligibilityChoice) => group.voluntaryRegistrationReason,
+    updateF = (c: VoluntaryRegistrationReason, g: Option[S4LVatEligibilityChoice]) =>
+      g.getOrElse(S4LVatEligibilityChoice()).copy(voluntaryRegistrationReason = Some(c))
   )
 
   implicit val modelTransformer = ApiModelTransformer { vs: VatScheme =>
-    vs.tradingDetails.flatMap(_.vatChoice.reason).collect {
+    vs.vatServiceEligibility.flatMap(_.vatEligibilityChoice.flatMap{_.reason}).collect {
       case SELLS => sells
       case INTENDS_TO_SELL => intendsToSell
     }

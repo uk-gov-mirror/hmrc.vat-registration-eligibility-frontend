@@ -83,7 +83,6 @@ class ServiceCriteriaQuestionsController @Inject()(val keystoreConnector: Keysto
               _ <- save(vatEligibility.setAnswer(question, data.answer))
               exit = data.answer == question.exitAnswer
               _ <- keystoreConnector.cache(IneligibilityReason.toString, question.name) onlyIf exit
-              _ <- vrs.submitVatEligibility() onlyIf question == CompanyWillDoAnyOfQuestion
             } yield Redirect(if(exit) routes.ServiceCriteriaQuestionsController.ineligible() else nextQuestion(question)))
         }
   }
