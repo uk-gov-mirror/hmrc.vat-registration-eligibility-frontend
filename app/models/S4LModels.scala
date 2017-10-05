@@ -71,7 +71,7 @@ case class S4LVatEligibilityChoice(taxableTurnover: Option[TaxableTurnover] = No
 
 object S4LVatEligibilityChoice {
   implicit val format: OFormat[S4LVatEligibilityChoice] = Json.format[S4LVatEligibilityChoice]
-  implicit val tradingDetails: S4LKey[S4LVatEligibilityChoice] = S4LKey("VatChoice")
+  implicit val vatChoice: S4LKey[S4LVatEligibilityChoice] = S4LKey("VatChoice")
 
   implicit val modelT = new S4LModelTransformer[S4LVatEligibilityChoice] {
     override def toS4LModel(vs: VatScheme): S4LVatEligibilityChoice =
