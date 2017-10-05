@@ -38,8 +38,8 @@ GET         /vat-taxable-sales-over-threshold                 controllers.Taxabl
 POST        /vat-taxable-sales-over-threshold                 controllers.TaxableTurnoverController.submit
 
 ## Post incorp threshold question 1
-GET         /vat-taxable-turnover-gone-over                   controllers.OverThresholdController.show
-POST        /vat-taxable-turnover-gone-over                   controllers.OverThresholdController.submit
+GET         /vat-taxable-turnover-gone-over                   controllers.ThresholdController.goneOverShow
+POST        /vat-taxable-turnover-gone-over                   controllers.ThresholdController.goneOverSubmit
 
 ## Threshold summary
 GET         /check-confirm-answers                            controllers.ThresholdSummaryController.show

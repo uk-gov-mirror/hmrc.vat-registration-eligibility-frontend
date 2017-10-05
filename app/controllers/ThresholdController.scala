@@ -28,13 +28,13 @@ import services._
 import utils.SessionProfile
 
 @Singleton
-class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
-                                        implicit val s4LService: S4LService,
-                                        implicit val vrs: VatRegistrationService,
-                                        val currentProfileService: CurrentProfileService)
+class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
+                                    implicit val s4LService: S4LService,
+                                    implicit val vrs: VatRegistrationService,
+                                    val currentProfileService: CurrentProfileService)
   extends VatRegistrationController with FlatMapSyntax with SessionProfile {
 
-  def show: Action[AnyContent] = authorised.async {
+  def goneOverShow: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request => {
         withCurrentProfile { implicit profile =>
@@ -48,7 +48,7 @@ class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
     }
   }
 
-  def submit: Action[AnyContent] = authorised.async {
+  def goneOverSubmit: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>

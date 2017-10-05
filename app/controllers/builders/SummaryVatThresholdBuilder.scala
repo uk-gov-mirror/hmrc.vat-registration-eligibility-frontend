@@ -33,7 +33,7 @@ case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThreshol
       case true => "app.common.yes"
       case false => "app.common.no"
     }.getOrElse(""),
-    Some(controllers.routes.OverThresholdController.show())
+    Some(controllers.routes.ThresholdController.goneOverShow())
   )
 
   val overThresholdDateRow: SummaryRow = SummaryRow(
@@ -41,7 +41,7 @@ case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThreshol
     vatThresholdPostIncorp.map(_.overThresholdDate).collect {
       case Some(date) => date.format(monthYearPresentationFormatter)
     }.getOrElse(""),
-    Some(controllers.routes.OverThresholdController.show())
+    Some(controllers.routes.ThresholdController.goneOverShow())
   )
 
   val section: SummarySection =

@@ -32,9 +32,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
 
-  object TestOverThresholdController extends OverThresholdController() {
+  object TestThresholdController extends ThresholdController() {
     override val authConnector = mockAuthConnector
 
     override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
@@ -42,16 +42,16 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
     }
   }
 
-  val fakeRequest = FakeRequest(routes.OverThresholdController.show())
+  val fakeRequest = FakeRequest(routes.ThresholdController.goneOverShow())
 
-  s"GET ${routes.OverThresholdController.show()}" should {
+  s"GET ${routes.ThresholdController.goneOverShow()}" should {
     "returnException if no IncorporationInfo Date present" in {
       val overThreshold = OverThresholdView(true, Some(LocalDate.of(2017, 6, 30)))
 
       save4laterReturnsViewModel(overThreshold)()
 
       assertThrows[TestFailedException]{
-        callAuthorised(TestOverThresholdController.show)(_ =>fail())
+        callAuthorised(TestThresholdController.goneOverShow)(_ =>fail())
       }
     }
 
@@ -60,7 +60,7 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
 
       save4laterReturnsViewModel(overThreshold)()
 
-      callAuthorised(TestOverThresholdController.show) {
+      callAuthorised(TestThresholdController.goneOverShow) {
         _ includesText "VAT taxable turnover gone over"
       }
     }
@@ -71,7 +71,7 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
       when(mockVatRegistrationService.getVatScheme()(Matchers.any(), Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validVatScheme))
 
-      callAuthorised(TestOverThresholdController.show) {
+      callAuthorised(TestThresholdController.goneOverShow) {
         _ includesText "VAT taxable turnover gone over"
       }
     }
@@ -82,17 +82,17 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
       when(mockVatRegistrationService.getVatScheme()(Matchers.any(), Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(emptyVatScheme))
 
-      callAuthorised(TestOverThresholdController.show) {
+      callAuthorised(TestThresholdController.goneOverShow) {
         _ includesText "VAT taxable turnover gone over"
       }
     }
   }
 
-  s"POST ${routes.OverThresholdController.submit()}" should {
+  s"POST ${routes.ThresholdController.goneOverSubmit()}" should {
     "return Exception When Incorporation date is empty" in {
 
       assertThrows[TestFailedException]{
-        submitAuthorised(TestOverThresholdController.submit(), fakeRequest.withFormUrlEncodedBody()) {
+        submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody()) {
           (_ =>fail())
         }
       }
@@ -101,7 +101,7 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
     "return 400 when no data posted" in {
 
       submitAuthorised(
-        TestOverThresholdController.submit(), fakeRequest.withFormUrlEncodedBody()) {
+        TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody()) {
         status(_) shouldBe Status.BAD_REQUEST
       }
     }
@@ -109,7 +109,7 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
     "return 400 when partial data is posted" in {
 
       submitAuthorised(
-        TestOverThresholdController.submit(), fakeRequest.withFormUrlEncodedBody(
+        TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
           "overThresholdRadio" -> "true",
           "overThreshold.month" -> "",
           "overThreshold.year" -> "2017"
@@ -121,7 +121,7 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
     "return 400 with incorrect data (date before incorporation date) - yes selected" in {
       save4laterExpectsSave[OverThresholdView]()
 
-      submitAuthorised(TestOverThresholdController.submit(), fakeRequest.withFormUrlEncodedBody(
+      submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "true",
         "overThreshold.month" -> "6",
         "overThreshold.year" -> "2016"
@@ -133,7 +133,7 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
     "return 303 with valid data - yes selected" in {
       save4laterExpectsSave[OverThresholdView]()
 
-      submitAuthorised(TestOverThresholdController.submit(), fakeRequest.withFormUrlEncodedBody(
+      submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "true",
         "overThreshold.month" -> "1",
         "overThreshold.year" -> "2017"
@@ -145,7 +145,7 @@ class OverThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture
     "return 303 with valid data - no selected" in {
       save4laterExpectsSave[OverThresholdView]()
 
-      submitAuthorised(TestOverThresholdController.submit(), fakeRequest.withFormUrlEncodedBody(
+      submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "false"
       )) {
         _ redirectsTo controllers.routes.ThresholdSummaryController.show.url
