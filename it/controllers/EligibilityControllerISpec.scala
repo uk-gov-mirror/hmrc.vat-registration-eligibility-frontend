@@ -16,7 +16,7 @@
 
 package controllers
 
-import models.S4LKey
+import models.{S4LKey, S4LVatEligibility}
 import models.api.VatServiceEligibility
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
@@ -87,7 +87,35 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
     "return 200" when {
-      "[Q5] /apply-for-any the user is authorised and data is in vat reg backend. data is pulled from vat because S4l returns 404" in {
+      "[Q5] /apply-exception-exemption  the user is authorised, current prof is setup, vatscheme is blank, s4l returns valid data, prepop field" in {
+
+        val s4lData = Json.obj(
+          "vatEligibility" -> Json.obj(
+            "haveNino"            -> true,
+            "doingBusinessAbroad" -> false,
+            "doAnyApplyToYou" -> false,
+            "applyingForAnyOf" -> false,
+            "applyingForVatExemption" -> true
+          )
+        )
+
+        given()
+          .user.isAuthorised
+          .currentProfile.withProfile
+          .vatScheme.isBlank
+          .audit.failsToWriteAudit()
+          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).contains(s4lData)
+
+        val response = buildClient("/apply-exception-exemption").get()
+        val res = whenReady(response)(a => a)
+        res.status mustBe 200
+        val document = Jsoup.parse(res.body)
+        document.title() mustBe "Is the company applying for either a VAT registration exception or exemption?"
+        document.getElementById("applyingForVatExemptionRadio-true").attr("checked") mustBe "checked"
+      }
+    }
+    "return 200" when {
+      "[Q6] /apply-for-any the user is authorised and data is in vat reg backend. data is pulled from vat because S4l returns 404" in {
         given()
           .user.isAuthorised
           .currentProfile.withProfile
@@ -142,7 +170,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
     "return 400 when invalid form is posted" when {
-      "[Q5] /apply-for-any the user submits an incorrect value in the form" in {
+      "[Q6] /apply-for-any the user submits an incorrect value in the form" in {
         given()
           .user.isAuthorised
           .currentProfile.withProfile
@@ -157,7 +185,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
     }
 
     "return 303 when final question posted" when {
-      "/apply-for-any final question is submitted successfully" in {
+      "[Q6] /apply-for-any final question is submitted successfully" in {
         val s4lData = Json.obj(
           "vatEligibility" -> Json.obj(
             "haveNino"            -> true,

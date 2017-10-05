@@ -45,8 +45,8 @@ class ServiceCriteriaQuestionsController @Inject()(val keystoreConnector: Keysto
     case HaveNinoQuestion            => controllers.routes.ServiceCriteriaQuestionsController.show(DoingBusinessAbroadQuestion.name)
     case DoingBusinessAbroadQuestion => controllers.routes.ServiceCriteriaQuestionsController.show(DoAnyApplyToYouQuestion.name)
     case DoAnyApplyToYouQuestion     => controllers.routes.ServiceCriteriaQuestionsController.show(ApplyingForAnyOfQuestion.name)
-    case ApplyingForAnyOfQuestion    => controllers.routes.ServiceCriteriaQuestionsController.show(CompanyWillDoAnyOfQuestion.name)
-    case CompanyWillDoAnyOfQuestion  => controllers.routes.EligibilitySuccessController.show
+    case ApplyingForAnyOfQuestion    => controllers.routes.EligibilityController.showExemptionCriteria()
+    case CompanyWillDoAnyOfQuestion  => controllers.routes.EligibilitySuccessController.show()
   }
 
   private def viewForQuestion(q: EligibilityQuestion, form: Form[YesOrNoQuestion])(implicit r: Request[AnyContent]) = q match {
@@ -89,6 +89,11 @@ class ServiceCriteriaQuestionsController @Inject()(val keystoreConnector: Keysto
 
   def ineligible(): Action[AnyContent] = authorised.async(implicit user => implicit request =>
     OptionT(keystoreConnector.fetchAndGet[String](IneligibilityReason.toString)).getOrElse("")
-      .map(failedQuestion => Ok(views.html.pages.ineligible(failedQuestion))))
+      .map{
+        failedQuestion => failedQuestion match {
+          case "applyingForVatExemption" => Ok(views.html.pages.exemption_ineligible())
+          case _ => Ok(views.html.pages.ineligible(failedQuestion))
+        }
+      })
 
 }

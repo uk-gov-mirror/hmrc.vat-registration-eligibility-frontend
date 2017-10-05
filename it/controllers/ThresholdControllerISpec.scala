@@ -33,7 +33,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
       "user successfully submits a valid form" in {
         val optVatChoice = Some(VatEligibilityChoice(necessity = "obligatory"))
 
-        val eligibility = VatServiceEligibility(Some(true),Some(false),Some(false),Some(false),Some(false),optVatChoice)
+        val eligibility = VatServiceEligibility(Some(true),Some(false),Some(false),Some(false),Some(false),Some(false),optVatChoice)
 
         val s4lEligibility = Json.toJson(S4LVatEligibility(Some(eligibility)))
 
@@ -189,7 +189,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
       "when the request is valid" in {
         val optVatChoice = Some(VatEligibilityChoice(necessity = "obligatory"))
 
-        val eligibility = VatServiceEligibility(Some(true),Some(false),Some(false),Some(false),Some(false),optVatChoice)
+        val eligibility = VatServiceEligibility(Some(true),Some(false),Some(false),Some(false),Some(false),Some(false),optVatChoice)
 
         val s4lEligibility = Json.toJson(S4LVatEligibility(Some(eligibility)))
 

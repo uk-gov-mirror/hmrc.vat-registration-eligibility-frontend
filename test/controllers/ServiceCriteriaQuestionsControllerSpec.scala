@@ -72,16 +72,16 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
         callAuthorised(testController.show(question.name))(_ includesText expectedTitle)
       }
     }
-
   }
 
   "POST ServiceCriteriaQuestionsController.submit()" should {
     //TODO: fix reverse route when exec unit test with testOnly - SCRS-9055
-    def addPrefix(url: String): String = {
-      if (!url.startsWith("/check-if-you-can-register-for-vat")) {
+    def addPrefix(url: String): String = if (!url.startsWith("/check-if-you-can-register-for-vat")) {
         s"/check-if-you-can-register-for-vat$url"
-      } else url
-    }
+      } else {
+        url
+      }
+
 
     def urlForQuestion(eligibilityQuestion: EligibilityQuestion): String = {
       addPrefix(controllers.routes.ServiceCriteriaQuestionsController.show(eligibilityQuestion.name).url)
@@ -91,46 +91,167 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
       HaveNinoQuestion -> urlForQuestion(DoingBusinessAbroadQuestion),
       DoingBusinessAbroadQuestion -> urlForQuestion(DoAnyApplyToYouQuestion),
       DoAnyApplyToYouQuestion -> urlForQuestion(ApplyingForAnyOfQuestion),
-      ApplyingForAnyOfQuestion -> urlForQuestion(CompanyWillDoAnyOfQuestion),
+      ApplyingForAnyOfQuestion -> controllers.routes.EligibilityController.showExemptionCriteria().url,
+      ApplyingForVatExemptionQuestion -> urlForQuestion(CompanyWillDoAnyOfQuestion),
       CompanyWillDoAnyOfQuestion -> addPrefix(controllers.routes.EligibilitySuccessController.show().url)
     )
 
-    println(questions)
+    "have nino should redirect to doing business abroad if answer is yes" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = HaveNinoQuestion
+      val nextQuestion = DoingBusinessAbroadQuestion
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsViewModel(validServiceEligibility)()
+      save4laterExpectsSave[VatServiceEligibility]()
 
-    "redirect to next screen when user is eligible to register for VAT using this service" in new Setup {
-      when(mockVatRegistrationService.submitVatEligibility()(any(),any()))
-        .thenReturn(validServiceEligibility.pure)
-
-      forAll(questions) { case (currentQuestion, nextScreenUrl) =>
-        setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
-        save4laterReturnsViewModel(validServiceEligibility)()
-        save4laterExpectsSave[VatServiceEligibility]()
-
-        submitAuthorised(testController.submit(currentQuestion.name),
-          FakeRequest().withFormUrlEncodedBody(
-            "question" -> currentQuestion.name,
-            s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
-        )(_ redirectsTo nextScreenUrl)
-      }
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo urlForQuestion(nextQuestion))
     }
 
-    "redirect to next screen when eligible and nothing in s4l or backend" in new Setup {
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any()))
-        .thenReturn(Future.successful(currentProfile))
-
+    "Doing Business abroad should redirect to Do any apply to you question if answer is no" in new Setup {
       when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
-      forAll(questions) { case (currentQuestion, nextScreenUrl) =>
-        setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
-        save4laterReturnsNoViewModel[VatServiceEligibility]()
-        when(mockVatRegistrationService.getVatScheme()(any(),any())).thenReturn(validVatScheme.copy(vatServiceEligibility = None).pure)
-        save4laterExpectsSave[VatServiceEligibility]()
+      val currentQuestion = DoingBusinessAbroadQuestion
+      val nextQuestion = DoAnyApplyToYouQuestion
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsViewModel(validServiceEligibility)()
+      save4laterExpectsSave[VatServiceEligibility]()
 
-        submitAuthorised(testController.submit(currentQuestion.name),
-          FakeRequest().withFormUrlEncodedBody(
-            "question" -> currentQuestion.name,
-            s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
-        )(_ redirectsTo nextScreenUrl)
-      }
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo urlForQuestion(nextQuestion))
+    }
+
+    "do any apply to you question should redirect to applying for any of question if answer is no" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = DoAnyApplyToYouQuestion
+      val nextQuestion = ApplyingForAnyOfQuestion
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsViewModel(validServiceEligibility)()
+      save4laterExpectsSave[VatServiceEligibility]()
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo urlForQuestion(nextQuestion))
+    }
+
+    "applying for any of question should redirect to applying for vat exemption question if answer is no" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = ApplyingForAnyOfQuestion
+      val nextQuestion = ApplyingForVatExemptionQuestion
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsViewModel(validServiceEligibility)()
+      save4laterExpectsSave[VatServiceEligibility]()
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo addPrefix(routes.EligibilityController.showExemptionCriteria().url))
+    }
+
+    "company will do any of question should redirect to can register for vat confirmation" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = CompanyWillDoAnyOfQuestion
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsViewModel(validServiceEligibility)()
+      save4laterExpectsSave[VatServiceEligibility]()
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo addPrefix(controllers.routes.EligibilitySuccessController.show().url))
+    }
+
+    "have nino should redirect to doing business abroad if answer is yes and nothing in s4l or backend" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = HaveNinoQuestion
+      val nextQuestion = DoingBusinessAbroadQuestion
+
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsNoViewModel[VatServiceEligibility]()
+      when(mockVatRegistrationService.getVatScheme()(any(),any())).thenReturn(validVatScheme.copy(vatServiceEligibility = None).pure)
+      save4laterExpectsSave[VatServiceEligibility]()
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo urlForQuestion(nextQuestion))
+    }
+
+    "Doing Business abroad should redirect to Do any apply to you question if answer is no and nothing in s4l or backend" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = DoingBusinessAbroadQuestion
+      val nextQuestion = DoAnyApplyToYouQuestion
+
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsNoViewModel[VatServiceEligibility]()
+      when(mockVatRegistrationService.getVatScheme()(any(),any())).thenReturn(validVatScheme.copy(vatServiceEligibility = None).pure)
+      save4laterExpectsSave[VatServiceEligibility]()
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo urlForQuestion(nextQuestion))
+    }
+
+    "do any apply to you question should redirect to applying for any of question if answer is no and nothing in s4l or backend" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = DoAnyApplyToYouQuestion
+      val nextQuestion = ApplyingForAnyOfQuestion
+
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsNoViewModel[VatServiceEligibility]()
+      when(mockVatRegistrationService.getVatScheme()(any(),any())).thenReturn(validVatScheme.copy(vatServiceEligibility = None).pure)
+      save4laterExpectsSave[VatServiceEligibility]()
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo urlForQuestion(nextQuestion))
+    }
+
+    "applying for any of question should redirect to applying for vat exemption question if answer is no and nothing in s4l or backend" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = ApplyingForAnyOfQuestion
+      val nextQuestion = ApplyingForVatExemptionQuestion
+
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsNoViewModel[VatServiceEligibility]()
+      when(mockVatRegistrationService.getVatScheme()(any(),any())).thenReturn(validVatScheme.copy(vatServiceEligibility = None).pure)
+      save4laterExpectsSave[VatServiceEligibility]()
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo addPrefix(routes.EligibilityController.showExemptionCriteria().url))
+    }
+
+    "company will do any of question should redirect to can register for vat confirmation and nothing in s4l or backend" in new Setup {
+      when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
+      val currentQuestion = CompanyWillDoAnyOfQuestion
+
+      setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
+      save4laterReturnsNoViewModel[VatServiceEligibility]()
+      when(mockVatRegistrationService.getVatScheme()(any(),any())).thenReturn(validVatScheme.copy(vatServiceEligibility = None).pure)
+      save4laterExpectsSave[VatServiceEligibility]()
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(
+          "question" -> currentQuestion.name,
+          s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
+      )(_ redirectsTo addPrefix(controllers.routes.EligibilitySuccessController.show().url))
     }
 
     "redirect to ineligible screen when user is NOT eligible to register for VAT using this service" in new Setup {
@@ -157,15 +278,44 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
       verify(mockKeystoreConnector, times(questions.size)).cache[String](Matchers.eq(IneligibilityReason.toString), any())(any(), any())
     }
 
-    "400 for malformed requests" in new Setup {
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any()))
-        .thenReturn(Future.successful(currentProfile))
+    "400 for malformed requests on have nino question" in new Setup {
+      val currentQuestion = HaveNinoQuestion
 
-      forAll(questions) { case (q, _) =>
-        submitAuthorised(testController.submit(q.name),
-          FakeRequest().withFormUrlEncodedBody(s"${q.name}Radio" -> "foo")
-        )(result => result isA 400)
-      }
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(s"${currentQuestion.name}Radio" -> "foo")
+      )(result => result isA 400)
+    }
+
+    "400 for malformed requests on doing business baroad question" in new Setup {
+      val currentQuestion = DoingBusinessAbroadQuestion
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(s"${currentQuestion.name}Radio" -> "foo")
+      )(result => result isA 400)
+    }
+
+    "400 for malformed requests on do any apply to you question" in new Setup {
+      val currentQuestion = DoAnyApplyToYouQuestion
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(s"${currentQuestion.name}Radio" -> "foo")
+      )(result => result isA 400)
+    }
+
+    "400 for malformed requests on the applying for any of question" in new Setup {
+      val currentQuestion = ApplyingForAnyOfQuestion
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(s"${currentQuestion.name}Radio" -> "foo")
+      )(result => result isA 400)
+    }
+
+    "400 for malformed requests on the company will do any of question" in new Setup {
+      val currentQuestion = CompanyWillDoAnyOfQuestion
+
+      submitAuthorised(testController.submit(currentQuestion.name),
+        FakeRequest().withFormUrlEncodedBody(s"${currentQuestion.name}Radio" -> "foo")
+      )(result => result isA 400)
     }
   }
 
@@ -179,11 +329,12 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
 
       //below the "" empty css class indicates that the section is showing (not "hidden")
       val eligibilityQuestions = Seq[(EligibilityQuestion, String)](
-        HaveNinoQuestion -> """id="nino-text" class=""""",
-        DoingBusinessAbroadQuestion -> """id="business-abroad-text" class=""""",
-        DoAnyApplyToYouQuestion -> """id="do-any-apply-to-you-text" class=""""",
-        ApplyingForAnyOfQuestion -> """id="applying-for-any-of-text" class=""""",
-        CompanyWillDoAnyOfQuestion -> """id="company-will-do-any-of-text" class="""""
+        HaveNinoQuestion                -> """id="nino-text" class=""""",
+        DoingBusinessAbroadQuestion     -> """id="business-abroad-text" class=""""",
+        DoAnyApplyToYouQuestion         -> """id="do-any-apply-to-you-text" class=""""",
+        ApplyingForAnyOfQuestion        -> """id="applying-for-any-of-text" class=""""",
+        ApplyingForVatExemptionQuestion -> """id="applying-for-vat-exemption-text"""",
+        CompanyWillDoAnyOfQuestion      -> """id="company-will-do-any-of-text" class="""""
       )
 
       forAll(eligibilityQuestions) { case (question, expectedTitle) =>
@@ -200,9 +351,6 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
         """id="applying-for-any-of-text" class="hidden"""",
         """id="company-will-do-any-of-text" class="hidden""""
       )
-
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any()))
-        .thenReturn(Future.successful(currentProfile))
 
       when(mockKeystoreConnector.fetchAndGet[String](Matchers.eq(IneligibilityReason.toString))(any(), any()))
         .thenReturn(Option.empty[String].pure)

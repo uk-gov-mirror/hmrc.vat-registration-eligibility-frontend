@@ -36,6 +36,7 @@ object TestSetupForm {
     "doingBusinessAbroad" -> optional(text),
     "doAnyApplyToYou" -> optional(text),
     "applyingForAnyOf" -> optional(text),
+    "applyingForVatExemption" -> optional(text),
     "companyWillDoAnyOf" -> optional(text)
   )(VatServiceEligibilityTestSetup.apply)(VatServiceEligibilityTestSetup.unapply)
 

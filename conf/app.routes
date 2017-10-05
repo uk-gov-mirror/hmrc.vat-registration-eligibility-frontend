@@ -28,6 +28,8 @@ GET         /involved-more-business-changing-status           controllers.Servic
 POST        /involved-more-business-changing-status           controllers.ServiceCriteriaQuestionsController.submit(question = "doAnyApplyToYou")
 GET         /agricultural-flat-rate                           controllers.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf")
 POST        /agricultural-flat-rate                           controllers.ServiceCriteriaQuestionsController.submit(question = "applyingForAnyOf")
+GET         /apply-exception-exemption                        controllers.EligibilityController.showExemptionCriteria
+POST        /apply-exception-exemption                        controllers.EligibilityController.submitExemptionCriteria
 GET         /apply-for-any                                    controllers.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf")
 POST        /apply-for-any                                    controllers.ServiceCriteriaQuestionsController.submit(question = "companyWillDoAnyOf")
 
