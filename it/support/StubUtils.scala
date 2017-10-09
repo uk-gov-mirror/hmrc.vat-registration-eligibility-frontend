@@ -28,10 +28,6 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.crypto.CompositeSymmetricCrypto.aes
 import uk.gov.hmrc.crypto.json.{JsonDecryptor, JsonEncryptor}
-import uk.gov.hmrc.play.http.HttpResponse
-import play.api.http.Status.OK
-
-import scala.concurrent.Future
 
 trait StubUtils {
   me: StartAndStopWireMock =>
