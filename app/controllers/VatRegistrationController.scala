@@ -38,10 +38,7 @@ abstract class VatRegistrationController extends FrontendController
   with I18nSupport with Actions with ApplicativeSyntax with FutureInstances {
 
   implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
-
-  //$COVERAGE-OFF$
   override val authConnector: AuthConnector = FrontendAuthConnector
-  //$COVERAGE-ON$
 
   /**
     * Use this to obtain an [[uk.gov.hmrc.play.frontend.auth.UserActions.AuthenticatedBy]] action builder.

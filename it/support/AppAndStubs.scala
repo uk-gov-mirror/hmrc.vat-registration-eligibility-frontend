@@ -71,8 +71,10 @@ trait AppAndStubs extends StartAndStopWireMock with StubUtils with OneServerPerS
       configMap + (
         s"microservice.services.$service.host" -> wiremockHost,
         s"microservice.services.$service.port" -> wiremockPort)
-    } + (s"auditing.consumer.baseUri.host" -> wiremockHost,
-      s"auditing.consumer.baseUri.port" -> wiremockPort) + ("play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck")
+    } +
+      (s"auditing.consumer.baseUri.host" -> wiremockHost, s"auditing.consumer.baseUri.port" -> wiremockPort) +
+      ("play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck") +
+      ("microservice.services.vat-registration-frontend.www.url" -> "/vat-uri")
 
 
   }

@@ -59,7 +59,6 @@ class TaxableTurnoverController @Inject()(implicit val messagesApi: MessagesApi,
             (data: TaxableTurnover) => save(data).map(_ => data.yesNo == TAXABLE_YES).ifM(
               for {
                 _ <- save(VoluntaryRegistration(REGISTER_NO))
-                //_ <- save(StartDateView(COMPANY_REGISTRATION_DATE)) //TODO: call S4LService to save StartDateView
                 _ <- vrs.submitVatEligibility()
               } yield vatRegFrontendService.buildVatRegFrontendUrlEntry,
               Future.successful(routes.VoluntaryRegistrationController.show.url)

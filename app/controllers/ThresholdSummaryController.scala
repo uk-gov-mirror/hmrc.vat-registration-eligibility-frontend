@@ -62,7 +62,6 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
             case VatThresholdPostIncorp(true, _) =>
               for {
                 _ <- save(VoluntaryRegistration(REGISTER_NO))
-                //_ <- save(StartDateView(COMPANY_REGISTRATION_DATE)) //TODO: call S4LService to save StartDateView
                 _ <- vrs.submitVatEligibility()
               } yield Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
             case _ => Future.successful(Redirect(controllers.routes.VoluntaryRegistrationController.show()))

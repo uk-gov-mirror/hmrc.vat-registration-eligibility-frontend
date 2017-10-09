@@ -16,7 +16,7 @@
 
 package controllers
 
-import models.{S4LKey, S4LVatEligibility}
+import models.S4LVatEligibility
 import models.api.VatServiceEligibility
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
@@ -35,7 +35,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .user.isAuthorised
           .currentProfile.withProfile
           .vatScheme.isBlank
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).isEmpty
+          .s4lContainer[S4LVatEligibility].isEmpty
           .audit.writesAudit()
         val response = buildClient("/national-insurance-number").get()
         whenReady(response)(_.status) mustBe 200
@@ -55,8 +55,8 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .user.isAuthorised
           .currentProfile.withProfile
           .vatScheme.isBlank
-          .audit.failsToWriteAudit()
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).contains(s4lData)
+          .s4lContainer[S4LVatEligibility].contains(s4lData)
+          .audit.writesAudit()
 
         val response = buildClient("/international-business").get()
         val res = whenReady(response)(a => a)
@@ -104,7 +104,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .currentProfile.withProfile
           .vatScheme.isBlank
           .audit.failsToWriteAudit()
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).contains(s4lData)
+          .s4lContainer[S4LVatEligibility].contains(s4lData)
 
         val response = buildClient("/apply-exception-exemption").get()
         val res = whenReady(response)(a => a)
@@ -121,7 +121,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .currentProfile.withProfile
           .vatScheme.hasValidEligibilityData
           .audit.writesAudit()
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).isEmpty
+          .s4lContainer[S4LVatEligibility].isEmpty
 
         val response = buildClient("/apply-for-any").get()
         whenReady(response) { res =>
@@ -139,10 +139,8 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .currentProfile.withProfile
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility"))
-          .contains(VatServiceEligibility(haveNino = Some(false)))
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility"))
-          .isUpdatedWith(VatServiceEligibility(haveNino = Some(false)))(S4LKey("VatServiceEligibility"),VatServiceEligibility.format)
+          .s4lContainer[S4LVatEligibility].contains(VatServiceEligibility(haveNino = Some(false)))
+          .s4lContainer[S4LVatEligibility].isUpdatedWith(VatServiceEligibility(haveNino = Some(false)))
 
         val response = buildClient("/national-insurance-number").post(Map("haveNinoRadio" -> Seq("true")))
         val res = whenReady(response)(a => a)
@@ -157,12 +155,11 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .currentProfile.withProfile
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility"))
-          .contains(VatServiceEligibility(haveNino = Some(false)))
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility"))
-          .isUpdatedWith(VatServiceEligibility(haveNino = Some(false)))(S4LKey("VatServiceEligibility"),VatServiceEligibility.format)
+          .s4lContainer[S4LVatEligibility].contains(VatServiceEligibility(haveNino = Some(false)))
+          .s4lContainer[S4LVatEligibility].isUpdatedWith(VatServiceEligibility(haveNino = Some(false)))
           .keystoreS.putKeyStoreValueWithKeyInUrl("ineligibility-reason",""""haveNino"""","IneligibilityReason")
           .keystoreS.hasKeystoreValueWithKeyInUrl("ineligibility-reason",""""haveNino"""","IneligibilityReason")
+
         val response = buildClient("/national-insurance-number").post(Map("haveNinoRadio" -> Seq("false")))
         val res = whenReady(response)(a => a)
         res.status mustBe 303
@@ -176,7 +173,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .currentProfile.withProfile
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).isEmpty
+          .s4lContainer[S4LVatEligibility].isEmpty
 
         val response = buildClient("/apply-for-any").post(Map("haveNinoRadio" -> Seq("fooBars")))
         val res = whenReady(response)(a => a)
@@ -191,7 +188,8 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
             "haveNino"            -> true,
             "doingBusinessAbroad" -> false,
             "doAnyApplyToYou" -> false,
-            "applyingForAnyOf" -> false
+            "applyingForAnyOf" -> false,
+            "applyingForVatExemption" -> false
           )
         )
         given()
@@ -199,11 +197,11 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .currentProfile.withProfile
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).contains(s4lData)
-          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).isUpdatedWith(VatServiceEligibility(companyWillDoAnyOf = Some(false)))(S4LKey("VatServiceEligibility"),VatServiceEligibility.format)
+          .s4lContainer[S4LVatEligibility].contains(s4lData)
+          .s4lContainer[S4LVatEligibility].isUpdatedWith(VatServiceEligibility(companyWillDoAnyOf = Some(false)))
           .vatScheme.hasServiceEligibilityDataApartFromLastQuestion
-          .vatScheme
-            .isUpdatedWith(s4lData.deepMerge(Json.obj("vatEligibility" -> Json.obj("companyWillDoAnyOfRadio"-> false))))
+          .vatScheme.isUpdatedWith(s4lData.deepMerge(Json.obj("vatEligibility" -> Json.obj("companyWillDoAnyOfRadio"-> false))))
+
         val response = buildClient("/apply-for-any").post(Map("companyWillDoAnyOfRadio" -> Seq("false")))
         whenReady(response){
           res =>
@@ -235,6 +233,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
         given()
           .user.isAuthorised
           .currentProfile.withProfile
+          .audit.writesAudit()
 
         val response = buildClient("/can-register").get()
         whenReady(response)(_.status) mustBe 200

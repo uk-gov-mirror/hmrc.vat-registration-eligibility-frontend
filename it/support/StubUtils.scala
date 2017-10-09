@@ -16,12 +16,13 @@
 
 package support
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.matching.UrlPathPattern
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import common.enums.VatRegStatus
 import models.S4LKey
-import play.api.libs.json.{Format, JsObject, JsString, Json}
+import play.api.libs.json.{Format, JsObject}
 import play.api.mvc.AnyContentAsFormUrlEncoded
 import play.api.test.FakeRequest
 import uk.gov.hmrc.crypto.ApplicationCrypto
@@ -65,6 +66,7 @@ trait StubUtils {
     def company = IncorporationStub()
 
     def s4lContainer[C: S4LKey]: ViewModelStub[C] = new ViewModelStub[C]()
+    def s4lContainerInScenario[C: S4LKey]: ViewModelScenarioStub[C] = new ViewModelScenarioStub[C]()
 
     def audit = AuditStub()
 
@@ -180,19 +182,15 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
   }
 
   trait S4LStub {
-
     import uk.gov.hmrc.crypto._
 
     //TODO get the json.encryption.key config value from application.conf
     val crypto: CompositeSymmetricCrypto = aes("fqpLDZ4sumDsekHkeEBlCA==", Seq.empty)
 
     def decrypt(encData: String): String = crypto.decrypt(Crypted(encData)).value
-
     def encrypt(str: String): String = crypto.encrypt(PlainText(str)).value
 
-
-    def stubS4LPut(key: String, data: String): StubMapping =
-      stubFor(
+    def stubS4LPut(key: String, data: String): MappingBuilder =
         put(urlPathMatching(s"/save4later/vat-registration-eligibility-frontend/1/data/$key"))
           .willReturn(ok(
             s"""
@@ -203,72 +201,113 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
                |      "createdAt": { "$$date": 1502265526026 },
                |      "lastUpdated": { "$$date": 1502265526026 }}}
             """.stripMargin
-          )))
-
-    def stubS4LGet[C, T](t: T)(implicit key: S4LKey[C], fmt: Format[T]): StubMapping = {
-      val s4lData = Json.toJson(t).as[JsObject]
-
-      val s4lResponse = Json.obj(
-        "id"   -> key.key,
-        "data" -> Json.obj(
-          key.key -> encryptionFormat.writes(Protected(s4lData))
-        )
-      )
-
-      stubFor(
-        get(urlPathMatching("/save4later/vat-registration-eligibility-frontend/1"))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-              .withBody(s4lResponse.toString())
           ))
+
+    def stubS4LGet[C, T](t: T)(implicit key: S4LKey[C], fmt: Format[T]): MappingBuilder = {
+      get(urlPathMatching("/save4later/vat-registration-eligibility-frontend/1"))
+        .willReturn(ok(
+          s"""
+             |{
+             |  "atomicId": { "$$oid": "598830cf5e00005e00b3401e" },
+             |  "data": {
+             |    "${key.key}": "${encrypt(fmt.writes(t).toString())}"
+             |  },
+             |  "id": "1",
+             |  "modifiedDetails": {
+             |    "createdAt": { "$$date": 1502097615710 },
+             |    "lastUpdated": { "$$date": 1502189409725 }
+             |  }
+             |}
+          """.stripMargin
+        ))
     }
 
+    def stubS4LGetNothing(): MappingBuilder = {
+      get(urlPathMatching("/save4later/vat-registration-eligibility-frontend/1"))
+        .willReturn(ok(
+          s"""
+             |{
+             |  "atomicId": { "$$oid": "598830cf5e00005e00b3401e" },
+             |  "data": {},
+             |  "id": "1",
+             |  "modifiedDetails": {
+             |    "createdAt": { "$$date": 1502097615710 },
+             |    "lastUpdated": { "$$date": 1502189409725 }
+             |  }
+             |}
+          """.stripMargin
+        ))
+    }
 
-    def stubS4LGetNothing(): StubMapping =
-      stubFor(
-        get(urlPathMatching("/save4later/vat-registration-eligibility-frontend/1"))
-          .willReturn(ok(
-            s"""
-               |{
-               |  "atomicId": { "$$oid": "598830cf5e00005e00b3401e" },
-               |  "data": {},
-               |  "id": "1",
-               |  "modifiedDetails": {
-               |    "createdAt": { "$$date": 1502097615710 },
-               |    "lastUpdated": { "$$date": 1502189409725 }
-               |  }
-               |}
-            """.stripMargin
-          )))
-
+    def stubS4LClear(): MappingBuilder =
+      delete(urlPathMatching("/save4later/vat-registration-eligibility-frontend/1")).willReturn(ok(""))
   }
 
 
   class ViewModelStub[C]()(implicit builder: PreconditionBuilder, s4LKey: S4LKey[C]) extends S4LStub with KeystoreStub {
 
     def contains[T](t: T)(implicit fmt: Format[T]): PreconditionBuilder = {
-      stubS4LGet[C, T](t)
+      stubFor(stubS4LGet[C, T](t))
       builder
     }
 
 
     def isUpdatedWith[T](t: T)(implicit key: S4LKey[C], fmt: Format[T]): PreconditionBuilder = {
-      stubS4LPut(key.key, fmt.writes(t).toString())
+      stubFor(stubS4LPut(key.key, fmt.writes(t).toString()))
       builder
     }
 
     def isEmpty: PreconditionBuilder = {
-      stubS4LGetNothing()
+      stubFor(stubS4LGetNothing())
       builder
     }
 
+    def cleared: PreconditionBuilder = {
+      stubFor(stubS4LClear())
+      builder
+    }
+  }
+
+  class ViewModelScenarioStub[C](scenario: String = "S4L Scenario")
+                                (implicit builder: PreconditionBuilder, s4LKey: S4LKey[C]) extends ViewModelStub {
+
+    def contains[T](t: T, currentState: Option[String] = None, nextState: Option[String] = None)
+                   (implicit fmt: Format[T]): PreconditionBuilder = {
+      val mappingBuilderScenarioGET = stubS4LGet[C, T](t).inScenario(scenario)
+      val mappingBuilderGET = currentState.fold(mappingBuilderScenarioGET)(mappingBuilderScenarioGET.whenScenarioStateIs)
+
+      stubFor(nextState.fold(mappingBuilderGET)(mappingBuilderGET.willSetStateTo))
+      builder
+    }
+
+    def isUpdatedWith[T](t: T, currentState: Option[String] = None, nextState: Option[String] = None)
+                        (implicit key: S4LKey[C], fmt: Format[T]): PreconditionBuilder = {
+      val mappingBuilderScenarioPUT = stubS4LPut(key.key, fmt.writes(t).toString()).inScenario(scenario)
+      val mappingBuilderPUT = currentState.fold(mappingBuilderScenarioPUT)(mappingBuilderScenarioPUT.whenScenarioStateIs)
+
+      stubFor(nextState.fold(mappingBuilderPUT)(mappingBuilderPUT.willSetStateTo))
+      builder
+    }
+
+    def isEmpty(currentState: Option[String] = None, nextState: Option[String] = None): PreconditionBuilder = {
+      val mappingBuilderScenarioGET = stubS4LGetNothing().inScenario(scenario)
+      val mappingBuilderGET = currentState.fold(mappingBuilderScenarioGET)(mappingBuilderScenarioGET.whenScenarioStateIs)
+
+      stubFor(nextState.fold(mappingBuilderGET)(mappingBuilderGET.willSetStateTo))
+      builder
+    }
+
+    def cleared(currentState: Option[String] = None, nextState: Option[String] = None): PreconditionBuilder = {
+      val mappingBuilderScenarioDELETE = stubS4LClear().inScenario(scenario)
+      val mappingBuilderDELETE = currentState.fold(mappingBuilderScenarioDELETE)(mappingBuilderScenarioDELETE.whenScenarioStateIs)
+
+      stubFor(nextState.fold(mappingBuilderDELETE)(mappingBuilderDELETE.willSetStateTo))
+      builder
+    }
   }
 
 
-  case class IncorporationStub
-  ()
-  (implicit builder: PreconditionBuilder) extends KeystoreStub {
+  case class IncorporationStub()(implicit builder: PreconditionBuilder) extends KeystoreStub {
 
     def isIncorporated: PreconditionBuilder = {
 
@@ -326,48 +365,39 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
 
   }
 
-  case class CurrentProfile()(implicit builder: PreconditionBuilder) extends KeystoreStub{
-    def setup: PreconditionBuilder = {
-      stubFor(
-        get(urlPathEqualTo(s"/incorporation-information/000-434-1/company-profile"))
-          .willReturn(ok(
-            s"""{ "company_name": "testCompanyName" }"""
-          )))
-
-      stubFor(
-        get(urlPathEqualTo("/vatreg/incorporation-information/000-434-1"))
-          .willReturn(ok(
-            s"""
-               |{
-               |  "statusEvent": {
-               |    "crn": "90000001",
-               |    "incorporationDate": "2016-08-05",
-               |    "status": "accepted"
-               |  },
-               |  "subscription": {
-               |    "callbackUrl": "http://localhost:9896/callbackUrl",
-               |    "regime": "vat",
-               |    "subscriber": "scrs",
-               |    "transactionId": "000-434-1"
-               |  }
-               |}
+  case class CurrentProfile()(implicit builder: PreconditionBuilder) extends KeystoreStub {
+    val incorpInfo = s"""
+                        |{
+                        |  "statusEvent": {
+                        |    "crn": "90000001",
+                        |    "incorporationDate": "2016-08-05",
+                        |    "status": "accepted"
+                        |  },
+                        |  "subscription": {
+                        |    "callbackUrl": "http://localhost:9896/callbackUrl",
+                        |    "regime": "vat",
+                        |    "subscriber": "scrs",
+                        |    "transactionId": "000-434-1"
+                        |  }
+                        |}
              """.stripMargin
-          )))
 
-      stubFor(
-        get(urlPathEqualTo("/business-registration/business-tax-registration"))
-          .willReturn((ok(
-                    """
-                      |{
-                      | "registrationID" : "1",
-                      | "language" : "EN"
-                      |}
-                      |"""".stripMargin)
-              )
-            )
+    val businessProfile = s"""
+                             |{
+                             | "registrationID" : "1",
+                             | "language" : "EN"
+                             |}
+                             |"""".stripMargin
+
+    def setup: PreconditionBuilder = {
+      stubFor(get(urlPathEqualTo(s"/incorporation-information/000-434-1/company-profile"))
+        .willReturn(ok(s"""{ "company_name": "testCompanyName" }""")
+        )
       )
-      CorporationTaxRegistrationStub().existsWithStatus("held")
 
+      stubFor(get(urlPathEqualTo("/vatreg/incorporation-information/000-434-1")).willReturn(ok(incorpInfo)))
+      stubFor(get(urlPathEqualTo("/business-registration/business-tax-registration")).willReturn(ok(businessProfile)))
+      CorporationTaxRegistrationStub().existsWithStatus("held")
 
       stubKeystorePut("CurrentProfile",
         """
@@ -385,7 +415,7 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
     def withProfileAndIncorpDate = withProfileInclIncorp(true)
     def withProfile = withProfileInclIncorp(false)
 
-   private val withProfileInclIncorp = (withIncorporationDate:Boolean) => {
+   private val withProfileInclIncorp = (withIncorporationDate: Boolean) => {
       val incorporationDate = ""","incorporationDate": "2016-08-05"}"""
     val js = s"""
         |{
@@ -399,9 +429,7 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
     }
   }
 
-  case class VatSchemeStub
-  ()
-  (implicit builder: PreconditionBuilder) extends KeystoreStub {
+  case class VatSchemeStub()(implicit builder: PreconditionBuilder) extends KeystoreStub {
 
     def hasValidEligibilityData:PreconditionBuilder = {
       stubFor(
@@ -413,16 +441,15 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
                |        "doingBusinessAbroad" : false,
                |        "doAnyApplyToYou" : false,
                |        "applyingForAnyOf" : false,
+               |        "applyingForVatExemption" : false,
                |        "companyWillDoAnyOf" : false,
-               |        "vatChoice" : {
-               |                "necessity" : "voluntary"
+               |        "vatEligibilityChoice" : {
+               |          "necessity" : "voluntary"
                |        }
                |    }}""".stripMargin
           )))
       builder
     }
-
-
 
     def hasServiceEligibilityDataApartFromLastQuestion:PreconditionBuilder = {
       stubFor(
@@ -433,15 +460,12 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
                |        "haveNino" : true,
                |        "doingBusinessAbroad" : false,
                |        "doAnyApplyToYou" : false,
-               |        "applyingForAnyOf" : false
-               |        "vatChoice" : {
-               |                "necessity" : "voluntary"
-               |        }
+               |        "applyingForAnyOf" : false,
+               |        "applyingForVatExemption" : false
                |    }}""".stripMargin
           )))
       builder
     }
-
 
     def isBlank: PreconditionBuilder = {
       stubFor(
@@ -459,6 +483,10 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
       builder
     }
 
+    def deleted: PreconditionBuilder = {
+      stubFor(delete(urlPathEqualTo("/vatreg/1/delete-scheme")).willReturn(ok("")))
+      builder
+    }
   }
 
   case class VatRegistrationFootprintStub

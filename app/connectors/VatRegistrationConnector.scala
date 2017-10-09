@@ -57,7 +57,7 @@ trait VatRegistrationConnect extends FutureInstances {
 
   def deleteVatScheme(regId: String)
                      (implicit hc: HeaderCarrier, rds: HttpReads[Boolean]): Future[Unit] =
-    http.DELETE[Boolean](s"$vatRegUrl/vatreg/$regId/delete-scheme").recover{
+    http.DELETE[HttpResponse](s"$vatRegUrl/vatreg/$regId/delete-scheme").recover {
       case e: Exception => throw logResponse(e, className, "deleteVatScheme")
     } map (_ => ())
 

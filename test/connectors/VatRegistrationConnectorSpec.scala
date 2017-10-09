@@ -20,7 +20,7 @@ import fixtures.VatRegistrationFixture
 import helpers.VatRegSpec
 import models.api._
 import models.external.IncorporationInfo
-import play.api.http.Status.{BAD_GATEWAY, FORBIDDEN, NOT_FOUND}
+import play.api.http.Status.{BAD_GATEWAY, FORBIDDEN, NOT_FOUND, OK}
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
 
@@ -60,11 +60,11 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
 
   "Calling deleteVatScheme" should {
     "return a successful outcome given an existing registration" in new Setup {
-      mockHttpDELETE[Boolean]("tst-url", true)
+      mockHttpDELETE[HttpResponse]("tst-url", HttpResponse(OK))
       connector.deleteVatScheme("regId") completedSuccessfully
     }
     "return the notFound exception when trying to DELETE non-existent registration" in new Setup {
-      mockHttpFailedDELETE[Boolean]("tst-url", notFound)
+      mockHttpFailedDELETE[HttpResponse]("tst-url", notFound)
       connector.deleteVatScheme("regId") failedWith notFound
     }
   }
