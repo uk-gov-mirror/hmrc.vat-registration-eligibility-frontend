@@ -71,6 +71,9 @@ pages.serviceCriteriaFailure.applyingForAnyOf.bullet2    = the company is applyi
 pages.serviceCriteriaFailure.applyingForAnyOf.p1         = If the company is applying for the Agricultural Flat Rate Scheme, you need to <a href="https://www.gov.uk/government/publications/vat-agricultural-flat-rate-scheme-application-for-certification-vat98">register using form VAT98</a>.
 pages.serviceCriteriaFailure.applyingForAnyOf.p2         = If the company is applying for an exception from VAT registration, you need to <a href="https://www.gov.uk/government/publications/vat-application-for-registration-vat1">register using form VAT1</a>.
 
+pages.serviceCriteriaFailure.applyingForVatExemption.p1    = If the company is applying for a VAT registration exception, let us know online through the <a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">VAT online services helpdesk</a> or send a letter explaining your circumstances to <a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-enquiries">HMRC VAT Registration Services</a>.
+pages.serviceCriteriaFailure.applyingForVatExemption.p2    = If the company is applying for an exemption from VAT registration, <a href="https://online.hmrc.gov.uk/registration/newbusiness/introduction">register using form VAT1</a>.
+
 pages.serviceCriteriaFailure.companyWillDoAnyOf.p1         = You can''t register with this service if the company:
 pages.serviceCriteriaFailure.companyWillDoAnyOf.bullet1    = hires out boats or aircraft to clients
 pages.serviceCriteriaFailure.companyWillDoAnyOf.bullet2    = owns one or more racehorses
@@ -87,6 +90,7 @@ validation.eligibility.doingBusinessAbroad.missing          = Tell us if you''ll
 validation.eligibility.doAnyApplyToYou.missing              = Tell us if any of the following apply to you or your business
 validation.eligibility.applyingForAnyOf.missing             = Tell us if you''ll apply for any of the following
 validation.eligibility.companyWillDoAnyOf.missing           = Tell us if you''ll do any of the following
+validation.eligibility.applyingForVatExemption.missing      = Tell us if the company is applying for either a VAT registration exception or an exemption
 
 ## Have Nino
 pages.eligibility.haveNino.title                            = Do you have a National Insurance number?
@@ -116,6 +120,21 @@ pages.eligibility.applyingForAnyOf.title                    = Is the company app
 pages.eligibility.applyingForAnyOf.heading                  = Is the company applying for either the Agricultural Flat Rate Scheme or the Annual Accounting Scheme?
 pages.eligibility.applyingForAnyOf.p1                       = The Agricultural Flat Rate Scheme is an alternative to VAT registration for farmers.
 pages.eligibility.applyingForAnyOf.p2                       = The Annual Accounting Scheme allows you to submit 1 VAT return a year and make advance payments towards your next VAT bill.
+
+## Is the company applying for either a VAT registration Exception or Exemption?
+pages.eligibility.applyingForVatExemption.title             = Is the company applying for either a VAT registration exception or exemption?
+pages.eligibility.applyingForVatExemption.heading           = Is the company applying for either a VAT registration exception or exemption?
+pages.eligibility.applyingForVatExemption.p1                = The company can get a registration exception if VAT taxable sales temporarily went over the VAT threshold (currently £85000) but have since dropped below it.
+pages.eligibility.applyingForVatExemption.p2                = The company can get a registration exemption if it sells mainly or only zero-rated goods or services.
+pages.eligibility.applyingForVatExemption.panel.title       = Examples of zero-rated goods or services
+pages.eligibility.applyingForVatExemption.panel.p1          = Zero-rated goods and services are VAT-taxable but the VAT rate on them is 0%.
+pages.eligibility.applyingForVatExemption.panel.p2          = They include:
+pages.eligibility.applyingForVatExemption.panel.bullet1     = most food and drink (but not things like alcoholic drinks, confectionery, crisps and savoury snacks, hot food, sports drinks, hot takeaways, ice cream, soft drinks and mineral water)
+pages.eligibility.applyingForVatExemption.panel.bullet2     = books and newspapers
+pages.eligibility.applyingForVatExemption.panel.bullet3     = printing services for brochures, leaflets or pamphlets
+pages.eligibility.applyingForVatExemption.panel.bullet4     = children’s clothes and shoes
+pages.eligibility.applyingForVatExemption.panel.bullet5     = most goods you export to non-EU countries
+pages.eligibility.applyingForVatExemption.panel.p3          = Find out about <a href="https://www.gov.uk/guidance/rates-of-vat-on-different-goods-and-services">VAT rates on different goods and services</a>.
 
 pages.eligibility.companyWillDoAnyOf.title                   = Will the company do any of the following once it''s registered for VAT?
 pages.eligibility.companyWillDoAnyOf.heading                 = Will the company do any of the following once it''s registered for VAT?

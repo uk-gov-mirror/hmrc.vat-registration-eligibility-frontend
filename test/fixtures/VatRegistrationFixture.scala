@@ -31,8 +31,8 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
   val validHttpResponse = HttpResponse(OK)
 
   //Api models
-  val validServiceEligibility          = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(validVatChoice))
-  val validServiceEligibilityNoChoice  = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false))
+  val validServiceEligibility          = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(false), Some(validVatChoice))
+  val validServiceEligibilityNoChoice  = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(false))
   val validVatThresholdPostIncorp      = VatThresholdPostIncorp(overThresholdSelection = false, None)
 
   val emptyVatScheme = VatScheme(testRegId)

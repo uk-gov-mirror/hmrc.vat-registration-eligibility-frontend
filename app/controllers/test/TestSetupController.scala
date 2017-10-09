@@ -52,6 +52,7 @@ class TestSetupController @Inject()(implicit s4LService: S4LService,
                 doingBusinessAbroad = eligibility.flatMap(_.vatEligibility).map(_.doingBusinessAbroad.getOrElse("").toString),
                 doAnyApplyToYou = eligibility.flatMap(_.vatEligibility).map(_.doAnyApplyToYou.getOrElse("").toString),
                 applyingForAnyOf = eligibility.flatMap(_.vatEligibility).map(_.applyingForAnyOf.getOrElse("").toString),
+                applyingForVatExemption = eligibility.flatMap(_.vatEligibility).map(_.applyingForVatExemption.getOrElse("").toString),
                 companyWillDoAnyOf = eligibility.flatMap(_.vatEligibility).map(_.companyWillDoAnyOf.getOrElse("").toString)
               ),
               VatEligibilityChoiceTestSetup(
@@ -86,6 +87,7 @@ class TestSetupController @Inject()(implicit s4LService: S4LService,
                            x.vatServiceEligibility.doingBusinessAbroad.map(_.toBoolean),
                            x.vatServiceEligibility.doAnyApplyToYou.map(_.toBoolean),
                            x.vatServiceEligibility.applyingForAnyOf.map(_.toBoolean),
+                           x.vatServiceEligibility.applyingForVatExemption.map(_.toBoolean),
                            x.vatServiceEligibility.companyWillDoAnyOf.map(_.toBoolean))))
                          })
                   _ <- s4LService.save(s4LBuilder.eligiblityChoiceFromData(data))
