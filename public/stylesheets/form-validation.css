@@ -116,7 +116,7 @@
 
 .error-notification {
     font-size: 16px;
-    font-weight: bold !important;
+    font-weight: bold;
     color: #b10e1e;
     display: block;
 }
