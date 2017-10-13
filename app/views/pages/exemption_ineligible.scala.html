@@ -18,17 +18,12 @@
 @import uk.gov.hmrc.play.views.html.helpers.form
 
 @main_template(title = messages("pages.serviceCriteriaFailure.title")) {
-<div class="grid-row">
-    <div class="column-two-thirds">
-        <header class="page-header">
-            <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.serviceCriteriaFailure.heading")</h1>
-        </header>
+  <header class="page-header">
+      <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.serviceCriteriaFailure.heading")</h1>
+  </header>
 
-        <div id="applying-for-vat-exemption-text">
-            <p>@Html(messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1"))</p>
-            <p>@Html(messages("pages.serviceCriteriaFailure.applyingForVatExemption.p2"))</p>
-        </div>
-
-    </div>
-</div>
+  <div id="applying-for-vat-exemption-text">
+      <p>@Html(messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1"))</p>
+      <p>@Html(messages("pages.serviceCriteriaFailure.applyingForVatExemption.p2"))</p>
+  </div>
 }
