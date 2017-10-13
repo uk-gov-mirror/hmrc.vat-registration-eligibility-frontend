@@ -33,7 +33,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "[Q1] /national-insurance-number The user is authorised, current prof is setup, vatscheme is blank,audit is successful, s4l 404's" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .s4lContainer[S4LVatEligibility].isEmpty
           .audit.writesAudit()
@@ -53,7 +53,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .s4lContainer[S4LVatEligibility].contains(s4lData)
           .audit.writesAudit()
@@ -101,7 +101,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.failsToWriteAudit()
           .s4lContainer[S4LVatEligibility].contains(s4lData)
@@ -118,7 +118,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "[Q6] /apply-for-any the user is authorised and data is in vat reg backend. data is pulled from vat because S4l returns 404" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.hasValidEligibilityData
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibility].isEmpty
@@ -136,7 +136,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "[Q1] /national-insurance-number the user submits an answer" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibility].contains(VatServiceEligibility(haveNino = Some(false)))
@@ -152,13 +152,12 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "[Q1] /national-insurance-number the user submits an answer which is false" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibility].contains(VatServiceEligibility(haveNino = Some(false)))
           .s4lContainer[S4LVatEligibility].isUpdatedWith(VatServiceEligibility(haveNino = Some(false)))
-          .keystoreS.putKeyStoreValueWithKeyInUrl("ineligibility-reason",""""haveNino"""","IneligibilityReason")
-          .keystoreS.hasKeystoreValueWithKeyInUrl("ineligibility-reason",""""haveNino"""","IneligibilityReason")
+          .keystore.putKeyStoreValue("IneligibilityReason", """"haveNino"""")
 
         val response = buildClient("/national-insurance-number").post(Map("haveNinoRadio" -> Seq("false")))
         val res = whenReady(response)(a => a)
@@ -170,7 +169,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "[Q6] /apply-for-any the user submits an incorrect value in the form" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibility].isEmpty
@@ -194,7 +193,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
         )
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibility].contains(s4lData)
@@ -217,10 +216,10 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "user hits it directly where a question has a inelligibility reason" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.writesAudit()
-          .keystoreS.putKeyStoreValue("ineligibility-reason",""""haveNino"""")
+          .keystore.putKeyStoreValue("ineligibility-reason",""""haveNino"""")
 
         val response = buildClient("/cant-register").get()
         whenReady(response)(_.status) mustBe 200
@@ -232,7 +231,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "user hits it directly with a current profile" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .audit.writesAudit()
 
         val response = buildClient("/can-register").get()
@@ -243,8 +242,8 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "user hits it but does not have a current profile so one is built up" in {
         given()
           .user.isAuthorised
-          .keystoreS.hasKeyStoreValue("foo","true")
-          .currentProfile.setup
+          .keystore.hasKeyStoreValue("foo","true")
+          .currentProfile.setup()
           .audit.writesAudit()
 
         val response = buildClient("/can-register").get()
@@ -257,9 +256,8 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       "user is authorised and has a current profile" in {
         given()
           .user.isAuthorised
-          .keystoreS.hasKeyStoreValue("foo","true")
-          .currentProfile.setup
-          .currentProfile.withProfile
+          .currentProfile.setup()
+          .currentProfile.withProfile()
           .audit.writesAudit()
 
         val response = buildClient("/can-register").post(Map("haveNinoRadio" -> Seq("fooBars")))

@@ -44,7 +44,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfileAndIncorpDate
+          .currentProfile.withProfileAndIncorpDate()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
@@ -68,7 +68,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfileAndIncorpDate
+          .currentProfile.withProfileAndIncorpDate()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
@@ -88,7 +88,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
     "return an error page if the company is not incorporated" in {
       given()
         .user.isAuthorised
-        .currentProfile.withProfile
+        .currentProfile.withProfile()
         .audit.writesAudit()
 
       val response = buildClient("/check-confirm-answers").get()
@@ -127,7 +127,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfileAndIncorpDate
+          .currentProfile.withProfileAndIncorpDate()
           .s4lContainerInScenario[S4LVatEligibilityChoice].contains(s4lData, Some(STARTED))
           .s4lContainerInScenario[S4LVatEligibilityChoice].isUpdatedWith(updatedS4LData, Some(STARTED), Some("Eligibility Choice updated"))
           .vatScheme.isBlank
@@ -152,7 +152,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfileAndIncorpDate
+          .currentProfile.withProfileAndIncorpDate()
           .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
           .audit.writesAudit()
 

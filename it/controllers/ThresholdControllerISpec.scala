@@ -23,7 +23,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "user is authorised and all conditions are fulfilled" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice](S4LVatEligibilityChoice.vatChoice).isEmpty
@@ -55,7 +55,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .s4lContainerInScenario[S4LVatEligibilityChoice].contains(startedS4LData, Some(STARTED))
           .s4lContainerInScenario[S4LVatEligibilityChoice].isUpdatedWith(s4lData, Some(STARTED), Some("Taxable Turnover updated"))
           .s4lContainerInScenario[S4LVatEligibilityChoice].contains(s4lData, Some("Taxable Turnover updated"))
@@ -64,6 +64,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainerInScenario[S4LVatEligibility].contains(s4lEligibility, Some("Voluntary Registration updated"), Some("Eligibility returned"))
           .s4lContainerInScenario[S4LVatEligibilityChoice].contains(updatedS4LData, Some("Eligibility returned"))
           .vatScheme.isUpdatedWith(postEligibilityData)
+          .audit.writesAudit()
           .audit.writesAudit()
 
         val response = buildClient("/vat-taxable-sales-over-threshold").post(Map("taxableTurnoverRadio" -> Seq(TAXABLE_YES)))
@@ -82,7 +83,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .s4lContainerInScenario[S4LVatEligibilityChoice].contains(startedS4LData, Some(STARTED))
           .s4lContainer[S4LVatEligibilityChoice].isUpdatedWith(s4lData)
           .audit.writesAudit()
@@ -102,7 +103,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
         given()
           .user.isAuthorised
           .vatScheme.isBlank
-          .currentProfile.withProfileAndIncorpDate
+          .currentProfile.withProfileAndIncorpDate()
           .s4lContainer[S4LVatEligibilityChoice].isEmpty
           .audit.writesAudit()
 
@@ -117,7 +118,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "when the request is valid" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfileAndIncorpDate
+          .currentProfile.withProfileAndIncorpDate()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].isEmpty
@@ -137,7 +138,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "when the request is valid" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].isEmpty
@@ -153,7 +154,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "the user choose value YES and save to S4L" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].isEmpty
@@ -169,7 +170,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "the user choose value NO and delete the registration in backend" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibility].cleared
           .vatScheme.deleted
@@ -189,7 +190,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
         given()
           .user.isAuthorised
           .vatScheme.isBlank
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice](S4LVatEligibilityChoice.vatChoice).isEmpty
 
@@ -231,7 +232,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .audit.writesAudit()
           .s4lContainerInScenario[S4LVatEligibilityChoice].contains(s4lData, Some(STARTED))
           .s4lContainerInScenario[S4LVatEligibilityChoice].isUpdatedWith(updatedS4LData, Some(STARTED), Some("Eligibility Choice updated"))
@@ -254,7 +255,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "the user selects an invalid reason" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfile
+          .currentProfile.withProfile()
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibility].cleared
           .vatScheme.deleted
