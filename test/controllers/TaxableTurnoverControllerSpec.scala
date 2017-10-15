@@ -39,6 +39,7 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
       mockCurrentProfileService,
       mockVatRegFrontendService
     ){
+
       override val authConnector: AuthConnector = mockAuthConnector
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {

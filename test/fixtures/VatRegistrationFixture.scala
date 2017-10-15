@@ -34,7 +34,7 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
   val validServiceEligibility          = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(false), Some(validVatChoice))
   val validServiceEligibilityNoChoice  = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(false))
   val validVatThresholdPostIncorp      = VatThresholdPostIncorp(overThresholdSelection = false, None)
-
+  val validExpectedVatThresholdPostIncorp      = VatExpectedThresholdPostIncorp(expectedOverThresholdSelection = true, Some(LocalDate.now()))
   val emptyVatScheme = VatScheme(testRegId)
 
   val validVatScheme = VatScheme(

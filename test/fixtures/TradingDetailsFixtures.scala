@@ -30,8 +30,8 @@ trait TradingDetailsFixture {
   // Api models
   val validVatChoice = VatEligibilityChoice(
     VatEligibilityChoice.NECESSITY_VOLUNTARY,
-    vatThresholdPostIncorp = Some(VatThresholdPostIncorp(true, Some(testDate)))
-  )
+    vatThresholdPostIncorp = Some(VatThresholdPostIncorp(true, Some(testDate))),
+    vatExpectedThresholdPostIncorp = Some(VatExpectedThresholdPostIncorp(true, Some(testDate))))
 
   val validVatServiceEligibility = VatServiceEligibility(vatEligibilityChoice = Some(validVatChoice))
 

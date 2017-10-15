@@ -16,10 +16,10 @@
 
 package models
 
-import models.api.{VatEligibilityChoice, VatScheme, VatServiceEligibility, VatThresholdPostIncorp}
+import models.api._
 import play.api.libs.json.{Json, OFormat}
 import common.ErrorUtil.fail
-import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
+import models.view._
 import models.view.VoluntaryRegistration.REGISTER_YES
 import models.api.VatEligibilityChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
 
@@ -67,7 +67,8 @@ object S4LVatEligibility {
 case class S4LVatEligibilityChoice(taxableTurnover: Option[TaxableTurnover] = None,
                                    voluntaryRegistration: Option[VoluntaryRegistration] = None,
                                    voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
-                                   overThreshold: Option[OverThresholdView] = None)
+                                   overThreshold: Option[OverThresholdView] = None,
+                                   expectationOverThreshold: Option[ExpectationOverThresholdView] = None)
 
 object S4LVatEligibilityChoice {
   implicit val format: OFormat[S4LVatEligibilityChoice] = Json.format[S4LVatEligibilityChoice]
@@ -79,6 +80,7 @@ object S4LVatEligibilityChoice {
         taxableTurnover = ApiModelTransformer[TaxableTurnover].toViewModel(vs),
         voluntaryRegistration = ApiModelTransformer[VoluntaryRegistration].toViewModel(vs),
         overThreshold = ApiModelTransformer[OverThresholdView].toViewModel(vs),
+        expectationOverThreshold = ApiModelTransformer[ExpectationOverThresholdView].toViewModel(vs),
         voluntaryRegistrationReason = ApiModelTransformer[VoluntaryRegistrationReason].toViewModel(vs)
       )
   }
@@ -96,7 +98,12 @@ object S4LVatEligibilityChoice {
               overThresholdSelection = vtp.selection,
               overThresholdDate = vtp.date
             )
-          )
+          ),
+          vatExpectedThresholdPostIncorp = c.expectationOverThreshold.map(eot =>
+            VatExpectedThresholdPostIncorp(
+              expectedOverThresholdSelection = eot.selection,
+              expectedOverThresholdDate = eot.date
+            ))
         )
   }
 }

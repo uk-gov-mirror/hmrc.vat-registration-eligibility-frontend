@@ -9,7 +9,7 @@ import models.view.VoluntaryRegistration.{REGISTER_NO, REGISTER_YES}
 import models.view.TaxableTurnover.{TAXABLE_NO, TAXABLE_YES}
 import models.view.VoluntaryRegistrationReason.{NEITHER, SELLS}
 import models.{S4LVatEligibility, S4LVatEligibilityChoice}
-import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
+import models.view._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
 import play.api.http.HeaderNames
@@ -124,6 +124,42 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer[S4LVatEligibilityChoice].isUpdatedWith(OverThresholdView(selection = false))
 
         val response = buildClient("/vat-taxable-turnover-gone-over").post(Map("overThresholdRadio" ->Seq("false")))
+        whenReady(response) { res =>
+          res.status mustBe 303
+          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.expectationOverShow().url)
+        }
+      }
+    }
+  }
+
+  "GET Expected Over Threshold page" should {
+    "return 200" when {
+      "when user is authorised and has a date of incorporation" in {
+        given()
+          .user.isAuthorised
+          .vatScheme.isBlank
+          .currentProfile.withProfileAndIncorpDate
+          .s4lContainer[S4LVatEligibilityChoice].isEmpty
+          .audit.writesAudit()
+
+        val response = buildClient("/go-over-vat-threshold-period").get()
+        whenReady(response)(_.status) mustBe 200
+      }
+    }
+  }
+
+  "POST Expectation Over Threshold page" should{
+    "return 303" when {
+      "when the request is valid" in {
+        given()
+          .user.isAuthorised
+          .currentProfile.withProfileAndIncorpDate
+          .vatScheme.isBlank
+          .audit.writesAudit()
+          .s4lContainer[S4LVatEligibilityChoice].isEmpty
+          .s4lContainer[S4LVatEligibilityChoice].isUpdatedWith(ExpectationOverThresholdView(selection = false))
+
+        val response = buildClient("/go-over-vat-threshold-period").post(Map("expectationOverThresholdRadio" ->Seq("false")))
         whenReady(response) { res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdSummaryController.show().url)

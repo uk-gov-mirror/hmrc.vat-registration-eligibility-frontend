@@ -19,13 +19,16 @@ package controllers
 import javax.inject.{Inject, Singleton}
 
 import cats.syntax.FlatMapSyntax
-import forms.OverThresholdFormFactory
+import forms.{ExpectationThresholdForm, OverThresholdFormFactory}
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
-import models.view.OverThresholdView
+import models.hasIncorpDate
+import models.view.{ExpectationOverThresholdView, OverThresholdView}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services._
 import utils.SessionProfile
+
+import scala.concurrent.Future
 
 @Singleton
 class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
@@ -38,28 +41,48 @@ class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
     implicit user =>
       implicit request => {
         withCurrentProfile { implicit profile =>
-          val dateOfIncorporation = profile.incorporationDate
-            .getOrElse(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))
-
-          viewModel[OverThresholdView]().fold(OverThresholdFormFactory.form(dateOfIncorporation))(OverThresholdFormFactory.form(dateOfIncorporation).fill) map {
-            form => Ok(views.html.pages.over_threshold(form, dateOfIncorporation.format(FORMAT_DD_MMMM_Y)))
-          }
+          hasIncorpDate.unapply.flatMap(incorpDate =>
+          viewModel[OverThresholdView]().fold(OverThresholdFormFactory.form(incorpDate))(OverThresholdFormFactory.form(incorpDate).fill) map {
+            form => Ok(views.html.pages.over_threshold(form, incorpDate.format(FORMAT_DD_MMMM_Y)))
+          })
         }
-    }
+      }
   }
 
   def goneOverSubmit: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          val dateOfIncorporation = profile.incorporationDate
-            .getOrElse(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))
-
-          OverThresholdFormFactory.form(dateOfIncorporation).bindFromRequest().fold(
-            badForm => BadRequest(views.html.pages.over_threshold(badForm, dateOfIncorporation.format(FORMAT_DD_MMMM_Y))).pure,
-            data => save(data).map(_ => Redirect(controllers.routes.ThresholdSummaryController.show()))
-          )
+          hasIncorpDate.unapply.flatMap(incorpDate =>
+          OverThresholdFormFactory.form(incorpDate).bindFromRequest().fold(
+            badForm => BadRequest(views.html.pages.over_threshold(badForm, incorpDate.format(FORMAT_DD_MMMM_Y))).pure,
+            data => save(data).map(_ => Redirect(controllers.routes.ThresholdController.expectationOverShow()))
+          ))
         }
   }
 
+  def expectationOverShow: Action[AnyContent] = authorised.async {
+    implicit user =>
+      implicit request =>
+        withCurrentProfile { implicit p =>
+          hasIncorpDate.unapply.flatMap(incorpDate =>
+            viewModel[ExpectationOverThresholdView]().fold(ExpectationThresholdForm.form(incorpDate))(ExpectationThresholdForm.form(incorpDate).fill) map {
+              form => Ok(views.html.pages.expectation_over_threshold(form))
+            })
+        }
+  }
+
+  def expectationOverSubmit: Action[AnyContent] = authorised.async {
+    implicit user =>
+      implicit request =>
+        withCurrentProfile { implicit p =>
+            hasIncorpDate.unapply.flatMap{incorpDate =>
+
+             val res = ExpectationThresholdForm.form(incorpDate).bindFromRequest()
+               res.fold(
+               badForm => BadRequest(views.html.pages.expectation_over_threshold(badForm)).pure,
+               data => save(data).map(_ => Redirect(controllers.routes.ThresholdSummaryController.show())))
+            }
+          }
+  }
 }
