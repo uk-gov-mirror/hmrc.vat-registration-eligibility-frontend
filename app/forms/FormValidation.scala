@@ -33,7 +33,6 @@ object FormValidation {
   private def unconstrained[T] = Constraint[T] { (t: T) => Valid }
 
   def mandatoryText()(implicit e: ErrorCode): Constraint[String] = Constraint { input: String =>
-println(input)
     if (StringUtils.isNotBlank(input)) Valid else Invalid(s"validation.$e.missing")
   }
 
