@@ -60,7 +60,7 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
       implicit request => {
         withCurrentProfile { implicit profile =>
           getVatThresholdAndExpectedThreshold().flatMap {
-            case Voluntary(a) =>
+            case a if (a._1.overThresholdSelection || a._2.expectedOverThresholdSelection) =>
               for {
                 _ <- save(VoluntaryRegistration(REGISTER_NO))
                 _ <- vrs.submitVatEligibility()
@@ -97,14 +97,5 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
     (thresholdView.map(a => VatThresholdPostIncorp(a.selection, a.date)).get,
       expectedThresholdView.map(a => VatExpectedThresholdPostIncorp(a.selection, a.date)).get)
   }
-
-
-}
-object Voluntary {
-  def unapply(a: (VatThresholdPostIncorp,
-               VatExpectedThresholdPostIncorp)):Option[Boolean] ={
-    if(a._1.overThresholdSelection || a._2.expectedOverThresholdSelection) Some(true) else None
-  }
-
 }
 
