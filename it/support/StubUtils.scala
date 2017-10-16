@@ -19,10 +19,9 @@ package support
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.matching.UrlPathPattern
-import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import common.enums.VatRegStatus
 import models.S4LKey
-import play.api.libs.json.{Format, JsObject}
+import play.api.libs.json.{Format, JsObject, Json}
 import play.api.mvc.AnyContentAsFormUrlEncoded
 import play.api.test.FakeRequest
 import uk.gov.hmrc.crypto.ApplicationCrypto
@@ -70,7 +69,8 @@ trait StubUtils {
 
     def audit = AuditStub()
 
-    def keystoreS = ksStub()
+    def keystore = new KeystoreStubWrapper()
+    def keystoreInScenario = new KeystoreStubScenarioWrapper()
 
     def businessReg = BusinessRegStub()
 
@@ -80,26 +80,32 @@ trait StubUtils {
     new PreconditionBuilder()
   }
 
-case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
+  class KeystoreStubWrapper()(implicit builder:PreconditionBuilder) extends KeystoreStub {
     def hasKeyStoreValue(key: String, data: String):PreconditionBuilder ={
-      stubKeystoreGet(key,data)
+      stubFor(stubKeystoreGet(key,data))
       builder
     }
 
-  def hasKeystoreValueWithKeyInUrl(key:String,data:String,urlKey:String):PreconditionBuilder = {
-    stubKeystoreGetWithUrl(key,data,urlKey)
-    builder
+    def putKeyStoreValue(key:String,data:String):PreconditionBuilder ={
+      stubFor(stubKeystorePut(key,data))
+      builder
+    }
   }
 
-  def putKeyStoreValueWithKeyInUrl(key:String,data:String,urlKey:String):PreconditionBuilder = {
-    stubKeystorePutWithUrl(key,data,urlKey)
-    builder
-  }
+  class KeystoreStubScenarioWrapper(scenario: String = "Keystore Scenario")(implicit builder: PreconditionBuilder) extends KeystoreStubWrapper {
+    def hasKeyStoreValue(key: String, data: String, currentState: Option[String] = None, nextState: Option[String] = None): PreconditionBuilder = {
+      val mpScenarioGET = stubKeystoreGet(key,data).inScenario(scenario)
+      val mpGET = currentState.fold(mpScenarioGET)(mpScenarioGET.whenScenarioStateIs)
+      stubFor(nextState.fold(mpGET)(mpGET.willSetStateTo))
+      builder
+    }
 
-  def putKeyStoreValue(key:String,data:String):PreconditionBuilder ={
-    stubKeystorePut(key,data)
-    builder
-  }
+    def putKeyStoreValue(key: String, data: String, currentState: Option[String] = None, nextState: Option[String] = None): PreconditionBuilder = {
+      val mpScenarioPUT = stubKeystorePut(key,data).inScenario(scenario)
+      val mpPUT = currentState.fold(mpScenarioPUT)(mpScenarioPUT.whenScenarioStateIs)
+      stubFor(nextState.fold(mpPUT)(mpPUT.willSetStateTo))
+      builder
+    }
   }
 
   case class BusinessRegStub()(implicit builder:PreconditionBuilder)  {
@@ -121,52 +127,8 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
   }
 
   trait KeystoreStub {
-    def stubKeystorePut(key: String, data: String): StubMapping =
-      stubFor(
-        put(urlPathMatching(s"/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+/data/$key"))
-          .willReturn(ok(
-            s"""
-               |{ "atomicId": { "$$oid": "598ac0b64e0000d800170620" },
-               |    "data": { "$key": $data },
-               |    "id": "session-ac4ed3e7-dbc3-4150-9574-40771c4285c1",
-               |    "modifiedDetails": {
-               |      "createdAt": { "$$date": 1502265526026 },
-               |      "lastUpdated": { "$$date": 1502265526026 }}}
-            """.stripMargin
-          )))
-
-    def stubKeystorePutWithUrl(key: String, data: String,urlKey:String): StubMapping =
-      stubFor(
-        put(urlPathMatching(s"/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+/data/$urlKey"))
-          .willReturn(ok(
-            s"""
-               |{ "atomicId": { "$$oid": "598ac0b64e0000d800170620" },
-               |    "data": { "$key": $data },
-               |    "id": "session-ac4ed3e7-dbc3-4150-9574-40771c4285c1",
-               |    "modifiedDetails": {
-               |      "createdAt": { "$$date": 1502265526026 },
-               |      "lastUpdated": { "$$date": 1502265526026 }}}
-            """.stripMargin
-          )))
-
-    def stubKeystoreGet(key: String, data: String): StubMapping = {
-      stubFor(
-        get(urlPathMatching("/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+"))
-          .willReturn(ok(
-            s"""
-               |{ "atomicId": { "$$oid": "598ac0b64e0000d800170620" },
-               |    "data": { "$key": $data },
-               |    "id": "session-ac4ed3e7-dbc3-4150-9574-40771c4285c1",
-               |    "modifiedDetails": {
-               |      "createdAt": { "$$date": 1502265526026 },
-               |      "lastUpdated": { "$$date": 1502265526026 }}}
-            """.stripMargin
-          )))
-
-  }
-  def stubKeystoreGetWithUrl(key:String,data:String,urlKey:String):StubMapping = {
-    stubFor(
-      get(urlPathMatching(s"/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+/data/$urlKey"))
+    def stubKeystorePut(key: String, data: String): MappingBuilder =
+      put(urlPathMatching(s"/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+/data/$key"))
         .willReturn(ok(
           s"""
              |{ "atomicId": { "$$oid": "598ac0b64e0000d800170620" },
@@ -175,10 +137,21 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
              |    "modifiedDetails": {
              |      "createdAt": { "$$date": 1502265526026 },
              |      "lastUpdated": { "$$date": 1502265526026 }}}
-            """.stripMargin
-        )))
+          """.stripMargin
+        ))
 
-   }
+    def stubKeystoreGet(key: String, data: String): MappingBuilder =
+      get(urlPathMatching("/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+"))
+        .willReturn(ok(
+          s"""
+             |{ "atomicId": { "$$oid": "598ac0b64e0000d800170620" },
+             |    "data": { "$key": $data },
+             |    "id": "session-ac4ed3e7-dbc3-4150-9574-40771c4285c1",
+             |    "modifiedDetails": {
+             |      "createdAt": { "$$date": 1502265526026 },
+             |      "lastUpdated": { "$$date": 1502265526026 }}}
+          """.stripMargin
+        ))
   }
 
   trait S4LStub {
@@ -365,7 +338,7 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
 
   }
 
-  case class CurrentProfile()(implicit builder: PreconditionBuilder) extends KeystoreStub {
+  case class CurrentProfile()(implicit builder: PreconditionBuilder) extends KeystoreStubScenarioWrapper {
     val incorpInfo = s"""
                         |{
                         |  "statusEvent": {
@@ -389,7 +362,7 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
                              |}
                              |"""".stripMargin
 
-    def setup: PreconditionBuilder = {
+    def setup(currentState: Option[String] = None, nextState: Option[String] = None): PreconditionBuilder = {
       stubFor(get(urlPathEqualTo(s"/incorporation-information/000-434-1/company-profile"))
         .willReturn(ok(s"""{ "company_name": "testCompanyName" }""")
         )
@@ -399,32 +372,44 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
       stubFor(get(urlPathEqualTo("/business-registration/business-tax-registration")).willReturn(ok(businessProfile)))
       CorporationTaxRegistrationStub().existsWithStatus("held")
 
-      stubKeystorePut("CurrentProfile",
-        """
-          |{
-          | "companyName" : "testCompanyName",
-          | "registrationID" : "1",
-          | "transactionID" : "000-434-1",
-          | "vatRegistrationStatus" : "DRAFT"
-          |}
-        """.stripMargin)
+      val currentProfile = """
+                             |{
+                             | "companyName" : "testCompanyName",
+                             | "registrationID" : "1",
+                             | "transactionID" : "000-434-1",
+                             | "vatRegistrationStatus" : "DRAFT"
+                             |}
+                           """.stripMargin
+
+      (currentState, nextState) match {
+        case (None, None) => putKeyStoreValue("CurrentProfile", currentProfile)
+        case _ => putKeyStoreValue("CurrentProfile", currentProfile, currentState, nextState)
+      }
 
       builder
     }
 
-    def withProfileAndIncorpDate = withProfileInclIncorp(true)
-    def withProfile = withProfileInclIncorp(false)
+    def withProfileAndIncorpDate(currentState: Option[String] = None, nextState: Option[String] = None) = withProfileInclIncorp(true, currentState, nextState)
+    def withProfile(currentState: Option[String] = None, nextState: Option[String] = None) = withProfileInclIncorp(false, currentState, nextState)
 
-   private val withProfileInclIncorp = (withIncorporationDate: Boolean) => {
-      val incorporationDate = ""","incorporationDate": "2016-08-05"}"""
-    val js = s"""
+    private val withProfileInclIncorp = (withIncorporationDate: Boolean, currentState: Option[String], nextState: Option[String]) => {
+      val incorporationDate = Json.parse("""{"incorporationDate": "2016-08-05"}""").as[JsObject]
+      val js = Json.parse(s"""
         |{
         | "companyName" : "testCompanyName",
         | "registrationID" : "1",
         | "transactionID" : "000-434-1",
         | "vatRegistrationStatus" : "${VatRegStatus.DRAFT}"
-        """.stripMargin
-     stubKeystoreGet("CurrentProfile",  if(withIncorporationDate) js + incorporationDate else js + "}")
+        |}
+        """.stripMargin).as[JsObject]
+
+      val currentProfile = if(withIncorporationDate) js.deepMerge(incorporationDate) else js
+
+      (currentState, nextState) match {
+        case (None, None) => hasKeyStoreValue("CurrentProfile", currentProfile.toString)
+        case _ => hasKeyStoreValue("CurrentProfile", currentProfile.toString, currentState, nextState)
+      }
+
       builder
     }
   }
