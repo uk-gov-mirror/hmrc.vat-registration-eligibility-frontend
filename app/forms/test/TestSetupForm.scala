@@ -28,7 +28,11 @@ object TestSetupForm {
     "voluntaryRegistrationReason" -> optional(text),
     "overThresholdSelection" -> optional(text),
     "overThresholdMonth" -> optional(text),
-    "overThresholdYear" -> optional(text)
+    "overThresholdYear" -> optional(text),
+    "expectationOverThresholdSelection" -> optional(text),
+    "expectationOverThresholdDay" -> optional(text),
+    "expectationOverThresholdMonth" -> optional(text),
+    "expectationOverThresholdYear" -> optional(text)
   )(VatEligibilityChoiceTestSetup.apply)(VatEligibilityChoiceTestSetup.unapply)
 
   val vatServiceEligibilityTestSetupMapping = mapping(
