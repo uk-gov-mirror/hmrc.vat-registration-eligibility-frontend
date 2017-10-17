@@ -139,7 +139,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
         given()
           .user.isAuthorised
           .vatScheme.isBlank
-          .currentProfile.withProfileAndIncorpDate
+          .currentProfile.withProfileAndIncorpDate()
           .s4lContainer[S4LVatEligibilityChoice].isEmpty
           .audit.writesAudit()
 
@@ -154,7 +154,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "when the request is valid" in {
         given()
           .user.isAuthorised
-          .currentProfile.withProfileAndIncorpDate
+          .currentProfile.withProfileAndIncorpDate()
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].isEmpty
