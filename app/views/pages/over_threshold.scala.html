@@ -43,7 +43,7 @@
         <p>@messages("pages.thresholdQuestion1.p1")</p>
 
         @govHelpers.form(action = controllers.routes.ThresholdController.goneOverSubmit()) {
-            <div class="form-group">
+            <div class="form-group" data-hidden="hidden">
                 <fieldset class="inline">
                 @defining(DateTimeFormatter
                         .ofLocalizedDate(java.time.format.FormatStyle.LONG)
@@ -61,7 +61,7 @@
                         )
                     }
 
-                    <div class="panel panel-indent hidden" id="overThreshold_date_panel">
+                    <div class="panel panel-indent" id="hidden">
                         <h2 class="heading-medium">@messages("pages.thresholdQuestion1.panel.heading")</h2>
 
                         <span class="form-hint">@messages("pages.thresholdQuestion1.panel.hint")</span>
@@ -115,10 +115,3 @@
   </div>
 
     }
-
-
-<script type="text/javascript">
-    $(document).ready($(function () {
-        OverThresholdPage.init()
-    }));
-</script>

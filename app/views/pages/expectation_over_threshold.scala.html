@@ -54,7 +54,7 @@
             </details>
 
             @govHelpers.form(action = controllers.routes.ThresholdController.expectationOverSubmit()) {
-                <div class="form-group">
+                <div class="form-group" data-hidden="hidden">
                     <fieldset class="inline">
                         @defining(DateTimeFormatter
                                 .ofLocalizedDate(java.time.format.FormatStyle.LONG)
@@ -72,7 +72,7 @@
                             )
                         }
 
-                        <div class="panel panel-indent hidden" id="expectationOverThreshold_date_panel">
+                        <div class="panel panel-indent" id="hidden">
 
                             <h2 class="heading-medium">@messages("pages.thresholdQuestion2.panel.heading")</h2>
                             <p class="form-hint">@messages("pages.thresholdQuestion2.form.example", s"${DateTime.now.dayOfMonth.get}", s"${DateTime.now.monthOfYear.get}", s"${DateTime.now.year.get}")</p>
@@ -136,11 +136,5 @@
             }
             </div>
     </div>
-
 }
 
-<script type="text/javascript">
-        $(document).ready($(function () {
-            ExpectationOverThresholdPage.init()
-        }));
-</script>
