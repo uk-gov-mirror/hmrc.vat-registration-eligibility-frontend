@@ -25,116 +25,111 @@
 
 @main_template(title = messages("pages.thresholdQuestion2.heading"), scriptElem = Some(Html(s"""<script type="text/javascript" src='${routes.Assets.at("javascripts/main.js")}'></script>"""))) {
 
-    <div class="grid-row">
-        <div class="column-two-thirds">
+    @errorSummary(
+        Messages("app.common.errorSummaryLabel"),
+        expectationThresholdForm
+    )
 
-            @errorSummary(
-                Messages("app.common.errorSummaryLabel"),
-                expectationThresholdForm
-            )
+    <header class="page-header">
+        <h1 class="form-title heading-xlarge" id="pageHeading">
+        @messages("pages.thresholdQuestion2.heading")
+        </h1>
+    </header>
+    <p>@messages("pages.thresholdQuestion2.p1")</p>
+    <p>@messages("pages.thresholdQuestion2.p2") <a href="https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies">
+        Vat Registration thresholds</a></p>
 
-            <header class="page-header">
-                <h1 class="form-title heading-xlarge" id="pageHeading">
-                @messages("pages.thresholdQuestion2.heading")
-                </h1>
-            </header>
-            <p>@messages("pages.thresholdQuestion2.p1")</p>
-            <p>@messages("pages.thresholdQuestion2.p2")<a href="https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies"> Vat Registration thresholds</a></p>
+    <p class="indent">@messages("pages.thresholdQuestion2.p3")</p>
 
-            <p class="indent">@messages("pages.thresholdQuestion2.p3")</p>
-
-            <details>
-                <summary class="summary">@messages("pages.thresholdQuestion2.example")</summary>
-                <div>
-                    <div class="indent">
-                        <p>@messages("pages.thresholdQuestion2.example.content.pt1")</p>
-                        <p>@messages("pages.thresholdQuestion2.example.content.pt2")</p>
-                    </div>
-                </div>
-            </details>
-
-            @govHelpers.form(action = controllers.routes.ThresholdController.expectationOverSubmit()) {
-                <div class="form-group" data-hidden="hidden">
-                    <fieldset class="inline">
-                        @defining(DateTimeFormatter
-                                .ofLocalizedDate(java.time.format.FormatStyle.LONG)
-                                .withLocale(java.util.Locale.UK)) { formatter =>
-
-                            @vatInputRadioGroup(
-                                expectationThresholdForm("expectationOverThresholdRadio"),
-                                Seq(
-                                    "true" -> Messages("app.common.yes"),
-                                    "false" -> Messages("app.common.no")
-                                ),
-                                '_labelAfter -> true,
-                                '_labelClass -> "block-label",
-                                '_legend -> ""
-                            )
-                        }
-
-                        <div class="panel panel-indent" id="hidden">
-
-                            <h2 class="heading-medium">@messages("pages.thresholdQuestion2.panel.heading")</h2>
-                            <p class="form-hint">@messages("pages.thresholdQuestion2.form.example", s"${DateTime.now.dayOfMonth.get}", s"${DateTime.now.monthOfYear.get}", s"${DateTime.now.year.get}")</p>
-
-
-                            @defining(expectationThresholdForm("expectationOverThreshold").errors.nonEmpty) { errorPresent =>
-                                <div class="form-date @if(errorPresent) { form-group-error }">
-
-                                    <fieldset id="expectation-over-threshold">
-                                        <legend></legend>
-                                        <label>
-                                            <span class="hidden">Expectation Over Threshold input</span>
-
-
-
-                                            @expectationThresholdForm.error("expectationOverThreshold").map { error =>
-                                                <span class="error-notification" role="tooltip">
-                                                    @messages(error.message, error.args: _*)
-                                                </span>
-                                            }
-                                            @*this is to make the clickable link in the error summary jump to the relevant place in the page*@
-                                            <input type="hidden" name="expectationOverThreshold" value="" id="expectationOverThreshold" class="hidden" />
-                                        </label>
-
-                                        @vatInput(
-                                            expectationThresholdForm("expectationOverThreshold.day"),
-                                            '_divClass -> "form-group",
-                                            '_inputClass -> "form-control",
-                                            '_maxlength -> 2,
-                                            '_label -> Messages("pages.thresholdQuestion2.day"),
-                                            '_labelClass -> "form-label"
-                                        )
-
-                                        @vatInput(
-                                            expectationThresholdForm("expectationOverThreshold.month"),
-                                            '_divClass -> "form-group",
-                                            '_inputClass -> "form-control",
-                                            '_maxlength -> 4,
-                                            '_label -> Messages("pages.thresholdQuestion2.month"),
-                                            '_labelClass -> "form-label"
-                                        )
-
-                                        @vatInput(
-                                            expectationThresholdForm("expectationOverThreshold.year"),
-                                            '_divClass -> "form-group",
-                                            '_inputClass -> "form-control",
-                                            '_maxlength -> 4,
-                                            '_label -> Messages("pages.thresholdQuestion2.year"),
-                                            '_labelClass -> "form-label"
-                                        )
-                                    </fieldset>
-                                </div>
-
-                            }
-                        </div>
-                    </fieldset>
-                </div>
-                <div class="form-group">
-                    <button class="btn button" type="submit" id="save-and-continue">@messages("app.common.saveAndContinue")</button>
-                </div>
-            }
+    <details>
+        <summary class="summary">@messages("pages.thresholdQuestion2.example")</summary>
+        <div>
+            <div class="indent">
+                <p>@messages("pages.thresholdQuestion2.example.content.pt1")</p>
+                <p>@messages("pages.thresholdQuestion2.example.content.pt2")</p>
             </div>
-    </div>
+        </div>
+    </details>
+
+    @govHelpers.form(action = controllers.routes.ThresholdController.expectationOverSubmit()) {
+        <div class="form-group" data-hidden="hidden">
+            <fieldset class="inline">
+                @defining(DateTimeFormatter
+                        .ofLocalizedDate(java.time.format.FormatStyle.LONG)
+                        .withLocale(java.util.Locale.UK)) { formatter =>
+
+                    @vatInputRadioGroup(
+                        expectationThresholdForm("expectationOverThresholdRadio"),
+                        Seq(
+                            "true" -> Messages("app.common.yes"),
+                            "false" -> Messages("app.common.no")
+                        ),
+                        '_labelAfter -> true,
+                        '_labelClass -> "block-label",
+                        '_legend -> ""
+                    )
+                }
+
+                <div class="panel panel-indent" id="hidden">
+
+                    <h2 class="heading-medium">@messages("pages.thresholdQuestion2.panel.heading")</h2>
+                    <p class="form-hint">@messages("pages.thresholdQuestion2.form.example", s"${DateTime.now.dayOfMonth.get}", s"${DateTime.now.monthOfYear.get}", s"${DateTime.now.year.get}")</p>
+
+
+                    @defining(expectationThresholdForm("expectationOverThreshold").errors.nonEmpty) { errorPresent =>
+                        <div class="form-date @if(errorPresent) { form-group-error }">
+
+                            <fieldset id="expectation-over-threshold">
+                                <legend></legend>
+                                <label>
+                                    <span class="hidden">Expectation Over Threshold input</span>
+
+
+                                    @expectationThresholdForm.error("expectationOverThreshold").map { error =>
+                                        <span class="error-notification" role="tooltip">
+                                            @messages(error.message, error.args: _*)
+                                        </span>
+                                    }
+                                    @*this is to make the clickable link in the error summary jump to the relevant place in the page*@
+                                    <input type="hidden" name="expectationOverThreshold" value="" id="expectationOverThreshold" class="hidden" />
+                                </label>
+
+                                @vatInput(
+                                    expectationThresholdForm("expectationOverThreshold.day"),
+                                    '_divClass -> "form-group",
+                                    '_inputClass -> "form-control",
+                                    '_maxlength -> 2,
+                                    '_label -> Messages("pages.thresholdQuestion2.day"),
+                                    '_labelClass -> "form-label"
+                                )
+
+                                @vatInput(
+                                    expectationThresholdForm("expectationOverThreshold.month"),
+                                    '_divClass -> "form-group",
+                                    '_inputClass -> "form-control",
+                                    '_maxlength -> 4,
+                                    '_label -> Messages("pages.thresholdQuestion2.month"),
+                                    '_labelClass -> "form-label"
+                                )
+
+                                @vatInput(
+                                    expectationThresholdForm("expectationOverThreshold.year"),
+                                    '_divClass -> "form-group",
+                                    '_inputClass -> "form-control",
+                                    '_maxlength -> 4,
+                                    '_label -> Messages("pages.thresholdQuestion2.year"),
+                                    '_labelClass -> "form-label"
+                                )
+                            </fieldset>
+                        </div>
+
+                    }
+                </div>
+            </fieldset>
+        </div>
+        <div class="form-group">
+            <button class="btn button" type="submit" id="save-and-continue">@messages("app.common.saveAndContinue")</button>
+        </div>
+    }
 }
 
