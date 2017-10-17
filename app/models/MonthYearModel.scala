@@ -24,6 +24,27 @@ import java.time.temporal.TemporalAdjusters
 import scala.util.Try
 
 
+case class DayMonthYearModel(day:String,month: String, year: String){
+
+  def toLocalDate: Option[LocalDate] = Try {
+    LocalDate.parse(s"$day-$month-$year", DayMonthYearModel.formatter)
+  }.toOption
+
+}
+
+object DayMonthYearModel {
+
+  //uuuu for year as we're using STRICT ResolverStyle
+  val formatter = DateTimeFormatter.ofPattern("d-M-uuuu").withResolverStyle(ResolverStyle.STRICT)
+
+  def fromLocalDate(localDate: LocalDate): DayMonthYearModel =
+    DayMonthYearModel(localDate.getDayOfMonth.toString,localDate.getMonthValue.toString, localDate.getYear.toString)
+
+  val FORMAT_DD_MMMM_Y = DateTimeFormatter.ofPattern("dd MMMM y").withResolverStyle(ResolverStyle.STRICT)
+
+
+}
+
 case class MonthYearModel(month: String, year: String) {
 
   def toLocalDate: Option[LocalDate] = Try {

@@ -18,10 +18,11 @@ package controllers.builders
 
 import java.time.format.DateTimeFormatter
 
-import models.api.VatThresholdPostIncorp
+import models.api.{VatExpectedThresholdPostIncorp, VatThresholdPostIncorp}
 import models.view.{SummaryRow, SummarySection}
 
-case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThresholdPostIncorp] = None)
+case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThresholdPostIncorp] = None,
+                                      vatExpectedThresholdPostIncorp: Option[VatExpectedThresholdPostIncorp] = None)
   extends SummarySectionBuilder {
 
   override val sectionId: String = "threshold"
@@ -33,7 +34,7 @@ case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThreshol
       case true => "app.common.yes"
       case false => "app.common.no"
     }.getOrElse(""),
-    Some(controllers.routes.OverThresholdController.show())
+    Some(controllers.routes.ThresholdController.goneOverShow())
   )
 
   val overThresholdDateRow: SummaryRow = SummaryRow(
@@ -41,7 +42,26 @@ case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThreshol
     vatThresholdPostIncorp.map(_.overThresholdDate).collect {
       case Some(date) => date.format(monthYearPresentationFormatter)
     }.getOrElse(""),
-    Some(controllers.routes.OverThresholdController.show())
+    Some(controllers.routes.ThresholdController.goneOverShow())
+  )
+
+  val dayMonthYearPresentationFormatter = DateTimeFormatter.ofPattern("dd MMMM y")
+
+  val expectedOverThresholdSelectionRow: SummaryRow = SummaryRow(
+    s"$sectionId.expectationOverThresholdSelection",
+    vatExpectedThresholdPostIncorp.map(_.expectedOverThresholdSelection).collect {
+      case true => "app.common.yes"
+      case false => "app.common.no"
+    }.getOrElse(""),
+    Some(controllers.routes.ThresholdController.expectationOverShow())
+  )
+
+  val expectedOverThresholdDateRow: SummaryRow = SummaryRow(
+    s"$sectionId.expectationOverThresholdDate",
+    vatExpectedThresholdPostIncorp.map(_.expectedOverThresholdDate).collect {
+      case Some(date) => date.format(dayMonthYearPresentationFormatter)
+    }.getOrElse(""),
+    Some(controllers.routes.ThresholdController.expectationOverShow())
   )
 
   val section: SummarySection =
@@ -49,7 +69,9 @@ case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThreshol
       sectionId,
       rows = Seq(
         (overThresholdSelectionRow, true),
-        (overThresholdDateRow, vatThresholdPostIncorp.flatMap(_.overThresholdDate).isDefined)
+        (overThresholdDateRow, vatThresholdPostIncorp.flatMap(_.overThresholdDate).isDefined),
+        (expectedOverThresholdSelectionRow, true),
+        (expectedOverThresholdDateRow, vatExpectedThresholdPostIncorp.flatMap(_.expectedOverThresholdDate).isDefined)
       )
     )
 

@@ -61,7 +61,11 @@ class TestSetupController @Inject()(implicit s4LService: S4LService,
                 voluntaryRegistrationReason = eligibilityChoice.flatMap(_.voluntaryRegistrationReason).map(_.reason),
                 overThresholdSelection = eligibilityChoice.flatMap(_.overThreshold).map(_.selection.toString),
                 overThresholdMonth = eligibilityChoice.flatMap(_.overThreshold).flatMap(_.date).map(_.getMonthValue.toString),
-                overThresholdYear = eligibilityChoice.flatMap(_.overThreshold).flatMap(_.date).map(_.getYear.toString)
+                overThresholdYear = eligibilityChoice.flatMap(_.overThreshold).flatMap(_.date).map(_.getYear.toString),
+                expectationOverThresholdSelection = eligibilityChoice.flatMap(_.expectationOverThreshold).map(_.selection.toString),
+                expectationOverThresholdDay = eligibilityChoice.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getDayOfMonth.toString),
+                expectationOverThresholdMonth = eligibilityChoice.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getMonthValue.toString),
+                expectationOverThresholdYear = eligibilityChoice.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getYear.toString)
               )
             )
             form = TestSetupForm.form.fill(testSetup)

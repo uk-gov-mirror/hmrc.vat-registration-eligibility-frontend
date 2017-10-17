@@ -20,11 +20,11 @@ import java.time.LocalDate
 
 import com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED
 import helpers.RequestsFinder
-import models.api.{VatEligibilityChoice, VatServiceEligibility, VatThresholdPostIncorp}
+import models.api.{VatEligibilityChoice, VatExpectedThresholdPostIncorp, VatServiceEligibility, VatThresholdPostIncorp}
 import models.api.VatEligibilityChoice.NECESSITY_OBLIGATORY
 import models.view.VoluntaryRegistration.REGISTER_NO
 import models.{S4LVatEligibility, S4LVatEligibilityChoice}
-import models.view.{OverThresholdView, VoluntaryRegistration}
+import models.view.{ExpectationOverThresholdView, OverThresholdView, VoluntaryRegistration}
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
@@ -35,12 +35,13 @@ import support.AppAndStubs
 class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with RequestsFinder with ScalaFutures {
   "GET Threshold Summary page" should {
     "return 200" when {
-      "over threshold is false" in {
+      "over threshold is false and Expected over threshold is false" in {
         val s4lData = Json.toJson(S4LVatEligibilityChoice(
           None,
           None,
           None,
-          Some(OverThresholdView(selection = false))))
+          Some(OverThresholdView(selection = false)),
+          Some(ExpectationOverThresholdView(selection = false))))
 
         given()
           .user.isAuthorised
@@ -48,7 +49,6 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
-
         val response = buildClient("/check-confirm-answers").get()
         whenReady(response) { res =>
           res.status mustBe 200
@@ -56,15 +56,17 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           document.title() mustBe "Check and confirm your answers"
           document.getElementById("threshold.overThresholdSelectionQuestion").text must include ("05 August 2016")
           document.getElementById("threshold.overThresholdSelectionAnswer").text mustBe "No"
+          document.getElementById("threshold.expectationOverThresholdSelectionAnswer").text mustBe "No"
         }
       }
 
-      "over threshold is true with a date" in {
+      "over threshold is true with a date and Expected over threshold is true with a date" in {
         val s4lData = Json.toJson(S4LVatEligibilityChoice(
           None,
           None,
           None,
-          Some(OverThresholdView(selection = true, Some(LocalDate.of(2016, 10, 25))))))
+          Some(OverThresholdView(selection = true, Some(LocalDate.of(2016, 10, 25)))),
+          Some(ExpectationOverThresholdView(selection = true,Some(LocalDate.of(2016,11,25))))))
 
         given()
           .user.isAuthorised
@@ -81,6 +83,8 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           document.getElementById("threshold.overThresholdSelectionQuestion").text must include ("05 August 2016")
           document.getElementById("threshold.overThresholdSelectionAnswer").text mustBe "Yes"
           document.getElementById("threshold.overThresholdDateAnswer").text mustBe "October 2016"
+          document.getElementById("threshold.expectationOverThresholdSelectionAnswer").text mustBe "Yes"
+          document.getElementById("threshold.expectationOverThresholdDateAnswer").text mustBe "25 November 2016"
         }
       }
     }
@@ -109,7 +113,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
         ))
       )
 
-      "over threshold is true with a date and save data to backend" in {
+      "over threshold is true with a date, and expected threshold is populated, save data to backend" in {
         val postEligibilityData = VatServiceEligibility(
           haveNino = Some(true),
           doingBusinessAbroad = Some(false),
@@ -118,11 +122,14 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           companyWillDoAnyOf = Some(false),
           vatEligibilityChoice = Some(VatEligibilityChoice(
             necessity = NECESSITY_OBLIGATORY,
+            vatExpectedThresholdPostIncorp = Some(VatExpectedThresholdPostIncorp(true,Some(LocalDate.of(2016,11,24)))),
             vatThresholdPostIncorp = Some(VatThresholdPostIncorp(overThresholdSelection = true, Some(LocalDate.of(2016, 10, 25))))
           ))
         )
 
-        val s4lData = S4LVatEligibilityChoice(overThreshold = Some(OverThresholdView(selection = true, Some(LocalDate.of(2016, 10, 25)))))
+        val s4lData = S4LVatEligibilityChoice(
+          expectationOverThreshold = Some(ExpectationOverThresholdView(true,Some(LocalDate.of(2016,11,24)))),
+          overThreshold = Some(OverThresholdView(selection = true, Some(LocalDate.of(2016, 10, 25)))))
         val updatedS4LData = s4lData.copy(voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_NO)))
 
         given()
@@ -144,11 +151,15 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           val json = getPATCHRequestJsonBody(s"/vatreg/1/service-eligibility")
           (json \ "vatEligibilityChoice" \ "vatThresholdPostIncorp" \ "overThresholdSelection").as[JsBoolean].value mustBe true
           (json \ "vatEligibilityChoice" \ "vatThresholdPostIncorp" \ "overThresholdDate").as[JsString].value mustBe "2016-10-25"
+          (json \ "vatEligibilityChoice" \ "vatExpectedThresholdPostIncorp" \ "expectedOverThresholdSelection").as[JsBoolean].value mustBe true
+          (json \ "vatEligibilityChoice" \ "vatExpectedThresholdPostIncorp" \ "expectedOverThresholdDate").as[JsString].value mustBe "2016-11-24"
         }
       }
 
-      "over threshold is false and redirect to Voluntary Registration page" in {
-        val s4lData = S4LVatEligibilityChoice(overThreshold = Some(OverThresholdView(selection = false)))
+      "over threshold is false and expectation is populated and redirect to Voluntary Registration page" in {
+        val s4lData = S4LVatEligibilityChoice(
+          expectationOverThreshold = Some(ExpectationOverThresholdView(false,None)),
+          overThreshold = Some(OverThresholdView(selection = false)))
 
         given()
           .user.isAuthorised

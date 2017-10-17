@@ -22,6 +22,8 @@ import common.enums.VatRegStatus
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
+import scala.concurrent.Future
+
 case class CurrentProfile(companyName: String,
                           registrationId: String,
                           transactionId: String,
@@ -46,4 +48,14 @@ object CurrentProfile {
     )(unlift(CurrentProfile.unapply))
 
   implicit val format: Format[CurrentProfile] = Format(reads, writes)
+}
+
+object hasIncorpDate{
+
+  def unapply(implicit arg: CurrentProfile): Future[LocalDate] = {
+    arg.incorporationDate match {
+     case Some(a) => Future.successful(a)
+      case _ => throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation")
+    }
+        }
 }

@@ -21,28 +21,26 @@ import java.time.format.DateTimeFormatter
 
 import fixtures.VatRegistrationFixture
 import helpers.VatRegSpec
-import models.api.VatThresholdPostIncorp
+import models.api.{VatExpectedThresholdPostIncorp, VatThresholdPostIncorp}
 import models.view.{SummaryRow, SummarySection}
 
-/**
-  * Created by eric on 26/09/17.
-  */
+
 class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFixture {
 
   val specificDate = LocalDate.of(2017, 11, 12)
 
   val monthYearPresentationFormatter = DateTimeFormatter.ofPattern("MMMM y")
 
-  "building a Summary vat threshould row" should {
+  "building a Summary vat threshold row" should {
 
-    "with overThresholdSelectionRow" should {
+    "with ThresholdSelectionRow" should {
 
       "return a summary row with 'YES' if post incorp is true" in {
         val postIncorpBuilder = SummaryVatThresholdBuilder(Some(VatThresholdPostIncorp(true,Some(specificDate))))
         postIncorpBuilder.overThresholdSelectionRow shouldBe SummaryRow(
           "threshold.overThresholdSelection",
           "app.common.yes",
-          Some(controllers.routes.OverThresholdController.show())
+          Some(controllers.routes.ThresholdController.goneOverShow())
         )
       }
 
@@ -51,7 +49,7 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
         noPostIncorpBuilder.overThresholdSelectionRow shouldBe SummaryRow(
           "threshold.overThresholdSelection",
           "app.common.no",
-          Some(controllers.routes.OverThresholdController.show())
+          Some(controllers.routes.ThresholdController.goneOverShow())
         )
       }
     }
@@ -63,7 +61,7 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
         postIncorpBuilder.overThresholdDateRow shouldBe SummaryRow(
           "threshold.overThresholdDate",
           specificDate.format(monthYearPresentationFormatter),
-          Some(controllers.routes.OverThresholdController.show())
+          Some(controllers.routes.ThresholdController.goneOverShow())
         )
       }
 
@@ -72,27 +70,36 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
         noPostIncorpBuilder.overThresholdDateRow shouldBe SummaryRow(
           "threshold.overThresholdDate",
           "",
-          Some(controllers.routes.OverThresholdController.show())
+          Some(controllers.routes.ThresholdController.goneOverShow())
         )
       }
 
       "Section" should {
 
-        "show the rows if post incorp is true" in {
-          val postIncorpBuilder = SummaryVatThresholdBuilder(Some(VatThresholdPostIncorp(true, Some(specificDate))))
+        "show the rows if post incorp is true for both Questions" in {
+          val postIncorpBuilder = SummaryVatThresholdBuilder(
+            Some(VatThresholdPostIncorp(true, Some(specificDate))),
+            Some(VatExpectedThresholdPostIncorp(true,Some(specificDate))))
+
           postIncorpBuilder.section shouldBe SummarySection(
             "threshold",
             Seq((postIncorpBuilder.overThresholdSelectionRow, true),
-              (postIncorpBuilder.overThresholdDateRow, true))
+              (postIncorpBuilder.overThresholdDateRow, true),
+              (postIncorpBuilder.expectedOverThresholdSelectionRow,true),
+              (postIncorpBuilder.expectedOverThresholdDateRow, true))
           )
         }
 
-        "hide the rows if post incorp is false" in {
-          val noPostIncorpBuilder = SummaryVatThresholdBuilder(Some(VatThresholdPostIncorp(false, None)))
+        "hide the rows if post incorp is false for both questions" in {
+          val noPostIncorpBuilder = SummaryVatThresholdBuilder(
+            Some(VatThresholdPostIncorp(false, None)),
+            Some(VatExpectedThresholdPostIncorp(false,None)))
           noPostIncorpBuilder.section shouldBe SummarySection(
             "threshold",
             Seq((noPostIncorpBuilder.overThresholdSelectionRow, true),
-              (noPostIncorpBuilder.overThresholdDateRow, false))
+              (noPostIncorpBuilder.overThresholdDateRow, false),
+              (noPostIncorpBuilder.expectedOverThresholdSelectionRow,true),
+              (noPostIncorpBuilder.expectedOverThresholdDateRow,false))
           )
         }
       }

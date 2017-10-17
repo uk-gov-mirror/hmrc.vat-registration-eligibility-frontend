@@ -47,7 +47,7 @@ class EligibilitySuccessController @Inject()(implicit val messagesApi: MessagesA
       implicit request =>
         withCurrentProfile { profile =>
           OptionT(vatRegistrationService.getIncorporationDate(profile.transactionId)).fold(controllers.routes.TaxableTurnoverController.show()) {
-            incorpDate => controllers.routes.OverThresholdController.show()
+            incorpDate => controllers.routes.ThresholdController.goneOverShow()
           }.map(Redirect)
         }
   }

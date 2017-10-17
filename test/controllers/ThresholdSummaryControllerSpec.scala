@@ -16,10 +16,12 @@
 
 package controllers
 
+import java.time.LocalDate
+
 import fixtures.VatRegistrationFixture
 import helpers.{S4LMockSugar, VatRegSpec}
-import models.api.VatEligibilityChoice
-import models.view.{OverThresholdView, Summary, TaxableTurnover, VoluntaryRegistration}
+import models.api.{VatEligibilityChoice, VatExpectedThresholdPostIncorp, VatThresholdPostIncorp}
+import models.view._
 import models.{CurrentProfile, S4LVatEligibilityChoice}
 import org.mockito.Mockito._
 import org.mockito.Matchers
@@ -54,33 +56,43 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
   "Calling threshold summary to show the threshold summary page" should {
     "return HTML with a valid threshold summary view" in new Setup {
       save4laterReturns(S4LVatEligibilityChoice(
-        overThreshold = Some(OverThresholdView(false, None))
+        overThreshold = Some(OverThresholdView(false, None)),
+        expectationOverThreshold = Some(ExpectationOverThresholdView(false, None))
       ))
-
       callAuthorised(testController.show)(_ includesText "Check and confirm your answers")
     }
 
-    "getVatThresholdPostIncorp returns a valid VatThresholdPostIncorp" in new Setup {
-      save4laterReturns(S4LVatEligibilityChoice(
-        overThreshold = Some(OverThresholdView(false, None))
-      ))
+    "getVatThresholdAndExpectedThreshold returns a valid VatThresholdPostIncorp and VatExpectedThresholdPostIncorp" in new Setup {
+      save4laterReturns(S4LVatEligibilityChoice(expectationOverThreshold = Some(ExpectationOverThresholdView(false,None)),overThreshold = Some(OverThresholdView(false))))
 
-      testController.getVatThresholdPostIncorp() returns validVatThresholdPostIncorp
+      testController.getVatThresholdAndExpectedThreshold() returns (validVatThresholdPostIncorp,VatExpectedThresholdPostIncorp(false,None))
+    }
+
+    "mapToModels returns a tuple of VatExpectedThreshold and VatThreshold" in new Setup {
+      testController.mapToModels(
+        Some(OverThresholdView(false,None)),
+        Some(ExpectationOverThresholdView(false,None))) shouldBe (VatThresholdPostIncorp(false,None),VatExpectedThresholdPostIncorp(false,None))
     }
 
     "getThresholdSummary maps a valid VatThresholdSummary object to a Summary object" in new Setup {
       save4laterReturns(S4LVatEligibilityChoice(
         overThreshold = Some(OverThresholdView(false, None))
       ))
+      save4laterReturns(S4LVatEligibilityChoice(
+        expectationOverThreshold = Some(ExpectationOverThresholdView(false, None))
+      ))
 
-      testController.getThresholdSummary().map(summary => summary.sections.length shouldBe 1)
+
+      testController.getThresholdSummary().map(summary => summary.sections.length shouldBe 2)
     }
   }
 
   s"POST ${controllers.routes.ThresholdSummaryController.submit()}" should {
-    "redirect the user to the voluntary registration page if all answers to threshold questions are no" in new Setup {
+    "redirect the user to the voluntary registration page if  if Q1A3 is false" in new Setup {
       save4laterReturns(S4LVatEligibilityChoice(
-        overThreshold = Some(OverThresholdView(false, None))
+        expectationOverThreshold = Some(ExpectationOverThresholdView(false,None)),
+        overThreshold = Some(OverThresholdView(false, None)
+        )
       ))
 
 
@@ -89,10 +101,11 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
       }
     }
 
-    "redirect the user to the completion capacity page if any answers to threshold questions are yes" in new Setup {
+    "redirect the user to the completion capacity page if Q1A3 is true" in new Setup {
 
       save4laterExpectsSave[VoluntaryRegistration]()
       save4laterReturns(S4LVatEligibilityChoice(
+        expectationOverThreshold = Some(ExpectationOverThresholdView(true,Some(testDate))),
         overThreshold = Some(OverThresholdView(true, Some(testDate)))
       ))
 

@@ -179,9 +179,30 @@ validation.overThreshold.date.missing                     = Enter a valid date
 validation.overThreshold.selection.missing                = Tell us if since {0} the company''s VAT taxable turnover gone over £85,000
 validation.overThreshold.date.range.above                 = This date must be before the current month
 validation.overThreshold.date.range.below                 = This date must be after {0}
-
+# Question 2
+pages.thresholdQuestion2.heading                          = Have you ever thought your company would go over the VAT threshold within a single 30-day period?
+pages.thresholdQuestion2.p1                               = This could be the date you received a large order or signed a new contract.
+pages.thresholdQuestion2.p2                               = Find a list of yearly
+pages.thresholdQuestion2.p3                               = We want to know about your expectation - even if your turnover for the 30-day period wasn''t (or won''t be) over the threshold.
+pages.thresholdQuestion2.example                          = Show me an example
+pages.thresholdQuestion2.form.example                     = For example, {0} {1} {2}
+pages.thresholdQuestion2.example.content.pt1              = You received a large order on 24 July 2016. At the time you thought your company''s VAT taxable turnover between 24 July and 23 August would be more than the VAT registration threshold of £83,000.
+pages.thresholdQuestion2.example.content.pt2              = Alternatively, yesterday you received a large order. You expect this order to take your VAT taxable turnover for the next 30 days over the VAT registration threshold of £85,000.
+pages.thresholdQuestion2.day                              = Day
+pages.thresholdQuestion2.month                            = Month
+pages.thresholdQuestion2.year                             = Year
+#validation messages Q2
+validation.expectationOverThreshold.date.invalid          = Enter a valid date
+validation.expectationOverThreshold.date.missing          = Enter a valid date
+validation.expectationOverThreshold.date.range.below      = Enter a date which is on or after the date the company is incorporated
+validation.expectationOverThreshold.date.range.above      = Enter a date which is not in the future
+validation.expectationOverThreshold.selection.missing     = Tell us if you''ve ever thought the company would go over the VAT threshold within a single 30-day period
+pages.thresholdQuestion2.panel.heading                    = When did this first happen?
 ## Threshold Summary Page
 pages.thresholdSummary.title                              = Check and confirm your answers
 pages.thresholdSummary.heading                            = Check and confirm your answers
 pages.summary.threshold.overThresholdSelection            = Since {0} has the company''s VAT taxable turnover gone over £85,000?
+pages.summary.threshold.expectationOverThresholdSelection = Thought turnover would go over VAT registration in a single 30-day period
 pages.summary.threshold.overThresholdDate                 = Month turnover went over £85,000
+pages.summary.threshold.expectationOverThresholdDate      = Date you first thought sales would go over threshold
+

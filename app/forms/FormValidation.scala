@@ -18,7 +18,7 @@ package forms
 
 import java.time.LocalDate
 
-import models.MonthYearModel
+import models.{DayMonthYearModel, MonthYearModel}
 import org.apache.commons.lang3.StringUtils
 import play.api.Logger
 import play.api.data.format.Formatter
@@ -74,6 +74,7 @@ object FormValidation {
       }
     }
 
+
   object Dates {
     def nonEmptyMonthYearModel(constraint: => Constraint[MonthYearModel] = unconstrained)(implicit e: ErrorCode): Constraint[MonthYearModel] =
       Constraint { pdm =>
@@ -82,8 +83,32 @@ object FormValidation {
           case err@_ => err
         }
       }
+
+    def nonEmptyDayMonthYearModel(constraint: => Constraint[DayMonthYearModel] = unconstrained)(implicit e: ErrorCode): Constraint[DayMonthYearModel] =
+      Constraint { pdm =>
+        mandatoryText.apply(Seq(pdm.day,pdm.month, pdm.year).mkString.trim) match {
+          case Valid => constraint(pdm)
+          case err@_ => err
+        }
+      }
+
+    def validPartialDayMonthYearModel(dateConstraint: => Constraint[LocalDate] = unconstrained)(implicit e: ErrorCode): Constraint[DayMonthYearModel] =
+      Constraint(dm => dm.toLocalDate.fold[ValidationResult](Invalid(s"validation.$e.invalid"))(dateConstraint(_)))
+
     def validPartialMonthYearModel(dateConstraint: => Constraint[LocalDate] = unconstrained)(implicit e: ErrorCode): Constraint[MonthYearModel] =
       Constraint(dm => dm.toLocalDate.fold[ValidationResult](Invalid(s"validation.$e.invalid"))(dateConstraint(_)))
 
+
+def incorporationDateValidation(constraint: => Constraint[LocalDate] = unconstrained)(incorporationDate:LocalDate)(implicit e:ErrorCode):
+Constraint[LocalDate] ={
+  Constraint { dm =>
+    dm match{
+    case date if(date.isBefore(incorporationDate)) => Invalid(ValidationError(s"validation.$e.range.below"))
+    case date if(date.isAfter(LocalDate.now())) => Invalid(ValidationError(s"validation.$e.range.above"))
+    case _ => Valid
+    }
   }
+}
+}
+
 }

@@ -19,8 +19,8 @@ package controllers
 import javax.inject.Inject
 
 import controllers.builders.SummaryVatThresholdBuilder
-import models.api.VatThresholdPostIncorp
-import models.view.{Summary, VoluntaryRegistration}
+import models.api.{VatExpectedThresholdPostIncorp, VatThresholdPostIncorp}
+import models.view.{ExpectationOverThresholdView, OverThresholdView, Summary, VoluntaryRegistration}
 import models.view.VoluntaryRegistration.REGISTER_NO
 import models.{CurrentProfile, MonthYearModel, S4LVatEligibilityChoice}
 import play.api.i18n.MessagesApi
@@ -46,10 +46,11 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
             .getOrElse(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))
 
           getThresholdSummary() map {
-            thresholdSummary => Ok(views.html.pages.threshold_summary(
-              thresholdSummary,
-              MonthYearModel.FORMAT_DD_MMMM_Y.format(dateOfIncorporation))
-            )
+            thresholdSummary =>
+              Ok(views.html.pages.threshold_summary(
+                thresholdSummary,
+                MonthYearModel.FORMAT_DD_MMMM_Y.format(dateOfIncorporation))
+              )
           }
         }
   }
@@ -58,8 +59,8 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
     implicit user =>
       implicit request => {
         withCurrentProfile { implicit profile =>
-          getVatThresholdPostIncorp().flatMap {
-            case VatThresholdPostIncorp(true, _) =>
+          getVatThresholdAndExpectedThreshold().flatMap {
+            case a if (a._1.overThresholdSelection || a._2.expectedOverThresholdSelection) =>
               for {
                 _ <- save(VoluntaryRegistration(REGISTER_NO))
                 _ <- vrs.submitVatEligibility()
@@ -67,25 +68,34 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
             case _ => Future.successful(Redirect(controllers.routes.VoluntaryRegistrationController.show()))
           }
         }
-    }
+      }
   }
 
   def getThresholdSummary()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Summary] = {
     for {
-      vatThresholdPostIncorp <- getVatThresholdPostIncorp()
-    } yield thresholdToSummary(vatThresholdPostIncorp)
+      (threshold,expectedThreshold) <- getVatThresholdAndExpectedThreshold()
+    } yield thresholdToSummary(threshold, expectedThreshold)
   }
 
-  def thresholdToSummary(vatThresholdPostIncorp: VatThresholdPostIncorp): Summary = {
+  def thresholdToSummary(vatThresholdPostIncorp: VatThresholdPostIncorp, expectedThresholdPostIncorp: VatExpectedThresholdPostIncorp): Summary = {
     Summary(Seq(
-      SummaryVatThresholdBuilder(Some(vatThresholdPostIncorp)).section
+      SummaryVatThresholdBuilder(Some(vatThresholdPostIncorp), Some(expectedThresholdPostIncorp)).section
     ))
   }
 
-  def getVatThresholdPostIncorp()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[VatThresholdPostIncorp] = {
+  def getVatThresholdAndExpectedThreshold()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[(VatThresholdPostIncorp,VatExpectedThresholdPostIncorp)] = {
     for {
       vatChoice <- s4LService.fetchAndGet[S4LVatEligibilityChoice]()
       overThreshold <- vatChoice.flatMap(_.overThreshold).pure
-    } yield overThreshold.map(o => VatThresholdPostIncorp(o.selection, o.date)).get
+      expected <- vatChoice.flatMap(_.expectationOverThreshold).pure
+    } yield mapToModels(overThreshold, expected)
+  }
+
+  def mapToModels(thresholdView: Option[OverThresholdView],
+                  expectedThresholdView: Option[ExpectationOverThresholdView])
+  : (VatThresholdPostIncorp, VatExpectedThresholdPostIncorp) = {
+    (thresholdView.map(a => VatThresholdPostIncorp(a.selection, a.date)).get,
+      expectedThresholdView.map(a => VatExpectedThresholdPostIncorp(a.selection, a.date)).get)
   }
 }
+

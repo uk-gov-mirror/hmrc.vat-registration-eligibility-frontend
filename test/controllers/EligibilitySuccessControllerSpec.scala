@@ -84,7 +84,7 @@ class EligibilitySuccessControllerSpec extends VatRegSpec with VatRegistrationFi
       mockKeystoreFetchAndGet[IncorporationInfo](INCORPORATION_STATUS, Some(testIncorporationInfo))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody()) {
-        _ redirectsTo controllers.routes.OverThresholdController.show().url
+        _ redirectsTo controllers.routes.ThresholdController.goneOverShow().url
       }
     }
 
