@@ -26,6 +26,7 @@ trait AppConfig {
   val analyticsHost: String
   val reportAProblemPartialUrl: String
   val reportAProblemNonJSUrl: String
+  val timeoutInSeconds: String
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
@@ -41,6 +42,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
   lazy val vatRegFrontendWelcomeUrl: String = loadConfig("microservice.services.vat-registration-frontend.www.url")
+
+  override val timeoutInSeconds = loadConfig("timeoutInSeconds")
 
   private def whitelistConfig(key: String): Seq[String] = Some(new String(Base64.getDecoder
     .decode(loadConfig(key)), "UTF-8"))

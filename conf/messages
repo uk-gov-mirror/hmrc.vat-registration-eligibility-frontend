@@ -21,6 +21,11 @@ errorPages.title                        = Something went wrong
 errorPages.restart.heading              = Sorry, we''re having technical issues.
 errorPages.restart.p1                   = You can try again by <a href="{0}" >restarting</a> your VAT registration.
 
+pages.timeout.title                     = Your session has timed out
+pages.timeout.heading                   = Your session has timed out due to inactivity
+pages.timeout.body.one                  = Your answers have been saved
+pages.timeout.body.two                  = Sign in to <a href="{0}">continue registration</a>.
+
 
 ## Service Criteria Questions (VAT Service Eligibility)
 ## Service Criteria Success

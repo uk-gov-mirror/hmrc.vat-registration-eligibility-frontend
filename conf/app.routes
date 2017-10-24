@@ -2,6 +2,11 @@
 
 GET         /assets/*file                                     controllers.Assets.at(path="/public", file)
 
+#SESSION
+GET         /renew-session                                    controllers.SessionController.renewSession
+GET         /error/destroy-session                            controllers.SessionController.destroySession
+GET         /error/timeout                                    controllers.SessionController.timeoutShow
+
 ## SIGN OUT
 GET         /sign-out                                         controllers.callbacks.SignInOutController.signOut
 
