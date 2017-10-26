@@ -30,7 +30,7 @@ class SessionController @Inject()(implicit val messagesApi: MessagesApi) extends
   def renewSession: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
-        Future.successful(Ok.sendFile(new File("public/images/renewSession.jpg")).as("image"))
+        Future.successful(Ok.sendFile(new File("public/images/renewSession.jpg")).as("image/jpeg"))
   }
 
   def destroySession: Action[AnyContent] = Action.async {
