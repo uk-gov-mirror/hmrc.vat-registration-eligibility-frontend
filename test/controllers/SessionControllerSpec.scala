@@ -35,7 +35,7 @@ class SessionControllerSpec extends VatRegSpec {
         redirectLocation(a) shouldBe ""
         status(a) shouldBe 200
         contentType(a) shouldBe Some("image/jpeg")
-        await(a).body.dataStream.toString.contains("""public/images/renewSession.jpg""")  shouldBe true
+        await(a).body.dataStream.toString.contains("""renewSession.jpg""")  shouldBe true
       }
     }
   }
