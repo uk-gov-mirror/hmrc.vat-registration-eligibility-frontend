@@ -20,9 +20,11 @@ import javax.inject.Singleton
 
 import cats.data.OptionT
 import cats.instances.FutureInstances
+import common.enums.VatRegStatus
 import config.WSHttp
 import models.api._
 import models.external.IncorporationInfo
+import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -65,6 +67,13 @@ trait VatRegistrationConnect extends FutureInstances {
     OptionT(http.GET[IncorporationInfo](s"$vatRegUrl/vatreg/incorporation-information/$transactionId").map(Some(_)).recover {
       case _ => Option.empty[IncorporationInfo]
     })
+
+  def getStatus(regId: String)(implicit hc: HeaderCarrier, rds: HttpReads[VatScheme]): Future[VatRegStatus.Value] =
+    http.GET[JsObject](s"$vatRegUrl/vatreg/$regId/status") map { json =>
+      (json \ "status").as[VatRegStatus.Value]
+    } recover {
+      case e: Exception => throw logResponse(e, className, "getStatus")
+    }
 
 }
 

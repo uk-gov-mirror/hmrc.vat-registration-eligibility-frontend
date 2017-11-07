@@ -362,9 +362,14 @@ trait StubUtils {
                              |}
                              |"""".stripMargin
 
-    def setup(currentState: Option[String] = None, nextState: Option[String] = None): PreconditionBuilder = {
+    def setup(status: VatRegStatus.Value = VatRegStatus.draft, currentState: Option[String] = None, nextState: Option[String] = None): PreconditionBuilder = {
       stubFor(get(urlPathEqualTo(s"/incorporation-information/000-434-1/company-profile"))
         .willReturn(ok(s"""{ "company_name": "testCompanyName" }""")
+        )
+      )
+
+      stubFor(get(urlPathEqualTo(s"/vatreg/1/status"))
+        .willReturn(ok(s"""{ "status": "${status.toString}" }""")
         )
       )
 
@@ -399,7 +404,7 @@ trait StubUtils {
         | "companyName" : "testCompanyName",
         | "registrationID" : "1",
         | "transactionID" : "000-434-1",
-        | "vatRegistrationStatus" : "${VatRegStatus.DRAFT}"
+        | "vatRegistrationStatus" : "${VatRegStatus.draft}"
         |}
         """.stripMargin).as[JsObject]
 
@@ -420,7 +425,7 @@ trait StubUtils {
       stubFor(
         get(urlPathEqualTo("/vatreg/1/get-scheme"))
           .willReturn(ok(
-            s"""{ "registrationId" : "1",
+            s"""{ "registrationId" : "1", "status" : "draft",
                | "vatEligibility" : {
                |        "haveNino" : true,
                |        "doingBusinessAbroad" : false,
@@ -456,7 +461,7 @@ trait StubUtils {
       stubFor(
         get(urlPathEqualTo("/vatreg/1/get-scheme"))
           .willReturn(ok(
-            s"""{ "registrationId" : "1" }"""
+            s"""{ "registrationId" : "1" , "status" : "draft" }"""
           )))
       builder
     }
@@ -473,6 +478,7 @@ trait StubUtils {
       builder
     }
   }
+
 
   case class VatRegistrationFootprintStub
   ()

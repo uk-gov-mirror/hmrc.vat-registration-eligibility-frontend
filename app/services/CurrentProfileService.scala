@@ -32,7 +32,7 @@ class CurrentProfileService @Inject()(val keystoreConnector: KeystoreConnector,
                                       val businessRegistrationConnector: BusinessRegistrationConnector,
                                       val compRegConnector: CompanyRegistrationConnector,
                                       val incorpInfoService: IncorpInfoService,
-                                      val vatRegistrationService: VatRegistrationService) {
+                                      val vatRegistrationService: VatRegistrationService)  {
 
   def getCurrentProfile()(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey.toString) flatMap {
@@ -47,12 +47,13 @@ class CurrentProfileService @Inject()(val keystoreConnector: KeystoreConnector,
       companyProfile        <- compRegConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
       companyName           <- incorpInfoService.getCompanyName(businessProfile.registrationID, companyProfile.transactionId)
       incorpInfo            <- vatRegistrationService.getIncorporationInfo(companyProfile.transactionId)
+      status                <- vatRegistrationService.getStatus(businessProfile.registrationID)
       incorpDate            =  if(incorpInfo.isDefined) incorpInfo.get.statusEvent.incorporationDate else None
       profile               =  CurrentProfile(
         companyName           = companyName,
         registrationId        = businessProfile.registrationID,
         transactionId         = companyProfile.transactionId,
-        vatRegistrationStatus = VatRegStatus.DRAFT,
+        vatRegistrationStatus = status,
         incorporationDate     = incorpDate
       )
       _                     <- keystoreConnector.cache[CurrentProfile](CurrentProfileKey.toString, profile)

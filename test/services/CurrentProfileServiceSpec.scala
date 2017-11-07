@@ -50,7 +50,7 @@ class CurrentProfileServiceSpec extends VatRegSpec {
     companyName           = testCompanyName,
     registrationId        = regId,
     transactionId         = txId,
-    vatRegistrationStatus = VatRegStatus.DRAFT,
+    vatRegistrationStatus = VatRegStatus.draft,
     incorporationDate     = incorpDate
   )
 
@@ -81,6 +81,9 @@ class CurrentProfileServiceSpec extends VatRegSpec {
 
         when(mockIncorpInfoService.getCompanyName(Matchers.any(), Matchers.any())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testCompanyName))
+
+        when(mockVatRegistrationService.getStatus(Matchers.any())(Matchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(VatRegStatus.draft))
 
         when(mockVatRegistrationService.getIncorporationInfo(Matchers.any())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(Some(testIncorporationInfo)))

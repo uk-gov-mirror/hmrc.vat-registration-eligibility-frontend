@@ -45,7 +45,7 @@ class SessionProfileSpec extends UnitSpec with MockitoSugar with VatMocks {
   def testFunc : Future[Result] = Future.successful(Ok)
   implicit val request = FakeRequest()
 
-  def validProfile(incorpDate: Option[LocalDate] = None) = CurrentProfile("TEST LTD", "regId", "txId", VatRegStatus.DRAFT, incorpDate)
+  def validProfile(incorpDate: Option[LocalDate] = None) = CurrentProfile("TEST LTD", "regId", "txId", VatRegStatus.draft, incorpDate)
 
   "calling withCurrentProfile" should {
     "carry out the passed function" in {
