@@ -16,6 +16,7 @@
 
 package models.views
 
+import common.enums.VatRegStatus
 import fixtures.VatRegistrationFixture
 import models.api.{VatEligibilityChoice, VatScheme}
 import models.view.TaxableTurnover
@@ -37,7 +38,7 @@ class TaxableTurnoverSpec extends UnitSpec with VatRegistrationFixture {
     }
 
     "convert a none VatChoice to empty view model" in {
-      val vatSchemeVoluntary = VatScheme(testRegId)
+      val vatSchemeVoluntary = VatScheme(testRegId, status = VatRegStatus.draft)
       ApiModelTransformer[TaxableTurnover].toViewModel(vatSchemeVoluntary) shouldBe None
     }
   }

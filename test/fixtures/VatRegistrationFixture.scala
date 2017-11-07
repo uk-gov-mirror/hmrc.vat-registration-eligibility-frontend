@@ -19,6 +19,7 @@ package fixtures
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import common.enums.VatRegStatus
 import models.api._
 import models.external.{IncorporationInfo, _}
 import play.api.http.Status._
@@ -35,10 +36,11 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
   val validServiceEligibilityNoChoice  = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(false))
   val validVatThresholdPostIncorp      = VatThresholdPostIncorp(overThresholdSelection = false, None)
   val validExpectedVatThresholdPostIncorp      = VatExpectedThresholdPostIncorp(expectedOverThresholdSelection = true, Some(LocalDate.now()))
-  val emptyVatScheme = VatScheme(testRegId)
+  val emptyVatScheme = VatScheme(testRegId, status = VatRegStatus.draft)
 
   val validVatScheme = VatScheme(
     id = testRegId,
+    status =VatRegStatus.draft,
     vatServiceEligibility = Some(validServiceEligibility)
   )
 
@@ -57,6 +59,7 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
   def vatScheme(id: String = testRegId, vatServiceEligibility: Option[VatServiceEligibility] = None): VatScheme =
     VatScheme(
       id = id,
+      status = VatRegStatus.draft,
       vatServiceEligibility = vatServiceEligibility
     )
 

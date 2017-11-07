@@ -51,7 +51,7 @@ class VatRegSpec extends UnitSpec with WithFakeApplication
   implicit val hc = HeaderCarrier()
 
   implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1",
-    VatRegStatus.DRAFT,Some(LocalDate.of(2016, 12, 21)))
+    VatRegStatus.draft,Some(LocalDate.of(2016, 12, 21)))
 
   override implicit val patienceConfig = PatienceConfig(timeout = Span(1, Seconds), interval = Span(50, Millis))
 

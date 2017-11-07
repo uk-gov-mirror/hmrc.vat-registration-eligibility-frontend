@@ -16,16 +16,20 @@
 
 package models.api
 
+import common.enums.VatRegStatus
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 
 case class VatScheme(id: String,
-                     vatServiceEligibility: Option[VatServiceEligibility] = None)
+                     vatServiceEligibility: Option[VatServiceEligibility] = None,
+                      status: VatRegStatus.Value
+                    )
 
 object VatScheme {
   implicit val format: OFormat[VatScheme] = (
     (__ \ "registrationId").format[String] and
-    (__ \ "vatEligibility").formatNullable[VatServiceEligibility]
+    (__ \ "vatEligibility").formatNullable[VatServiceEligibility] and
+      (__ \ "status").format[VatRegStatus.Value]
   )(VatScheme.apply, unlift(VatScheme.unapply))
 }
