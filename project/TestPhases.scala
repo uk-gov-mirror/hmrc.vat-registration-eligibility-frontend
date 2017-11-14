@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-package utils
+import sbt.Tests.{Group, SubProcess}
+import sbt._
 
-import models.CurrentProfile
-import play.api.mvc.{Request, Result}
-import services.CurrentProfileService
-
-import scala.concurrent.Future
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.http.HeaderCarrier
-
-trait SessionProfile {
-  val currentProfileService: CurrentProfileService
-
-  def withCurrentProfile(f: CurrentProfile => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-    currentProfileService.getCurrentProfile flatMap f
-  }
+object TestPhases {
+  def oneForkedJvmPerTest(tests: Seq[TestDefinition]) = tests map(test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name)))))
 }

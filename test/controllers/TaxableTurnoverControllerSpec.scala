@@ -20,15 +20,15 @@ import fixtures.VatRegistrationFixture
 import helpers.{S4LMockSugar, VatRegSpec}
 import models.CurrentProfile
 import models.view.{TaxableTurnover, VoluntaryRegistration}
-import org.mockito.Matchers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
 
@@ -57,7 +57,7 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
 
       save4laterReturnsViewModel(taxableTurnover)()
 
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any())).thenReturn(Future.successful(currentProfile))
+      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
 
       callAuthorised(testController.show()) {
         _ includesText "VAT taxable sales of more than £85,000 in the 30 days"
@@ -67,7 +67,7 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
     "return HTML when there's nothing in S4L and vatScheme contains data" in new Setup {
       save4laterReturnsNoViewModel[TaxableTurnover]()
 
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any())).thenReturn(Future.successful(currentProfile))
+      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
 
       when(mockVatRegistrationService.getVatScheme()(any(), any[HeaderCarrier]()))
         .thenReturn(Future.successful(validVatScheme))
@@ -81,7 +81,7 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
     "return HTML when there's nothing in S4L and vatScheme contains no data" in new Setup{
       save4laterReturnsNoViewModel[TaxableTurnover]()
 
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any())).thenReturn(Future.successful(currentProfile))
+      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
 
       when(mockVatRegistrationService.getVatScheme()(any(), any[HeaderCarrier]()))
         .thenReturn(Future.successful(emptyVatScheme))
@@ -96,7 +96,7 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
   s"POST ${routes.TaxableTurnoverController.submit()} with Empty data" should {
     "return 400" in new Setup {
 
-      when(mockKeystoreConnector.fetchAndGet[CurrentProfile](Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(currentProfile)))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
@@ -110,12 +110,12 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
       save4laterExpectsSave[TaxableTurnover]()
       save4laterExpectsSave[VoluntaryRegistration]()
 
-      when(mockVatRegistrationService.submitVatEligibility()(Matchers.any(), Matchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
-      when(mockVatRegistrationService.deleteVatScheme()(Matchers.any(), Matchers.any())).thenReturn(Future.successful())
+      when(mockVatRegistrationService.submitVatEligibility()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
+      when(mockVatRegistrationService.deleteVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful())
 
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any())).thenReturn(Future.successful(currentProfile))
+      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(Matchers.any())).thenReturn("someUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "taxableTurnoverRadio" -> TaxableTurnover.TAXABLE_YES
@@ -128,7 +128,7 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
     "return 303" in new Setup {
       save4laterExpectsSave[TaxableTurnover]()
 
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any())).thenReturn(Future.successful(currentProfile))
+      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "taxableTurnoverRadio" -> TaxableTurnover.TAXABLE_NO

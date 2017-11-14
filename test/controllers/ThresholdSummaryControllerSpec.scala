@@ -24,12 +24,12 @@ import models.api.{VatEligibilityChoice, VatExpectedThresholdPostIncorp, VatThre
 import models.view._
 import models.{CurrentProfile, S4LVatEligibilityChoice}
 import org.mockito.Mockito._
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
 
@@ -109,10 +109,10 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
         overThreshold = Some(OverThresholdView(true, Some(testDate)))
       ))
 
-      when(mockVatRegistrationService.submitVatEligibility()(Matchers.any(), Matchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
-      when(mockVatRegistrationService.deleteVatScheme()(Matchers.any(), Matchers.any())).thenReturn(Future.successful())
+      when(mockVatRegistrationService.submitVatEligibility()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
+      when(mockVatRegistrationService.deleteVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful())
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(Matchers.any())).thenReturn("someEntryUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someEntryUrl")
 
       callAuthorised(testController.submit) {
         _ redirectsTo s"someEntryUrl"

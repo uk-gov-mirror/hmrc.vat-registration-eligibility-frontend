@@ -24,6 +24,7 @@ import models.api._
 import models.external.{IncorporationInfo, _}
 import play.api.http.Status._
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.http.HttpResponse
 
 trait VatRegistrationFixture extends TradingDetailsFixture {
 

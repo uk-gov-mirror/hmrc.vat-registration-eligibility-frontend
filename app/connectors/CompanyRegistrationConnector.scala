@@ -23,12 +23,11 @@ import models.external.CompanyRegistrationProfile
 import play.api.Logger
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
-import uk.gov.hmrc.play.http.ws.WSHttp
 import utils.VREFEFeatureSwitch
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier}
 
 @Singleton
 class CompanyRegistrationConnector @Inject()(val featureSwitch: VREFEFeatureSwitch) extends ServicesConfig {
@@ -36,7 +35,7 @@ class CompanyRegistrationConnector @Inject()(val featureSwitch: VREFEFeatureSwit
   val companyRegistrationUri: String = getConfString("company-registration.uri", "")
   lazy val stubUrl: String = baseUrl("incorporation-frontend-stubs")
   lazy val stubUri: String = getConfString("incorporation-frontend-stubs.uri","")
-  val http: WSHttp = WSHttp
+  val http: CoreGet = WSHttp
 
   def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyRegistrationProfile] = {
     val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration" else s"$stubUrl$stubUri"

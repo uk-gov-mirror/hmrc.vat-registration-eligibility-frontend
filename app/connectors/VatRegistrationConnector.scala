@@ -26,23 +26,22 @@ import models.api._
 import models.external.IncorporationInfo
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.http.{CoreDelete, CoreGet, CorePatch, HeaderCarrier, HttpReads, HttpResponse}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
 class VatRegistrationConnector extends VatRegistrationConnect with ServicesConfig {
   val vatRegUrl = baseUrl("vat-registration")
-  val http: WSHttp = WSHttp
+  val http: CoreGet with CorePatch with CoreDelete = WSHttp
 }
 
 trait VatRegistrationConnect extends FutureInstances {
   self =>
 
   val vatRegUrl: String
-  val http: WSHttp
+  val http: CoreGet with CorePatch with CoreDelete
 
   val className = self.getClass.getSimpleName
 

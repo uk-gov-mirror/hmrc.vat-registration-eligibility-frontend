@@ -25,7 +25,7 @@ import play.api.http.HeaderNames
 import play.api.libs.ws.WS
 import play.api.mvc.AnyContentAsFormUrlEncoded
 import play.api.test.{FakeApplication, FakeRequest}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.it.Port
 
 trait AppAndStubs extends StartAndStopWireMock with StubUtils with OneServerPerSuite with IntegrationPatience with PatienceConfiguration with SessionBuilder {

@@ -24,16 +24,16 @@ import models.CurrentProfile
 import models.api.VatServiceEligibility
 import models.view.EligibilityQuestion
 import models.view.EligibilityQuestion.{ApplyingForVatExemptionQuestion, DoingBusinessAbroadQuestion, HaveNinoQuestion}
-import org.mockito.Matchers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
 
@@ -51,7 +51,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
     }
 
     def setupIneligibilityReason(keystoreConnector: KeystoreConnector, question: EligibilityQuestion) =
-      when(mockKeystoreConnector.fetchAndGet[String](Matchers.eq(IneligibilityReason.toString))(any(), any()))
+      when(mockKeystoreConnector.fetchAndGet[String](ArgumentMatchers.eq(IneligibilityReason.toString))(any(), any()))
         .thenReturn(Some(question.name).pure)
   }
 

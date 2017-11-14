@@ -20,9 +20,10 @@ import javax.inject.{Inject, Singleton}
 
 import config.VatSessionCache
 import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
@@ -32,7 +33,7 @@ class KeystoreConnector @Inject()(val sessionCache: VatSessionCache) {
     sessionCache.cache[T](formId, body)
   }
 
-  def fetch()(implicit hc : HeaderCarrier) : Future[Option[CacheMap]] = {
+  def fetch()(implicit hc : HeaderCarrier): Future[Option[CacheMap]] = {
     sessionCache.fetch()
   }
 
@@ -40,7 +41,7 @@ class KeystoreConnector @Inject()(val sessionCache: VatSessionCache) {
     sessionCache.fetchAndGetEntry(key)
   }
 
-  def remove()(implicit hc : HeaderCarrier) : Future[HttpResponse] = {
+  def remove()(implicit hc : HeaderCarrier): Future[HttpResponse] = {
     sessionCache.remove()
   }
 }

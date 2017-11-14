@@ -25,6 +25,7 @@ import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.language.postfixOps
+import uk.gov.hmrc.http.{ HttpResponse, InternalServerException, NotFoundException, Upstream4xxResponse }
 
 class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixture {
 

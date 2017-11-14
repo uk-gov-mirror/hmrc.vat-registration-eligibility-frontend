@@ -22,7 +22,7 @@ import helpers.VatRegSpec
 import models.api.VatServiceEligibility
 import models.view.TaxableTurnover
 import models._
-import org.mockito.Matchers.{any, eq => =~=}
+import org.mockito.ArgumentMatchers.{any, eq => =~=}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap

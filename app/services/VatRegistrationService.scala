@@ -27,12 +27,12 @@ import models._
 import models.api._
 import models.external.IncorporationInfo
 import play.api.libs.json.Format
-import uk.gov.hmrc.play.http.HeaderCarrier
 import common.enums.CacheKeys.CurrentProfile
 import common.enums.VatRegStatus
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class VatRegistrationService @Inject()(val s4LService: S4LService,

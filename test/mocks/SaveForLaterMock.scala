@@ -19,15 +19,15 @@ package mocks
 import cats.data.OptionT
 import connectors.{OptionalResponse, S4LConnector}
 import models.S4LKey
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 trait SaveForLaterMock {
   this: MockitoSugar =>
@@ -35,23 +35,24 @@ trait SaveForLaterMock {
   lazy val mockS4LConnector = mock[S4LConnector]
 
   def mockS4LFetchAndGet[T](formId: String, model: Option[T], mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[OptionalResponse[T]] = {
-    when(mockS4LConnector.fetchAndGet[T](Matchers.anyString(), Matchers.contains(formId))(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
+    when(mockS4LConnector.fetchAndGet[T](ArgumentMatchers.anyString(), ArgumentMatchers.contains(formId))
+      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(OptionT(Future.successful(model)))
   }
 
   def mockS4LFetchAll(cacheMap: Option[CacheMap], mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[Option[CacheMap]]] = {
-    when(mockS4LConnector.fetchAll(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+    when(mockS4LConnector.fetchAll(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
       .thenReturn(Future.successful(cacheMap))
   }
 
   def mockS4LClear(mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[HttpResponse]] = {
-    when(mockS4LConnector.clear(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+    when(mockS4LConnector.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
       .thenReturn(Future.successful(HttpResponse(200)))
   }
 
   def mockS4LSaveForm[T:S4LKey](cacheMap: CacheMap, mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[CacheMap]] = {
-    when(mockS4LConnector.save[T](Matchers.anyString(), Matchers.contains(S4LKey[T].key),
-      Matchers.any[T]())(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
+    when(mockS4LConnector.save[T](ArgumentMatchers.anyString(), ArgumentMatchers.contains(S4LKey[T].key),
+      ArgumentMatchers.any[T]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(Future.successful(cacheMap))
   }
 }

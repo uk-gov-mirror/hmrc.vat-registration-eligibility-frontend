@@ -21,11 +21,11 @@ import javax.inject.{Inject, Singleton}
 import common.enums.VatRegStatus
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
 import models.CurrentProfile
-import uk.gov.hmrc.play.http.HeaderCarrier
 import common.enums.CacheKeys.{CurrentProfile => CurrentProfileKey}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class CurrentProfileService @Inject()(val keystoreConnector: KeystoreConnector,

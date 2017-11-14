@@ -26,10 +26,10 @@ import models.{CurrentProfile, MonthYearModel, S4LVatEligibilityChoice}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.SessionProfile
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi,
                                            implicit val s4LService: S4LService,

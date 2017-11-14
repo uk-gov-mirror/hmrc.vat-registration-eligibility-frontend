@@ -30,14 +30,13 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 abstract class VatRegistrationController extends FrontendController
   with I18nSupport with Actions with ApplicativeSyntax with FutureInstances {
 
-  implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
   override val authConnector: AuthConnector = FrontendAuthConnector
 
   /**
