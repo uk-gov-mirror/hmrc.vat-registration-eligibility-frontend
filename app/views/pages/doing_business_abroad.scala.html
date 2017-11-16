@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.errorSummary
 @import views.html.helpers.templates.vatInputRadioGroup
+@import views.html.helpers.templates.newWindowLink
 
 @main_template(title = messages("pages.eligibility.doingBusinessAbroad.title")) {
 
@@ -33,7 +34,8 @@
 
     <div class="form-group">
         <ul class="list list-bullet">
-            <li>@Html(messages("pages.eligibility.doingBusinessAbroad.bullet1"))</li>
+            <li>@messages("pages.eligibility.doingBusinessAbroad.bullet1")
+                @newWindowLink("https://www.gov.uk/online-and-distance-selling-for-businesses", messages("pages.eligibility.doingBusinessAbroad.bullet1.1"))@messages("pages.eligibility.doingBusinessAbroad.bullet1.2")</li>
             <li>@messages("pages.eligibility.doingBusinessAbroad.bullet2")</li>
             <li>@messages("pages.eligibility.doingBusinessAbroad.bullet3")</li>
             <li>@messages("pages.eligibility.doingBusinessAbroad.bullet4")</li>

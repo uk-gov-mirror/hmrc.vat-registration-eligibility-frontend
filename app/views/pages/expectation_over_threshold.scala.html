@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.errorSummary
 @import views.html.helpers.templates.{vatInput, vatInputRadioGroup}
+@import views.html.helpers.templates.newWindowLink
 
 @import org.joda.time.DateTime
 
@@ -36,9 +37,8 @@
         </h1>
     </header>
     <p>@messages("pages.thresholdQuestion2.p1")</p>
-    <p>@messages("pages.thresholdQuestion2.p2") <a href="https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies">
-        VAT Registration thresholds</a>.</p>
-
+    <p>@messages("pages.thresholdQuestion2.p2")
+        @newWindowLink("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies", messages("pages.thresholdQuestion2.p2.1"))</p>
     <p class="indent">@messages("pages.thresholdQuestion2.p3")</p>
 
     <details>
