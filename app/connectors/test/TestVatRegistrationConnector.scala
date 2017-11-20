@@ -21,10 +21,10 @@ import javax.inject.Singleton
 import config.WSHttp
 import play.api.mvc.{Result, Results}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 @Singleton
 class TestVatRegistrationConnector extends ServicesConfig {

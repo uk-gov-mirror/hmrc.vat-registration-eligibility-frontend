@@ -19,9 +19,9 @@ package connectors
 import helpers.VatRegSpec
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.NotFoundException
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.NotFoundException
 
 class IncorporationInformationConnectorSpec extends VatRegSpec {
 

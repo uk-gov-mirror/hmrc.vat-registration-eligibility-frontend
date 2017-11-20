@@ -23,14 +23,14 @@ import fixtures.VatRegistrationFixture
 import helpers.{S4LMockSugar, VatRegSpec}
 import models.CurrentProfile
 import models.external.IncorporationInfo
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class EligibilitySuccessControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
 
@@ -66,7 +66,7 @@ class EligibilitySuccessControllerSpec extends VatRegSpec with VatRegistrationFi
 
   s"POST ${routes.EligibilitySuccessController.submit()}" should {
     "return 303 with valid data - Company NOT INCORPORATED" in new Setup{
-      when(mockVatRegistrationService.getIncorporationDate(Matchers.any())(Matchers.any())).thenReturn(Future.successful(None))
+      when(mockVatRegistrationService.getIncorporationDate(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(None))
 
       mockKeystoreFetchAndGet[IncorporationInfo](INCORPORATION_STATUS, None)
 
@@ -79,7 +79,7 @@ class EligibilitySuccessControllerSpec extends VatRegSpec with VatRegistrationFi
 
   s"POST ${routes.EligibilitySuccessController.submit()}" should {
     "return 303 with valid data - Company INCORPORATED" in new Setup{
-      when(mockVatRegistrationService.getIncorporationDate(Matchers.any())(Matchers.any())).thenReturn(Future.successful(Some(specificDate)))
+      when(mockVatRegistrationService.getIncorporationDate(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(Some(specificDate)))
 
       mockKeystoreFetchAndGet[IncorporationInfo](INCORPORATION_STATUS, Some(testIncorporationInfo))
 

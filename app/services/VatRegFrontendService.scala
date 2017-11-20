@@ -19,7 +19,7 @@ package services
 import javax.inject.Singleton
 
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class VatRegFrontendService extends ServicesConfig {

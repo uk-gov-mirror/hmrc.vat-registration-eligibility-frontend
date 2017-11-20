@@ -19,16 +19,16 @@ package connectors
 import config.VatShortLivedCache
 import helpers.FutureAssertions
 import models.view.TaxableTurnover
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions {
 
@@ -44,7 +44,8 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions 
   "Fetching from save4later" should {
     "return the correct model" in {
 
-      when(mockShortLivedCache.fetchAndGetEntry[TaxableTurnover](Matchers.anyString(), Matchers.anyString())(Matchers.any(), Matchers.any()))
+      when(mockShortLivedCache.fetchAndGetEntry[TaxableTurnover](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Option(taxableTurnoverModel)))
 
       S4LConnectorTest.fetchAndGet[TaxableTurnover]("", "") returnsSome taxableTurnoverModel
@@ -55,7 +56,8 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions 
     "save the model" in {
       val returnCacheMap = CacheMap("", Map("" -> Json.toJson(taxableTurnoverModel)))
 
-      when(mockShortLivedCache.cache[TaxableTurnover](Matchers.anyString(), Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockShortLivedCache.cache[TaxableTurnover](ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any())
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(returnCacheMap))
 
       val result = S4LConnectorTest.save[TaxableTurnover]("", "", taxableTurnoverModel)
@@ -65,7 +67,8 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions 
 
   "clearing an entry using save4later" should {
     "clear the entry given the user id" in {
-      when(mockShortLivedCache.remove(Matchers.anyString())(Matchers.any()))
+      when(mockShortLivedCache.remove(ArgumentMatchers.anyString())
+        (ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val result = S4LConnectorTest.clear("test")
@@ -75,7 +78,8 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions 
 
   "fetchAll" should {
     "fetch all entries in S4L" in {
-      when(mockShortLivedCache.fetch(Matchers.any())(Matchers.any()))
+      when(mockShortLivedCache.fetch(ArgumentMatchers.any())
+        (ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(cacheMap)))
 
       val result = S4LConnectorTest.fetchAll("testUserId")

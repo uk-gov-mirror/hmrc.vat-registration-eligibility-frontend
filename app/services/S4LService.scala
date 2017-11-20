@@ -22,10 +22,10 @@ import connectors.S4LConnector
 import models.{CurrentProfile, S4LKey, ViewModelFormat}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 @Singleton
 class S4LService @Inject()(val s4LConnector: S4LConnector) {

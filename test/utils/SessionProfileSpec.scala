@@ -26,13 +26,13 @@ import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.CurrentProfileService
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 
 class SessionProfileSpec extends UnitSpec with MockitoSugar with VatMocks {
@@ -49,7 +49,7 @@ class SessionProfileSpec extends UnitSpec with MockitoSugar with VatMocks {
 
   "calling withCurrentProfile" should {
     "carry out the passed function" in {
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any[HeaderCarrier]()))
+      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validProfile()))
 
       val result = await(TestSession.withCurrentProfile { _ => testFunc })

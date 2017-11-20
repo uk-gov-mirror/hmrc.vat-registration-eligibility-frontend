@@ -17,7 +17,7 @@
 package controllers.feedback
 
 import helpers.VatRegSpec
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 
@@ -33,7 +33,7 @@ class FeedbackControllerSpec extends VatRegSpec {
 
     "return HTML when user is authorized to access" in {
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome(Matchers.any())).thenReturn(s"someUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome(ArgumentMatchers.any())).thenReturn(s"someUrl")
 
       callAuthorised(TestController.show)(_ redirectsTo "someUrl")
     }

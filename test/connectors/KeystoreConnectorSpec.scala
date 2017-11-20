@@ -19,14 +19,14 @@ package connectors
 import config.VatSessionCache
 import helpers.VatRegSpec
 import mocks.VatMocks
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HttpResponse
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HttpResponse
 
 class KeystoreConnectorSpec extends VatRegSpec with VatMocks {
 
@@ -46,7 +46,7 @@ class KeystoreConnectorSpec extends VatRegSpec with VatMocks {
     "save the model" in {
       val returnCacheMap = CacheMap("", Map("" -> Json.toJson(testModel)))
 
-      when(mockVatSessionCache.cache[TestModel](any(), any())(any(), any()))
+      when(mockVatSessionCache.cache[TestModel](any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(returnCacheMap))
 
       connector.cache("", testModel) returns returnCacheMap
@@ -57,7 +57,7 @@ class KeystoreConnectorSpec extends VatRegSpec with VatMocks {
     "return a list" in {
       val list = List(testModel)
 
-      when(mockVatSessionCache.fetchAndGetEntry[List[TestModel]](any())(any(), any()))
+      when(mockVatSessionCache.fetchAndGetEntry[List[TestModel]](any())(any(), any(), any()))
         .thenReturn(Future.successful(Some(list)))
 
       connector.fetchAndGet[List[TestModel]]("") returns Some(list)
@@ -68,7 +68,7 @@ class KeystoreConnectorSpec extends VatRegSpec with VatMocks {
     "return a CacheMap" in {
       val returnCacheMap = CacheMap("", Map("" -> Json.toJson(testModel)))
 
-      when(mockVatSessionCache.fetch()(any())).thenReturn(Future.successful(Some(returnCacheMap)))
+      when(mockVatSessionCache.fetch()(any(), any())).thenReturn(Future.successful(Some(returnCacheMap)))
 
       await(connector.fetch()) shouldBe Some(returnCacheMap)
     }
@@ -76,7 +76,7 @@ class KeystoreConnectorSpec extends VatRegSpec with VatMocks {
 
   "Removing from KeyStore" should {
     "return a HTTP Response" in {
-      when(mockVatSessionCache.remove()(any())).thenReturn(Future.successful(HttpResponse(OK)))
+      when(mockVatSessionCache.remove()(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
 
       await(connector.remove()).status shouldBe HttpResponse(OK).status
     }

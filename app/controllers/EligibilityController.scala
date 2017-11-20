@@ -33,9 +33,6 @@ import utils.SessionProfile
 
 import scala.concurrent.Future
 
-/**
-  * Created by eric on 29/09/17.
-  */
 class EligibilityController @Inject()(val keystoreConnector: KeystoreConnector,
                                       val currentProfileService: CurrentProfileService,
                                       implicit val messagesApi: MessagesApi,

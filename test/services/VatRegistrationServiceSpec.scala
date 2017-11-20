@@ -22,8 +22,8 @@ import fixtures.VatRegistrationFixture
 import helpers.{S4LMockSugar, VatRegSpec}
 import models._
 import models.external.IncorporationInfo
-import org.mockito.Matchers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.cache.client.CacheMap
 
@@ -47,7 +47,7 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
       save4laterReturns(S4LVatEligibility(Some(validServiceEligibility)))
       save4laterReturns(S4LVatEligibilityChoice.modelT.toS4LModel(validVatScheme))
 
-      when(mockRegConnector.getRegistration(Matchers.eq(testRegId))(any(), any())).thenReturn(validVatScheme.pure)
+      when(mockRegConnector.getRegistration(ArgumentMatchers.eq(testRegId))(any(), any())).thenReturn(validVatScheme.pure)
       when(mockRegConnector.upsertVatEligibility(any(), any())(any(), any())).thenReturn(validServiceEligibility.pure)
 
       service.submitVatEligibility() returns validServiceEligibility
@@ -65,7 +65,7 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
 
   "When this is the first time the user starts a journey and we're persisting to the backend" should {
     "submitVatEligibility should process the submission even if VatScheme does not contain a VatEligibility object" in new Setup {
-      when(mockRegConnector.getRegistration(Matchers.eq(testRegId))(any(), any())).thenReturn(emptyVatScheme.pure)
+      when(mockRegConnector.getRegistration(ArgumentMatchers.eq(testRegId))(any(), any())).thenReturn(emptyVatScheme.pure)
       when(mockRegConnector.upsertVatEligibility(any(), any())(any(), any())).thenReturn(validServiceEligibility.pure)
       save4laterReturns(S4LVatEligibility(Some(validServiceEligibility)))
       save4laterReturns(S4LVatEligibilityChoice.modelT.toS4LModel(validVatScheme))
@@ -73,7 +73,7 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
     }
 
     "submitVatEligibility should fail if there's not trace of VatEligibility in neither backend nor S4L" in new Setup {
-      when(mockRegConnector.getRegistration(Matchers.eq(testRegId))(any(), any())).thenReturn(emptyVatScheme.pure)
+      when(mockRegConnector.getRegistration(ArgumentMatchers.eq(testRegId))(any(), any())).thenReturn(emptyVatScheme.pure)
       save4laterReturnsNothing[S4LVatEligibility]()
       save4laterReturnsNothing[S4LVatEligibilityChoice]()
 
@@ -83,7 +83,7 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
 
   "Calling getIncorporationInfo" should {
     "successfully returns an incorporation information" in new Setup {
-      when(mockRegConnector.getIncorporationInfo(Matchers.any())(Matchers.any())).thenReturn(OptionT.fromOption(Some(testIncorporationInfo)))
+      when(mockRegConnector.getIncorporationInfo(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(OptionT.fromOption(Some(testIncorporationInfo)))
 
       service.getIncorporationInfo("txId") returns Some(testIncorporationInfo)
     }
@@ -98,7 +98,7 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
 
     "successfully returns an incorporation date from microservice and save to keystore" in new Setup {
       mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(currentProfile.copy(incorporationDate = None)))
-      when(mockRegConnector.getIncorporationInfo(Matchers.any())(Matchers.any())).thenReturn(OptionT.fromOption(Some(testIncorporationInfo)))
+      when(mockRegConnector.getIncorporationInfo(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(OptionT.fromOption(Some(testIncorporationInfo)))
       mockKeystoreCache[String](CacheKeys.CurrentProfile.toString, CacheMap("", Map.empty))
 
       service.getIncorporationDate("txId") returns testIncorporationInfo.statusEvent.incorporationDate
@@ -106,7 +106,7 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
 
     "throw an exception if no Current Profile is returned from keystore" in new Setup {
       mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
-      when(mockRegConnector.getIncorporationInfo(Matchers.any())(Matchers.any())).thenReturn(OptionT.fromOption(Some(testIncorporationInfo)))
+      when(mockRegConnector.getIncorporationInfo(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(OptionT.fromOption(Some(testIncorporationInfo)))
       mockKeystoreCache[String](CacheKeys.CurrentProfile.toString, CacheMap("", Map.empty))
 
       an[IllegalStateException] shouldBe thrownBy(await(service.getIncorporationDate("txId")))

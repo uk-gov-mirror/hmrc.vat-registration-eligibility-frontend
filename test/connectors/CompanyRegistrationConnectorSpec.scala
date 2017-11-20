@@ -19,10 +19,10 @@ package connectors
 import helpers.VatRegSpec
 import models.external.CompanyRegistrationProfile
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.play.http.BadRequestException
 import utils.VREFEFeatureSwitch
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.BadRequestException
 
 class CompanyRegistrationConnectorSpec extends VatRegSpec {
 

@@ -35,10 +35,10 @@ import play.api.inject.Injector
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class VatRegSpec extends UnitSpec with WithFakeApplication
   with MockitoSugar with VatMocks with LoginFixture with Inside with Inspectors

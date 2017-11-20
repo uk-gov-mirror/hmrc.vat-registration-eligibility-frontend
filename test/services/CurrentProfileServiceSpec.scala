@@ -23,13 +23,13 @@ import connectors.BusinessRegistrationConnector
 import helpers.VatRegSpec
 import models.CurrentProfile
 import models.external.{BusinessProfile, CompanyRegistrationProfile}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads }
 
 class CurrentProfileServiceSpec extends VatRegSpec {
   val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
@@ -59,7 +59,7 @@ class CurrentProfileServiceSpec extends VatRegSpec {
 
     "return a CurrentProfile" when {
       "fetched from Keystore" in {
-        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[CurrentProfile]]()))
+        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CurrentProfile]]()))
           .thenReturn(Future.successful(Some(testCurrentProfile())))
 
         val result = await(testService.getCurrentProfile())
@@ -70,25 +70,25 @@ class CurrentProfileServiceSpec extends VatRegSpec {
         val businessProfile = BusinessProfile(regId, "EN")
         val compRegDetails = CompanyRegistrationProfile("accepted", txId)
 
-        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[CurrentProfile]]()))
+        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CurrentProfile]]()))
           .thenReturn(Future.successful(None))
 
-        when(mockBusinessRegistrationConnector.retrieveBusinessProfile(Matchers.any[HeaderCarrier](), Matchers.any[HttpReads[BusinessProfile]]))
+        when(mockBusinessRegistrationConnector.retrieveBusinessProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]))
           .thenReturn(Future.successful(businessProfile))
 
-        when(mockCompanyRegConnector.getCompanyRegistrationDetails(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        when(mockCompanyRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(compRegDetails))
 
-        when(mockIncorpInfoService.getCompanyName(Matchers.any(), Matchers.any())(Matchers.any[HeaderCarrier]()))
+        when(mockIncorpInfoService.getCompanyName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testCompanyName))
 
-        when(mockVatRegistrationService.getStatus(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        when(mockVatRegistrationService.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(VatRegStatus.draft))
 
-        when(mockVatRegistrationService.getIncorporationInfo(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        when(mockVatRegistrationService.getIncorporationInfo(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(Some(testIncorporationInfo)))
 
-        when(mockKeystoreConnector.cache[CurrentProfile](Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
+        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(CacheMap("", Map())))
 
         val result = await(testService.getCurrentProfile())

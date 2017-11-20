@@ -22,17 +22,16 @@ import config.WSHttp
 import play.api.Logger
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 
 @Singleton
 class IncorporationInformationConnector extends ServicesConfig {
   val incorpInfoUrl = baseUrl("incorporation-information")
   val incorpInfoUri = getConfString("incorporation-information.uri", "")
-  val http: WSHttp = WSHttp
+  val http: CoreGet = WSHttp
 
   val className = this.getClass.getSimpleName
 

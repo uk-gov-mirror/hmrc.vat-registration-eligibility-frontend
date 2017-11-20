@@ -18,11 +18,11 @@ package connectors
 
 import helpers.VatRegSpec
 import models.external.BusinessProfile
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import uk.gov.hmrc.play.http._
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadRequestException, NotFoundException, Upstream4xxResponse, Upstream5xxResponse }
 
 class BusinessRegistrationConnectorSpec extends VatRegSpec {
 
@@ -48,42 +48,48 @@ class BusinessRegistrationConnectorSpec extends VatRegSpec {
     }
 
     "return a Not Found response when a CurrentProfile record can not be found" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.contains("/business-registration/business-tax-registration"))(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("not found")))
 
       intercept[NotFoundException](await(connector.retrieveBusinessProfile))
     }
 
     "return a Bad Request response when a bad request is send while getting CurrentProfile " in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.contains("/business-registration/business-tax-registration"))(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new BadRequestException("Bad request")))
 
       intercept[BadRequestException](await(connector.retrieveBusinessProfile))
     }
 
     "return a Forbidden response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.contains("/business-registration/business-tax-registration"))(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Upstream4xxResponse("Forbidden", 403, 403)))
 
       intercept[Upstream4xxResponse](await(connector.retrieveBusinessProfile))
     }
 
     "return a 4xx response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.contains("/business-registration/business-tax-registration"))(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Upstream4xxResponse("Forbidden", 405, 405)))
 
       intercept[Upstream4xxResponse](await(connector.retrieveBusinessProfile))
     }
 
     "return a 5xx response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.contains("/business-registration/business-tax-registration"))(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.failed(new Upstream5xxResponse("Forbidden", 500, 500)))
 
       intercept[Upstream5xxResponse](await(connector.retrieveBusinessProfile))
       }
 
     "return an Exception response when an unspecified error has occurred" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.contains("/business-registration/business-tax-registration"))(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("Runtime Exception")))
 
       intercept[RuntimeException](await(connector.retrieveBusinessProfile))

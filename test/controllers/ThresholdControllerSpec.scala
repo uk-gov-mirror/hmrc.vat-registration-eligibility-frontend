@@ -23,15 +23,15 @@ import helpers.{S4LMockSugar, VatRegSpec}
 import models.CurrentProfile
 import models.view.{ExpectationOverThresholdView, OverThresholdView}
 import org.jsoup.Jsoup
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
 
@@ -79,7 +79,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "return HTML when there's nothing in S4L and vatScheme contains data" in {
       save4laterReturnsNoViewModel[OverThresholdView]()
 
-      when(mockVatRegistrationService.getVatScheme()(Matchers.any(), Matchers.any[HeaderCarrier]()))
+      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validVatScheme))
 
       callAuthorised(TestThresholdController.goneOverShow) {
@@ -90,7 +90,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "return HTML when there's nothing in S4L and vatScheme contains no data" in {
       save4laterReturnsNoViewModel[OverThresholdView]()
 
-      when(mockVatRegistrationService.getVatScheme()(Matchers.any(), Matchers.any[HeaderCarrier]()))
+      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(emptyVatScheme))
 
       callAuthorised(TestThresholdController.goneOverShow) {

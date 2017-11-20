@@ -24,16 +24,16 @@ import models.CurrentProfile
 import models.api.VatServiceEligibility
 import models.view.EligibilityQuestion
 import models.view.EligibilityQuestion._
-import org.mockito.Matchers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
 
@@ -53,7 +53,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
   }
 
   private def setupIneligibilityReason(keystoreConnector: KeystoreConnector, question: EligibilityQuestion) =
-    when(mockKeystoreConnector.fetchAndGet[String](Matchers.eq(IneligibilityReason.toString))(any(), any()))
+    when(mockKeystoreConnector.fetchAndGet[String](ArgumentMatchers.eq(IneligibilityReason.toString))(any(), any()))
       .thenReturn(Some(question.name).pure)
 
   "GET ServiceCriteriaQuestionsController.show()" should {
@@ -255,7 +255,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
     }
 
     "redirect to ineligible screen when user is NOT eligible to register for VAT using this service" in new Setup {
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any()))
+      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any()))
         .thenReturn(Future.successful(currentProfile))
 
       when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
@@ -275,7 +275,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
         }
 
       }
-      verify(mockKeystoreConnector, times(questions.size)).cache[String](Matchers.eq(IneligibilityReason.toString), any())(any(), any())
+      verify(mockKeystoreConnector, times(questions.size)).cache[String](ArgumentMatchers.eq(IneligibilityReason.toString), any())(any(), any())
     }
 
     "400 for malformed requests on have nino question" in new Setup {
@@ -324,7 +324,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
 
     "return HTML for relevant ineligibility page" in new Setup {
 
-      when(mockCurrentProfileService.getCurrentProfile()(Matchers.any()))
+      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any()))
         .thenReturn(Future.successful(currentProfile))
 
       //below the "" empty css class indicates that the section is showing (not "hidden")
@@ -352,7 +352,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
         """id="company-will-do-any-of-text" class="hidden""""
       )
 
-      when(mockKeystoreConnector.fetchAndGet[String](Matchers.eq(IneligibilityReason.toString))(any(), any()))
+      when(mockKeystoreConnector.fetchAndGet[String](ArgumentMatchers.eq(IneligibilityReason.toString))(any(), any()))
         .thenReturn(Option.empty[String].pure)
       when(mockVatRegistrationService.getVatScheme()(any(), any())).thenReturn(validVatScheme.copy(vatServiceEligibility = None).pure)
 

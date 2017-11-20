@@ -22,8 +22,9 @@ import cats.data.OptionT
 import config.VatShortLivedCache
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
@@ -44,6 +45,4 @@ class S4LConnector @Inject()(val shortCache: VatShortLivedCache) {
   def fetchAll(Id: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = {
     shortCache.fetch(Id)
   }
-
-
 }

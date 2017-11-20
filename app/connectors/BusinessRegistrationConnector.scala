@@ -22,16 +22,15 @@ import config.WSHttp
 import models.external.BusinessProfile
 import play.api.Logger
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpReads, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
 
 @Singleton
 class BusinessRegistrationConnector @Inject()() extends ServicesConfig {
   val businessRegUrl = baseUrl("business-registration")
-  val http : WSHttp = WSHttp
+  val http: CoreGet = WSHttp
 
   def retrieveBusinessProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") map {
