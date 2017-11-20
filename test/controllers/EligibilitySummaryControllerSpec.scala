@@ -17,7 +17,7 @@
 package controllers
 
 import fixtures.VatRegistrationFixture
-import helpers.{S4LMockSugar, VatRegSpec}
+import helpers.VatRegSpec
 import models.CurrentProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class EligibilitySummaryControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+class EligibilitySummaryControllerSpec extends VatRegSpec with VatRegistrationFixture {
 
   class Setup {
 
@@ -59,10 +59,7 @@ class EligibilitySummaryControllerSpec extends VatRegSpec with VatRegistrationFi
   }
 
   s"POST ${controllers.routes.EligibilitySummaryController.submit()}" should {
-    "save to backend and redrect to the you can register page" in new Setup {
-      when(mockVatRegistrationService.submitVatEligibility()(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(validServiceEligibilityNoChoice)
-
+    "redirect to the you can register page" in new Setup {
       callAuthorised(testController.submit) {
         _ redirectsTo controllers.routes.EligibilitySuccessController.show.url
       }

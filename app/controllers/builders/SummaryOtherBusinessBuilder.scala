@@ -19,45 +19,45 @@ package controllers.builders
 import models.api.VatServiceEligibility
 import models.view.{SummaryRow, SummarySection}
 
-case class SummaryOtherBusinessBuilder(vatServiceEligibility: Option[VatServiceEligibility] = None)
+case class SummaryOtherBusinessBuilder(vatServiceEligibility: VatServiceEligibility)
   extends SummarySectionBuilder {
 
-  override val sectionId: String     = "otherBusiness"
+  override val sectionId: String = "otherBusiness"
 
   val soleTraderRow: SummaryRow = SummaryRow(
     s"$sectionId.soleTrader",
-    vatServiceEligibility.flatMap(_.doAnyApplyToYou).collect {
+    vatServiceEligibility.doAnyApplyToYou.map {
       case true => "app.common.yes"
       case false => "app.common.no"
     }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou"))
+    Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())
   )
 
   val vatGroupRow: SummaryRow = SummaryRow(
     s"$sectionId.vatGroup",
-    vatServiceEligibility.flatMap(_.doAnyApplyToYou).collect {
+    vatServiceEligibility.doAnyApplyToYou.map {
       case true => "app.common.yes"
       case false => "app.common.no"
     }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou"))
+    Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())
   )
 
   val makingProfitRow: SummaryRow = SummaryRow(
     s"$sectionId.makingProfit",
-    vatServiceEligibility.flatMap(_.doAnyApplyToYou).collect {
+    vatServiceEligibility.doAnyApplyToYou.map {
       case true => "app.common.yes"
       case false => "app.common.no"
     }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou"))
+    Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())
   )
 
   val limitedCompanyRow: SummaryRow = SummaryRow(
     s"$sectionId.limitedCompany",
-    vatServiceEligibility.flatMap(_.doAnyApplyToYou).collect {
+    vatServiceEligibility.doAnyApplyToYou.map {
       case true => "app.common.yes"
       case false => "app.common.no"
     }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou"))
+    Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())
   )
 
   val section: SummarySection =

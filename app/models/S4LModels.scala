@@ -16,52 +16,19 @@
 
 package models
 
-import models.api._
-import play.api.libs.json.{Json, OFormat}
-import common.ErrorUtil.fail
 import models.view._
-import models.view.VoluntaryRegistration.REGISTER_YES
-import models.api.VatEligibilityChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
+import play.api.libs.json.{Json, OFormat}
 
-trait S4LModelTransformer[C] {
-  // Returns an S4L container for a logical group given a VatScheme
-  def toS4LModel(vatScheme: VatScheme): C
-}
-
-trait S4LApiTransformer[C, API] {
-  // Returns logical group API model given an S4L container
-  def toApi(container: C): API
-}
-
-case class S4LVatEligibility
-(
-  vatEligibility: Option[VatServiceEligibility] = None
+case class S4LVatEligibility(haveNino: Option[Boolean] = None,
+                             doingBusinessAbroad: Option[Boolean] = None,
+                             doAnyApplyToYou: Option[Boolean] = None,
+                             applyingForAnyOf: Option[Boolean] = None,
+                             applyingForVatExemption: Option[Boolean] = None,
+                             companyWillDoAnyOf: Option[Boolean] = None
 )
 
 object S4LVatEligibility {
   implicit val format: OFormat[S4LVatEligibility] = Json.format[S4LVatEligibility]
-  implicit val vatServiceEligibility: S4LKey[S4LVatEligibility] = S4LKey("VatServiceEligibility")
-
-  implicit val modelT = new S4LModelTransformer[S4LVatEligibility] {
-    override def toS4LModel(vs: VatScheme): S4LVatEligibility =
-      S4LVatEligibility(vatEligibility = ApiModelTransformer[VatServiceEligibility].toViewModel(vs))
-  }
-
-  def error = throw fail("VatServiceEligibility")
-
-  implicit val apiT = new S4LApiTransformer[S4LVatEligibility, VatServiceEligibility] {
-    override def toApi(c: S4LVatEligibility): VatServiceEligibility = {
-      c.vatEligibility.map(ve => VatServiceEligibility(
-        haveNino = ve.haveNino,
-        doingBusinessAbroad = ve.doingBusinessAbroad,
-        doAnyApplyToYou = ve.doAnyApplyToYou,
-        applyingForAnyOf = ve.applyingForAnyOf,
-        applyingForVatExemption = ve.applyingForVatExemption,
-        companyWillDoAnyOf = ve.companyWillDoAnyOf,
-        vatEligibilityChoice = ve.vatEligibilityChoice)
-      ).getOrElse(error)
-    }
-  }
 }
 
 case class S4LVatEligibilityChoice(taxableTurnover: Option[TaxableTurnover] = None,
@@ -72,38 +39,4 @@ case class S4LVatEligibilityChoice(taxableTurnover: Option[TaxableTurnover] = No
 
 object S4LVatEligibilityChoice {
   implicit val format: OFormat[S4LVatEligibilityChoice] = Json.format[S4LVatEligibilityChoice]
-  implicit val vatChoice: S4LKey[S4LVatEligibilityChoice] = S4LKey("VatChoice")
-
-  implicit val modelT = new S4LModelTransformer[S4LVatEligibilityChoice] {
-    override def toS4LModel(vs: VatScheme): S4LVatEligibilityChoice =
-      S4LVatEligibilityChoice(
-        taxableTurnover = ApiModelTransformer[TaxableTurnover].toViewModel(vs),
-        voluntaryRegistration = ApiModelTransformer[VoluntaryRegistration].toViewModel(vs),
-        overThreshold = ApiModelTransformer[OverThresholdView].toViewModel(vs),
-        expectationOverThreshold = ApiModelTransformer[ExpectationOverThresholdView].toViewModel(vs),
-        voluntaryRegistrationReason = ApiModelTransformer[VoluntaryRegistrationReason].toViewModel(vs)
-      )
-  }
-
-  def error = throw fail("VatChoice")
-
-  implicit val apiT = new S4LApiTransformer[S4LVatEligibilityChoice, VatEligibilityChoice] {
-    override def toApi(c: S4LVatEligibilityChoice): VatEligibilityChoice =
-        VatEligibilityChoice(
-          necessity = c.voluntaryRegistration.map(vr =>
-            if (vr.yesNo == REGISTER_YES) NECESSITY_VOLUNTARY else NECESSITY_OBLIGATORY).getOrElse(NECESSITY_OBLIGATORY),
-          reason = c.voluntaryRegistrationReason.map(_.reason),
-          vatThresholdPostIncorp = c.overThreshold.map(vtp =>
-            VatThresholdPostIncorp(
-              overThresholdSelection = vtp.selection,
-              overThresholdDate = vtp.date
-            )
-          ),
-          vatExpectedThresholdPostIncorp = c.expectationOverThreshold.map(eot =>
-            VatExpectedThresholdPostIncorp(
-              expectedOverThresholdSelection = eot.selection,
-              expectedOverThresholdDate = eot.date
-            ))
-        )
-  }
 }

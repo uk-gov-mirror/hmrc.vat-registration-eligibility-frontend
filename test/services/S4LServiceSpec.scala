@@ -16,115 +16,52 @@
 
 package services
 
-import cats.data.OptionT
-import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
-import models.api.VatServiceEligibility
-import models.view.TaxableTurnover
-import models._
-import org.mockito.ArgumentMatchers.{any, eq => =~=}
-import org.mockito.Mockito._
-import play.api.libs.json.Json
+import java.time.LocalDate
+
+import common.enums.VatRegStatus
+import helpers.FutureAssertions
+import mocks.VatMocks
+import models.CurrentProfile
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.mockito.MockitoSugar
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+class S4LServiceSpec extends UnitSpec with MockitoSugar with VatMocks with FutureAssertions {
+  val service = new S4LService(mockS4LConnector)
+  val cacheMap = CacheMap("s-date", Map.empty)
 
+  val testRegId = "id"
+  val cacheKey = "test"
+  val cacheData = "data"
 
-class S4LServiceSpec extends VatRegSpec with VatRegistrationFixture {
-
-  private final case class TestView(property: String)
-  private final case class TestGroup(testView: Option[TestView] = None)
-
-  private object TestView {
-    implicit val fmt = Json.format[TestView]
-    implicit val viewModelFormat = ViewModelFormat[TestView, TestGroup](
-      readF = (_: TestGroup).testView,
-      updateF = (v: TestView, g: Option[TestGroup]) => g.getOrElse(TestGroup()).copy(testView = Some(v))
-    )
-  }
-
-  private object TestGroup {
-    implicit val fmt = Json.format[TestGroup]
-    implicit val s4lKey = S4LKey[TestGroup]("testGroupKey")
-  }
-
-  trait Setup {
-    val service = new S4LService(mockS4LConnector)
-
-    val key = TestGroup.s4lKey.key
-  }
-
-  val testServiceEligibility = VatServiceEligibility()
+  implicit val hc = HeaderCarrier()
+  implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1",
+    VatRegStatus.draft,Some(LocalDate.of(2016, 12, 21)))
 
   "S4L Service" should {
-
-    "save a form with the correct key" in new Setup {
+    "save a form with the correct key" in {
       mockKeystoreFetchAndGet[String]("RegistrationId", Some(testRegId))
-      private val cacheMap = CacheMap("s-date", Map.empty)
-      mockS4LSaveForm[S4LVatEligibility](cacheMap)
-      service.save(S4LVatEligibility(vatEligibility = Some(testServiceEligibility))) returns cacheMap
+      mockS4LSaveForm[String](cacheMap)
+      service.save(cacheKey, cacheData) returns cacheMap
     }
 
-    "fetch a form with the correct key" in new Setup {
+    "fetch a form with the correct key" in {
       mockKeystoreFetchAndGet[String]("RegistrationId", Some(testRegId))
-      mockS4LFetchAndGet(S4LKey[S4LVatEligibility].key, Some(S4LVatEligibility(vatEligibility = Some(testServiceEligibility))))
-      service.fetchAndGet[S4LVatEligibility]() returns Some(S4LVatEligibility(vatEligibility = Some(testServiceEligibility)))
+      mockS4LFetchAndGet("test", Some(cacheData))
+      service.fetchAndGet[String](cacheKey) returns Some(cacheData)
     }
 
-    "clear down S4L data" in new Setup {
+    "clear down S4L data" in {
       mockKeystoreFetchAndGet[String]("RegistrationId", Some(testRegId))
       mockS4LClear()
       service.clear().map(_.status) returns 200
     }
 
-    "fetch all data" in new Setup {
+    "fetch all data" in {
       mockKeystoreFetchAndGet[String]("RegistrationId", Some(testRegId))
-      private val cacheMap = CacheMap("allData", Map.empty)
       mockS4LFetchAll(Some(cacheMap))
       service.fetchAll() returns Some(cacheMap)
-    }
-  }
-
-  "getting a View Model from Save 4 Later" should {
-    "yield a None given a unpopulated Container" in new Setup {
-      val container = S4LVatEligibilityChoice(None)
-      service.getViewModel[TaxableTurnover, S4LVatEligibilityChoice](Future.successful(container)) returns None
-    }
-
-    "yield a ViewModel given a populated Container" in new Setup {
-      private val taxableTurnover = TaxableTurnover(yesNo = TaxableTurnover.TAXABLE_NO)
-      val container = S4LVatEligibilityChoice(Some(taxableTurnover))
-
-      service.getViewModel[TaxableTurnover, S4LVatEligibilityChoice](Future.successful(container)) returns Some(taxableTurnover)
-    }
-
-  }
-
-  "updating a View Model in Save 4 Later" should {
-
-    val cacheMap = CacheMap("id", Map())
-    val testView = TestView("test")
-    val testGroup = TestGroup()
-
-    "save test view in appropriate container object in Save 4 Later" when {
-      "container in s4l does not already contain the view" in new Setup {
-        mockKeystoreFetchAndGet[String]("RegistrationId", Some(testRegId))
-        when(mockS4LConnector.fetchAndGet[TestGroup](=~=(testRegId), =~=(key))(any(), any())).thenReturn(OptionT(Option(TestGroup()).pure))
-        when(mockS4LConnector.save(=~=(testRegId), =~=(key), any())(any(), any())).thenReturn(cacheMap.pure)
-
-        service.updateViewModel[TestView, TestGroup](testView, testGroup.pure) returns cacheMap
-        verify(mockS4LConnector).save(testRegId, key, TestGroup(Some(testView)))
-      }
-
-      "container in s4l already contains the view" in new Setup {
-        mockKeystoreFetchAndGet[String]("RegistrationId", Some(testRegId))
-        when(mockS4LConnector.fetchAndGet[TestGroup](=~=(testRegId), =~=(key))(any(), any()))
-          .thenReturn(OptionT(Option(TestGroup(Some(TestView("oldProperty")))).pure))
-        when(mockS4LConnector.save(=~=(testRegId), =~=(key), any())(any(), any())).thenReturn(cacheMap.pure)
-
-        service.updateViewModel[TestView, TestGroup](testView, testGroup.pure) returns cacheMap
-        verify(mockS4LConnector).save(testRegId, key, TestGroup(Some(testView)))
-      }
     }
   }
 }

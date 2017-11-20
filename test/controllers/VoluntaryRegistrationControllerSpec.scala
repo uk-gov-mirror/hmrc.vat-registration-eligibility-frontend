@@ -32,28 +32,28 @@
 
 package controllers
 
-import fixtures.VatRegistrationFixture
-import helpers.{S4LMockSugar, VatRegSpec}
+import fixtures.{S4LFixture, VatRegistrationFixture}
+import helpers.VatRegSpec
 import models.CurrentProfile
 import models.view.VoluntaryRegistration
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
     val testController = new VoluntaryRegistrationController()(mockMessages,
       mockS4LService,
       mockCurrentProfileService,
       mockVatRegistrationService,
-      mockVatRegFrontendService
+      mockVatRegFrontendService,
+      mockEligibilityService
     ) {
       override val authConnector: AuthConnector = mockAuthConnector
 
@@ -66,62 +66,39 @@ class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistratio
   val fakeRequest = FakeRequest(routes.VoluntaryRegistrationController.show())
 
   s"GET ${routes.VoluntaryRegistrationController.show()}" should {
-    "return HTML Voluntary Registration  page with no Selection" in new Setup {
-      val voluntaryRegistration = VoluntaryRegistration("")
+    val expectedText = "Do you want to register voluntarily for VAT?"
 
-      save4laterReturnsViewModel(voluntaryRegistration)()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+    "return HTML Voluntary Registration page with no Selection" in new Setup {
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyS4LEligibilityChoice))
 
       callAuthorised(testController.show()) {
-        _ includesText "Do you want to register voluntarily for VAT?"
+        _ includesText expectedText
       }
     }
 
-    "return HTML when there's nothing in S4L and vatScheme contains data" in new Setup {
-      save4laterReturnsNoViewModel[VoluntaryRegistration]()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
-      when(mockVatRegistrationService.getVatScheme()(any(), any[HeaderCarrier]()))
-        .thenReturn(Future.successful(validVatScheme))
+    "return HTML when there's view data" in new Setup {
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData))
 
       callAuthorised(testController.show) {
-        _ includesText "Do you want to register voluntarily for VAT?"
-      }
-    }
-
-    "return HTML when there's nothing in S4L and vatScheme contains no data" in new Setup {
-      save4laterReturnsNoViewModel[VoluntaryRegistration]()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
-      when(mockVatRegistrationService.getVatScheme()(any(), any[HeaderCarrier]()))
-        .thenReturn(Future.successful(emptyVatScheme))
-
-      callAuthorised(testController.show) {
-        _ includesText "Do you want to register voluntarily for VAT?"
+        _ includesText expectedText
       }
     }
   }
 
   s"POST ${routes.VoluntaryRegistrationController.submit()} with Empty data" should {
     "return 400" in new Setup {
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
-      submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-      ))(result => result isA 400)
+      submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody()) {
+        result => result isA 400
+      }
     }
   }
 
   s"POST ${routes.VoluntaryRegistrationController.submit()} with Voluntary Registration selected Yes" should {
     "return 303" in new Setup {
-      save4laterExpectsSave[VoluntaryRegistration]()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someUrl")
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "voluntaryRegistrationRadio" -> VoluntaryRegistration.REGISTER_YES
@@ -131,12 +108,12 @@ class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistratio
 
   s"POST ${routes.VoluntaryRegistrationController.submit()} with Voluntary Registration selected No" should {
     "redirect to the welcome page" in new Setup {
-      when(mockS4LService.clear()(any[HeaderCarrier](), any())).thenReturn(Future.successful(validHttpResponse))
-      save4laterExpectsSave[VoluntaryRegistration]()
-      when(mockVatRegistrationService.deleteVatScheme()(any[HeaderCarrier](), any()))
-        .thenReturn(Future.successful(()))
+      import models.view.VoluntaryRegistration.REGISTER_NO
 
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+      val registerNO = VoluntaryRegistration(REGISTER_NO)
+
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData.copy(voluntaryRegistration = Some(registerNO))))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome(ArgumentMatchers.any())).thenReturn(s"someUrl")
 

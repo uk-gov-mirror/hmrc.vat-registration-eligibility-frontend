@@ -22,7 +22,7 @@ import forms.VoluntaryRegistrationReasonForm
 import models.view.VoluntaryRegistrationReason
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, EligibilityService, S4LService, VatRegFrontendService, VatRegistrationService}
 import utils.SessionProfile
 
 @Singleton
@@ -30,10 +30,9 @@ class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: 
                                                       implicit val s4l: S4LService,
                                                       implicit val vrs: VatRegistrationService,
                                                       val currentProfileService: CurrentProfileService,
-                                                      val vatRegFrontendService: VatRegFrontendService)
+                                                      val vatRegFrontendService: VatRegFrontendService,
+                                                      val eligibilityService: EligibilityService)
   extends VatRegistrationController with SessionProfile {
-
-  import cats.syntax.flatMap._
 
   val form = VoluntaryRegistrationReasonForm.form
 
@@ -41,8 +40,11 @@ class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: 
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          viewModel[VoluntaryRegistrationReason]().fold(form)(form.fill)
-            .map(f => Ok(views.html.pages.voluntary_registration_reason(f)))
+          eligibilityService.getEligibilityChoice map { choice =>
+            Ok(views.html.pages.voluntary_registration_reason(
+              choice.voluntaryRegistrationReason.fold(form)(form.fill)
+            ))
+          }
         }
   }
 
@@ -52,16 +54,14 @@ class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: 
         withCurrentProfile { implicit profile =>
           form.bindFromRequest().fold(
             badForm => BadRequest(views.html.pages.voluntary_registration_reason(badForm)).pure,
-            goodForm => (goodForm.reason == VoluntaryRegistrationReason.NEITHER).pure.ifM(
-              for{
-                _ <- s4l.clear()
-                _ <- vrs.deleteVatScheme()
-              } yield vatRegFrontendService.buildVatRegFrontendUrlWelcome,
-              for {
-                _ <- save(goodForm)
-                _ <- vrs.submitVatEligibility()
-              } yield vatRegFrontendService.buildVatRegFrontendUrlEntry
-            ).map(Redirect(_)))
+            data => eligibilityService.saveChoiceQuestion(data) map { _ =>
+              if (data.reason == VoluntaryRegistrationReason.NEITHER) {
+                Redirect(vatRegFrontendService.buildVatRegFrontendUrlWelcome)
+              } else {
+                Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
+              }
+            }
+          )
         }
   }
 }

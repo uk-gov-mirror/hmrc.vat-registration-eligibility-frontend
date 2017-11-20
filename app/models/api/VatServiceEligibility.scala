@@ -16,10 +16,6 @@
 
 package models.api
 
-import models.{ApiModelTransformer, S4LVatEligibility, ViewModelFormat, _}
-import models.api.VatEligibilityChoice.NECESSITY_VOLUNTARY
-import models.view.EligibilityQuestion
-import models.view.EligibilityQuestion._
 import play.api.libs.json.{Json, OFormat}
 
 case class VatServiceEligibility(haveNino: Option[Boolean] = None,
@@ -28,42 +24,9 @@ case class VatServiceEligibility(haveNino: Option[Boolean] = None,
                                  applyingForAnyOf: Option[Boolean] = None,
                                  applyingForVatExemption: Option[Boolean] = None,
                                  companyWillDoAnyOf: Option[Boolean] = None,
-                                 vatEligibilityChoice: Option[VatEligibilityChoice] = None) {
-
-  def getAnswer(question: EligibilityQuestion): Option[Boolean] = question match {
-    case HaveNinoQuestion => haveNino
-    case DoingBusinessAbroadQuestion => doingBusinessAbroad
-    case DoAnyApplyToYouQuestion => doAnyApplyToYou
-    case ApplyingForAnyOfQuestion => applyingForAnyOf
-    case ApplyingForVatExemptionQuestion => applyingForVatExemption
-    case CompanyWillDoAnyOfQuestion => companyWillDoAnyOf
-  }
-
-  def setAnswer(question: EligibilityQuestion, answer: Boolean): VatServiceEligibility = question match {
-    case HaveNinoQuestion => this.copy(haveNino = Some(answer))
-    case DoingBusinessAbroadQuestion => this.copy(doingBusinessAbroad = Some(answer))
-    case DoAnyApplyToYouQuestion => this.copy(doAnyApplyToYou = Some(answer))
-    case ApplyingForAnyOfQuestion => this.copy(applyingForAnyOf = Some(answer))
-    case ApplyingForVatExemptionQuestion => this.copy(applyingForVatExemption = Some(answer))
-    case CompanyWillDoAnyOfQuestion => this.copy(companyWillDoAnyOf = Some(answer))
-  }
-
-}
-
+                                 vatEligibilityChoice: Option[VatEligibilityChoice] = None)
 
 object VatServiceEligibility {
-
   implicit val format: OFormat[VatServiceEligibility] = Json.format
-
-  implicit val vmReads = ViewModelFormat(
-    readF = (group: S4LVatEligibility) => group.vatEligibility,
-    updateF = (c: VatServiceEligibility, g: Option[S4LVatEligibility]) =>
-      g.getOrElse(S4LVatEligibility()).copy(vatEligibility = Some(c))
-  )
-
-  implicit val modelTransformer = ApiModelTransformer[VatServiceEligibility] { vs: VatScheme =>
-    vs.vatServiceEligibility
-  }
-
 }
 

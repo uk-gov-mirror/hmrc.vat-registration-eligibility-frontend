@@ -21,16 +21,15 @@ import javax.inject.{Inject, Singleton}
 
 import cats.data.OptionT
 import cats.implicits._
-import common.ErrorUtil.fail
 import connectors.{KeystoreConnector, VatRegistrationConnector}
 import models._
-import models.api._
+import models.api.{VatServiceEligibility, _}
 import models.external.IncorporationInfo
 import play.api.libs.json.Format
 import common.enums.CacheKeys.CurrentProfile
 import common.enums.VatRegStatus
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -39,29 +38,14 @@ class VatRegistrationService @Inject()(val s4LService: S4LService,
                                        val keystoreConnector: KeystoreConnector,
                                        val vatRegConnector: VatRegistrationConnector) {
 
-  private[services] def s4l[T: Format : S4LKey]()(implicit hc: HeaderCarrier, profile: CurrentProfile) =
-    s4LService.fetchAndGet[T]()
-
   def getVatScheme()(implicit profile: CurrentProfile, hc: HeaderCarrier): Future[VatScheme] =
     vatRegConnector.getRegistration(profile.registrationId)
 
   def deleteVatScheme()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Unit] =
     vatRegConnector.deleteVatScheme(profile.registrationId)
 
-  def submitVatEligibility()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[VatServiceEligibility] = {
-    def merge(fresh: Option[S4LVatEligibility], vs: VatScheme): VatServiceEligibility =
-      fresh.fold(
-        vs.vatServiceEligibility.getOrElse(throw fail("VatServiceEligibility"))
-      )(s4l => S4LVatEligibility.apiT.toApi(s4l))
-
-    for {
-      vs       <- getVatScheme()
-      ve       <- s4l[S4LVatEligibility]()
-      s4lVC    <- s4l[S4LVatEligibilityChoice]()
-      vc       = s4lVC.map(S4LVatEligibilityChoice.apiT.toApi(_))
-      response <- vatRegConnector.upsertVatEligibility(profile.registrationId, merge(ve, vs).copy(vatEligibilityChoice = vc))
-    } yield response
-  }
+  def submitEligibility(eligibility: VatServiceEligibility)(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[VatServiceEligibility] =
+    vatRegConnector.upsertVatEligibility(profile.registrationId, eligibility)
 
   def getIncorporationInfo(txId: String)(implicit headerCarrier: HeaderCarrier): Future[Option[IncorporationInfo]] =
     vatRegConnector.getIncorporationInfo(txId).value

@@ -98,17 +98,15 @@ object FormValidation {
     def validPartialMonthYearModel(dateConstraint: => Constraint[LocalDate] = unconstrained)(implicit e: ErrorCode): Constraint[MonthYearModel] =
       Constraint(dm => dm.toLocalDate.fold[ValidationResult](Invalid(s"validation.$e.invalid"))(dateConstraint(_)))
 
-
-def incorporationDateValidation(constraint: => Constraint[LocalDate] = unconstrained)(incorporationDate:LocalDate)(implicit e:ErrorCode):
-Constraint[LocalDate] ={
-  Constraint { dm =>
-    dm match{
-    case date if(date.isBefore(incorporationDate)) => Invalid(ValidationError(s"validation.$e.range.below"))
-    case date if(date.isAfter(LocalDate.now())) => Invalid(ValidationError(s"validation.$e.range.above"))
-    case _ => Valid
-    }
-  }
-}
+    def incorporationDateValidation(incorporationDate: LocalDate)(constraint: => Constraint[LocalDate] = unconstrained)
+                                   (implicit e:ErrorCode): Constraint[LocalDate] =
+      Constraint { dm =>
+        dm match{
+        case date if(date.isBefore(incorporationDate)) => Invalid(ValidationError(s"validation.$e.range.below"))
+        case date if(date.isAfter(LocalDate.now())) => Invalid(ValidationError(s"validation.$e.range.above"))
+        case _ => Valid
+        }
+      }
 }
 
 }

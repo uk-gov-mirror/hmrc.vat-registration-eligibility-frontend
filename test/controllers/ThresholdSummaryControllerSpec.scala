@@ -16,22 +16,20 @@
 
 package controllers
 
-import java.time.LocalDate
-
-import fixtures.VatRegistrationFixture
-import helpers.{S4LMockSugar, VatRegSpec}
-import models.api.{VatEligibilityChoice, VatExpectedThresholdPostIncorp, VatThresholdPostIncorp}
+import fixtures.{S4LFixture, VatRegistrationFixture}
+import helpers.VatRegSpec
+import models.api.{VatExpectedThresholdPostIncorp, VatThresholdPostIncorp}
 import models.view._
 import models.{CurrentProfile, S4LVatEligibilityChoice}
-import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
-
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
-class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+import scala.concurrent.Future
+
+class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
 
@@ -40,7 +38,8 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
       mockS4LService,
       mockVatRegistrationService,
       mockCurrentProfileService,
-      mockVatRegFrontendService
+      mockVatRegFrontendService,
+      mockEligibilityService
     ) {
       override val authConnector = mockAuthConnector
 
@@ -55,15 +54,21 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
 
   "Calling threshold summary to show the threshold summary page" should {
     "return HTML with a valid threshold summary view" in new Setup {
-      save4laterReturns(S4LVatEligibilityChoice(
-        overThreshold = Some(OverThresholdView(false, None)),
-        expectationOverThreshold = Some(ExpectationOverThresholdView(false, None))
-      ))
+
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold))
+
       callAuthorised(testController.show)(_ includesText "Check and confirm your answers")
     }
 
     "getVatThresholdAndExpectedThreshold returns a valid VatThresholdPostIncorp and VatExpectedThresholdPostIncorp" in new Setup {
-      save4laterReturns(S4LVatEligibilityChoice(expectationOverThreshold = Some(ExpectationOverThresholdView(false,None)),overThreshold = Some(OverThresholdView(false))))
+      val eligibilityChoice = S4LVatEligibilityChoice(
+        expectationOverThreshold = Some(ExpectationOverThresholdView(false,None)),
+        overThreshold = Some(OverThresholdView(false))
+      )
+
+      when(mockS4LService.fetchAndGet[S4LVatEligibilityChoice](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(eligibilityChoice)))
 
       testController.getVatThresholdAndExpectedThreshold() returns (validVatThresholdPostIncorp,VatExpectedThresholdPostIncorp(false,None))
     }
@@ -75,42 +80,46 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
     }
 
     "getThresholdSummary maps a valid VatThresholdSummary object to a Summary object" in new Setup {
-      save4laterReturns(S4LVatEligibilityChoice(
-        overThreshold = Some(OverThresholdView(false, None))
-      ))
-      save4laterReturns(S4LVatEligibilityChoice(
+      val eligibilityChoice = S4LVatEligibilityChoice(
+        overThreshold = Some(OverThresholdView(false, None)),
         expectationOverThreshold = Some(ExpectationOverThresholdView(false, None))
-      ))
+      )
 
+      when(mockS4LService.fetchAndGet[S4LVatEligibilityChoice](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(eligibilityChoice)))
 
       testController.getThresholdSummary().map(summary => summary.sections.length shouldBe 2)
     }
   }
 
   s"POST ${controllers.routes.ThresholdSummaryController.submit()}" should {
-    "redirect the user to the voluntary registration page if  if Q1A3 is false" in new Setup {
-      save4laterReturns(S4LVatEligibilityChoice(
-        expectationOverThreshold = Some(ExpectationOverThresholdView(false,None)),
-        overThreshold = Some(OverThresholdView(false, None)
-        )
-      ))
-
+    "redirect the user to the voluntary registration page if both overThreshold and expectationOverThreshold are false" in new Setup {
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold))
 
       callAuthorised(testController.submit) {
         _ redirectsTo controllers.routes.VoluntaryRegistrationController.show.url
       }
     }
 
-    "redirect the user to the completion capacity page if Q1A3 is true" in new Setup {
+    "redirect the user to the completion capacity page if overThreshold is true" in new Setup {
+      val overThreshold = OverThresholdView(true, Some(testDate))
 
-      save4laterExpectsSave[VoluntaryRegistration]()
-      save4laterReturns(S4LVatEligibilityChoice(
-        expectationOverThreshold = Some(ExpectationOverThresholdView(true,Some(testDate))),
-        overThreshold = Some(OverThresholdView(true, Some(testDate)))
-      ))
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(overThreshold = Some(overThreshold))))
 
-      when(mockVatRegistrationService.submitVatEligibility()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
-      when(mockVatRegistrationService.deleteVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful())
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someEntryUrl")
+
+      callAuthorised(testController.submit) {
+        _ redirectsTo s"someEntryUrl"
+      }
+    }
+
+    "redirect the user to the completion capacity page if expectationOverThreshold is true" in new Setup {
+      val expectation = ExpectationOverThresholdView(true, Some(testDate))
+
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(expectationOverThreshold = Some(expectation))))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someEntryUrl")
 

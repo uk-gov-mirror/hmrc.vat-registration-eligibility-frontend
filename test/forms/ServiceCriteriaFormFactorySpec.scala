@@ -16,8 +16,8 @@
 
 package forms
 
-import models.YesOrNoQuestion
 import helpers.FormInspectors._
+import models.view.YesOrNoQuestion
 import uk.gov.hmrc.play.test.UnitSpec
 
 class ServiceCriteriaFormFactorySpec extends UnitSpec {

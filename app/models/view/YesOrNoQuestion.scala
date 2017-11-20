@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-package common
+package models.view
 
-object ErrorUtil {
-  def fail(logicalGroup: String): Exception =
-    new IllegalStateException(s"$logicalGroup data expected to be found in either backend or save for later")
-}
+case class YesOrNoQuestion(question: String, answer: Boolean)

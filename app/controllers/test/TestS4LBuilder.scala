@@ -19,13 +19,13 @@ package controllers.test
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 
-import models.S4LVatEligibilityChoice
+import models.{S4LVatEligibility, S4LVatEligibilityChoice}
 import models.test.TestSetup
-import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
+import models.view.{ExpectationOverThresholdView, OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
 
 class TestS4LBuilder {
 
-  def eligiblityChoiceFromData(data: TestSetup): S4LVatEligibilityChoice = {
+  def eligibilityChoiceFromData(data: TestSetup): S4LVatEligibilityChoice = {
     val taxableTurnover: Option[String] = data.vatEligibilityChoice.taxableTurnoverChoice
 
     val overThresholdView: Option[OverThresholdView] = data.vatEligibilityChoice.overThresholdSelection match {
@@ -38,6 +38,16 @@ class TestS4LBuilder {
       case _ => None
     }
 
+    val expectationOverThresholdView: Option[ExpectationOverThresholdView] = data.vatEligibilityChoice.expectationOverThresholdSelection match {
+      case Some("true") => Some(ExpectationOverThresholdView(selection = true, Some(LocalDate.of(
+        data.vatEligibilityChoice.expectationOverThresholdYear.map(_.toInt).get,
+        data.vatEligibilityChoice.expectationOverThresholdMonth.map(_.toInt).get,
+        data.vatEligibilityChoice.expectationOverThresholdDay.map(_.toInt).get
+      ))))
+      case Some("false") => Some(ExpectationOverThresholdView(selection = false, None))
+      case _ => None
+    }
+
     val voluntaryRegistration: Option[String] = data.vatEligibilityChoice.voluntaryChoice
     val voluntaryRegistrationReason: Option[String] = data.vatEligibilityChoice.voluntaryRegistrationReason
 
@@ -45,7 +55,17 @@ class TestS4LBuilder {
       taxableTurnover = taxableTurnover.map(TaxableTurnover(_)),
       voluntaryRegistration = voluntaryRegistration.map(VoluntaryRegistration(_)),
       voluntaryRegistrationReason = voluntaryRegistrationReason.map(VoluntaryRegistrationReason(_)),
-      overThreshold = overThresholdView
+      overThreshold = overThresholdView,
+      expectationOverThreshold = expectationOverThresholdView
     )
   }
+
+  def eligibilityFromData(data: TestSetup): S4LVatEligibility = S4LVatEligibility(
+    haveNino = data.vatServiceEligibility.haveNino.map(_.toBoolean),
+    doingBusinessAbroad = data.vatServiceEligibility.doingBusinessAbroad.map(_.toBoolean),
+    doAnyApplyToYou = data.vatServiceEligibility.doAnyApplyToYou.map(_.toBoolean),
+    applyingForAnyOf = data.vatServiceEligibility.applyingForAnyOf.map(_.toBoolean),
+    applyingForVatExemption = data.vatServiceEligibility.applyingForVatExemption.map(_.toBoolean),
+    companyWillDoAnyOf = data.vatServiceEligibility.companyWillDoAnyOf.map(_.toBoolean)
+  )
 }

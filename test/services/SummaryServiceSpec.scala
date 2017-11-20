@@ -16,47 +16,40 @@
 
 package services
 
+import java.time.LocalDate
+
 import common.enums.VatRegStatus
-import helpers.VatRegSpec
-import models.S4LVatEligibility
-import models.api.VatScheme
+import fixtures.{S4LFixture, VatRegistrationFixture}
+import helpers.FutureAssertions
+import mocks.VatMocks
+import models.{CurrentProfile, S4LVatEligibility}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import org.scalatest.mockito.MockitoSugar
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class SummaryServiceSpec extends VatRegSpec {
+class SummaryServiceSpec extends UnitSpec with MockitoSugar with VatMocks with FutureAssertions with VatRegistrationFixture with S4LFixture {
+  implicit val hc = HeaderCarrier()
 
-
+  implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1",
+    VatRegStatus.draft,Some(LocalDate.of(2016, 12, 21)))
 
   class Setup {
     val service = new SummaryService(
-      s4LService = mockS4LService,
-      vatRegService = mockVatRegistrationService
+      eligibilityService = mockEligibilityService
     )
   }
 
   "Calling Eligibility Summary" should {
-    "return a valid summary with the right amount of sections from s4l if present" in new Setup {
-      when(mockS4LService.fetchAndGet[S4LVatEligibility]()(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(S4LVatEligibility(Some(validServiceEligibilityNoChoice)))))
+    "return a valid summary with the right amount of sections from a valid api model" in new Setup {
+      when(mockEligibilityService.getEligibility(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibility))
 
-      val response = await(service.getEligibilitySummary())
-
-      response.sections.length shouldBe 6
-      response.sections(0).id shouldBe "nationalInsurance"
-      response.sections(1).id shouldBe "internationalBusiness"
-      response.sections(2).id shouldBe "otherBusiness"
-      response.sections(3).id shouldBe "otherVatScheme"
-      response.sections(4).id shouldBe "vatExemption"
-      response.sections(5).id shouldBe "resources"
-    }
-    "return a valid summary with the right amount of sections from vatScheme" in new Setup {
-      when(mockS4LService.fetchAndGet[S4LVatEligibility]()(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(None))
-
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(VatScheme("foobar",Some(validServiceEligibilityNoChoice),VatRegStatus.draft)))
+      when(mockEligibilityService.toApi(ArgumentMatchers.any[S4LVatEligibility]()))
+        .thenReturn(validServiceEligibilityNoChoice)
 
       val response = await(service.getEligibilitySummary())
 

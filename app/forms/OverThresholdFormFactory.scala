@@ -18,14 +18,16 @@ package forms
 
 import java.time.LocalDate
 
-import forms.FormValidation.Dates.{nonEmptyMonthYearModel, validPartialMonthYearModel}
-import forms.FormValidation.{inRangeWithArgs, missingBooleanFieldMappingArgs}
+import forms.FormValidation.Dates.{incorporationDateValidation, nonEmptyMonthYearModel, validPartialMonthYearModel}
+import forms.FormValidation.missingBooleanFieldMappingArgs
 import models.MonthYearModel
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
 import models.view.OverThresholdView
 import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
+
+import scala.util.Try
 
 object OverThresholdFormFactory {
 
@@ -35,10 +37,17 @@ object OverThresholdFormFactory {
 
   val RADIO_YES_NO = "overThresholdRadio"
 
-  def form(dateOfIncorporation: LocalDate): Form[OverThresholdView] = {
+  def bind(selection: Boolean, dateModel: Option[MonthYearModel]): OverThresholdView =
+    OverThresholdView(selection, dateModel.flatMap(_.toLocalDate))
 
-    val minDate: LocalDate = dateOfIncorporation
-    val maxDate: LocalDate = LocalDate.now()
+  def unbind(overThreshold: OverThresholdView): Option[(Boolean, Option[MonthYearModel])] =
+    Try {
+      overThreshold.date.fold((overThreshold.selection, Option.empty[MonthYearModel])) {
+        d => (overThreshold.selection, Some(MonthYearModel.fromLocalDate(d)))
+      }
+    }.toOption
+
+  def form(dateOfIncorporation: LocalDate): Form[OverThresholdView] = {
     implicit val specificErrorCode: String = "overThreshold.date"
 
     Form(
@@ -50,9 +59,9 @@ object OverThresholdFormFactory {
             "month" -> text,
             "year" -> text
           )(MonthYearModel.apply)(MonthYearModel.unapply).verifying(
-            nonEmptyMonthYearModel(validPartialMonthYearModel(inRangeWithArgs(minDate, maxDate)(Seq(dateOfIncorporation.format(FORMAT_DD_MMMM_Y))))))
+            nonEmptyMonthYearModel(validPartialMonthYearModel(incorporationDateValidation(dateOfIncorporation)())))
         )
-      )(OverThresholdView.bind)(OverThresholdView.unbind)
+      )(bind)(unbind)
     )
   }
 }

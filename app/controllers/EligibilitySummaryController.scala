@@ -23,6 +23,8 @@ import javax.inject.Inject
 import play.api.i18n.MessagesApi
 import services.{CurrentProfileService, S4LService, SummaryService, VatRegistrationService}
 
+import scala.concurrent.Future
+
 class EligibilitySummaryController @Inject()(implicit val s4LService: S4LService,
                                              implicit val messagesApi: MessagesApi,
                                              val summaryService: SummaryService,
@@ -35,15 +37,15 @@ class EligibilitySummaryController @Inject()(implicit val s4LService: S4LService
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-            summaryService.getEligibilitySummary() map ( summary => Ok(views.html.pages.summary_eligibility(summary)))
-          }
+          summaryService.getEligibilitySummary() map ( summary => Ok(views.html.pages.summary_eligibility(summary)))
         }
+  }
 
   def submit: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          vrs.submitVatEligibility() map ( _ => Redirect(controllers.routes.EligibilitySuccessController.show()))
+          Future.successful(Redirect(controllers.routes.EligibilitySuccessController.show()))
         }
   }
 }

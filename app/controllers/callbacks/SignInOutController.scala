@@ -37,4 +37,7 @@ class SignInOutController @Inject()(implicit val messagesApi: MessagesApi) exten
     Redirect(s"$compRegFEURL$compRegFEURI/questionnaire").withNewSession
   }
 
+  def dashboard: Action[AnyContent] = authorised { implicit user => implicit request =>
+    Redirect(s"$compRegFEURL$compRegFEURI/dashboard")
+  }
 }

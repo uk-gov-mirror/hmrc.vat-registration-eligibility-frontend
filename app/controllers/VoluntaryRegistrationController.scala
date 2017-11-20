@@ -22,18 +22,19 @@ import forms.VoluntaryRegistrationForm
 import models.view.VoluntaryRegistration
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, EligibilityService, S4LService, VatRegFrontendService, VatRegistrationService}
 import utils.SessionProfile
+
+import scala.concurrent.Future
 
 @Singleton
 class VoluntaryRegistrationController @Inject()(implicit val messagesApi: MessagesApi,
                                                 implicit val s4l: S4LService,
                                                 val currentProfileService: CurrentProfileService,
                                                 val vrs: VatRegistrationService,
-                                                val vatRegFrontendService: VatRegFrontendService)
+                                                val vatRegFrontendService: VatRegFrontendService,
+                                                val eligibilityService: EligibilityService)
   extends VatRegistrationController with SessionProfile {
-
-  import cats.syntax.flatMap._
 
   val form = VoluntaryRegistrationForm.form
 
@@ -41,8 +42,11 @@ class VoluntaryRegistrationController @Inject()(implicit val messagesApi: Messag
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          viewModel[VoluntaryRegistration]().fold(form)(form.fill)
-            .map(f => Ok(views.html.pages.voluntary_registration(f)))
+          eligibilityService.getEligibilityChoice map { choice =>
+            Ok(views.html.pages.voluntary_registration(
+              choice.voluntaryRegistration.fold(form)(form.fill)
+            ))
+          }
         }
   }
 
@@ -51,11 +55,15 @@ class VoluntaryRegistrationController @Inject()(implicit val messagesApi: Messag
       implicit request =>
         withCurrentProfile { implicit profile =>
           form.bindFromRequest().fold(
-            badForm => BadRequest(views.html.pages.voluntary_registration(badForm)).pure,
-            goodForm => (VoluntaryRegistration.REGISTER_YES == goodForm.yesNo).pure.ifM(
-              save(goodForm).map(_ => controllers.routes.VoluntaryRegistrationReasonController.show.url),
-              s4l.clear().flatMap(_ => vrs.deleteVatScheme()).map(_ => vatRegFrontendService.buildVatRegFrontendUrlWelcome)
-            ).map(Redirect(_)))
+            badForm => Future.successful(BadRequest(views.html.pages.voluntary_registration(badForm))),
+            data => eligibilityService.saveChoiceQuestion(data) map { _ =>
+              if (data.yesNo == VoluntaryRegistration.REGISTER_YES) {
+                Redirect(controllers.routes.VoluntaryRegistrationReasonController.show())
+              } else {
+                Redirect(vatRegFrontendService.buildVatRegFrontendUrlWelcome)
+              }
+            }
+          )
         }
   }
 }

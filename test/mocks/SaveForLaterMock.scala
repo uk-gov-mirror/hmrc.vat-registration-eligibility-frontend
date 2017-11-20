@@ -18,16 +18,15 @@ package mocks
 
 import cats.data.OptionT
 import connectors.{OptionalResponse, S4LConnector}
-import models.S4LKey
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 trait SaveForLaterMock {
   this: MockitoSugar =>
@@ -50,8 +49,8 @@ trait SaveForLaterMock {
       .thenReturn(Future.successful(HttpResponse(200)))
   }
 
-  def mockS4LSaveForm[T:S4LKey](cacheMap: CacheMap, mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[CacheMap]] = {
-    when(mockS4LConnector.save[T](ArgumentMatchers.anyString(), ArgumentMatchers.contains(S4LKey[T].key),
+  def mockS4LSaveForm[T](cacheMap: CacheMap, mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[CacheMap]] = {
+    when(mockS4LConnector.save[T](ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
       ArgumentMatchers.any[T]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(Future.successful(cacheMap))
   }

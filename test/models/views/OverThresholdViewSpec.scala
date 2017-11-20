@@ -19,9 +19,9 @@ package models.views
 import java.time.LocalDate
 
 import fixtures.VatRegistrationFixture
-import models.api.VatThresholdPostIncorp
+import forms.OverThresholdFormFactory
 import models.view.OverThresholdView
-import models.{ApiModelTransformer, MonthYearModel, S4LVatEligibilityChoice}
+import models.MonthYearModel
 import org.scalatest.Inside
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -33,7 +33,7 @@ class OverThresholdViewSpec extends UnitSpec with VatRegistrationFixture with In
 
   "unbind" should {
     "decompose an over threshold view with a date" in {
-      inside(OverThresholdView.unbind(yesView)) {
+      inside(OverThresholdFormFactory.unbind(yesView)) {
         case Some((selection, otDate)) =>
           selection shouldBe true
           otDate shouldBe Some(MonthYearModel.fromLocalDate(date))
@@ -41,7 +41,7 @@ class OverThresholdViewSpec extends UnitSpec with VatRegistrationFixture with In
     }
 
     "decompose an over threshold view without a date" in {
-      inside(OverThresholdView.unbind(noView)) {
+      inside(OverThresholdFormFactory.unbind(noView)) {
         case Some((selection, otDate)) =>
           selection shouldBe false
           otDate shouldBe None
@@ -51,56 +51,10 @@ class OverThresholdViewSpec extends UnitSpec with VatRegistrationFixture with In
 
   "bind" should {
     "create OverThresholdView when MonthYearModel is present" in {
-      OverThresholdView.bind(true, Some(MonthYearModel.fromLocalDate(date))) shouldBe OverThresholdView(true, Some(date))
+      OverThresholdFormFactory.bind(true, Some(MonthYearModel.fromLocalDate(date))) shouldBe OverThresholdView(true, Some(date))
     }
     "create OverThresholdView when MonthYearModel is NOT present" in {
-      OverThresholdView.bind(false, None) shouldBe OverThresholdView(false, None)
+      OverThresholdFormFactory.bind(false, None) shouldBe OverThresholdView(false, None)
     }
   }
-
-  "ViewModelFormat" should {
-    val validOverThresholdView = OverThresholdView(false, None)
-    val s4LVatChoice: S4LVatEligibilityChoice = S4LVatEligibilityChoice(overThreshold = Some(validOverThresholdView))
-
-    "extract over threshold from vatChoice" in {
-      OverThresholdView.viewModelFormat.read(s4LVatChoice) shouldBe Some(validOverThresholdView)
-    }
-
-    "update empty vatChoice with over threshold" in {
-      OverThresholdView.viewModelFormat.update(validOverThresholdView, Option.empty[S4LVatEligibilityChoice]).overThreshold shouldBe Some(validOverThresholdView)
-    }
-
-    "update non-empty vatChoice with over threshold" in {
-      OverThresholdView.viewModelFormat.update(validOverThresholdView, Some(s4LVatChoice)).overThreshold shouldBe Some(validOverThresholdView)
-    }
-
-    "ApiModelTransformer" should {
-
-      "produce empty view model from an empty frs start date" in {
-        val vm = ApiModelTransformer[OverThresholdView]
-          .toViewModel(vatScheme(vatServiceEligibility = None))
-        vm shouldBe None
-      }
-
-      "produce a view model from a vatScheme with an over threshold date set" in {
-        val vm = ApiModelTransformer[OverThresholdView]
-          .toViewModel(vatScheme(vatServiceEligibility = Some(validServiceEligibility.copy(
-            vatEligibilityChoice = Some(validVatChoice.copy(vatThresholdPostIncorp =
-              Some(VatThresholdPostIncorp(overThresholdSelection = true, overThresholdDate = Some(date)))))
-          ))))
-        vm shouldBe Some(OverThresholdView(true, Some(date)))
-      }
-
-      "produce a view model from a vatScheme with no over threshold date" in {
-        val vm = ApiModelTransformer[OverThresholdView]
-          .toViewModel(vatScheme(vatServiceEligibility = Some(validServiceEligibility.copy(
-            vatEligibilityChoice = Some(validVatChoice.copy(vatThresholdPostIncorp =
-              Some(VatThresholdPostIncorp(overThresholdSelection = false, None))))
-          ))))
-        vm shouldBe Some(OverThresholdView(false, None))
-      }
-
-    }
-  }
-
 }

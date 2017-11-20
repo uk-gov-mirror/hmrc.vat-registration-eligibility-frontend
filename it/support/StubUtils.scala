@@ -19,8 +19,7 @@ package support
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.matching.UrlPathPattern
-import common.enums.VatRegStatus
-import models.S4LKey
+import common.enums.{CacheKeys, VatRegStatus}
 import play.api.libs.json.{Format, JsObject, Json}
 import play.api.mvc.AnyContentAsFormUrlEncoded
 import play.api.test.FakeRequest
@@ -64,8 +63,8 @@ trait StubUtils {
 
     def company = IncorporationStub()
 
-    def s4lContainer[C: S4LKey]: ViewModelStub[C] = new ViewModelStub[C]()
-    def s4lContainerInScenario[C: S4LKey]: ViewModelScenarioStub[C] = new ViewModelScenarioStub[C]()
+    def s4lContainer: ViewModelStub = new ViewModelStub()
+    def s4lContainerInScenario: ViewModelScenarioStub = new ViewModelScenarioStub()
 
     def audit = AuditStub()
 
@@ -86,7 +85,7 @@ trait StubUtils {
       builder
     }
 
-    def putKeyStoreValue(key:String,data:String):PreconditionBuilder ={
+    def putKeyStoreValue(key:String, data: String):PreconditionBuilder ={
       stubFor(stubKeystorePut(key,data))
       builder
     }
@@ -176,14 +175,14 @@ trait StubUtils {
             """.stripMargin
           ))
 
-    def stubS4LGet[C, T](t: T)(implicit key: S4LKey[C], fmt: Format[T]): MappingBuilder = {
+    def stubS4LGet[T](key: String, t: T)(implicit fmt: Format[T]): MappingBuilder = {
       get(urlPathMatching("/save4later/vat-registration-eligibility-frontend/1"))
         .willReturn(ok(
           s"""
              |{
              |  "atomicId": { "$$oid": "598830cf5e00005e00b3401e" },
              |  "data": {
-             |    "${key.key}": "${encrypt(fmt.writes(t).toString())}"
+             |    "$key": "${encrypt(fmt.writes(t).toString())}"
              |  },
              |  "id": "1",
              |  "modifiedDetails": {
@@ -217,16 +216,16 @@ trait StubUtils {
   }
 
 
-  class ViewModelStub[C]()(implicit builder: PreconditionBuilder, s4LKey: S4LKey[C]) extends S4LStub with KeystoreStub {
+  class ViewModelStub()(implicit builder: PreconditionBuilder) extends S4LStub with KeystoreStub {
 
-    def contains[T](t: T)(implicit fmt: Format[T]): PreconditionBuilder = {
-      stubFor(stubS4LGet[C, T](t))
+    def contains[T](key: String, t: T)(implicit fmt: Format[T]): PreconditionBuilder = {
+      stubFor(stubS4LGet[T](key, t))
       builder
     }
 
 
-    def isUpdatedWith[T](t: T)(implicit key: S4LKey[C], fmt: Format[T]): PreconditionBuilder = {
-      stubFor(stubS4LPut(key.key, fmt.writes(t).toString()))
+    def isUpdatedWith[T](key: String, t: T)(implicit fmt: Format[T]): PreconditionBuilder = {
+      stubFor(stubS4LPut(key, fmt.writes(t).toString()))
       builder
     }
 
@@ -241,21 +240,21 @@ trait StubUtils {
     }
   }
 
-  class ViewModelScenarioStub[C](scenario: String = "S4L Scenario")
-                                (implicit builder: PreconditionBuilder, s4LKey: S4LKey[C]) extends ViewModelStub {
+  class ViewModelScenarioStub(scenario: String = "S4L Scenario")
+                             (implicit builder: PreconditionBuilder) extends ViewModelStub {
 
-    def contains[T](t: T, currentState: Option[String] = None, nextState: Option[String] = None)
+    def contains[T](key: String, t: T, currentState: Option[String] = None, nextState: Option[String] = None)
                    (implicit fmt: Format[T]): PreconditionBuilder = {
-      val mappingBuilderScenarioGET = stubS4LGet[C, T](t).inScenario(scenario)
+      val mappingBuilderScenarioGET = stubS4LGet[T](key, t).inScenario(scenario)
       val mappingBuilderGET = currentState.fold(mappingBuilderScenarioGET)(mappingBuilderScenarioGET.whenScenarioStateIs)
 
       stubFor(nextState.fold(mappingBuilderGET)(mappingBuilderGET.willSetStateTo))
       builder
     }
 
-    def isUpdatedWith[T](t: T, currentState: Option[String] = None, nextState: Option[String] = None)
-                        (implicit key: S4LKey[C], fmt: Format[T]): PreconditionBuilder = {
-      val mappingBuilderScenarioPUT = stubS4LPut(key.key, fmt.writes(t).toString()).inScenario(scenario)
+    def isUpdatedWith[T](key: String, t: T, currentState: Option[String] = None, nextState: Option[String] = None)
+                        (implicit fmt: Format[T]): PreconditionBuilder = {
+      val mappingBuilderScenarioPUT = stubS4LPut(key, fmt.writes(t).toString()).inScenario(scenario)
       val mappingBuilderPUT = currentState.fold(mappingBuilderScenarioPUT)(mappingBuilderScenarioPUT.whenScenarioStateIs)
 
       stubFor(nextState.fold(mappingBuilderPUT)(mappingBuilderPUT.willSetStateTo))
@@ -382,13 +381,13 @@ trait StubUtils {
                              | "companyName" : "testCompanyName",
                              | "registrationID" : "1",
                              | "transactionID" : "000-434-1",
-                             | "vatRegistrationStatus" : "DRAFT"
+                             | "vatRegistrationStatus" : "${VatRegStatus.draft}"
                              |}
                            """.stripMargin
 
       (currentState, nextState) match {
-        case (None, None) => putKeyStoreValue("CurrentProfile", currentProfile)
-        case _ => putKeyStoreValue("CurrentProfile", currentProfile, currentState, nextState)
+        case (None, None) => putKeyStoreValue(CacheKeys.CurrentProfile, currentProfile)
+        case _ => putKeyStoreValue(CacheKeys.CurrentProfile, currentProfile, currentState, nextState)
       }
 
       builder
@@ -411,8 +410,8 @@ trait StubUtils {
       val currentProfile = if(withIncorporationDate) js.deepMerge(incorporationDate) else js
 
       (currentState, nextState) match {
-        case (None, None) => hasKeyStoreValue("CurrentProfile", currentProfile.toString)
-        case _ => hasKeyStoreValue("CurrentProfile", currentProfile.toString, currentState, nextState)
+        case (None, None) => hasKeyStoreValue(CacheKeys.CurrentProfile, currentProfile.toString)
+        case _ => hasKeyStoreValue(CacheKeys.CurrentProfile, currentProfile.toString, currentState, nextState)
       }
 
       builder
