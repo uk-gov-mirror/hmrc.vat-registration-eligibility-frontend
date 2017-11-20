@@ -60,25 +60,44 @@ pages.serviceCriteriaFailure.button.linkToLegacyApp     = Register using HMRC''s
 
 pages.serviceCriteriaFailure.nino.p1                    = You must have a National Insurance number to register for VAT with this service.
 
+pages.serviceCriteriaFailure.businessAbroad.link1       = You need to
+pages.serviceCriteriaFailure.businessAbroad.link1.1     = register using HMRC''s existing service.
+pages.serviceCriteriaFailure.businessAbroad.link1.2     = if:
 pages.serviceCriteriaFailure.businessAbroad.bullet1     = the company sells goods outside the UK but not in the UK
 pages.serviceCriteriaFailure.businessAbroad.bullet2     = the company''s head office is based outside the UK
-pages.serviceCriteriaFailure.businessAbroad.p1          = If the company distance sells goods into the UK from another EU country, you need to <a href="https://www.gov.uk/government/publications/vat-application-for-registration-distance-selling-vat1a">register using form VAT1A</a>.
-pages.serviceCriteriaFailure.businessAbroad.p2          = If the company buys goods from other EU countries and brings them into the UK, you need to <a href="https://www.gov.uk/government/publications/vat-application-for-registration-acquisitions-vat1b">register using form VAT1B</a>.
-pages.serviceCriteriaFailure.businessAbroad.p3          = If the company is selling assets you bought and claimed a VAT refund on from a country outside the UK, you need to <a href="https://www.gov.uk/government/publications/vat-registration-notification-vat1c">register using form VAT1C</a>.
+pages.serviceCriteriaFailure.businessAbroad.p1          = If the company distance sells goods into the UK from another EU country, you need to
+pages.serviceCriteriaFailure.businessAbroad.p1.1        = register using form VAT1A.
+pages.serviceCriteriaFailure.businessAbroad.p2          = If the company buys goods from other EU countries and brings them into the UK, you need to
+pages.serviceCriteriaFailure.businessAbroad.p2.1        = register using form VAT1B.
+pages.serviceCriteriaFailure.businessAbroad.p3          = If the company is selling assets you bought and claimed a VAT refund on from a country outside the UK, you need to
+pages.serviceCriteriaFailure.businessAbroad.p3.1        = register using form VAT1C.
 
+pages.serviceCriteriaFailure.doAnyApplyToYou.link1      = You need to
+pages.serviceCriteriaFailure.doAnyApplyToYou.link1.1    = register using HMRC''s existing service
+pages.serviceCriteriaFailure.doAnyApplyToYou.link1.2    = if:
 pages.serviceCriteriaFailure.doAnyApplyToYou.bullet1    = you changed the legal status of the company when you registered it with Companies House
 pages.serviceCriteriaFailure.doAnyApplyToYou.bullet2    = you''ve taken over a VAT-registered business which is operating and making a profit
 pages.serviceCriteriaFailure.doAnyApplyToYou.bullet3    = you want to register a VAT group
 pages.serviceCriteriaFailure.doAnyApplyToYou.bullet4    = you''ve been involved with other businesses in the last 2 years
-pages.serviceCriteriaFailure.doAnyApplyToYou.p1         = If your VAT taxable turnover went over the £85,000 threshold temporarily but has since dropped below the threshold, you need to <a href="https://www.gov.uk/government/publications/vat-application-for-registration-vat1">register using form VAT1</a>.
+pages.serviceCriteriaFailure.doAnyApplyToYou.p1         = If your VAT taxable turnover went over the £85,000 threshold temporarily but has since dropped below the threshold, you need to
+pages.serviceCriteriaFailure.doAnyApplyToYou.p1.1       = register using form VAT1
 
+pages.serviceCriteriaFailure.applyingForAnyOf.link1      = You need to
+pages.serviceCriteriaFailure.applyingForAnyOf.link1.1    = register using HMRC''s existing service
+pages.serviceCriteriaFailure.applyingForAnyOf.link1.2    = if:
 pages.serviceCriteriaFailure.applyingForAnyOf.bullet1    = the company is applying for the Annual Accounting Scheme
 pages.serviceCriteriaFailure.applyingForAnyOf.bullet2    = the company is applying for an exemption from VAT registration
-pages.serviceCriteriaFailure.applyingForAnyOf.p1         = If the company is applying for the Agricultural Flat Rate Scheme, you need to <a href="https://www.gov.uk/government/publications/vat-agricultural-flat-rate-scheme-application-for-certification-vat98">register using form VAT98</a>.
-pages.serviceCriteriaFailure.applyingForAnyOf.p2         = If the company is applying for an exception from VAT registration, you need to <a href="https://www.gov.uk/government/publications/vat-application-for-registration-vat1">register using form VAT1</a>.
+pages.serviceCriteriaFailure.applyingForAnyOf.p1         = If the company is applying for the Agricultural Flat Rate Scheme, you need to
+pages.serviceCriteriaFailure.applyingForAnyOf.p1.1       = register using form VAT98
+pages.serviceCriteriaFailure.applyingForAnyOf.p2         = If the company is applying for an exception from VAT registration, you need to
+pages.serviceCriteriaFailure.applyingForAnyOf.p2.1       = register using form VAT1
 
-pages.serviceCriteriaFailure.applyingForVatExemption.p1    = If the company is applying for a VAT registration exception, let us know online through the <a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">VAT online services helpdesk</a> or send a letter explaining your circumstances to <a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-enquiries">HMRC VAT Registration Services</a>.
-pages.serviceCriteriaFailure.applyingForVatExemption.p2    = If the company is applying for an exemption from VAT registration, <a href="https://online.hmrc.gov.uk/registration/newbusiness/introduction">register using form VAT1</a>.
+pages.serviceCriteriaFailure.applyingForVatExemption.p1    = If the company is applying for a VAT registration exception, let us know online through the
+pages.serviceCriteriaFailure.applyingForVatExemption.p1.1  = VAT online services helpdesk
+pages.serviceCriteriaFailure.applyingForVatExemption.p1.2  = or send a letter explaining your circumstances to
+pages.serviceCriteriaFailure.applyingForVatExemption.p1.3  = HMRC VAT Registration Services.
+pages.serviceCriteriaFailure.applyingForVatExemption.p2    = If the company is applying for an exemption from VAT registration,
+pages.serviceCriteriaFailure.applyingForVatExemption.p2.1  = register using form VAT1.
 
 pages.serviceCriteriaFailure.companyWillDoAnyOf.p1         = You can''t register with this service if the company:
 pages.serviceCriteriaFailure.companyWillDoAnyOf.bullet1    = hires out boats or aircraft to clients

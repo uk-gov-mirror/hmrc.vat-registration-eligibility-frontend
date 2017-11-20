@@ -16,6 +16,7 @@
 
 @()(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.helpers.form
+@import views.html.helpers.templates.newWindowLink
 
 @main_template(title = messages("pages.serviceCriteriaFailure.title")) {
   <header class="page-header">
@@ -23,7 +24,11 @@
   </header>
 
   <div id="applying-for-vat-exemption-text">
-      <p>@Html(messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1"))</p>
-      <p>@Html(messages("pages.serviceCriteriaFailure.applyingForVatExemption.p2"))</p>
+      <p>@messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1")
+          @newWindowLink("https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk", messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1.1"))
+          @messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1.2")
+          @newWindowLink("https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-enquiries", messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1.3"))</p>
+      <p>@messages("pages.serviceCriteriaFailure.applyingForVatExemption.p2")
+          @newWindowLink("https://online.hmrc.gov.uk/registration/newbusiness/introduction", messages("pages.serviceCriteriaFailure.applyingForVatExemption.p2.1"))</p>
   </div>
 }
