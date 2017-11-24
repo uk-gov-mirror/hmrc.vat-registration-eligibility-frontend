@@ -61,7 +61,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
       save4laterReturnsViewModel[VatServiceEligibility](validServiceEligibility)()
 
       val eligibilityQuestions = Seq[(EligibilityQuestion, String)](
-        HaveNinoQuestion -> "Do you have a National Insurance number?",
+        HaveNinoQuestion -> "Do you have a UK National Insurance number?",
         DoingBusinessAbroadQuestion -> "Will the company do international business",
         DoAnyApplyToYouQuestion -> "Are you involved with more than one business or changing the legal status of your business?",
         ApplyingForAnyOfQuestion -> "Is the company applying for either the Agricultural Flat Rate Scheme or the Annual Accounting Scheme?",
@@ -156,7 +156,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
       )(_ redirectsTo addPrefix(routes.EligibilityController.showExemptionCriteria().url))
     }
 
-    "company will do any of question should redirect to can register for vat confirmation" in new Setup {
+    "company will do any of question should redirect to the eligibility summary page" in new Setup {
       when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
       val currentQuestion = CompanyWillDoAnyOfQuestion
       setupIneligibilityReason(mockKeystoreConnector, currentQuestion)
@@ -167,7 +167,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
         FakeRequest().withFormUrlEncodedBody(
           "question" -> currentQuestion.name,
           s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
-      )(_ redirectsTo addPrefix(controllers.routes.EligibilitySuccessController.show().url))
+      )(_ redirectsTo addPrefix(controllers.routes.EligibilitySummaryController.show().url))
     }
 
     "have nino should redirect to doing business abroad if answer is yes and nothing in s4l or backend" in new Setup {
@@ -238,7 +238,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
       )(_ redirectsTo addPrefix(routes.EligibilityController.showExemptionCriteria().url))
     }
 
-    "company will do any of question should redirect to can register for vat confirmation and nothing in s4l or backend" in new Setup {
+    "company will do any of question should redirect to can eligibility summary page for vat confirmation and nothing in s4l or backend" in new Setup {
       when(mockVatRegistrationService.submitVatEligibility()(any(),any())).thenReturn(validServiceEligibility.pure)
       val currentQuestion = CompanyWillDoAnyOfQuestion
 
@@ -251,7 +251,7 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
         FakeRequest().withFormUrlEncodedBody(
           "question" -> currentQuestion.name,
           s"${currentQuestion.name}Radio" -> (!currentQuestion.exitAnswer).toString)
-      )(_ redirectsTo addPrefix(controllers.routes.EligibilitySuccessController.show().url))
+      )(_ redirectsTo addPrefix(controllers.routes.EligibilitySummaryController.show().url))
     }
 
     "redirect to ineligible screen when user is NOT eligible to register for VAT using this service" in new Setup {

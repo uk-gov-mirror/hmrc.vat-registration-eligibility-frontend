@@ -46,7 +46,7 @@ class ServiceCriteriaQuestionsController @Inject()(val keystoreConnector: Keysto
     case DoingBusinessAbroadQuestion => controllers.routes.ServiceCriteriaQuestionsController.show(DoAnyApplyToYouQuestion.name)
     case DoAnyApplyToYouQuestion     => controllers.routes.ServiceCriteriaQuestionsController.show(ApplyingForAnyOfQuestion.name)
     case ApplyingForAnyOfQuestion    => controllers.routes.EligibilityController.showExemptionCriteria()
-    case CompanyWillDoAnyOfQuestion  => controllers.routes.EligibilitySuccessController.show()
+    case CompanyWillDoAnyOfQuestion  => controllers.routes.EligibilitySummaryController.show()
   }
 
   private def viewForQuestion(q: EligibilityQuestion, form: Form[YesOrNoQuestion])(implicit r: Request[AnyContent]) = q match {

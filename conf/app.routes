@@ -50,8 +50,8 @@ POST        /vat-taxable-turnover-gone-over                   controllers.Thresh
 GET        /go-over-vat-threshold-period                      controllers.ThresholdController.expectationOverShow
 POST       /go-over-vat-threshold-period                      controllers.ThresholdController.expectationOverSubmit
 ## Threshold summary
-GET         /check-confirm-answers                            controllers.ThresholdSummaryController.show
-POST        /check-confirm-answers                            controllers.ThresholdSummaryController.submit
+GET         /check-confirm-threshold                            controllers.ThresholdSummaryController.show
+POST        /check-confirm-threshold                            controllers.ThresholdSummaryController.submit
 
 ## VOLUNTARY REGISTRATION PAGE
 GET         /register-voluntarily                             controllers.VoluntaryRegistrationController.show
@@ -60,3 +60,7 @@ POST        /register-voluntarily                             controllers.Volunt
 ## VOLUNTARY REGISTRATION REASON PAGE
 GET         /applies-company                                  controllers.VoluntaryRegistrationReasonController.show
 POST        /applies-company                                  controllers.VoluntaryRegistrationReasonController.submit
+
+## ELIGIBILITY SUMMARY PAGE
+GET         /check-confirm-eligibility                          controllers.EligibilitySummaryController.show
+POST        /check-confirm-eligibility                          controllers.EligibilitySummaryController.submit

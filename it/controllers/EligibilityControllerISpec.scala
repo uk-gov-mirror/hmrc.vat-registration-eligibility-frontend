@@ -110,7 +110,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
         val res = whenReady(response)(a => a)
         res.status mustBe 200
         val document = Jsoup.parse(res.body)
-        document.title() mustBe "Is the company applying for either a VAT registration exception or exemption?"
+        document.title() mustBe "Will the company apply for a VAT registration exception or exemption?"
         document.getElementById("applyingForVatExemptionRadio-true").attr("checked") mustBe "checked"
       }
     }
@@ -205,7 +205,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
         whenReady(response){
           res =>
             res.status mustBe 303
-            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/can-register")
+            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/check-confirm-eligibility")
         }
       }
     }
