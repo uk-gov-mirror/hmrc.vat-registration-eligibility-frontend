@@ -49,7 +49,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           .vatScheme.isBlank
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
-        val response = buildClient("/check-confirm-answers").get()
+        val response = buildClient("/check-confirm-threshold").get()
         whenReady(response) { res =>
           res.status mustBe 200
           val document = Jsoup.parse(res.body)
@@ -75,7 +75,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           .audit.writesAudit()
           .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
 
-        val response = buildClient("/check-confirm-answers").get()
+        val response = buildClient("/check-confirm-threshold").get()
         whenReady(response) { res =>
           res.status mustBe 200
           val document = Jsoup.parse(res.body)
@@ -95,7 +95,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
         .currentProfile.withProfile()
         .audit.writesAudit()
 
-      val response = buildClient("/check-confirm-answers").get()
+      val response = buildClient("/check-confirm-threshold").get()
       whenReady(response)(_.status) mustBe 500
     }
   }
@@ -143,7 +143,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           .vatScheme.isUpdatedWith(postEligibilityData)
           .audit.writesAudit()
 
-        val response = buildClient("/check-confirm-answers").post(Map("" -> Seq("")))
+        val response = buildClient("/check-confirm-threshold").post(Map("" -> Seq("")))
         whenReady(response){ res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some("/vat-uri/who-is-registering-the-company-for-vat")
@@ -167,7 +167,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
           .audit.writesAudit()
 
-        val response = buildClient("/check-confirm-answers").post(Map("" -> Seq("")))
+        val response = buildClient("/check-confirm-threshold").post(Map("" -> Seq("")))
         whenReady(response){ res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VoluntaryRegistrationController.show().url)

@@ -1,0 +1,56 @@
+/*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package services
+
+import javax.inject.Inject
+
+import controllers.builders.{SummaryResourceBuilder, _}
+import models.{CurrentProfile, S4LVatEligibility}
+import models.api.VatServiceEligibility
+import models.view.Summary
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import scala.concurrent.Future
+
+class SummaryService @Inject()(val s4LService: S4LService, val vatRegService: VatRegistrationService) extends SummarySrv
+
+trait SummarySrv{
+   val s4LService: S4LService
+  val vatRegService: VatRegistrationService
+
+  def getEligibilitySummary()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Summary] =
+   getServiceEligibility().map(a => eligibilitySummary(a))
+
+  private def getServiceEligibility()(implicit hc: HeaderCarrier, profile: CurrentProfile) =
+    s4LService.fetchAndGet[S4LVatEligibility]() flatMap  {
+      case None     => vatRegService.getVatScheme() map (x => x.vatServiceEligibility)
+      case Some(e)  => Future.successful(e.vatEligibility)
+    }
+
+  private def eligibilitySummary(vs: Option[VatServiceEligibility])(implicit profile : CurrentProfile): Summary =
+    Summary(Seq(
+      SummaryNationalInsuranceBuilder(vs).section,
+      SummaryInternationalBusinessBuilder(vs).section,
+      SummaryOtherBusinessBuilder(vs).section,
+      SummaryOtherVatSchemeBuilder(vs).section,
+      SummaryVatExemptionBuilder(vs).section,
+      SummaryResourceBuilder(vs).section
+    ))
+
+
+}

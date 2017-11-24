@@ -58,7 +58,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
   "GET EligibilityController.showExemptionCriteria()" should {
     "return HTML for relevant page with no data in the form" in new Setup {
       save4laterReturnsViewModel[VatServiceEligibility](validServiceEligibility)()
-      val expectedTitle = "Is the company applying for either a VAT registration exception or exemption"
+      val expectedTitle = "Will the company apply for a VAT registration exception or exemption?"
       callAuthorised(testController.showExemptionCriteria())(_ includesText expectedTitle)
     }
   }
