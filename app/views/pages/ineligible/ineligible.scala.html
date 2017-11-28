@@ -17,6 +17,7 @@
 @(thisSection: String)(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.helpers.form
 @import views.html.helpers.templates.newWindowLink
+@import common.enums.{EligibilityQuestions => Questions}
 
 @main_template(title = messages("pages.serviceCriteriaFailure.title")) {
 
@@ -24,9 +25,9 @@
         <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.serviceCriteriaFailure.heading")</h1>
     </header>
 
-    @defining((in:String) => if (in == thisSection) "" else "hidden") { cssClass =>
+    @defining((in: String) => if (in == thisSection) "" else "hidden") { cssClass =>
 
-        <div id="nino-text" class="@cssClass("haveNino")">
+        <div id="nino-text" class="@cssClass(Questions.haveNino)">
 
             <p>@messages("pages.serviceCriteriaFailure.nino.p1")</p>
 
@@ -35,7 +36,7 @@
 
         </div>
 
-        <div id="business-abroad-text" class="@cssClass("doingBusinessAbroad")">
+        <div id="business-abroad-text" class="@cssClass(Questions.doingBusinessAbroad)">
 
             <p>@messages("pages.serviceCriteriaFailure.businessAbroad.p1")
                 @newWindowLink("https://www.gov.uk/government/publications/vat-application-for-registration-distance-selling-vat1a",
@@ -59,14 +60,14 @@
 
         </div>
 
-        <div id="do-any-apply-to-you-text" class="@cssClass("doAnyApplyToYou")">
+        <div id="do-any-apply-to-you-text" class="@cssClass(Questions.doAnyApplyToYou)">
 
             <p>@messages("pages.serviceCriteriaFailure.doAnyApplyToYou.link1")
                 @newWindowLink("https://online.hmrc.gov.uk/registration/newbusiness/introduction", messages("pages.serviceCriteriaFailure.doAnyApplyToYou.link1.1"))</p>
 
         </div>
 
-        <div id="applying-for-any-of-text" class="@cssClass("applyingForAnyOf")">
+        <div id="applying-for-any-of-text" class="@cssClass(Questions.applyingForAnyOf)">
 
             <p>@messages("pages.serviceCriteriaFailure.applyingForAnyOf.p1")
                 @newWindowLink("https://www.gov.uk/government/publications/vat-agricultural-flat-rate-scheme-application-for-certification-vat98", messages("pages.serviceCriteriaFailure.applyingForAnyOf.p1.1"))</p>
@@ -75,7 +76,7 @@
 
         </div>
 
-        <div id="company-will-do-any-of-text" class="@cssClass("companyWillDoAnyOf")">
+        <div id="company-will-do-any-of-text" class="@cssClass(Questions.companyWillDoAnyOf)">
 
             <p>@messages("pages.serviceCriteriaFailure.linkToLegacyApp")
                 @newWindowLink("https://online.hmrc.gov.uk/registration/newbusiness/introduction", messages("pages.serviceCriteriaFailure.linkToLegacyApp1"))</p>

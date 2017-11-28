@@ -16,19 +16,19 @@
 
 package controllers
 
-import helpers.{S4LMockSugar, VatRegSpec}
+import helpers.FormInspectors._
+import helpers.VatRegSpec
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import play.api.http.Status.NO_CONTENT
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.FakeRequest
-import play.api.http.Status.NO_CONTENT
-import helpers.FormInspectors._
 
 case class TestClass(text: String, number: Int)
 
 
-class VatRegistrationControllerSpec extends VatRegSpec with S4LMockSugar {
+class VatRegistrationControllerSpec extends VatRegSpec {
 
   class Setup{
     val testController = new VatRegistrationController {

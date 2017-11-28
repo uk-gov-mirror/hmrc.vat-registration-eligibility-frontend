@@ -16,28 +16,28 @@
 
 package controllers
 
-import fixtures.VatRegistrationFixture
-import helpers.{S4LMockSugar, VatRegSpec}
+import fixtures.{S4LFixture, VatRegistrationFixture}
+import helpers.VatRegSpec
 import models.CurrentProfile
-import models.view.{TaxableTurnover, VoluntaryRegistration}
+import models.view.TaxableTurnover
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
     val testController = new TaxableTurnoverController()(mockMessages,
       mockS4LService,
       mockVatRegistrationService,
       mockCurrentProfileService,
-      mockVatRegFrontendService
+      mockVatRegFrontendService,
+      mockEligibilityService
     ){
 
       override val authConnector: AuthConnector = mockAuthConnector
@@ -51,53 +51,29 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
   val fakeRequest = FakeRequest(routes.TaxableTurnoverController.show())
 
   s"GET ${routes.TaxableTurnoverController.show()}" should {
+    val expectedText = "VAT taxable sales of more than £85,000 in the 30 days"
 
-    "return HTML when there's a start date in S4L" in new Setup {
-      val taxableTurnover = TaxableTurnover(TaxableTurnover.TAXABLE_YES)
-
-      save4laterReturnsViewModel(taxableTurnover)()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+    "return HTML when there's a taxable turnover view model data" in new Setup {
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithTaxableTurnover))
 
       callAuthorised(testController.show()) {
-        _ includesText "VAT taxable sales of more than £85,000 in the 30 days"
+        _ includesText expectedText
       }
     }
 
-    "return HTML when there's nothing in S4L and vatScheme contains data" in new Setup {
-      save4laterReturnsNoViewModel[TaxableTurnover]()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
-      when(mockVatRegistrationService.getVatScheme()(any(), any[HeaderCarrier]()))
-        .thenReturn(Future.successful(validVatScheme))
+    "return HTML when there's a default taxable turnover view model data" in new Setup{
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyS4LEligibilityChoice))
 
       callAuthorised(testController.show) {
-        _ includesText "VAT taxable sales of more than £85,000 in the 30 days"
-      }
-    }
-
-
-    "return HTML when there's nothing in S4L and vatScheme contains no data" in new Setup{
-      save4laterReturnsNoViewModel[TaxableTurnover]()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
-      when(mockVatRegistrationService.getVatScheme()(any(), any[HeaderCarrier]()))
-        .thenReturn(Future.successful(emptyVatScheme))
-
-      callAuthorised(testController.show) {
-        _ includesText "VAT taxable sales of more than £85,000 in the 30 days"
+        _ includesText expectedText
       }
     }
   }
 
-
   s"POST ${routes.TaxableTurnoverController.submit()} with Empty data" should {
     "return 400" in new Setup {
-
-      when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(currentProfile)))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
       ))(result => result isA 400)
@@ -107,13 +83,8 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
   s"POST ${routes.TaxableTurnoverController.submit()} with Taxable Turnover selected Yes" should {
 
     "return 303" in new Setup {
-      save4laterExpectsSave[TaxableTurnover]()
-      save4laterExpectsSave[VoluntaryRegistration]()
-
-      when(mockVatRegistrationService.submitVatEligibility()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
-      when(mockVatRegistrationService.deleteVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful())
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithTaxableTurnover))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someUrl")
 
@@ -126,9 +97,12 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
 
   s"POST ${routes.TaxableTurnoverController.submit()} with Taxable Turnover selected No" should {
     "return 303" in new Setup {
-      save4laterExpectsSave[TaxableTurnover]()
+      import models.view.TaxableTurnover.TAXABLE_NO
 
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+      val taxableNO = TaxableTurnover(TAXABLE_NO)
+
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithTaxableTurnover.copy(taxableTurnover = Some(taxableNO))))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "taxableTurnoverRadio" -> TaxableTurnover.TAXABLE_NO

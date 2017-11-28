@@ -18,8 +18,8 @@ package services
 
 import cats.data.OptionT
 import common.enums.CacheKeys
-import fixtures.VatRegistrationFixture
-import helpers.{S4LMockSugar, VatRegSpec}
+import fixtures.{S4LFixture, VatRegistrationFixture}
+import helpers.VatRegSpec
 import models._
 import models.external.IncorporationInfo
 import org.mockito.ArgumentMatchers
@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
     val service = new VatRegistrationService(mockS4LService, mockKeystoreConnector, mockRegConnector)
@@ -44,13 +44,9 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
 
   "Calling submitEligibility" should {
     "return a success response when VatEligibility is submitted" in new Setup {
-      save4laterReturns(S4LVatEligibility(Some(validServiceEligibility)))
-      save4laterReturns(S4LVatEligibilityChoice.modelT.toS4LModel(validVatScheme))
-
-      when(mockRegConnector.getRegistration(ArgumentMatchers.eq(testRegId))(any(), any())).thenReturn(validVatScheme.pure)
       when(mockRegConnector.upsertVatEligibility(any(), any())(any(), any())).thenReturn(validServiceEligibility.pure)
 
-      service.submitVatEligibility() returns validServiceEligibility
+      service.submitEligibility(validServiceEligibility) returns validServiceEligibility
     }
   }
 
@@ -64,20 +60,9 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
   }
 
   "When this is the first time the user starts a journey and we're persisting to the backend" should {
-    "submitVatEligibility should process the submission even if VatScheme does not contain a VatEligibility object" in new Setup {
-      when(mockRegConnector.getRegistration(ArgumentMatchers.eq(testRegId))(any(), any())).thenReturn(emptyVatScheme.pure)
+    "submitEligibility should process the submission even if VatScheme does not contain a VatEligibility object" in new Setup {
       when(mockRegConnector.upsertVatEligibility(any(), any())(any(), any())).thenReturn(validServiceEligibility.pure)
-      save4laterReturns(S4LVatEligibility(Some(validServiceEligibility)))
-      save4laterReturns(S4LVatEligibilityChoice.modelT.toS4LModel(validVatScheme))
-      service.submitVatEligibility() returns validServiceEligibility
-    }
-
-    "submitVatEligibility should fail if there's not trace of VatEligibility in neither backend nor S4L" in new Setup {
-      when(mockRegConnector.getRegistration(ArgumentMatchers.eq(testRegId))(any(), any())).thenReturn(emptyVatScheme.pure)
-      save4laterReturnsNothing[S4LVatEligibility]()
-      save4laterReturnsNothing[S4LVatEligibilityChoice]()
-
-      service.submitVatEligibility() failedWith classOf[IllegalStateException]
+      service.submitEligibility(validServiceEligibility) returns validServiceEligibility
     }
   }
 

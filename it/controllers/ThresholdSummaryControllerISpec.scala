@@ -19,17 +19,18 @@ package controllers
 import java.time.LocalDate
 
 import com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED
+import common.enums.CacheKeys
 import helpers.RequestsFinder
-import models.api.{VatEligibilityChoice, VatExpectedThresholdPostIncorp, VatServiceEligibility, VatThresholdPostIncorp}
 import models.api.VatEligibilityChoice.NECESSITY_OBLIGATORY
+import models.api.{VatEligibilityChoice, VatExpectedThresholdPostIncorp, VatServiceEligibility, VatThresholdPostIncorp}
 import models.view.VoluntaryRegistration.REGISTER_NO
-import models.{S4LVatEligibility, S4LVatEligibilityChoice}
 import models.view.{ExpectationOverThresholdView, OverThresholdView, VoluntaryRegistration}
+import models.{S4LVatEligibility, S4LVatEligibilityChoice}
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsBoolean, JsString, Json}
+import play.api.libs.json.Json
 import support.AppAndStubs
 
 class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with RequestsFinder with ScalaFutures {
@@ -48,7 +49,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           .currentProfile.withProfileAndIncorpDate()
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
+          .s4lContainer.contains(CacheKeys.EligibilityChoice, s4lData)
         val response = buildClient("/check-confirm-threshold").get()
         whenReady(response) { res =>
           res.status mustBe 200
@@ -73,7 +74,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           .currentProfile.withProfileAndIncorpDate()
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
+          .s4lContainer.contains(CacheKeys.EligibilityChoice, s4lData)
 
         val response = buildClient("/check-confirm-threshold").get()
         whenReady(response) { res =>
@@ -103,14 +104,11 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
   "POST Threshold Summary page" should {
     "return 303" when {
       val s4lEligibilityData = S4LVatEligibility(
-        vatEligibility = Some(VatServiceEligibility(
           haveNino = Some(true),
           doingBusinessAbroad = Some(false),
           doAnyApplyToYou = Some(false),
           applyingForAnyOf = Some(false),
-          companyWillDoAnyOf = Some(false),
-          vatEligibilityChoice = None
-        ))
+          companyWillDoAnyOf = Some(false)
       )
 
       "over threshold is true with a date, and expected threshold is populated, save data to backend" in {
@@ -135,11 +133,11 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
         given()
           .user.isAuthorised
           .currentProfile.withProfileAndIncorpDate()
-          .s4lContainerInScenario[S4LVatEligibilityChoice].contains(s4lData, Some(STARTED))
-          .s4lContainerInScenario[S4LVatEligibilityChoice].isUpdatedWith(updatedS4LData, Some(STARTED), Some("Eligibility Choice updated"))
+          .s4lContainerInScenario.contains(CacheKeys.EligibilityChoice, s4lData, Some(STARTED))
+          .s4lContainerInScenario.isUpdatedWith(CacheKeys.EligibilityChoice, updatedS4LData, Some(STARTED), Some("Eligibility Choice updated"))
           .vatScheme.isBlank
-          .s4lContainerInScenario[S4LVatEligibility].contains(s4lEligibilityData, Some("Eligibility Choice updated"), Some("Eligibility returned"))
-          .s4lContainerInScenario[S4LVatEligibilityChoice].contains(updatedS4LData, Some("Eligibility returned"))
+          .s4lContainerInScenario.contains(CacheKeys.Eligibility, s4lEligibilityData, Some("Eligibility Choice updated"), Some("Eligibility returned"))
+          .s4lContainerInScenario.contains(CacheKeys.EligibilityChoice, updatedS4LData, Some("Eligibility returned"))
           .vatScheme.isUpdatedWith(postEligibilityData)
           .audit.writesAudit()
 
@@ -147,12 +145,6 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
         whenReady(response){ res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some("/vat-uri/who-is-registering-the-company-for-vat")
-
-          val json = getPATCHRequestJsonBody(s"/vatreg/1/service-eligibility")
-          (json \ "vatEligibilityChoice" \ "vatThresholdPostIncorp" \ "overThresholdSelection").as[JsBoolean].value mustBe true
-          (json \ "vatEligibilityChoice" \ "vatThresholdPostIncorp" \ "overThresholdDate").as[JsString].value mustBe "2016-10-25"
-          (json \ "vatEligibilityChoice" \ "vatExpectedThresholdPostIncorp" \ "expectedOverThresholdSelection").as[JsBoolean].value mustBe true
-          (json \ "vatEligibilityChoice" \ "vatExpectedThresholdPostIncorp" \ "expectedOverThresholdDate").as[JsString].value mustBe "2016-11-24"
         }
       }
 
@@ -164,7 +156,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
         given()
           .user.isAuthorised
           .currentProfile.withProfileAndIncorpDate()
-          .s4lContainer[S4LVatEligibilityChoice].contains(s4lData)
+          .s4lContainer.contains(CacheKeys.EligibilityChoice, s4lData)
           .audit.writesAudit()
 
         val response = buildClient("/check-confirm-threshold").post(Map("" -> Seq("")))

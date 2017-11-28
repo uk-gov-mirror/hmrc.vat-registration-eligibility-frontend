@@ -19,37 +19,29 @@ package controllers.builders
 import models.api.VatServiceEligibility
 import models.view.{SummaryRow, SummarySection}
 
-case class SummaryOtherVatSchemeBuilder(vatServiceEligibility: Option[VatServiceEligibility] = None)
+case class SummaryOtherVatSchemeBuilder(vatServiceEligibility: VatServiceEligibility)
   extends SummarySectionBuilder {
 
-  override val sectionId: String     = "otherVatScheme"
+  override val sectionId: String = "otherVatScheme"
 
   val agriculturalFlatRow: SummaryRow = SummaryRow(
     s"$sectionId.agriculturalFlat",
-    vatServiceEligibility.flatMap(_.applyingForAnyOf).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf"))
+    booleanToMessageKey(vatServiceEligibility.applyingForAnyOf),
+    Some(controllers.routes.EligibilityController.showApplyingForAnyOf())
   )
 
   val accountingSchemeRow: SummaryRow = SummaryRow(
     s"$sectionId.accountingScheme",
-    vatServiceEligibility.flatMap(_.applyingForAnyOf).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf"))
+    booleanToMessageKey(vatServiceEligibility.applyingForAnyOf),
+    Some(controllers.routes.EligibilityController.showApplyingForAnyOf())
   )
 
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (agriculturalFlatRow, true),
-          (accountingSchemeRow, true)
-
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (agriculturalFlatRow, true),
+      (accountingSchemeRow, true)
     )
+  )
 
 }

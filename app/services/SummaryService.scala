@@ -19,30 +19,23 @@ package services
 import javax.inject.Inject
 
 import controllers.builders.{SummaryResourceBuilder, _}
-import models.{CurrentProfile, S4LVatEligibility}
+import models.CurrentProfile
 import models.api.VatServiceEligibility
 import models.view.Summary
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-class SummaryService @Inject()(val s4LService: S4LService, val vatRegService: VatRegistrationService) extends SummarySrv
+class SummaryService @Inject()(val eligibilityService: EligibilityService) extends SummarySrv
 
 trait SummarySrv{
-   val s4LService: S4LService
-  val vatRegService: VatRegistrationService
+  val eligibilityService: EligibilityService
 
   def getEligibilitySummary()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Summary] =
-   getServiceEligibility().map(a => eligibilitySummary(a))
+    eligibilityService.getEligibility.map(a => eligibilitySummary(eligibilityService.toApi(a)))
 
-  private def getServiceEligibility()(implicit hc: HeaderCarrier, profile: CurrentProfile) =
-    s4LService.fetchAndGet[S4LVatEligibility]() flatMap  {
-      case None     => vatRegService.getVatScheme() map (x => x.vatServiceEligibility)
-      case Some(e)  => Future.successful(e.vatEligibility)
-    }
-
-  private def eligibilitySummary(vs: Option[VatServiceEligibility])(implicit profile : CurrentProfile): Summary =
+  private def eligibilitySummary(vs: VatServiceEligibility)(implicit profile : CurrentProfile): Summary =
     Summary(Seq(
       SummaryNationalInsuranceBuilder(vs).section,
       SummaryInternationalBusinessBuilder(vs).section,
@@ -51,6 +44,4 @@ trait SummarySrv{
       SummaryVatExemptionBuilder(vs).section,
       SummaryResourceBuilder(vs).section
     ))
-
-
 }

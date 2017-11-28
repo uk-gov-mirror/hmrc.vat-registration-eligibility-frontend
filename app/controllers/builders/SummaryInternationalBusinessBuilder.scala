@@ -19,53 +19,38 @@ package controllers.builders
 import models.api.VatServiceEligibility
 import models.view.{SummaryRow, SummarySection}
 
-case class SummaryInternationalBusinessBuilder(vatServiceEligibility: Option[VatServiceEligibility] = None)
+case class SummaryInternationalBusinessBuilder(vatServiceEligibility: VatServiceEligibility)
   extends SummarySectionBuilder {
 
-  override val sectionId: String      = "internationalBusiness"
+  override val sectionId: String = "internationalBusiness"
 
   val sellGoodsRow: SummaryRow = SummaryRow(
     s"$sectionId.sellGoods",
-    vatServiceEligibility.flatMap(_.doingBusinessAbroad).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
+    Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
   val buyGoodsRow: SummaryRow = SummaryRow(
     s"$sectionId.buyGoods",
-    vatServiceEligibility.flatMap(_.doingBusinessAbroad).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
+    Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
 
   val sellAssets: SummaryRow = SummaryRow(
     s"$sectionId.sellAssets",
-    vatServiceEligibility.flatMap(_.doingBusinessAbroad).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
+    Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
 
   val sellGoodsServices: SummaryRow = SummaryRow(
     s"$sectionId.sellGoodsServices",
-    vatServiceEligibility.flatMap(_.doingBusinessAbroad).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
+    Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
 
   val doBusiness : SummaryRow = SummaryRow(
     s"$sectionId.doBusiness",
-    vatServiceEligibility.flatMap(_.doingBusinessAbroad).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
+    Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
 
   val section: SummarySection =

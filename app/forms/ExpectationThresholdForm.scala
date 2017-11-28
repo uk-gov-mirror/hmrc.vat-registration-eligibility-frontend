@@ -18,15 +18,17 @@ package forms
 
 import java.time.LocalDate
 
-import models.view.{ExpectationOverThresholdView, OverThresholdView}
-import play.api.data.{Form, FormError, Mapping}
+import models.view.ExpectationOverThresholdView
+import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 import forms.FormValidation.Dates._
 import forms.FormValidation._
-import models.{DayMonthYearModel}
+import models.DayMonthYearModel
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
+
+import scala.util.Try
 
 object ExpectationThresholdForm {
 
@@ -36,10 +38,17 @@ object ExpectationThresholdForm {
 
   val RADIO_YES_NO = "expectationOverThresholdRadio"
 
-  def form(dateOfIncorporation: LocalDate): Form[ExpectationOverThresholdView] = {
+  def bind(selection: Boolean, dateModel: Option[DayMonthYearModel]): ExpectationOverThresholdView =
+    ExpectationOverThresholdView(selection, dateModel.flatMap(_.toLocalDate))
 
-    val minDate: LocalDate = dateOfIncorporation
-    val maxDate: LocalDate = LocalDate.now()
+  def unbind(expect: ExpectationOverThresholdView): Option[(Boolean, Option[DayMonthYearModel])] =
+    Try {
+      expect.date.fold((expect.selection, Option.empty[DayMonthYearModel])) {
+        d => (expect.selection, Some(DayMonthYearModel.fromLocalDate(d)))
+      }
+    }.toOption
+
+  def form(dateOfIncorporation: LocalDate): Form[ExpectationOverThresholdView] = {
     implicit val specificErrorCode: String = "expectationOverThreshold.date"
 
     Form(
@@ -52,9 +61,9 @@ object ExpectationThresholdForm {
             "month" -> text,
             "year" -> text
           )(DayMonthYearModel.apply)(DayMonthYearModel.unapply).verifying(
-            nonEmptyDayMonthYearModel(validPartialDayMonthYearModel(incorporationDateValidation()(dateOfIncorporation))))
+            nonEmptyDayMonthYearModel(validPartialDayMonthYearModel(incorporationDateValidation(dateOfIncorporation)())))
         )
-      )(ExpectationOverThresholdView.bind)(ExpectationOverThresholdView.unbind)
+      )(bind)(unbind)
     )
   }
 }

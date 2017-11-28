@@ -19,9 +19,9 @@ package models.views
 import java.time.LocalDate
 
 import fixtures.VatRegistrationFixture
-import models.api.VatExpectedThresholdPostIncorp
+import forms.ExpectationThresholdForm
+import models.DayMonthYearModel
 import models.view.ExpectationOverThresholdView
-import models.{ApiModelTransformer, DayMonthYearModel, S4LVatEligibilityChoice}
 import org.scalatest.Inside
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -34,7 +34,7 @@ class ExpectationOverThresholdViewSpec  extends UnitSpec with VatRegistrationFix
 
   "unbind" should {
     "decompose an over threshold view with a date" in {
-      inside(ExpectationOverThresholdView.unbind(yesView)) {
+      inside(ExpectationThresholdForm.unbind(yesView)) {
         case Some((selection, otDate)) =>
           selection shouldBe true
           otDate shouldBe Some(DayMonthYearModel.fromLocalDate(date))
@@ -42,7 +42,7 @@ class ExpectationOverThresholdViewSpec  extends UnitSpec with VatRegistrationFix
     }
 
     "decompose an over threshold view without a date" in {
-      inside(ExpectationOverThresholdView.unbind(noView)) {
+      inside(ExpectationThresholdForm.unbind(noView)) {
         case Some((selection, otDate)) =>
           selection shouldBe false
           otDate shouldBe None
@@ -52,56 +52,10 @@ class ExpectationOverThresholdViewSpec  extends UnitSpec with VatRegistrationFix
 
   "bind" should {
     "create OverThresholdView when MonthYearModel is present" in {
-      ExpectationOverThresholdView.bind(true, Some(DayMonthYearModel.fromLocalDate(date))) shouldBe ExpectationOverThresholdView(true, Some(date))
+      ExpectationThresholdForm.bind(true, Some(DayMonthYearModel.fromLocalDate(date))) shouldBe ExpectationOverThresholdView(true, Some(date))
     }
     "create OverThresholdView when MonthYearModel is NOT present" in {
-      ExpectationOverThresholdView.bind(false, None) shouldBe ExpectationOverThresholdView(false, None)
+      ExpectationThresholdForm.bind(false, None) shouldBe ExpectationOverThresholdView(false, None)
     }
   }
-
-  "ViewModelFormat" should {
-    val validExpectationOverThresholdView = ExpectationOverThresholdView(false, None)
-    val s4LVatChoice: S4LVatEligibilityChoice = S4LVatEligibilityChoice(expectationOverThreshold = Some(validExpectationOverThresholdView))
-
-    "extract over threshold from vatChoice" in {
-      ExpectationOverThresholdView.viewModelFormat.read(s4LVatChoice) shouldBe Some(validExpectationOverThresholdView)
-    }
-
-    "update empty vatChoice with expectation over threshold" in {
-      ExpectationOverThresholdView.viewModelFormat.update(validExpectationOverThresholdView, Option.empty[S4LVatEligibilityChoice]).expectationOverThreshold shouldBe Some(validExpectationOverThresholdView)
-    }
-
-    "update non-empty vatChoice with expectation over threshold" in {
-      ExpectationOverThresholdView.viewModelFormat.update(validExpectationOverThresholdView, Some(s4LVatChoice)).expectationOverThreshold shouldBe Some(validExpectationOverThresholdView)
-    }
-
-    "ApiModelTransformer" should {
-
-      "produce empty view model from an empty frs start date" in {
-        val vm = ApiModelTransformer[ExpectationOverThresholdView]
-          .toViewModel(vatScheme(vatServiceEligibility = None))
-        vm shouldBe None
-      }
-
-      "produce a view model from a vatScheme with an over threshold date set" in {
-        val vm = ApiModelTransformer[ExpectationOverThresholdView]
-          .toViewModel(vatScheme(vatServiceEligibility = Some(validServiceEligibility.copy(
-            vatEligibilityChoice = Some(validVatChoice.copy(vatExpectedThresholdPostIncorp =
-              Some(VatExpectedThresholdPostIncorp(expectedOverThresholdSelection = true, expectedOverThresholdDate = Some(date)))))
-          ))))
-        vm shouldBe Some(ExpectationOverThresholdView(true, Some(date)))
-      }
-
-      "produce a view model from a vatScheme with no over threshold date" in {
-        val vm = ApiModelTransformer[ExpectationOverThresholdView]
-          .toViewModel(vatScheme(vatServiceEligibility = Some(validServiceEligibility.copy(
-            vatEligibilityChoice = Some(validVatChoice.copy(vatExpectedThresholdPostIncorp =
-              Some(VatExpectedThresholdPostIncorp(expectedOverThresholdSelection = false, None))))
-          ))))
-        vm shouldBe Some(ExpectationOverThresholdView(false, None))
-      }
-
-    }
-  }
-
 }

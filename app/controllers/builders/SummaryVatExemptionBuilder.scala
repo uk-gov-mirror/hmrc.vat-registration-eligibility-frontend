@@ -19,37 +19,28 @@ package controllers.builders
 import models.api.VatServiceEligibility
 import models.view.{SummaryRow, SummarySection}
 
-case class SummaryVatExemptionBuilder(vatServiceEligibility: Option[VatServiceEligibility] = None)
+case class SummaryVatExemptionBuilder(vatServiceEligibility: VatServiceEligibility)
   extends SummarySectionBuilder {
 
-  override val sectionId: String     = "vatExemption"
+  override val sectionId: String = "vatExemption"
 
   val vatExceptionRow: SummaryRow = SummaryRow(
     s"$sectionId.vatException",
-    vatServiceEligibility.flatMap(_.applyingForVatExemption).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.applyingForVatExemption),
     Some(controllers.routes.EligibilityController.showExemptionCriteria())
   )
 
   val vatExemptionRow: SummaryRow = SummaryRow(
     s"$sectionId.vatExemption",
-    vatServiceEligibility.flatMap(_.applyingForVatExemption).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.applyingForVatExemption),
     Some(controllers.routes.EligibilityController.showExemptionCriteria())
   )
 
-
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (vatExceptionRow, true),
-        (vatExemptionRow, true)
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (vatExceptionRow, true),
+      (vatExemptionRow, true)
     )
-
+  )
 }

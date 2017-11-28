@@ -17,9 +17,9 @@
 package controllers
 
 
+import common.enums.CacheKeys
 import helpers.RequestsFinder
 import models.api.VatServiceEligibility
-
 import models.S4LVatEligibility
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -41,38 +41,43 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
   )
 
   val s4lData = Json.toJson(S4LVatEligibility(
-    vatEligibility = Some(validEligibilityData)
+    haveNino                = Some(true),
+    doingBusinessAbroad     = Some(false),
+    doAnyApplyToYou         = Some(false),
+    applyingForAnyOf        = Some(false),
+    applyingForVatExemption = Some(false),
+    companyWillDoAnyOf      = Some(false)
   ))
 
   def validateEligibilitySummaryPage(document: Document) = {
     document.title() mustBe "Check and confirm your answers"
     document.getElementById("nationalInsurance.hasNinoAnswer").text mustBe "Yes"
-    document.getElementById("nationalInsurance.hasNinoChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "haveNino").url
+    document.getElementById("nationalInsurance.hasNinoChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showHaveNino().url
 
     document.getElementById("internationalBusiness.sellGoodsAnswer").text mustBe "No"
     document.getElementById("internationalBusiness.buyGoodsAnswer").text mustBe "No"
     document.getElementById("internationalBusiness.sellAssetsAnswer").text mustBe "No"
     document.getElementById("internationalBusiness.sellGoodsServicesAnswer").text mustBe "No"
     document.getElementById("internationalBusiness.doBusinessAnswer").text mustBe "No"
-    document.getElementById("internationalBusiness.sellGoodsChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad").url
-    document.getElementById("internationalBusiness.buyGoodsChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad").url
-    document.getElementById("internationalBusiness.sellAssetsChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad").url
-    document.getElementById("internationalBusiness.sellGoodsServicesChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad").url
-    document.getElementById("internationalBusiness.doBusinessChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad").url
+    document.getElementById("internationalBusiness.sellGoodsChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoingBusinessAbroad().url
+    document.getElementById("internationalBusiness.buyGoodsChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoingBusinessAbroad().url
+    document.getElementById("internationalBusiness.sellAssetsChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoingBusinessAbroad().url
+    document.getElementById("internationalBusiness.sellGoodsServicesChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoingBusinessAbroad().url
+    document.getElementById("internationalBusiness.doBusinessChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoingBusinessAbroad().url
 
     document.getElementById("otherBusiness.soleTraderAnswer").text mustBe "No"
     document.getElementById("otherBusiness.vatGroupAnswer").text mustBe "No"
     document.getElementById("otherBusiness.makingProfitAnswer").text mustBe "No"
     document.getElementById("otherBusiness.limitedCompanyAnswer").text mustBe "No"
-    document.getElementById("otherBusiness.soleTraderChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou").url
-    document.getElementById("otherBusiness.vatGroupChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou").url
-    document.getElementById("otherBusiness.makingProfitChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou").url
-    document.getElementById("otherBusiness.limitedCompanyChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou").url
+    document.getElementById("otherBusiness.soleTraderChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoAnyApplyToYou().url
+    document.getElementById("otherBusiness.vatGroupChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoAnyApplyToYou().url
+    document.getElementById("otherBusiness.makingProfitChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoAnyApplyToYou().url
+    document.getElementById("otherBusiness.limitedCompanyChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showDoAnyApplyToYou().url
 
     document.getElementById("otherVatScheme.agriculturalFlatAnswer").text mustBe "No"
     document.getElementById("otherVatScheme.accountingSchemeAnswer").text mustBe "No"
-    document.getElementById("otherVatScheme.agriculturalFlatChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf").url
-    document.getElementById("otherVatScheme.accountingSchemeChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf").url
+    document.getElementById("otherVatScheme.agriculturalFlatChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showApplyingForAnyOf().url
+    document.getElementById("otherVatScheme.accountingSchemeChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showApplyingForAnyOf().url
 
     document.getElementById("vatExemption.vatExceptionAnswer").text mustBe "No"
     document.getElementById("vatExemption.vatExemptionAnswer").text mustBe "No"
@@ -81,8 +86,8 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
 
     document.getElementById("resources.companyOwnAnswer").text mustBe "No"
     document.getElementById("resources.companySellAnswer").text mustBe "No"
-    document.getElementById("resources.companyOwnChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf").url
-    document.getElementById("resources.companySellChangeLink").attr("href") mustBe controllers.routes.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf").url
+    document.getElementById("resources.companyOwnChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showCompanyWillDoAnyOf().url
+    document.getElementById("resources.companySellChangeLink").attr("href") mustBe controllers.routes.EligibilityController.showCompanyWillDoAnyOf().url
   }
 
   "GET Eligibility Summary page" should {
@@ -94,7 +99,7 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
           .currentProfile.withProfileAndIncorpDate()
           .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[S4LVatEligibility].contains(s4lData)
+          .s4lContainer.contains(CacheKeys.Eligibility, s4lData)
 
         val response = buildClient("/check-confirm-eligibility").get()
         whenReady(response) { res =>
@@ -104,14 +109,21 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
         }
       }
       "page is rendered with all data passed in if data is in backend" in {
-
+        val s4lData = S4LVatEligibility(
+          Some(true),
+          Some(false),
+          Some(false),
+          Some(false),
+          Some(false),
+          Some(false)
+        )
         given()
           .user.isAuthorised
           .currentProfile.withProfileAndIncorpDate()
-          .vatScheme.isBlank
           .audit.writesAudit()
-          .s4lContainer[S4LVatEligibility].isEmpty
+          .s4lContainer.isEmpty
           .vatScheme.hasValidEligibilityData
+          .s4lContainer.isUpdatedWith(CacheKeys.Eligibility, s4lData)
 
         val response = buildClient("/check-confirm-eligibility").get()
         whenReady(response) { res =>
@@ -129,7 +141,7 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
         .currentProfile.withProfileAndIncorpDate()
         .vatScheme.isBlank
         .audit.writesAudit()
-        .s4lContainer[S4LVatEligibility].contains(s4lData)
+        .s4lContainer.contains(CacheKeys.Eligibility, s4lData)
         .vatScheme.isUpdatedWith(validEligibilityData)
 
       val response = buildClient("/check-confirm-eligibility").post(Map("" -> Seq("")))

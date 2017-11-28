@@ -19,42 +19,24 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors.S4LConnector
-import models.{CurrentProfile, S4LKey, ViewModelFormat}
+import models.CurrentProfile
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 @Singleton
 class S4LService @Inject()(val s4LConnector: S4LConnector) {
+  def save[T](formId: String, data: T)(implicit profile: CurrentProfile, hc: HeaderCarrier, format: Format[T]): Future[CacheMap] =
+    s4LConnector.save[T](profile.registrationId, formId, data)
 
-  def save[T: S4LKey](data: T)(implicit profile: CurrentProfile, hc: HeaderCarrier, format: Format[T]): Future[CacheMap] =
-    s4LConnector.save[T](profile.registrationId, S4LKey[T].key, data)
-
-  def updateViewModel[T, G](data: T, container: Future[G])
-                           (implicit hc: HeaderCarrier,
-                            profile: CurrentProfile,
-                            vmf: ViewModelFormat.Aux[T, G],
-                            f: Format[G],
-                            k: S4LKey[G]): Future[CacheMap] =
-    for {
-      group <- container
-      cm <- s4LConnector.save(profile.registrationId, k.key, vmf.update(data, Some(group)))
-    } yield cm
-
-  def fetchAndGet[T: S4LKey]()(implicit profile: CurrentProfile, hc: HeaderCarrier, format: Format[T]): Future[Option[T]] =
-    s4LConnector.fetchAndGet[T](profile.registrationId, S4LKey[T].key).value
-
-  def getViewModel[T, G](container: Future[G])
-                        (implicit r: ViewModelFormat.Aux[T, G], f: Format[G]): Future[Option[T]] =
-    container.map(r.read)
+  def fetchAndGet[T](formId: String)(implicit profile: CurrentProfile, hc: HeaderCarrier, format: Format[T]): Future[Option[T]] =
+    s4LConnector.fetchAndGet[T](profile.registrationId, formId).value
 
   def clear()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[HttpResponse] =
     s4LConnector.clear(profile.registrationId)
 
   def fetchAll()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Option[CacheMap]] =
     s4LConnector.fetchAll(profile.registrationId)
-
 }

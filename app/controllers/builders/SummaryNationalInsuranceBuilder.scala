@@ -19,26 +19,20 @@ package controllers.builders
 import models.api.VatServiceEligibility
 import models.view.{SummaryRow, SummarySection}
 
-case class SummaryNationalInsuranceBuilder(vatServiceEligibility: Option[VatServiceEligibility] = None)
-  extends SummarySectionBuilder {
+case class SummaryNationalInsuranceBuilder(vatServiceEligibility: VatServiceEligibility) extends SummarySectionBuilder {
 
-  override val sectionId: String      = "nationalInsurance"
+  override val sectionId: String = "nationalInsurance"
 
   val nationalInsuranceRow: SummaryRow = SummaryRow(
     s"$sectionId.hasNino",
-    vatServiceEligibility.flatMap(_.haveNino).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "haveNino"))
+    booleanToMessageKey(vatServiceEligibility.haveNino),
+    Some(controllers.routes.EligibilityController.showHaveNino())
   )
 
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (nationalInsuranceRow, true)
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (nationalInsuranceRow, true)
     )
-
+  )
 }

@@ -20,36 +20,28 @@ package controllers.builders
 import models.api.VatServiceEligibility
 import models.view.{SummaryRow, SummarySection}
 
-case class SummaryResourceBuilder(vatServiceEligibility: Option[VatServiceEligibility] = None)
+case class SummaryResourceBuilder(vatServiceEligibility: VatServiceEligibility)
   extends SummarySectionBuilder {
 
-  override val sectionId: String     = "resources"
+  override val sectionId: String = "resources"
 
   val companyOwnRow: SummaryRow = SummaryRow(
     s"$sectionId.companyOwn",
-    vatServiceEligibility.flatMap(_.companyWillDoAnyOf).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf"))
+    booleanToMessageKey(vatServiceEligibility.companyWillDoAnyOf),
+    Some(controllers.routes.EligibilityController.showCompanyWillDoAnyOf())
   )
 
   val companySellRow: SummaryRow = SummaryRow(
     s"$sectionId.companySell",
-    vatServiceEligibility.flatMap(_.companyWillDoAnyOf).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
-    Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf"))
+    booleanToMessageKey(vatServiceEligibility.companyWillDoAnyOf),
+    Some(controllers.routes.EligibilityController.showCompanyWillDoAnyOf())
   )
 
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (companyOwnRow, true),
-        (companySellRow, true)
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (companyOwnRow, true),
+      (companySellRow, true)
     )
-
+  )
 }

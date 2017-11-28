@@ -20,19 +20,19 @@ package controllers
 import java.time.LocalDate
 
 import fixtures.VatRegistrationFixture
-import helpers.{S4LMockSugar, VatRegSpec}
+import helpers.VatRegSpec
 import models.CurrentProfile
 import models.external.IncorporationInfo
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class EligibilitySuccessControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+class EligibilitySuccessControllerSpec extends VatRegSpec with VatRegistrationFixture {
 
   val specificDate = LocalDate.of(2017, 11, 12)
 

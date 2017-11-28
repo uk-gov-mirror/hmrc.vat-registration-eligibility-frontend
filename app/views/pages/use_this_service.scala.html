@@ -25,7 +25,7 @@
 
     <p>@messages("pages.eligibility.start.para1")</p>
     <br>
-    @form(action = controllers.routes.ServiceCriteriaQuestionsController.show("haveNino")) {
+    @form(action = controllers.routes.EligibilityController.showHaveNino) {
         <div class="form-group">
             <button class="button-get-started" role="button" id="save-and-continue">@messages("app.common.continue")</button>
         </div>

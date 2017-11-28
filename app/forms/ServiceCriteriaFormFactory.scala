@@ -17,7 +17,7 @@
 package forms
 
 import forms.FormValidation.missingBooleanFieldMapping
-import models.YesOrNoQuestion
+import models.view.YesOrNoQuestion
 import play.api.data.Form
 import play.api.data.Forms._
 

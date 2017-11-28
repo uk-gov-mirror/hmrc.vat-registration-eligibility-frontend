@@ -18,11 +18,11 @@ package controllers.test
 
 import javax.inject.Inject
 
+import common.enums.CacheKeys
 import controllers.VatRegistrationController
 import forms.test.TestSetupForm
-import models.api._
+import models._
 import models.test.{TestSetup, VatEligibilityChoiceTestSetup, VatServiceEligibilityTestSetup}
-import models.{S4LKey, _}
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Format
 import play.api.mvc.{Action, AnyContent}
@@ -43,20 +43,20 @@ class TestSetupController @Inject()(implicit s4LService: S4LService,
       implicit request =>
         withCurrentProfile { implicit profile =>
           for {
-            eligibilityChoice <- s4LService.fetchAndGet[S4LVatEligibilityChoice]()
-            eligibility <- s4LService.fetchAndGet[S4LVatEligibility]()
+            eligibilityChoice <- s4LService.fetchAndGet[S4LVatEligibilityChoice](CacheKeys.EligibilityChoice)
+            eligibility <- s4LService.fetchAndGet[S4LVatEligibility](CacheKeys.Eligibility)
 
             testSetup = TestSetup(
               VatServiceEligibilityTestSetup(
-                haveNino = eligibility.flatMap(_.vatEligibility).map(_.haveNino.getOrElse("").toString),
-                doingBusinessAbroad = eligibility.flatMap(_.vatEligibility).map(_.doingBusinessAbroad.getOrElse("").toString),
-                doAnyApplyToYou = eligibility.flatMap(_.vatEligibility).map(_.doAnyApplyToYou.getOrElse("").toString),
-                applyingForAnyOf = eligibility.flatMap(_.vatEligibility).map(_.applyingForAnyOf.getOrElse("").toString),
-                applyingForVatExemption = eligibility.flatMap(_.vatEligibility).map(_.applyingForVatExemption.getOrElse("").toString),
-                companyWillDoAnyOf = eligibility.flatMap(_.vatEligibility).map(_.companyWillDoAnyOf.getOrElse("").toString)
+                haveNino = eligibility.flatMap(_.haveNino.map(_.toString)),
+                doingBusinessAbroad = eligibility.flatMap(_.doingBusinessAbroad.map(_.toString)),
+                doAnyApplyToYou = eligibility.flatMap(_.doAnyApplyToYou.map(_.toString)),
+                applyingForAnyOf = eligibility.flatMap(_.applyingForAnyOf.map(_.toString)),
+                applyingForVatExemption = eligibility.flatMap(_.applyingForVatExemption.map(_.toString)),
+                companyWillDoAnyOf = eligibility.flatMap(_.companyWillDoAnyOf.map(_.toString))
               ),
               VatEligibilityChoiceTestSetup(
-                taxableTurnoverChoice =   eligibilityChoice.flatMap(_.taxableTurnover.map(_.yesNo)),
+                taxableTurnoverChoice = eligibilityChoice.flatMap(_.taxableTurnover.map(_.yesNo)),
                 voluntaryChoice = eligibilityChoice.flatMap(_.voluntaryRegistration).map(_.yesNo),
                 voluntaryRegistrationReason = eligibilityChoice.flatMap(_.voluntaryRegistrationReason).map(_.reason),
                 overThresholdSelection = eligibilityChoice.flatMap(_.overThreshold).map(_.selection.toString),
@@ -77,24 +77,14 @@ class TestSetupController @Inject()(implicit s4LService: S4LService,
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          def saveToS4Later[T: Format : S4LKey](userEntered: Option[String], data: TestSetup, f: TestSetup => T): Future[Unit] =
-            userEntered.map(_ => s4LService.save(f(data)).map(_ => ())).getOrElse(Future.successful(()))
-
           TestSetupForm.form.bindFromRequest().fold(
             badForm => {
               Future.successful(BadRequest(views.html.pages.test.test_setup(badForm)))
             }, {
               data: TestSetup => {
                 for {
-                  _ <- saveToS4Later(data.vatServiceEligibility.haveNino, data, { x =>
-                         S4LVatEligibility(Some(VatServiceEligibility(x.vatServiceEligibility.haveNino.map(_.toBoolean),
-                           x.vatServiceEligibility.doingBusinessAbroad.map(_.toBoolean),
-                           x.vatServiceEligibility.doAnyApplyToYou.map(_.toBoolean),
-                           x.vatServiceEligibility.applyingForAnyOf.map(_.toBoolean),
-                           x.vatServiceEligibility.applyingForVatExemption.map(_.toBoolean),
-                           x.vatServiceEligibility.companyWillDoAnyOf.map(_.toBoolean))))
-                         })
-                  _ <- s4LService.save(s4LBuilder.eligiblityChoiceFromData(data))
+                  _ <- s4LService.save(CacheKeys.Eligibility, s4LBuilder.eligibilityFromData(data))
+                  _ <- s4LService.save(CacheKeys.EligibilityChoice, s4LBuilder.eligibilityChoiceFromData(data))
                 } yield Ok("Test setup complete")
               }
             })

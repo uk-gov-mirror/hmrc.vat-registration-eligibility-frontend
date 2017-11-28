@@ -51,11 +51,7 @@ object CurrentProfile {
 }
 
 object hasIncorpDate{
-
   def unapply(implicit arg: CurrentProfile): Future[LocalDate] = {
-    arg.incorporationDate match {
-     case Some(a) => Future.successful(a)
-      case _ => throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation")
-    }
-        }
+    arg.incorporationDate.fold(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))(Future.successful)
+  }
 }

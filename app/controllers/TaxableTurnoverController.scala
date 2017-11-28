@@ -24,7 +24,7 @@ import models.view.TaxableTurnover.TAXABLE_YES
 import models.view.VoluntaryRegistration.REGISTER_NO
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, EligibilityService, S4LService, VatRegFrontendService, VatRegistrationService}
 import utils.SessionProfile
 
 import scala.concurrent.Future
@@ -34,10 +34,9 @@ class TaxableTurnoverController @Inject()(implicit val messagesApi: MessagesApi,
                                           implicit val s4LService: S4LService,
                                           implicit val vrs: VatRegistrationService,
                                           val currentProfileService: CurrentProfileService,
-                                          val vatRegFrontendService: VatRegFrontendService)
+                                          val vatRegFrontendService: VatRegFrontendService,
+                                          val eligibilityService: EligibilityService)
   extends VatRegistrationController with SessionProfile {
-
-  import cats.syntax.flatMap._
 
   val form = TaxableTurnoverForm.form
 
@@ -45,8 +44,9 @@ class TaxableTurnoverController @Inject()(implicit val messagesApi: MessagesApi,
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          viewModel[TaxableTurnover]().fold(form)(form.fill)
-            .map(f => Ok(views.html.pages.taxable_turnover(f)))
+          eligibilityService.getEligibilityChoice map { choice =>
+            Ok(views.html.pages.taxable_turnover(choice.taxableTurnover.fold(form)(form.fill)))
+          }
         }
   }
 
@@ -55,14 +55,15 @@ class TaxableTurnoverController @Inject()(implicit val messagesApi: MessagesApi,
       implicit request =>
         withCurrentProfile { implicit profile =>
           form.bindFromRequest().fold(
-            badForm => BadRequest(views.html.pages.taxable_turnover(badForm)).pure,
-            (data: TaxableTurnover) => save(data).map(_ => data.yesNo == TAXABLE_YES).ifM(
-              for {
-                _ <- save(VoluntaryRegistration(REGISTER_NO))
-                _ <- vrs.submitVatEligibility()
-              } yield vatRegFrontendService.buildVatRegFrontendUrlEntry,
-              Future.successful(routes.VoluntaryRegistrationController.show.url)
-            ) map (Redirect(_)))
+            badForm => Future.successful(BadRequest(views.html.pages.taxable_turnover(badForm))),
+            data => eligibilityService.saveChoiceQuestion(data) map { _ =>
+              if (data.yesNo == TAXABLE_YES) {
+                Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
+              } else {
+                Redirect(controllers.routes.VoluntaryRegistrationController.show.url)
+              }
+            }
+          )
         }
   }
 }

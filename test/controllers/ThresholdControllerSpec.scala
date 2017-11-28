@@ -18,8 +18,8 @@ package controllers
 
 import java.time.LocalDate
 
-import fixtures.VatRegistrationFixture
-import helpers.{S4LMockSugar, VatRegSpec}
+import fixtures.{S4LFixture, VatRegistrationFixture}
+import helpers.VatRegSpec
 import models.CurrentProfile
 import models.view.{ExpectationOverThresholdView, OverThresholdView}
 import org.jsoup.Jsoup
@@ -29,11 +29,11 @@ import play.api.http.Status
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
-class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+import scala.concurrent.Future
+
+class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   val expectedError = "Date of Incorporation data expected to be found in Incorporation"
 
@@ -56,45 +56,32 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
   val fakeRequest = FakeRequest(routes.ThresholdController.goneOverShow())
 
   s"GET ${routes.ThresholdController.goneOverShow()}" should {
+    val expectedText = "VAT taxable turnover gone over"
+
     "returnException if no IncorporationInfo Date present" in {
-      val overThreshold = OverThresholdView(true, Some(LocalDate.of(2017, 6, 30)))
-
-      save4laterReturnsViewModel(overThreshold)()
-
-    val res = intercept[Exception](callAuthorised(TestThresholdControllerWithoutIncorpDate.goneOverShow)
-    (a => status(a) shouldBe 500)).getMessage
+      val res = intercept[Exception](callAuthorised(TestThresholdControllerWithoutIncorpDate.goneOverShow) {
+        a => status(a) shouldBe 500
+      }).getMessage
       res shouldBe expectedError
     }
 
-    "return HTML when there's a over threshold view in S4L" in {
+    "return HTML when there's an over threshold view data" in {
       val overThreshold = OverThresholdView(true, Some(LocalDate.of(2017, 6, 30)))
 
-      save4laterReturnsViewModel(overThreshold)()
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(overThreshold = Some(overThreshold))))
 
       callAuthorised(TestThresholdController.goneOverShow) {
-        _ includesText "VAT taxable turnover gone over"
+        _ includesText expectedText
       }
     }
 
-    "return HTML when there's nothing in S4L and vatScheme contains data" in {
-      save4laterReturnsNoViewModel[OverThresholdView]()
-
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(validVatScheme))
+    "return HTML with a default over threshold view data" in {
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyS4LEligibilityChoice))
 
       callAuthorised(TestThresholdController.goneOverShow) {
-        _ includesText "VAT taxable turnover gone over"
-      }
-    }
-
-    "return HTML when there's nothing in S4L and vatScheme contains no data" in {
-      save4laterReturnsNoViewModel[OverThresholdView]()
-
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(emptyVatScheme))
-
-      callAuthorised(TestThresholdController.goneOverShow) {
-        _ includesText "VAT taxable turnover gone over"
+        _ includesText expectedText
       }
     }
   }
@@ -129,7 +116,9 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     }
 
     "return 400 with incorrect data (date before incorporation date) - yes selected" in {
-      save4laterExpectsSave[OverThresholdView]()
+      val overThreshold = OverThresholdView(true, Some(LocalDate.of(2017, 6, 30)))
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(overThreshold = Some(overThreshold))))
 
       submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "true",
@@ -141,7 +130,9 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     }
 
     "return 303 with valid data - yes selected" in {
-      save4laterExpectsSave[OverThresholdView]()
+      val overThreshold = OverThresholdView(true, Some(LocalDate.of(2017, 1, 30)))
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(overThreshold = Some(overThreshold))))
 
       submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "true",
@@ -153,7 +144,8 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     }
 
     "return 303 with valid data - no selected" in {
-      save4laterExpectsSave[OverThresholdView]()
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold))
 
       submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "false"
@@ -167,7 +159,8 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "returnException if no IncorporationInfo Date present" in {
       val expectation = ExpectationOverThresholdView(true, Some(LocalDate.of(2017, 6, 30)))
 
-      save4laterReturnsViewModel(expectation)()
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(expectationOverThreshold = Some(expectation))))
 
       val res = intercept[Exception](callAuthorised(TestThresholdControllerWithoutIncorpDate.expectationOverShow)
       (a => status(a) shouldBe 500)).getMessage
@@ -176,7 +169,8 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "return 200 and elements are populated when there's a over threshold view in S4L" in {
       val expectation = ExpectationOverThresholdView(true, Some(LocalDate.of(2017, 6, 30)))
 
-      save4laterReturnsViewModel(expectation)()
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(expectationOverThreshold = Some(expectation))))
 
       callAuthorised(TestThresholdController.expectationOverShow()) {
         a =>
@@ -205,8 +199,12 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
         status(_) shouldBe Status.BAD_REQUEST
       }
     }
+
     "return 303 with valid data - yes selected" in {
-      save4laterExpectsSave[ExpectationOverThresholdView]()
+      val expectation = ExpectationOverThresholdView(true, Some(LocalDate.of(2017, 1, 1)))
+
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(expectationOverThreshold = Some(expectation))))
 
       submitAuthorised(TestThresholdController.expectationOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "expectationOverThresholdRadio" -> "true",

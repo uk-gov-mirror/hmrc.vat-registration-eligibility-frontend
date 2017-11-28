@@ -27,13 +27,18 @@ import play.api.http.Status._
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.http.HttpResponse
 
-trait VatRegistrationFixture extends TradingDetailsFixture {
+trait VatRegistrationFixture {
 
   //Test variables
   val testRegId = "VAT123456"
   val validHttpResponse = HttpResponse(OK)
+  val testDate = LocalDate.of(2017, 3, 21)
 
   //Api models
+  val validVatChoice = VatEligibilityChoice(
+    VatEligibilityChoice.NECESSITY_VOLUNTARY,
+    vatThresholdPostIncorp = Some(VatThresholdPostIncorp(true, Some(testDate))),
+    vatExpectedThresholdPostIncorp = Some(VatExpectedThresholdPostIncorp(true, Some(testDate))))
   val validServiceEligibility          = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(false), Some(validVatChoice))
   val validServiceEligibilityNoChoice  = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(false))
 
@@ -68,35 +73,35 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
 
   val nationalInsuiranceSection = SummarySection(
     "nationalInsurance",
-    rows = Seq((SummaryRow("nationalInsurance.hasNino","app.common.yes",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "haveNino"))),true))
+    rows = Seq((SummaryRow("nationalInsurance.hasNino","app.common.yes",Some(controllers.routes.EligibilityController.showHaveNino())),true))
   )
 
   val internationalBusinessSection = SummarySection(
     "internationalBusiness",
     rows = Seq(
-      (SummaryRow("internationalBusiness.sellGoods","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))),true),
-      (SummaryRow("internationalBusiness.buyGoods","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))),true),
-      (SummaryRow("internationalBusiness.sellAssets","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))),true),
-      (SummaryRow("internationalBusiness.sellGoodsServices","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))),true),
-      (SummaryRow("internationalBusiness.doBusiness","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad"))),true)
+      (SummaryRow("internationalBusiness.sellGoods","app.common.no",Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())),true),
+      (SummaryRow("internationalBusiness.buyGoods","app.common.no",Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())),true),
+      (SummaryRow("internationalBusiness.sellAssets","app.common.no",Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())),true),
+      (SummaryRow("internationalBusiness.sellGoodsServices","app.common.no",Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())),true),
+      (SummaryRow("internationalBusiness.doBusiness","app.common.no",Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())),true)
     )
   )
 
   val otherBusinessSection = SummarySection(
     "otherBusiness",
     rows = Seq(
-      (SummaryRow("otherBusiness.soleTrader","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou"))),true),
-      (SummaryRow("otherBusiness.vatGroup","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou"))),true),
-      (SummaryRow("otherBusiness.makingProfit","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou"))),true),
-      (SummaryRow("otherBusiness.limitedCompany","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou"))),true)
+      (SummaryRow("otherBusiness.soleTrader","app.common.no",Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())),true),
+      (SummaryRow("otherBusiness.vatGroup","app.common.no",Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())),true),
+      (SummaryRow("otherBusiness.makingProfit","app.common.no",Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())),true),
+      (SummaryRow("otherBusiness.limitedCompany","app.common.no",Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())),true)
     )
   )
 
   val otherVatSchemeSection = SummarySection(
     "otherVatScheme",
     rows = Seq(
-      (SummaryRow("otherVatScheme.agriculturalFlat","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf"))),true),
-      (SummaryRow("otherVatScheme.accountingScheme","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf"))),true)
+      (SummaryRow("otherVatScheme.agriculturalFlat","app.common.no",Some(controllers.routes.EligibilityController.showApplyingForAnyOf())),true),
+      (SummaryRow("otherVatScheme.accountingScheme","app.common.no",Some(controllers.routes.EligibilityController.showApplyingForAnyOf())),true)
     )
   )
 
@@ -111,8 +116,8 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
   val resourcesSection = SummarySection(
     "resources",
     rows = Seq(
-      (SummaryRow("resources.companyOwn","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf"))),true),
-      (SummaryRow("resources.companySell","app.common.no",Some(controllers.routes.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf"))),true)
+      (SummaryRow("resources.companyOwn","app.common.no",Some(controllers.routes.EligibilityController.showCompanyWillDoAnyOf())),true),
+      (SummaryRow("resources.companySell","app.common.no",Some(controllers.routes.EligibilityController.showCompanyWillDoAnyOf())),true)
     )
   )
 

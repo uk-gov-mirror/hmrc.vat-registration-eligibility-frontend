@@ -20,18 +20,22 @@ import java.time.LocalDate
 
 import common.enums.VatRegStatus
 import connectors.BusinessRegistrationConnector
-import helpers.VatRegSpec
+import fixtures.VatRegistrationFixture
+import helpers.FutureAssertions
+import mocks.VatMocks
 import models.CurrentProfile
 import models.external.{BusinessProfile, CompanyRegistrationProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads }
 
-class CurrentProfileServiceSpec extends VatRegSpec {
+class CurrentProfileServiceSpec extends UnitSpec with MockitoSugar with VatMocks with FutureAssertions with VatRegistrationFixture {
   val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
 
   val testService = new CurrentProfileService(mockKeystoreConnector,

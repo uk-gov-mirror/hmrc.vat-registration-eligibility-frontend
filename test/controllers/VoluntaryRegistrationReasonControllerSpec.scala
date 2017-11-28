@@ -16,28 +16,28 @@
 
 package controllers
 
-import fixtures.VatRegistrationFixture
-import helpers.{S4LMockSugar, VatRegSpec}
+import fixtures.{S4LFixture, VatRegistrationFixture}
+import helpers.VatRegSpec
 import models.CurrentProfile
 import models.view.VoluntaryRegistrationReason
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LMockSugar {
+class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
     val testController = new VoluntaryRegistrationReasonController()(mockMessages,
       mockS4LService,
       mockVatRegistrationService,
       mockCurrentProfileService,
-      mockVatRegFrontendService
+      mockVatRegFrontendService,
+      mockEligibilityService
       ) {
       override val authConnector: AuthConnector = mockAuthConnector
 
@@ -50,49 +50,29 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
   val fakeRequest = FakeRequest(routes.VoluntaryRegistrationReasonController.show())
 
   s"GET ${routes.VoluntaryRegistrationReasonController.show()}" should {
+    val expectedText = "Which one applies to the company?"
+
     "return HTML Voluntary Registration Reason page with no Selection" in new Setup{
-      val voluntaryRegistrationReason = VoluntaryRegistrationReason("")
-
-      save4laterReturnsViewModel(voluntaryRegistrationReason)()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData.copy(voluntaryRegistrationReason = None)))
 
       callAuthorised(testController.show()){
-        _ includesText "Which one applies to the company?"
+        _ includesText expectedText
       }
     }
 
-    "return HTML when there's nothing in S4L and vatScheme contains data" in new Setup {
-      save4laterReturnsNoViewModel[VoluntaryRegistrationReason]()
-
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
-      when(mockVatRegistrationService.getVatScheme()(any(), any()))
-        .thenReturn(Future.successful(validVatScheme))
+    "return HTML when there's no data" in new Setup {
+      when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyS4LEligibilityChoice))
 
       callAuthorised(testController.show) {
-        _ includesText "Which one applies to the company?"
-      }
-    }
-
-    "return HTML when there's nothing in S4L and vatScheme contains no data" in new Setup {
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
-      save4laterReturnsNoViewModel[VoluntaryRegistrationReason]()
-
-      when(mockVatRegistrationService.getVatScheme()(any(), any()))
-        .thenReturn(Future.successful(emptyVatScheme))
-
-      callAuthorised(testController.show) {
-        _ includesText "Which one applies to the company?"
+        _ includesText expectedText
       }
     }
   }
 
   s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Empty data" should {
     "return 400" in new Setup {
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
-
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
       ))(result => result isA 400)
     }
@@ -100,12 +80,9 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
 
   s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Voluntary Registration Reason selected Sells" should {
     "return 303" in new Setup {
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData))
 
-      when(mockVatRegistrationService.submitVatEligibility()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
-      when(mockVatRegistrationService.deleteVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful())
-
-      save4laterExpectsSave[VoluntaryRegistrationReason]()
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn(s"someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
@@ -116,29 +93,27 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
 
   s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Voluntary Registration Reason selected Intends to sell" should {
     "return 303" in new Setup {
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+      val reasonIntendsToSell = VoluntaryRegistrationReason(VoluntaryRegistrationReason.INTENDS_TO_SELL)
 
-      when(mockVatRegistrationService.submitVatEligibility()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(validVatServiceEligibility))
-      when(mockVatRegistrationService.deleteVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful())
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData.copy(voluntaryRegistrationReason = Some(reasonIntendsToSell))))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn(s"someUrl")
-      save4laterExpectsSave[VoluntaryRegistrationReason]()
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.SELLS
+        "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.INTENDS_TO_SELL
       )){_ redirectsTo s"someUrl"}
     }
   }
 
-  s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Voluntary Registration selected No" should {
+  s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Voluntary Registration selected Neither" should {
     "redirect to the welcome page" in new Setup {
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any())).thenReturn(Future.successful(currentProfile))
+      val reasonNeither = VoluntaryRegistrationReason(VoluntaryRegistrationReason.NEITHER)
+
+      when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData.copy(voluntaryRegistrationReason = Some(reasonNeither))))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome(ArgumentMatchers.any())).thenReturn(s"someUrl")
-
-      when(mockS4LService.clear()(any(), any())).thenReturn(Future.successful(validHttpResponse))
-      save4laterExpectsSave[VoluntaryRegistrationReason]()
-      when(mockVatRegistrationService.deleteVatScheme()(any(), any())).thenReturn(Future.successful(()))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.NEITHER

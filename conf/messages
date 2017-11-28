@@ -57,6 +57,7 @@ pages.serviceCriteriaFailure.heading                    = You can''t register fo
 pages.serviceCriteriaFailure.linkToLegacyApp            = You need to
 pages.serviceCriteriaFailure.linkToLegacyApp1           = register using another HMRC service.
 pages.serviceCriteriaFailure.button.linkToLegacyApp     = Register using HMRC''s existing service
+pages.serviceCriteriaFailure.button.finish              = Finish
 
 pages.serviceCriteriaFailure.nino.p1                    = You must have a UK National Insurance number to register for VAT with this service.
 

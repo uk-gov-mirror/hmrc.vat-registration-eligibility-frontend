@@ -68,9 +68,9 @@ object FormValidation {
       Logger.info(s"Checking constraint for value $t in the range of [$minValue, $maxValue]")
       (ordering.compare(t, minValue).signum, ordering.compare(t, maxValue).signum) match {
         case (1, -1) | (0, _) | (_, 0) => Valid
-        case (_, 1) => Invalid(ValidationError(s"validation.$e.range.above", maxValue))
-        case (-1, _) if !args.isEmpty  => Invalid(ValidationError(s"validation.$e.range.below", args.head))
-        case (-1, _) => Invalid(ValidationError(s"validation.$e.range.below", minValue))
+        case (_, 1)                    => Invalid(ValidationError(s"validation.$e.range.above", maxValue))
+        case (-1, _) if args.nonEmpty  => Invalid(ValidationError(s"validation.$e.range.below", args.head))
+        case (-1, _)                   => Invalid(ValidationError(s"validation.$e.range.below", minValue))
       }
     }
 
@@ -98,17 +98,15 @@ object FormValidation {
     def validPartialMonthYearModel(dateConstraint: => Constraint[LocalDate] = unconstrained)(implicit e: ErrorCode): Constraint[MonthYearModel] =
       Constraint(dm => dm.toLocalDate.fold[ValidationResult](Invalid(s"validation.$e.invalid"))(dateConstraint(_)))
 
-
-def incorporationDateValidation(constraint: => Constraint[LocalDate] = unconstrained)(incorporationDate:LocalDate)(implicit e:ErrorCode):
-Constraint[LocalDate] ={
-  Constraint { dm =>
-    dm match{
-    case date if(date.isBefore(incorporationDate)) => Invalid(ValidationError(s"validation.$e.range.below"))
-    case date if(date.isAfter(LocalDate.now())) => Invalid(ValidationError(s"validation.$e.range.above"))
-    case _ => Valid
-    }
-  }
-}
+    def incorporationDateValidation(incorporationDate: LocalDate)(constraint: => Constraint[LocalDate] = unconstrained)
+                                   (implicit e:ErrorCode): Constraint[LocalDate] =
+      Constraint { dm =>
+        dm match{
+          case date if date.isBefore(incorporationDate) => Invalid(ValidationError(s"validation.$e.range.below"))
+          case date if date.isAfter(LocalDate.now())    => Invalid(ValidationError(s"validation.$e.range.above"))
+          case _ => Valid
+        }
+      }
 }
 
 }

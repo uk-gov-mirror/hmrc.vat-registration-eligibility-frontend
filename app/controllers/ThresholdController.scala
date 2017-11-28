@@ -34,17 +34,22 @@ import scala.concurrent.Future
 class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
                                     implicit val s4LService: S4LService,
                                     implicit val vrs: VatRegistrationService,
-                                    val currentProfileService: CurrentProfileService)
+                                    val currentProfileService: CurrentProfileService,
+                                    val eligibilityService: EligibilityService)
   extends VatRegistrationController with FlatMapSyntax with SessionProfile {
 
   def goneOverShow: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request => {
         withCurrentProfile { implicit profile =>
-          hasIncorpDate.unapply.flatMap(incorpDate =>
-          viewModel[OverThresholdView]().fold(OverThresholdFormFactory.form(incorpDate))(OverThresholdFormFactory.form(incorpDate).fill) map {
-            form => Ok(views.html.pages.over_threshold(form, incorpDate.format(FORMAT_DD_MMMM_Y)))
-          })
+          hasIncorpDate.unapply.flatMap { incorpDate =>
+            eligibilityService.getEligibilityChoice map { choice =>
+              Ok(views.html.pages.over_threshold(
+                choice.overThreshold.fold(OverThresholdFormFactory.form(incorpDate))(OverThresholdFormFactory.form(incorpDate).fill),
+                incorpDate.format(FORMAT_DD_MMMM_Y)
+              ))
+            }
+          }
         }
       }
   }
@@ -53,36 +58,39 @@ class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          hasIncorpDate.unapply.flatMap(incorpDate =>
-          OverThresholdFormFactory.form(incorpDate).bindFromRequest().fold(
-            badForm => BadRequest(views.html.pages.over_threshold(badForm, incorpDate.format(FORMAT_DD_MMMM_Y))).pure,
-            data => save(data).map(_ => Redirect(controllers.routes.ThresholdController.expectationOverShow()))
-          ))
+          hasIncorpDate.unapply.flatMap { incorpDate =>
+            OverThresholdFormFactory.form(incorpDate).bindFromRequest().fold(
+              badForm => BadRequest(views.html.pages.over_threshold(badForm, incorpDate.format(FORMAT_DD_MMMM_Y))).pure,
+              data => eligibilityService.saveChoiceQuestion(data) map (_ => Redirect(controllers.routes.ThresholdController.expectationOverShow()))
+            )
+          }
         }
   }
 
   def expectationOverShow: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
-        withCurrentProfile { implicit p =>
-          hasIncorpDate.unapply.flatMap(incorpDate =>
-            viewModel[ExpectationOverThresholdView]().fold(ExpectationThresholdForm.form(incorpDate))(ExpectationThresholdForm.form(incorpDate).fill) map {
-              form => Ok(views.html.pages.expectation_over_threshold(form))
-            })
+        withCurrentProfile { implicit profile =>
+          hasIncorpDate.unapply.flatMap { incorpDate =>
+            eligibilityService.getEligibilityChoice map { choice =>
+              Ok(views.html.pages.expectation_over_threshold(
+                choice.expectationOverThreshold.fold(ExpectationThresholdForm.form(incorpDate))(ExpectationThresholdForm.form(incorpDate).fill)
+              ))
+            }
+          }
         }
   }
 
   def expectationOverSubmit: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
-        withCurrentProfile { implicit p =>
-            hasIncorpDate.unapply.flatMap{incorpDate =>
-
-             val res = ExpectationThresholdForm.form(incorpDate).bindFromRequest()
-               res.fold(
-               badForm => BadRequest(views.html.pages.expectation_over_threshold(badForm)).pure,
-               data => save(data).map(_ => Redirect(controllers.routes.ThresholdSummaryController.show())))
-            }
+        withCurrentProfile { implicit profile =>
+          hasIncorpDate.unapply.flatMap { incorpDate =>
+            ExpectationThresholdForm.form(incorpDate).bindFromRequest().fold(
+              badForm => BadRequest(views.html.pages.expectation_over_threshold(badForm)).pure,
+              data => eligibilityService.saveChoiceQuestion(data) map (_ => Redirect(controllers.routes.ThresholdSummaryController.show()))
+            )
           }
+        }
   }
 }

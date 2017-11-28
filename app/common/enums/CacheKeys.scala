@@ -19,4 +19,8 @@ package common.enums
 object CacheKeys extends Enumeration {
   val CurrentProfile = Value
   val IneligibilityReason = Value
+  val Eligibility = Value
+  val EligibilityChoice = Value
+
+  implicit def cacheKeysValueToString(value: CacheKeys.Value): String = value.toString
 }
