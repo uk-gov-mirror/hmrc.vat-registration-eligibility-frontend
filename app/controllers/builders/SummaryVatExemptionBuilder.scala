@@ -26,30 +26,21 @@ case class SummaryVatExemptionBuilder(vatServiceEligibility: VatServiceEligibili
 
   val vatExceptionRow: SummaryRow = SummaryRow(
     s"$sectionId.vatException",
-    vatServiceEligibility.applyingForVatExemption.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.applyingForVatExemption),
     Some(controllers.routes.EligibilityController.showExemptionCriteria())
   )
 
   val vatExemptionRow: SummaryRow = SummaryRow(
     s"$sectionId.vatExemption",
-    vatServiceEligibility.applyingForVatExemption.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.applyingForVatExemption),
     Some(controllers.routes.EligibilityController.showExemptionCriteria())
   )
 
-
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (vatExceptionRow, true),
-        (vatExemptionRow, true)
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (vatExceptionRow, true),
+      (vatExemptionRow, true)
     )
-
+  )
 }

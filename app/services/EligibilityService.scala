@@ -70,19 +70,19 @@ class EligibilityService @Inject()(val s4lService: S4LService,
   {
     S4LVatEligibilityChoice(
       taxableTurnover = api.necessity match {
-        case NECESSITY_VOLUNTARY => Some(TaxableTurnover(TAXABLE_NO))
+        case NECESSITY_VOLUNTARY  => Some(TaxableTurnover(TAXABLE_NO))
         case NECESSITY_OBLIGATORY => Some(TaxableTurnover(TAXABLE_YES))
-        case _ => None
+        case _                    => None
       },
       voluntaryRegistration = api.necessity match {
-        case NECESSITY_VOLUNTARY => Some(VoluntaryRegistration(REGISTER_YES))
+        case NECESSITY_VOLUNTARY  => Some(VoluntaryRegistration(REGISTER_YES))
         case NECESSITY_OBLIGATORY => Some(VoluntaryRegistration(REGISTER_NO))
-        case _ => None
+        case _                    => None
       },
       voluntaryRegistrationReason = api.reason.map {
-        case SELLS => VoluntaryRegistrationReason(SELLS)
-        case INTENDS_TO_SELL => VoluntaryRegistrationReason(INTENDS_TO_SELL)
-        case NEITHER => VoluntaryRegistrationReason(NEITHER)
+        case SELLS            => VoluntaryRegistrationReason(SELLS)
+        case INTENDS_TO_SELL  => VoluntaryRegistrationReason(INTENDS_TO_SELL)
+        case NEITHER          => VoluntaryRegistrationReason(NEITHER)
       },
       overThreshold = None,
       expectationOverThreshold = None
@@ -94,14 +94,14 @@ class EligibilityService @Inject()(val s4lService: S4LService,
     S4LVatEligibilityChoice(
       taxableTurnover = None,
       voluntaryRegistration = api.necessity match {
-        case NECESSITY_VOLUNTARY => Some(VoluntaryRegistration(REGISTER_YES))
+        case NECESSITY_VOLUNTARY  => Some(VoluntaryRegistration(REGISTER_YES))
         case NECESSITY_OBLIGATORY => Some(VoluntaryRegistration(REGISTER_NO))
-        case _ => None
+        case _                    => None
       },
       voluntaryRegistrationReason = api.reason.map {
-        case SELLS => VoluntaryRegistrationReason(SELLS)
+        case SELLS           => VoluntaryRegistrationReason(SELLS)
         case INTENDS_TO_SELL => VoluntaryRegistrationReason(INTENDS_TO_SELL)
-        case NEITHER => VoluntaryRegistrationReason(NEITHER)
+        case NEITHER         => VoluntaryRegistrationReason(NEITHER)
       },
       overThreshold = api.vatThresholdPostIncorp.map { t =>
         OverThresholdView(t.overThresholdSelection, t.overThresholdDate)
@@ -186,12 +186,12 @@ class EligibilityService @Inject()(val s4lService: S4LService,
     for {
       eligibility <- getEligibility
       toSave = questionKey match {
-        case Questions.haveNino => eligibility.copy(haveNino = Some(newValue))
-        case Questions.doingBusinessAbroad => eligibility.copy(doingBusinessAbroad = Some(newValue))
-        case Questions.doAnyApplyToYou => eligibility.copy(doAnyApplyToYou = Some(newValue))
-        case Questions.applyingForAnyOf => eligibility.copy(applyingForAnyOf = Some(newValue))
+        case Questions.haveNino                => eligibility.copy(haveNino = Some(newValue))
+        case Questions.doingBusinessAbroad     => eligibility.copy(doingBusinessAbroad = Some(newValue))
+        case Questions.doAnyApplyToYou         => eligibility.copy(doAnyApplyToYou = Some(newValue))
+        case Questions.applyingForAnyOf        => eligibility.copy(applyingForAnyOf = Some(newValue))
         case Questions.applyingForVatExemption => eligibility.copy(applyingForVatExemption = Some(newValue))
-        case Questions.companyWillDoAnyOf => eligibility.copy(companyWillDoAnyOf = Some(newValue))
+        case Questions.companyWillDoAnyOf      => eligibility.copy(companyWillDoAnyOf = Some(newValue))
       }
       res <- saveEligibilityQuestions(toSave)
     } yield res
@@ -222,11 +222,11 @@ class EligibilityService @Inject()(val s4lService: S4LService,
 
   private def buildEligibilityChoiceViewModel(viewModel: S4LVatEligibilityChoice, newValue: EligibilityChoice): S4LVatEligibilityChoice = {
     val newViewModel = newValue match {
-      case vr: VoluntaryRegistration => viewModel.copy(voluntaryRegistration = Some(vr))
-      case vrr: VoluntaryRegistrationReason => viewModel.copy(voluntaryRegistrationReason = Some(vrr))
-      case tt: TaxableTurnover => viewModel.copy(taxableTurnover = Some(tt))
-      case ot: OverThresholdView => viewModel.copy(overThreshold = Some(ot))
-      case eot: ExpectationOverThresholdView => viewModel.copy(expectationOverThreshold = Some(eot))
+      case vr: VoluntaryRegistration          => viewModel.copy(voluntaryRegistration = Some(vr))
+      case vrr: VoluntaryRegistrationReason   => viewModel.copy(voluntaryRegistrationReason = Some(vrr))
+      case tt: TaxableTurnover                => viewModel.copy(taxableTurnover = Some(tt))
+      case ot: OverThresholdView              => viewModel.copy(overThreshold = Some(ot))
+      case eot: ExpectationOverThresholdView  => viewModel.copy(expectationOverThreshold = Some(eot))
     }
 
     updateEligibilityChoiceViewModel(newViewModel)

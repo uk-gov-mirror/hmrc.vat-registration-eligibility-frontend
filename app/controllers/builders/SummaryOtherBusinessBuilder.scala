@@ -26,49 +26,35 @@ case class SummaryOtherBusinessBuilder(vatServiceEligibility: VatServiceEligibil
 
   val soleTraderRow: SummaryRow = SummaryRow(
     s"$sectionId.soleTrader",
-    vatServiceEligibility.doAnyApplyToYou.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doAnyApplyToYou),
     Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())
   )
 
   val vatGroupRow: SummaryRow = SummaryRow(
     s"$sectionId.vatGroup",
-    vatServiceEligibility.doAnyApplyToYou.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doAnyApplyToYou),
     Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())
   )
 
   val makingProfitRow: SummaryRow = SummaryRow(
     s"$sectionId.makingProfit",
-    vatServiceEligibility.doAnyApplyToYou.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doAnyApplyToYou),
     Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())
   )
 
   val limitedCompanyRow: SummaryRow = SummaryRow(
     s"$sectionId.limitedCompany",
-    vatServiceEligibility.doAnyApplyToYou.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doAnyApplyToYou),
     Some(controllers.routes.EligibilityController.showDoAnyApplyToYou())
   )
 
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (soleTraderRow, true),
-        (vatGroupRow, true),
-        (makingProfitRow, true),
-        (limitedCompanyRow, true)
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (soleTraderRow, true),
+      (vatGroupRow, true),
+      (makingProfitRow, true),
+      (limitedCompanyRow, true)
     )
-
+  )
 }

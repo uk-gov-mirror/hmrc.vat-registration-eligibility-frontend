@@ -27,29 +27,21 @@ case class SummaryResourceBuilder(vatServiceEligibility: VatServiceEligibility)
 
   val companyOwnRow: SummaryRow = SummaryRow(
     s"$sectionId.companyOwn",
-    vatServiceEligibility.companyWillDoAnyOf.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.companyWillDoAnyOf),
     Some(controllers.routes.EligibilityController.showCompanyWillDoAnyOf())
   )
 
   val companySellRow: SummaryRow = SummaryRow(
     s"$sectionId.companySell",
-    vatServiceEligibility.companyWillDoAnyOf.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.companyWillDoAnyOf),
     Some(controllers.routes.EligibilityController.showCompanyWillDoAnyOf())
   )
 
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (companyOwnRow, true),
-        (companySellRow, true)
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (companyOwnRow, true),
+      (companySellRow, true)
     )
-
+  )
 }

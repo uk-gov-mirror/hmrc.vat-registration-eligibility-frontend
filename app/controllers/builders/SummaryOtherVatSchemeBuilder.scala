@@ -26,30 +26,22 @@ case class SummaryOtherVatSchemeBuilder(vatServiceEligibility: VatServiceEligibi
 
   val agriculturalFlatRow: SummaryRow = SummaryRow(
     s"$sectionId.agriculturalFlat",
-    vatServiceEligibility.applyingForAnyOf.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.applyingForAnyOf),
     Some(controllers.routes.EligibilityController.showApplyingForAnyOf())
   )
 
   val accountingSchemeRow: SummaryRow = SummaryRow(
     s"$sectionId.accountingScheme",
-    vatServiceEligibility.applyingForAnyOf.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.applyingForAnyOf),
     Some(controllers.routes.EligibilityController.showApplyingForAnyOf())
   )
 
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (agriculturalFlatRow, true),
-          (accountingSchemeRow, true)
-
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (agriculturalFlatRow, true),
+      (accountingSchemeRow, true)
     )
+  )
 
 }

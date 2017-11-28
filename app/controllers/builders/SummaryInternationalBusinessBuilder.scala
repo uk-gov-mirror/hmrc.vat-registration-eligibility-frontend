@@ -26,45 +26,30 @@ case class SummaryInternationalBusinessBuilder(vatServiceEligibility: VatService
 
   val sellGoodsRow: SummaryRow = SummaryRow(
     s"$sectionId.sellGoods",
-    vatServiceEligibility.doingBusinessAbroad.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
     Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
   val buyGoodsRow: SummaryRow = SummaryRow(
     s"$sectionId.buyGoods",
-    vatServiceEligibility.doingBusinessAbroad.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
     Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
 
   val sellAssets: SummaryRow = SummaryRow(
     s"$sectionId.sellAssets",
-    vatServiceEligibility.doingBusinessAbroad.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
     Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
 
   val sellGoodsServices: SummaryRow = SummaryRow(
     s"$sectionId.sellGoodsServices",
-    vatServiceEligibility.doingBusinessAbroad.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
     Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
 
   val doBusiness : SummaryRow = SummaryRow(
     s"$sectionId.doBusiness",
-    vatServiceEligibility.doingBusinessAbroad.map {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    booleanToMessageKey(vatServiceEligibility.doingBusinessAbroad),
     Some(controllers.routes.EligibilityController.showDoingBusinessAbroad())
   )
 

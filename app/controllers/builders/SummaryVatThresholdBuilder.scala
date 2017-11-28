@@ -30,18 +30,13 @@ case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThreshol
 
   val overThresholdSelectionRow: SummaryRow = SummaryRow(
     s"$sectionId.overThresholdSelection",
-    vatThresholdPostIncorp.map(_.overThresholdSelection).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    vatThresholdPostIncorp.fold("")(x => if(x.overThresholdSelection) "app.common.yes" else "app.common.no"),
     Some(controllers.routes.ThresholdController.goneOverShow())
   )
 
   val overThresholdDateRow: SummaryRow = SummaryRow(
     s"$sectionId.overThresholdDate",
-    vatThresholdPostIncorp.map(_.overThresholdDate).collect {
-      case Some(date) => date.format(monthYearPresentationFormatter)
-    }.getOrElse(""),
+    vatThresholdPostIncorp.map(_.overThresholdDate.fold("")(_.format(monthYearPresentationFormatter))).getOrElse(""),
     Some(controllers.routes.ThresholdController.goneOverShow())
   )
 
@@ -49,30 +44,23 @@ case class SummaryVatThresholdBuilder(vatThresholdPostIncorp: Option[VatThreshol
 
   val expectedOverThresholdSelectionRow: SummaryRow = SummaryRow(
     s"$sectionId.expectationOverThresholdSelection",
-    vatExpectedThresholdPostIncorp.map(_.expectedOverThresholdSelection).collect {
-      case true => "app.common.yes"
-      case false => "app.common.no"
-    }.getOrElse(""),
+    vatExpectedThresholdPostIncorp.fold("")(x => if(x.expectedOverThresholdSelection) "app.common.yes" else "app.common.no"),
     Some(controllers.routes.ThresholdController.expectationOverShow())
   )
 
   val expectedOverThresholdDateRow: SummaryRow = SummaryRow(
     s"$sectionId.expectationOverThresholdDate",
-    vatExpectedThresholdPostIncorp.map(_.expectedOverThresholdDate).collect {
-      case Some(date) => date.format(dayMonthYearPresentationFormatter)
-    }.getOrElse(""),
+    vatExpectedThresholdPostIncorp.map(_.expectedOverThresholdDate.fold("")(_.format(dayMonthYearPresentationFormatter))).getOrElse(""),
     Some(controllers.routes.ThresholdController.expectationOverShow())
   )
 
-  val section: SummarySection =
-    SummarySection(
-      sectionId,
-      rows = Seq(
-        (overThresholdSelectionRow, true),
-        (overThresholdDateRow, vatThresholdPostIncorp.flatMap(_.overThresholdDate).isDefined),
-        (expectedOverThresholdSelectionRow, true),
-        (expectedOverThresholdDateRow, vatExpectedThresholdPostIncorp.flatMap(_.expectedOverThresholdDate).isDefined)
-      )
+  val section: SummarySection = SummarySection(
+    sectionId,
+    rows = Seq(
+      (overThresholdSelectionRow, true),
+      (overThresholdDateRow, vatThresholdPostIncorp.flatMap(_.overThresholdDate).isDefined),
+      (expectedOverThresholdSelectionRow, true),
+      (expectedOverThresholdDateRow, vatExpectedThresholdPostIncorp.flatMap(_.expectedOverThresholdDate).isDefined)
     )
-
+  )
 }
