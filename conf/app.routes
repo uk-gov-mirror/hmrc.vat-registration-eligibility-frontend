@@ -16,7 +16,7 @@ GET         /post-sign-in                                     controllers.callba
 ## DASHBOARD
 GET         /dashboard                                        controllers.callbacks.SignInOutController.dashboard
 
-GET         /use-this-service                                 controllers.TwirlViewController.renderViewAuthorised(viewName="use-this-service")
+##GET         /use-this-service                                 controllers.TwirlViewController.renderViewAuthorised(viewName="use-this-service")
 
 ## FEEDBACK
 GET         /feedback                                         controllers.feedback.FeedbackController.show
