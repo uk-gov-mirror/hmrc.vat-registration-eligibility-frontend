@@ -21,27 +21,20 @@
 
 @main_template(title = messages("pages.thresholdSummary.title")) {
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.thresholdSummary.heading")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.thresholdSummary.heading")</h1>
 
     @for(section <- summaryModel.sections) {
         @if(section.display) {
 
             <section>
-                <table class="check-your-answers form-group">
-                    @*To show grey line at top of section*@
-                    <tr>
-                        <th style="white-space: normal;
-                            width: 50%;" class="question"></th>
-                        <td class="answer"></td>
-                        <td class="change"><span class="visuallyhidden"></span></td>
-                    </tr>
+                <dl class="govuk-check-your-answers cya-questions-long">
                     @*Iterates to display sections and rows*@
                     @for((row, doDisplayRow) <- section.rows) {
                         @if(doDisplayRow) {
                             @summaryRow(row, dateOfIncorporation)
                         }
                     }
-                </table>
+                </dl>
             </section>
         }
     }
