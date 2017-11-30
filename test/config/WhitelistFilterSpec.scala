@@ -54,7 +54,7 @@ class WhitelistFilterSpec extends PlaySpec with OneAppPerTest with SessionBuilde
   "ProductionFrontendGlobal" must {
     "let requests passing" when {
       "coming from an IP in the white list must work as normal" in {
-        val request = FakeRequest(GET, "/check-if-you-can-register-for-vat/use-this-service").withHeaders("True-Client-IP" -> "11.22.33.44")
+        val request = FakeRequest(GET, "/check-if-you-can-register-for-vat/national-insurance-number").withHeaders("True-Client-IP" -> "11.22.33.44")
         val Some(result) = route(app, request)
 
         status(result) mustBe SEE_OTHER

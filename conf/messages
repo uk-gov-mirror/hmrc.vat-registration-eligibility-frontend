@@ -90,11 +90,6 @@ pages.serviceCriteriaFailure.applyingForVatExemption.p2.1  = another HMRC servic
 pages.serviceCriteriaFailure.linkToLegacyApp               = You''ll need to
 pages.serviceCriteriaFailure.linkToLegacyApp1              = register using another HMRC service.
 
-## Service Eligibility
-pages.eligibility.start.title                               = Can you use this service?
-pages.eligibility.start.heading                             = Can you use this service?
-pages.eligibility.start.para1                               = Before you register for VAT, we need to ask some eligibility questions.
-
 ## Service Eligibility Questions Validation
 validation.eligibility.haveNino.missing                     = Tell us if you have a UK National Insurance number
 validation.eligibility.doingBusinessAbroad.missing          = Tell us if the company will do international business once it''s registered for VAT
