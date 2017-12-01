@@ -19,6 +19,7 @@ package controllers
 import fixtures.VatRegistrationFixture
 import helpers.VatRegSpec
 import models.CurrentProfile
+import models.external.IncorporationInfo
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.mvc.{Request, Result}
@@ -44,6 +45,7 @@ class EligibilitySummaryControllerSpec extends VatRegSpec with VatRegistrationFi
         f(currentProfile)
       }
     }
+    val INCORPORATION_STATUS = "incorporationStatus"
 
   }
 
@@ -59,10 +61,14 @@ class EligibilitySummaryControllerSpec extends VatRegSpec with VatRegistrationFi
   }
 
   s"POST ${controllers.routes.EligibilitySummaryController.submit()}" should {
-    "redirect to the you can register page" in new Setup {
-      callAuthorised(testController.submit) {
-        _ redirectsTo controllers.routes.EligibilitySuccessController.show.url
+    "return 303 with valid data - Company NOT INCORPORATED" in new Setup {
+      when(mockVatRegistrationService.getIncorporationDate(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(None))
+
+      mockKeystoreFetchAndGet[IncorporationInfo](INCORPORATION_STATUS, None)
+
+      submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody()) {
+        _ redirectsTo controllers.routes.TaxableTurnoverController.show().url
       }
     }
   }
-}
+  }

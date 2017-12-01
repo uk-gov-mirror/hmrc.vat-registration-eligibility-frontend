@@ -27,30 +27,6 @@ pages.timeout.heading                   = Your session has timed out due to inac
 pages.timeout.body.one                  = Your answers have been saved
 pages.timeout.body.two                  = Sign in to <a href="{0}">continue registration</a>.
 
-
-## Service Criteria Questions (VAT Service Eligibility)
-## Service Criteria Success
-pages.serviceCriteriaSuccess.title                                     = Eligible to register
-pages.serviceCriteriaSuccess.heading                                   = You can register for VAT using this service
-pages.serviceCriteriaSuccess.para1                                     = To register for VAT you''ll need:
-pages.serviceCriteriaSuccess.bullet.details.bullet1                    = details of the person making the application (for example, National Insurance number)
-pages.serviceCriteriaSuccess.bullet.details.bullet2                    = estimate of the company''s VAT taxable sales for the next 12 months
-pages.serviceCriteriaSuccess.note.registrationTime                     = This application should take no more than 30 minutes.
-pages.serviceCriteriaSuccess.panels.vatVoluntarily.title               = Can you register voluntarily for VAT?
-pages.serviceCriteriaSuccess.panels.vatVoluntarily.para1               = You can register voluntarily if the company''s VAT taxable turnover is less than £85,000 in the 30 days after it''s registered with Companies House.
-pages.serviceCriteriaSuccess.panels.vatVoluntarily.para2               = If you''re registered for VAT you:
-pages.serviceCriteriaSuccess.panels.vatVoluntarily.bullet.charge       = must <a href="https://www.gov.uk/vat-businesses/how-vat-works">charge VAT</a> on the goods or services you sell
-pages.serviceCriteriaSuccess.panels.vatVoluntarily.bullet.reclaim      = can <a href="https://www.gov.uk/reclaim-vat">reclaim VAT</a> on your business-related purchases
-pages.serviceCriteriaSuccess.panels.vatVoluntarily.bullet.invoices     = must send VAT invoices to VAT-registered customers
-pages.serviceCriteriaSuccess.panels.vatVoluntarily.para3               = Smaller companies that are registered for VAT can appear larger and more established to customers. However, charging VAT on goods and services may put off customers who aren''t VAT registered and can''t reclaim VAT.
-pages.serviceCriteriaSuccess.panels.vatVoluntarily.para4               = You can apply to cancel your VAT registration at any time if it turns out to be the wrong decision.
-pages.serviceCriteriaSuccess.panels.vatResponsibilities.title          = What are your VAT responsibilities?
-pages.serviceCriteriaSuccess.panels.vatResponsibilities.para1          = From the date you''re registered for VAT you must:
-pages.serviceCriteriaSuccess.panels.vatResponsibilities.bullet.charge  = charge the <a href="https://www.gov.uk/vat-businesses/when-to-charge-vat">right amount of VAT</a>
-pages.serviceCriteriaSuccess.panels.vatResponsibilities.bullet.pay     = pay any VAT due to HMRC
-pages.serviceCriteriaSuccess.panels.vatResponsibilities.bullet.submit  = submit VAT Returns
-pages.serviceCriteriaSuccess.panels.vatResponsibilities.bullet.records = keep VAT records and a VAT account
-
 ## Service Criteria Failure
 pages.serviceCriteriaFailure.title                      = You can''t register for VAT with this service
 pages.serviceCriteriaFailure.heading                    = You can''t register for VAT with this service

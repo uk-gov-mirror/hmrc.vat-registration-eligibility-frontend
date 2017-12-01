@@ -94,10 +94,10 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with Requests
       "[Q5] /apply-exception-exemption  the user is authorised, current prof is setup, vatscheme is blank, s4l returns valid data, prepop field" in {
 
         val s4lData = S4LVatEligibility(haveNino = Some(true),
-                                        doingBusinessAbroad = Some(true),
-                                        doAnyApplyToYou = Some(false),
-                                        applyingForAnyOf = Some(false),
-                                        applyingForVatExemption = Some(true))
+          doingBusinessAbroad = Some(true),
+          doAnyApplyToYou = Some(false),
+          applyingForAnyOf = Some(false),
+          applyingForVatExemption = Some(true))
 
         given()
           .user.isAuthorised
@@ -201,7 +201,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with Requests
           .s4lContainer.cleared
 
         val response = buildClient("/apply-for-any").post(Map("companyWillDoAnyOfRadio" -> Seq("false")))
-        whenReady(response){
+        whenReady(response) {
           res =>
             res.status mustBe 303
             res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/check-confirm-eligibility")
@@ -254,7 +254,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with Requests
           .s4lContainer.cleared
 
         val response = buildClient("/apply-for-any").post(Map("companyWillDoAnyOfRadio" -> Seq("false")))
-        whenReady(response){
+        whenReady(response) {
           res =>
             res.status mustBe 303
             res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/check-confirm-eligibility")
@@ -271,76 +271,5 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with Requests
       }
     }
 
-  }
-  "Eligibility /cant-register on GET" should {
-    "return 200" when {
-      "user hits it directly where a question has a ineligibility reason" in {
-        given()
-          .user.isAuthorised
-          .currentProfile.withProfile(Some(STARTED), Some("Current Profile returned"))
-          .audit.writesAudit()
-          .keystoreInScenario.hasKeyStoreValue(IneligibilityReason.toString, s""""haveNino"""", Some("Current Profile returned"))
-
-        val response = buildClient("/cant-register").get()
-        whenReady(response)(_.status) mustBe 200
-      }
-    }
-
-    "return 500" when {
-      "user hits it directly but there's no ineligibility reason in keystore" in {
-        given()
-          .user.isAuthorised
-          .currentProfile.withProfile()
-          .audit.writesAudit()
-          .keystore.hasKeyStoreValue(IneligibilityReason.toString, "")
-
-        val response = buildClient("/cant-register").get()
-        whenReady(response)(_.status) mustBe 500
-      }
-    }
-  }
-  "Eligibility /can-register on GET" should {
-    "return 200" when {
-      "user hits it directly with a current profile" in {
-        given()
-          .user.isAuthorised
-          .currentProfile.withProfile()
-          .audit.writesAudit()
-
-        val response = buildClient("/can-register").get()
-        whenReady(response)(_.status) mustBe 200
-      }
-    }
-    "return 200" when {
-      "user hits it but does not have a current profile so one is built up" in {
-        given()
-          .user.isAuthorised
-          .keystore.hasKeyStoreValue("foo","true")
-          .currentProfile.setup()
-          .audit.writesAudit()
-
-        val response = buildClient("/can-register").get()
-        whenReady(response)(_.status) mustBe 200
-      }
-    }
-  }
-  "Eligility /can-register on POST" should {
-    "return 303 and redirect to gone over threshold" when {
-      "user is authorised and has a current profile" in {
-        given()
-          .user.isAuthorised
-          .currentProfile.setup()
-          .currentProfile.withProfile()
-          .audit.writesAudit()
-
-        val response = buildClient("/can-register").post(Map("haveNinoRadio" -> Seq("fooBars")))
-        whenReady(response){
-          res =>
-            res.status mustBe 303
-            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/vat-taxable-turnover-gone-over")
-        }
-      }
-
-    }
   }
 }
