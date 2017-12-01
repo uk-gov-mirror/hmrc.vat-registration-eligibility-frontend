@@ -16,14 +16,8 @@ GET         /post-sign-in                                     controllers.callba
 ## DASHBOARD
 GET         /dashboard                                        controllers.callbacks.SignInOutController.dashboard
 
-##GET         /use-this-service                                 controllers.TwirlViewController.renderViewAuthorised(viewName="use-this-service")
-
 ## FEEDBACK
 GET         /feedback                                         controllers.feedback.FeedbackController.show
-
-## CAN OR CAN'T REGISTER
-GET         /can-register                                     controllers.EligibilitySuccessController.show
-POST        /can-register                                     controllers.EligibilitySuccessController.submit
 
 ## SERVICE CRITERIA QUESTIONS
 GET         /cant-register                                    controllers.EligibilityController.ineligible()

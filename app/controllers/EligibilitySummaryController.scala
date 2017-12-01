@@ -20,24 +20,22 @@ import play.api.mvc._
 import utils.SessionProfile
 import javax.inject.Inject
 
+import cats.data.OptionT
 import play.api.i18n.MessagesApi
 import services.{CurrentProfileService, S4LService, SummaryService, VatRegistrationService}
-
-import scala.concurrent.Future
 
 class EligibilitySummaryController @Inject()(implicit val s4LService: S4LService,
                                              implicit val messagesApi: MessagesApi,
                                              val summaryService: SummaryService,
                                              val vrs: VatRegistrationService,
-                                             val currentProfileService: CurrentProfileService
-                                            )
+                                             val currentProfileService: CurrentProfileService)
   extends VatRegistrationController with SessionProfile {
 
   def show: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          summaryService.getEligibilitySummary() map ( summary => Ok(views.html.pages.summary_eligibility(summary)))
+          summaryService.getEligibilitySummary() map (summary => Ok(views.html.pages.summary_eligibility(summary)))
         }
   }
 
@@ -45,7 +43,10 @@ class EligibilitySummaryController @Inject()(implicit val s4LService: S4LService
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          Future.successful(Redirect(controllers.routes.EligibilitySuccessController.show()))
+          OptionT(vrs.getIncorporationDate(profile.transactionId)).fold(controllers.routes.TaxableTurnoverController.show()) {
+            incorpDate => controllers.routes.ThresholdController.goneOverShow()
+          }.map(Redirect)
         }
   }
+
 }

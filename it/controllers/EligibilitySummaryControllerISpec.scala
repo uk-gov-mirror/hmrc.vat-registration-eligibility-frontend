@@ -135,7 +135,7 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
     }
   }
   "Save and continue on eligibility summary" should {
-    "save the data to the back end and redirect to the you can register page" in {
+    "save the data to the back end and redirect to threshold page" in {
       given()
         .user.isAuthorised
         .currentProfile.withProfileAndIncorpDate()
@@ -147,7 +147,36 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
       val response = buildClient("/check-confirm-eligibility").post(Map("" -> Seq("")))
       whenReady(response) { res =>
         res.status mustBe 303
-        res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.EligibilitySuccessController.show().url)
+        res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.goneOverShow().url)
+      }
+    }
+  }
+
+  "Save and continue on eligibility summary without incorp date" should {
+    "save the data to the back end and redirect to taxable turnover page" in {
+      val profile = """
+                             |{
+                             | "companyName" : "testCompanyName",
+                             | "registrationID" : "1",
+                             | "transactionID" : "000-434-1",
+                             | "vatRegistrationStatus" : "${VatRegStatus.draft}"
+                             |}
+                           """.stripMargin
+
+      given()
+        .user.isAuthorised
+        .vatScheme.isBlank
+        .currentProfile.withProfile()
+        .company.incorporationStatusNotKnown()
+        .keystore.putKeyStoreValue(CacheKeys.CurrentProfile, profile)
+        .audit.writesAudit()
+        .s4lContainer.contains(CacheKeys.Eligibility, s4lData)
+        .vatScheme.isUpdatedWith(validEligibilityData)
+
+      val response = buildClient("/check-confirm-eligibility").post(Map("" -> Seq("")))
+      whenReady(response) { res =>
+        res.status mustBe 303
+        res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.TaxableTurnoverController.show().url)
       }
     }
   }
