@@ -27,6 +27,7 @@ trait AppConfig {
   val reportAProblemPartialUrl: String
   val reportAProblemNonJSUrl: String
   val timeoutInSeconds: String
+  val vatRegFrontendFeedbackUrl: String
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
@@ -42,6 +43,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
   lazy val vatRegFrontendWelcomeUrl: String = loadConfig("microservice.services.vat-registration-frontend.www.url")
+  override lazy val vatRegFrontendFeedbackUrl: String = s"${loadConfig("microservice.services.vat-registration-frontend.www.url")}/feedback"
 
   override val timeoutInSeconds = loadConfig("timeoutInSeconds")
 
