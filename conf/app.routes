@@ -16,9 +16,6 @@ GET         /post-sign-in                                     controllers.callba
 ## DASHBOARD
 GET         /dashboard                                        controllers.callbacks.SignInOutController.dashboard
 
-## FEEDBACK
-GET         /feedback                                         controllers.feedback.FeedbackController.show
-
 ## SERVICE CRITERIA QUESTIONS
 GET         /cant-register                                    controllers.EligibilityController.ineligible()
 
