@@ -37,7 +37,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   private val contactFormServiceIdentifier = "SCRS"
 
-  override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
+  override lazy val contactFrontendPartialBaseUrl = loadConfig("microservice.services.contact-frontend.url")
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")
