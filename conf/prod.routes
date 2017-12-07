@@ -2,5 +2,6 @@
 ->         /check-if-you-can-register-for-vat               app.Routes
 ->         /                                                health.Routes
 ->     	   /template                                        template.Routes
+->         /internal                                        internal.Routes
 
 GET        /admin/metrics                                   @com.kenshoo.play.metrics.MetricsController.metrics

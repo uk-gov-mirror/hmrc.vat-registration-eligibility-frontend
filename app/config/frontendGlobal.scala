@@ -17,6 +17,7 @@
 package config
 
 import com.typesafe.config.Config
+import filters.VATCSRFExceptionsFilter
 import net.ceedubs.ficus.Ficus._
 import play.api.mvc.Request
 import play.api.{Application, Configuration, Play}
@@ -26,7 +27,7 @@ import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
 import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
-import uk.gov.hmrc.play.frontend.filters.{ FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport }
+import uk.gov.hmrc.play.frontend.filters.{FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport}
 
 
 object FrontendGlobal extends FrontendGlobal
@@ -35,6 +36,8 @@ trait FrontendGlobal extends DefaultFrontendGlobal {
   override val auditConnector = FrontendAuditConnector
   override val loggingFilter = LoggingFilter
   override val frontendAuditFilter = AuditFilter
+
+  override def csrfExceptionsFilter = new VATCSRFExceptionsFilter(FrontendAppConfig.uriWhiteList)
 
   override def onStart(app: Application) {
     super.onStart(app)

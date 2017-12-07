@@ -1,0 +1,1 @@
+DELETE          /:regId/delete-session                         controllers.internal.DeleteSessionItemsController.deleteSessionRelatedData(regId)

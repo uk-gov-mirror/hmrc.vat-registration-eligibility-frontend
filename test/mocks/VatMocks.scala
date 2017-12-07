@@ -44,4 +44,5 @@ trait VatMocks
   implicit lazy val mockVatRegFrontendService = mock[VatRegFrontendService]
   implicit lazy val mockSummaryService = mock[SummaryService]
   implicit lazy val mockEligibilityService = mock[EligibilityService]
+  implicit lazy val mockCancellationService = mock[CancellationService]
 }

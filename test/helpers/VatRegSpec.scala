@@ -71,6 +71,7 @@ class VatRegSpec extends UnitSpec with WithFakeApplication
     reset(mockWSHttp)
     reset(mockCurrentProfileService)
     reset(mockVatRegFrontendService)
+    reset(mockCancellationService)
   }
 
   // Placeholder for custom configuration
