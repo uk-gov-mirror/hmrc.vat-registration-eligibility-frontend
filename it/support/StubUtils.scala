@@ -89,6 +89,16 @@ trait StubUtils {
       stubFor(stubKeystorePut(key,data))
       builder
     }
+
+    def deleteKeystore(): PreconditionBuilder = {
+      stubFor(stubKeystoreRemove())
+      builder
+    }
+
+    def keystoreGetNotFound(): PreconditionBuilder = {
+      stubFor(stubKeystoreGetNotFound())
+      builder
+    }
   }
 
   class KeystoreStubScenarioWrapper(scenario: String = "Keystore Scenario")(implicit builder: PreconditionBuilder) extends KeystoreStubWrapper {
@@ -123,6 +133,14 @@ trait StubUtils {
       )
       builder
     }
+
+    def failsToGetBusinessProfile = {
+      stubFor(
+        get(urlPathEqualTo("/business-registration/business-tax-registration"))
+          .willReturn(notFound())
+      )
+      builder
+    }
   }
 
   trait KeystoreStub {
@@ -151,6 +169,17 @@ trait StubUtils {
              |      "lastUpdated": { "$$date": 1502265526026 }}}
           """.stripMargin
         ))
+
+    def stubKeystoreRemove(): MappingBuilder = {
+      delete(urlMatching("/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+"))
+        .willReturn(ok())
+    }
+
+    def stubKeystoreGetNotFound(): MappingBuilder = {
+      get(urlPathMatching("/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+"))
+        .willReturn(notFound())
+    }
+
   }
 
   trait S4LStub {
@@ -535,7 +564,7 @@ trait StubUtils {
           .willReturn(forbidden()))
       builder
      }
-    }
+  }
 
 
 

@@ -49,6 +49,10 @@ trait AppAndStubs extends StartAndStopWireMock with StubUtils with OneServerPerS
     WS.url(s"http://localhost:$port/check-if-you-can-register-for-vat$path").withFollowRedirects(false).withHeaders(headers,"Csrf-Token" -> "nocheck")
   }
 
+  def buildInternalCall(path: String)(implicit headers:(String,String) = HeaderNames.COOKIE -> getSessionCookie()) = {
+    WS.url(s"http://localhost:$port/internal/$path").withFollowRedirects(false).withHeaders(headers,"Csrf-Token" -> "nocheck")
+  }
+
   override implicit lazy val app: FakeApplication = FakeApplication(
     //override app config here, chaning hosts and ports to point app at Wiremock
     additionalConfiguration = replaceWithWiremock(Seq(
@@ -74,7 +78,8 @@ trait AppAndStubs extends StartAndStopWireMock with StubUtils with OneServerPerS
     } +
       (s"auditing.consumer.baseUri.host" -> wiremockHost, s"auditing.consumer.baseUri.port" -> wiremockPort) +
       ("play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck") +
-      ("microservice.services.vat-registration-frontend.www.url" -> "/vat-uri")
+      ("microservice.services.vat-registration-frontend.www.url" -> "/vat-uri") +
+      ("microservice.services.vat-registration-eligibility-frontend.www.url" -> "/vat-el-uri")
 
 
   }

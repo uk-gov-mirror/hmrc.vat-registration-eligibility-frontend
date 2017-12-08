@@ -25,7 +25,6 @@ import connectors.{KeystoreConnector, VatRegistrationConnector}
 import models._
 import models.api.{VatServiceEligibility, _}
 import models.external.IncorporationInfo
-import play.api.libs.json.Format
 import common.enums.CacheKeys.CurrentProfile
 import common.enums.VatRegStatus
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
