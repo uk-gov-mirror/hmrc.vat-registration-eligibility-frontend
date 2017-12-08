@@ -16,36 +16,26 @@
 
 package models.test
 
+import models.view.Eligibility
 import play.api.libs.json.Json
 
-case class VatServiceEligibilityTestSetup(haveNino: Option[String],
-                                          doingBusinessAbroad: Option[String],
-                                          doAnyApplyToYou: Option[String],
-                                          applyingForAnyOf: Option[String],
-                                          applyingForVatExemption: Option[String],
-                                          companyWillDoAnyOf: Option[String])
+case class ThresholdTestSetup(taxableTurnoverChoice: Option[String],
+                              voluntaryChoice: Option[String],
+                              voluntaryRegistrationReason: Option[String],
+                              overThresholdSelection: Option[String],
+                              overThresholdMonth: Option[String],
+                              overThresholdYear: Option[String],
+                              expectationOverThresholdSelection: Option[String],
+                              expectationOverThresholdDay: Option[String],
+                              expectationOverThresholdMonth: Option[String],
+                              expectationOverThresholdYear: Option[String])
 
-object VatServiceEligibilityTestSetup {
-  implicit val format = Json.format[VatServiceEligibilityTestSetup]
+object ThresholdTestSetup {
+  implicit val format = Json.format[ThresholdTestSetup]
 }
 
-case class VatEligibilityChoiceTestSetup(taxableTurnoverChoice: Option[String],
-                                         voluntaryChoice: Option[String],
-                                         voluntaryRegistrationReason: Option[String],
-                                         overThresholdSelection: Option[String],
-                                         overThresholdMonth: Option[String],
-                                         overThresholdYear: Option[String],
-                                         expectationOverThresholdSelection:Option[String],
-                                         expectationOverThresholdDay:Option[String],
-                                         expectationOverThresholdMonth:Option[String],
-                                         expectationOverThresholdYear:Option[String])
-
-object VatEligibilityChoiceTestSetup {
-  implicit val format = Json.format[VatEligibilityChoiceTestSetup]
-}
-
-case class TestSetup(vatServiceEligibility: VatServiceEligibilityTestSetup,
-                     vatEligibilityChoice: VatEligibilityChoiceTestSetup)
+case class TestSetup(eligibility: Eligibility,
+                     threshold: ThresholdTestSetup)
 
 object TestSetup {
   implicit val format = Json.format[TestSetup]

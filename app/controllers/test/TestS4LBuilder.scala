@@ -18,40 +18,39 @@ package controllers.test
 
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
-
-import models.{S4LVatEligibility, S4LVatEligibilityChoice}
 import models.test.TestSetup
-import models.view.{ExpectationOverThresholdView, OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
+import models.view._
 
-class TestS4LBuilder {
+class TestS4LBuilderImpl extends TestS4LBuilder
 
-  def eligibilityChoiceFromData(data: TestSetup): S4LVatEligibilityChoice = {
-    val taxableTurnover: Option[String] = data.vatEligibilityChoice.taxableTurnoverChoice
+trait TestS4LBuilder {
+  def thresholdFromData(data: TestSetup): Threshold = {
+    val taxableTurnover: Option[String] = data.threshold.taxableTurnoverChoice
 
-    val overThresholdView: Option[OverThresholdView] = data.vatEligibilityChoice.overThresholdSelection match {
+    val overThresholdView: Option[OverThresholdView] = data.threshold.overThresholdSelection match {
       case Some("true") => Some(OverThresholdView(selection = true, Some(LocalDate.of(
-        data.vatEligibilityChoice.overThresholdYear.map(_.toInt).get,
-        data.vatEligibilityChoice.overThresholdMonth.map(_.toInt).get,
+        data.threshold.overThresholdYear.map(_.toInt).get,
+        data.threshold.overThresholdMonth.map(_.toInt).get,
         1
       ).`with`(TemporalAdjusters.lastDayOfMonth()))))
       case Some("false") => Some(OverThresholdView(selection = false, None))
       case _ => None
     }
 
-    val expectationOverThresholdView: Option[ExpectationOverThresholdView] = data.vatEligibilityChoice.expectationOverThresholdSelection match {
+    val expectationOverThresholdView: Option[ExpectationOverThresholdView] = data.threshold.expectationOverThresholdSelection match {
       case Some("true") => Some(ExpectationOverThresholdView(selection = true, Some(LocalDate.of(
-        data.vatEligibilityChoice.expectationOverThresholdYear.map(_.toInt).get,
-        data.vatEligibilityChoice.expectationOverThresholdMonth.map(_.toInt).get,
-        data.vatEligibilityChoice.expectationOverThresholdDay.map(_.toInt).get
+        data.threshold.expectationOverThresholdYear.map(_.toInt).get,
+        data.threshold.expectationOverThresholdMonth.map(_.toInt).get,
+        data.threshold.expectationOverThresholdDay.map(_.toInt).get
       ))))
       case Some("false") => Some(ExpectationOverThresholdView(selection = false, None))
       case _ => None
     }
 
-    val voluntaryRegistration: Option[String] = data.vatEligibilityChoice.voluntaryChoice
-    val voluntaryRegistrationReason: Option[String] = data.vatEligibilityChoice.voluntaryRegistrationReason
+    val voluntaryRegistration: Option[String] = data.threshold.voluntaryChoice
+    val voluntaryRegistrationReason: Option[String] = data.threshold.voluntaryRegistrationReason
 
-    S4LVatEligibilityChoice(
+    Threshold(
       taxableTurnover = taxableTurnover.map(TaxableTurnover(_)),
       voluntaryRegistration = voluntaryRegistration.map(VoluntaryRegistration(_)),
       voluntaryRegistrationReason = voluntaryRegistrationReason.map(VoluntaryRegistrationReason(_)),
@@ -59,13 +58,4 @@ class TestS4LBuilder {
       expectationOverThreshold = expectationOverThresholdView
     )
   }
-
-  def eligibilityFromData(data: TestSetup): S4LVatEligibility = S4LVatEligibility(
-    haveNino = data.vatServiceEligibility.haveNino.map(_.toBoolean),
-    doingBusinessAbroad = data.vatServiceEligibility.doingBusinessAbroad.map(_.toBoolean),
-    doAnyApplyToYou = data.vatServiceEligibility.doAnyApplyToYou.map(_.toBoolean),
-    applyingForAnyOf = data.vatServiceEligibility.applyingForAnyOf.map(_.toBoolean),
-    applyingForVatExemption = data.vatServiceEligibility.applyingForVatExemption.map(_.toBoolean),
-    companyWillDoAnyOf = data.vatServiceEligibility.companyWillDoAnyOf.map(_.toBoolean)
-  )
 }

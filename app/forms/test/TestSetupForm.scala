@@ -16,13 +16,14 @@
 
 package forms.test
 
-import models.test.{TestSetup, VatEligibilityChoiceTestSetup, VatServiceEligibilityTestSetup}
+import models.test.{TestSetup, ThresholdTestSetup}
+import models.view.Eligibility
 import play.api.data.Form
 import play.api.data.Forms._
 
 object TestSetupForm {
 
-  val vatChoiceTestSetupMapping = mapping(
+  val thresholdTestSetupMapping = mapping(
     "taxableTurnoverChoice" -> optional(text),
     "voluntaryChoice" -> optional(text),
     "voluntaryRegistrationReason" -> optional(text),
@@ -33,20 +34,19 @@ object TestSetupForm {
     "expectationOverThresholdDay" -> optional(text),
     "expectationOverThresholdMonth" -> optional(text),
     "expectationOverThresholdYear" -> optional(text)
-  )(VatEligibilityChoiceTestSetup.apply)(VatEligibilityChoiceTestSetup.unapply)
+  )(ThresholdTestSetup.apply)(ThresholdTestSetup.unapply)
 
-  val vatServiceEligibilityTestSetupMapping = mapping(
-    "haveNino" -> optional(text),
-    "doingBusinessAbroad" -> optional(text),
-    "doAnyApplyToYou" -> optional(text),
-    "applyingForAnyOf" -> optional(text),
-    "applyingForVatExemption" -> optional(text),
-    "companyWillDoAnyOf" -> optional(text)
-  )(VatServiceEligibilityTestSetup.apply)(VatServiceEligibilityTestSetup.unapply)
+  val eligibilityTestSetupMapping = mapping(
+    "haveNino" -> optional(boolean),
+    "doingBusinessAbroad" -> optional(boolean),
+    "doAnyApplyToYou" -> optional(boolean),
+    "applyingForAnyOf" -> optional(boolean),
+    "applyingForVatExemption" -> optional(boolean),
+    "companyWillDoAnyOf" -> optional(boolean)
+  )(Eligibility.apply)(Eligibility.unapply)
 
   val form = Form(mapping(
-    "vatServiceEligibility" -> vatServiceEligibilityTestSetupMapping,
-    "vatEligibilityChoice" -> vatChoiceTestSetupMapping
+    "vatServiceEligibility" -> eligibilityTestSetupMapping,
+    "vatEligibilityChoice" -> thresholdTestSetupMapping
   )(TestSetup.apply)(TestSetup.unapply))
-
 }
