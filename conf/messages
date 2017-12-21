@@ -127,7 +127,7 @@ pages.eligibility.applyingForVatExemption.panel.p3.1        = VAT rates on diffe
 
 pages.eligibility.companyWillDoAnyOf.title                   = Will the company do any of the following once it''s registered for VAT?
 pages.eligibility.companyWillDoAnyOf.heading                 = Will the company do any of the following once it''s registered for VAT?
-pages.eligibility.companyWillDoAnyOf.p1                      = Tell us if the company will do any of the following:
+pages.eligibility.companyWillDoAnyOf.p1                      = Tell us if the company will do either of the following:
 pages.eligibility.companyWillDoAnyOf.bullet2                 = own one or more racehorses
 pages.eligibility.companyWillDoAnyOf.bullet3                 = buy, sell or rent out land or property
 
