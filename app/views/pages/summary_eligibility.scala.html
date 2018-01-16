@@ -24,7 +24,7 @@
 
     @for(section <- summaryModel.sections) {
       @if(section.display) {
-        <section>
+        <section class="form-group">
           <h2 class="heading-medium">@Messages(s"pages.summary.${section.id}.sectionHeading")</h2>
           <dl class="govuk-check-your-answers cya-questions-long">
             @for((row, doDisplayRow) <- section.rows) {
