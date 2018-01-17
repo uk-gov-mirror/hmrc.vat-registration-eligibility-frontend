@@ -16,19 +16,23 @@
 
 package controllers.test
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 import common.enums.CacheKeys
 import common.enums.CacheKeys._
-import connectors.S4LConnector
+import connectors.{S4LConnector, VatRegistrationConnector}
 import controllers.VatRegistrationController
 import forms.test.TestSetupForm
 import models._
 import models.test.{TestSetup, ThresholdTestSetup}
 import models.view.{Eligibility, Threshold}
+import play.api.Logger
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.CurrentProfileService
+import transformers.ToThresholdView
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
@@ -38,11 +42,13 @@ class TestSetupControllerImpl @Inject()(val s4LConnector: S4LConnector,
                                         val messagesApi: MessagesApi,
                                         val authConnector: AuthConnector,
                                         val currentProfileService: CurrentProfileService,
+                                        val vatRegistrationConnector: VatRegistrationConnector,
                                         val s4LBuilder: TestS4LBuilder) extends TestSetupController
 
 trait TestSetupController extends VatRegistrationController with SessionProfile {
   val s4LConnector: S4LConnector
   val s4LBuilder: TestS4LBuilder
+  val vatRegistrationConnector: VatRegistrationConnector
 
   def show: Action[AnyContent] = authorised.async {
     implicit user =>
@@ -88,5 +94,30 @@ trait TestSetupController extends VatRegistrationController with SessionProfile 
               }
             })
         }
+  }
+
+  def addThresholdToBackend(reason: Option[String], overDate: Option[String], expectedDate: Option[String]): Action[AnyContent] = authorised.async {
+    implicit user =>
+      implicit request =>
+        withCurrentProfile { implicit profile =>
+          val od = overDate.map(LocalDate.parse)
+          val eod = expectedDate.map(LocalDate.parse)
+          val threshold = getThresholdFromJson(buildThreshold(reason, od, eod))
+          vatRegistrationConnector.patchThreshold(threshold) map (_ => Ok("Threshold Inserted"))
+        }
+  }
+
+  private def getThresholdFromJson(json: JsValue): Threshold = {
+    ToThresholdView.fromAPI(json, true)
+  }
+
+  private def buildThreshold(reason: Option[String], overDate: Option[LocalDate], expectedOverDate: Option[LocalDate]) = {
+    (reason, overDate, expectedOverDate) match {
+      case (Some(r),_,_)            => Json.obj("mandatoryRegistration" -> false, "voluntaryReason" -> r)
+      case (_, Some(od), Some(eod)) => Json.obj("mandatoryRegistration" -> true, "overThresholdDate" -> od, "expectedOverThresholdDate" -> eod)
+      case (_, Some(od), _)         => Json.obj("mandatoryRegistration" -> true, "overThresholdDate" -> od)
+      case (_, _, Some(eod))        => Json.obj("mandatoryRegistration" -> true, "expectedOverThresholdDate" -> eod)
+      case _                        => Json.obj("mandatoryRegistration" -> false)
+    }
   }
 }
