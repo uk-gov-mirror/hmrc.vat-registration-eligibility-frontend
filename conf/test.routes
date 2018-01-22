@@ -5,3 +5,5 @@ GET         /db-teardown                       controllers.test.TestVatRegistrat
 
 GET         /test-setup                        controllers.test.TestSetupController.show()
 POST        /test-setup                        controllers.test.TestSetupController.submit()
+
+GET         /setup-threshold                   controllers.test.TestSetupController.addThresholdToBackend(reason: Option[String], overDate: Option[String], expectedOverDate: Option[String])

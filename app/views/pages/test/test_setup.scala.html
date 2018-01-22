@@ -21,7 +21,7 @@
 <h1 class="form-title heading-xlarge" id="pageHeading">Test Setup</h1>
 
 @govHelpers.form(action = controllers.test.routes.TestSetupController.submit()) {
-    <div class="form-group">
+    <div class="form-group" id="vrefe-test-setup-form">
         <fieldset>
             <b>VAT SERVICE ELIGIBILITY</b>
             <p>@govHelpers.input(testSetupForm("vatServiceEligibility.haveNino"), '_label -> "Have nino (true or false)") </p>
