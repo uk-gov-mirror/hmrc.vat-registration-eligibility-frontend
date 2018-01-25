@@ -30,11 +30,6 @@ import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 import scala.util.Try
 
 object OverThresholdFormFactory {
-
-  implicit object LocalDateOrdering extends Ordering[LocalDate] {
-    override def compare(x: LocalDate, y: LocalDate): Int = x.compareTo(y)
-  }
-
   val RADIO_YES_NO = "overThresholdRadio"
 
   def bind(selection: Boolean, dateModel: Option[MonthYearModel]): OverThresholdView =

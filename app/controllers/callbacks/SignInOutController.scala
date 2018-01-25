@@ -42,10 +42,6 @@ trait SignInOutController extends VatRegistrationController {
   def signOut: Action[AnyContent] = authorised { implicit user => implicit request =>
     Redirect(s"$compRegFEURL$compRegFEURI/questionnaire").withNewSession
   }
-
-  def dashboard: Action[AnyContent] = authorised { implicit user => implicit request =>
-    Redirect(s"$compRegFEURL$compRegFEURI/dashboard")
-  }
 }
 
 
