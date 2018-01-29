@@ -166,7 +166,7 @@ validation.overThreshold.date.invalid                     = Enter a valid date
 validation.overThreshold.date.missing                     = Enter a valid date
 validation.overThreshold.selection.missing                = Tell us if since {0} the company''s VAT taxable turnover gone over £85,000
 validation.overThreshold.date.range.above                 = This date must be before the current month
-validation.overThreshold.date.range.below                 = This date must be after {0}
+validation.overThreshold.date.range.below                 = Enter a date which is on or after the date the company was incorporated
 # Question 2
 pages.thresholdQuestion2.heading                          = Have you ever thought your company would go over the VAT threshold within a single 30-day period?
 pages.thresholdQuestion2.p1                               = This could be the date you received a large order or signed a new contract.
@@ -183,7 +183,7 @@ pages.thresholdQuestion2.year                             = Year
 #validation messages Q2
 validation.expectationOverThreshold.date.invalid          = Enter a valid date
 validation.expectationOverThreshold.date.missing          = Enter a valid date
-validation.expectationOverThreshold.date.range.below      = Enter a date which is on or after the date the company is incorporated
+validation.expectationOverThreshold.date.range.below      = Enter a date which is on or after the date the company was incorporated
 validation.expectationOverThreshold.date.range.above      = Enter a date which is not in the future
 validation.expectationOverThreshold.selection.missing     = Tell us if you''ve ever thought the company would go over the VAT threshold within a single 30-day period
 pages.thresholdQuestion2.panel.heading                    = When did this first happen?

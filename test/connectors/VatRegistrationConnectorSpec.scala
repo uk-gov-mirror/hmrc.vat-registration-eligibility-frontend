@@ -16,13 +16,14 @@
 
 package connectors
 
+import common.enums.VatRegStatus
 import fixtures.VatRegistrationFixture
 import helpers.VatRegSpec
 import models.external.IncorporationInfo
 import play.api.http.Status._
 import config.WSHttp
 import models.view.VoluntaryRegistrationReason.SELLS
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 
 import scala.language.postfixOps
 import uk.gov.hmrc.http.{HttpResponse, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
@@ -50,6 +51,23 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
     "fail when an Internal Server Error response is returned by the microservice" in new Setup {
       mockHttpFailedGET[IncorporationInfo]("test-url", notFound)
       await(connector.getIncorporationInfo("tstID")) shouldBe None
+    }
+  }
+
+  "Calling getStatus" should {
+    "return a valid status" in new Setup {
+      mockHttpGET[JsObject]("tst-url", Json.obj("status" -> VatRegStatus.draft))
+      await(connector.getStatus("testID")) shouldBe VatRegStatus.draft
+    }
+
+    "fail when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[JsObject]("test-url", notFound)
+      an[Exception] shouldBe thrownBy(await(connector.getStatus("testID")))
+    }
+
+    "return an exception when the status is not valid" in new Setup {
+      mockHttpGET[JsObject]("tst-url", Json.obj("status" -> "wrongStatus"))
+      an[Exception] shouldBe thrownBy(await(connector.getStatus("testID")))
     }
   }
 

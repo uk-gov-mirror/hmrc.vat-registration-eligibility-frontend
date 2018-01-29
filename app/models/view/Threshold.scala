@@ -41,7 +41,8 @@ object Threshold{
         }
       }
 
-      val voluntaryRegistrationReason = o.voluntaryRegistrationReason.fold(Json.obj())(v => Json.obj("voluntaryReason" -> v.reason))
+      val voluntaryRegistrationReason = if (toMandatoryRegistration(o)) Json.obj() else o.voluntaryRegistrationReason.fold(Json.obj())(v => Json.obj("voluntaryReason" -> v.reason))
+
       val overThresholdDate = o.overThreshold.fold(Json.obj()) { overThreshold =>
         if (overThreshold.selection) {
           Json.obj("overThresholdDate" -> overThreshold.date.getOrElse(throw new IllegalStateException("Missing overThreshold date to save into backend")))
@@ -49,6 +50,7 @@ object Threshold{
           Json.obj()
         }
       }
+
       val expectedOverThresholdDate = o.expectationOverThreshold.fold(Json.obj()) { expectedOverThreshold =>
         if (expectedOverThreshold.selection) {
           Json.obj("expectedOverThresholdDate" -> expectedOverThreshold.date.getOrElse(throw new IllegalStateException("Missing expectedOverThreshold date to save into backend")))

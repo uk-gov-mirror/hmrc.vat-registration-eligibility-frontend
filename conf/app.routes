@@ -13,9 +13,6 @@ GET         /sign-out                                         controllers.callba
 ## POST SIGN IN
 GET         /post-sign-in                                     controllers.callbacks.SignInOutController.postSignIn
 
-## DASHBOARD
-GET         /dashboard                                        controllers.callbacks.SignInOutController.dashboard
-
 ## SERVICE CRITERIA QUESTIONS
 GET         /cant-register                                    controllers.EligibilityController.ineligible()
 

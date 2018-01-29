@@ -89,7 +89,7 @@ trait TestSetupController extends VatRegistrationController with SessionProfile 
               data: TestSetup => {
                 for {
                   _ <- s4LConnector.save(profile.registrationId, CacheKeys.Eligibility, data.eligibility)
-                  _ <- s4LConnector.save(profile.registrationId, CacheKeys.Threshold, s4LBuilder.thresholdFromData(data))
+                  _ <- s4LConnector.save(profile.registrationId, CacheKeys.Threshold, s4LBuilder.thresholdFromData(data.threshold))
                 } yield Ok("Test setup complete")
               }
             })

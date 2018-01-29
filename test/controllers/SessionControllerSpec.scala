@@ -31,14 +31,12 @@ class SessionControllerSpec extends VatRegSpec {
 
   implicit val duration: Timeout = 5.seconds
 
-  //TODO: This should work
   "renewSession" should {
-    "return 200 when hit with Authorised User" ignore {
-      callAuthorised(testController.renewSession()){ a =>
-        redirectLocation(a) shouldBe ""
-        status(a) shouldBe 200
-        contentType(a) shouldBe Some("image/jpeg")
-        await(a).body.dataStream.toString.contains("""renewSession.jpg""")  shouldBe true
+    "return 200 when hit with Authorised User" in {
+      callAuthorised(testController.renewSession()){ res =>
+        status(res) shouldBe 200
+        contentType(res) shouldBe Some("image/jpeg")
+        res.body.dataStream.toString.contains("""renewSession.jpg""")  shouldBe true
       }
     }
   }

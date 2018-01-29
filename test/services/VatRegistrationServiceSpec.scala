@@ -16,13 +16,14 @@
 
 package services
 
-import common.enums.CacheKeys
+import common.enums.{CacheKeys, VatRegStatus}
 import fixtures.VatRegistrationFixture
 import helpers.VatRegSpec
 import models._
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
+import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
@@ -67,6 +68,22 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
       mockKeystoreCache[String](CacheKeys.CurrentProfile.toString, CacheMap("", Map.empty))
 
       service.getIncorporationDate(currentProfile.copy(incorporationDate = None), hc) returns testIncorporationInfo.statusEvent.incorporationDate
+    }
+  }
+
+  "Calling getStatus" should {
+    "successfully returns a Registration Status" in new Setup {
+      when(mockRegConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(VatRegStatus.draft))
+
+      service.getStatus("regId") returns VatRegStatus.draft
+    }
+
+    "return an Exception if fail to get the status" in new Setup {
+      when(mockRegConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(throw new BadRequestException("test")))
+
+      service.getStatus("regId") failedWith classOf[BadRequestException]
     }
   }
 }

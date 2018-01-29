@@ -18,7 +18,6 @@ package config
 
 import com.google.inject.AbstractModule
 import connectors._
-import connectors.test._
 import controllers._
 import controllers.callbacks._
 import controllers.internal._
@@ -51,7 +50,6 @@ class BindingModule extends AbstractModule {
     bind(classOf[VoluntaryRegistrationReasonController]).to(classOf[VoluntaryRegistrationReasonControllerImpl]).asEagerSingleton()
     bind(classOf[TestCacheController]).to(classOf[TestCacheControllerImpl]).asEagerSingleton()
     bind(classOf[TestSetupController]).to(classOf[TestSetupControllerImpl]).asEagerSingleton()
-    bind(classOf[TestVatRegistrationAdminController]).to(classOf[TestVatRegistrationAdminControllerImpl]).asEagerSingleton()
   }
 
   private def bindServices(): Unit = {
@@ -66,7 +64,6 @@ class BindingModule extends AbstractModule {
   }
 
   private def bindConnectors(): Unit = {
-    bind(classOf[TestVatRegistrationConnector]).to(classOf[TestVatRegistrationConnectorImpl]).asEagerSingleton()
     bind(classOf[BusinessRegistrationConnector]).to(classOf[BusinessRegistrationConnectorImpl]).asEagerSingleton()
     bind(classOf[CompanyRegistrationConnector]).to(classOf[CompanyRegistrationConnectorImpl]).asEagerSingleton()
     bind(classOf[IncorporationInformationConnector]).to(classOf[IncorporationInformationConnectorImpl]).asEagerSingleton()

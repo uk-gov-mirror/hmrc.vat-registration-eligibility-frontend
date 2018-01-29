@@ -584,7 +584,7 @@ trait StubUtils {
     def isNotAuthorised  = {
       stubFor(
         get(urlPathEqualTo("/auth/authority"))
-          .willReturn(forbidden()))
+          .willReturn(unauthorized()))
       builder
      }
   }

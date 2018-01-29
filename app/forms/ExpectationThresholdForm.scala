@@ -31,11 +31,6 @@ import models.MonthYearModel.FORMAT_DD_MMMM_Y
 import scala.util.Try
 
 object ExpectationThresholdForm {
-
-  implicit object LocalDateOrdering extends Ordering[LocalDate] {
-    override def compare(x: LocalDate, y: LocalDate): Int = x.compareTo(y)
-  }
-
   val RADIO_YES_NO = "expectationOverThresholdRadio"
 
   def bind(selection: Boolean, dateModel: Option[DayMonthYearModel]): ExpectationOverThresholdView =

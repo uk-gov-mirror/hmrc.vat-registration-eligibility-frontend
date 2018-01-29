@@ -18,37 +18,37 @@ package controllers.test
 
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
-import models.test.TestSetup
+import models.test.ThresholdTestSetup
 import models.view._
 
 class TestS4LBuilderImpl extends TestS4LBuilder
 
 trait TestS4LBuilder {
-  def thresholdFromData(data: TestSetup): Threshold = {
-    val taxableTurnover: Option[String] = data.threshold.taxableTurnoverChoice
+  def thresholdFromData(data: ThresholdTestSetup): Threshold = {
+    val taxableTurnover: Option[String] = data.taxableTurnoverChoice
 
-    val overThresholdView: Option[OverThresholdView] = data.threshold.overThresholdSelection match {
+    val overThresholdView: Option[OverThresholdView] = data.overThresholdSelection match {
       case Some("true") => Some(OverThresholdView(selection = true, Some(LocalDate.of(
-        data.threshold.overThresholdYear.map(_.toInt).get,
-        data.threshold.overThresholdMonth.map(_.toInt).get,
+        data.overThresholdYear.map(_.toInt).get,
+        data.overThresholdMonth.map(_.toInt).get,
         1
       ).`with`(TemporalAdjusters.lastDayOfMonth()))))
       case Some("false") => Some(OverThresholdView(selection = false, None))
       case _ => None
     }
 
-    val expectationOverThresholdView: Option[ExpectationOverThresholdView] = data.threshold.expectationOverThresholdSelection match {
+    val expectationOverThresholdView: Option[ExpectationOverThresholdView] = data.expectationOverThresholdSelection match {
       case Some("true") => Some(ExpectationOverThresholdView(selection = true, Some(LocalDate.of(
-        data.threshold.expectationOverThresholdYear.map(_.toInt).get,
-        data.threshold.expectationOverThresholdMonth.map(_.toInt).get,
-        data.threshold.expectationOverThresholdDay.map(_.toInt).get
+        data.expectationOverThresholdYear.map(_.toInt).get,
+        data.expectationOverThresholdMonth.map(_.toInt).get,
+        data.expectationOverThresholdDay.map(_.toInt).get
       ))))
       case Some("false") => Some(ExpectationOverThresholdView(selection = false, None))
       case _ => None
     }
 
-    val voluntaryRegistration: Option[String] = data.threshold.voluntaryChoice
-    val voluntaryRegistrationReason: Option[String] = data.threshold.voluntaryRegistrationReason
+    val voluntaryRegistration: Option[String] = data.voluntaryChoice
+    val voluntaryRegistrationReason: Option[String] = data.voluntaryRegistrationReason
 
     Threshold(
       taxableTurnover = taxableTurnover.map(TaxableTurnover(_)),
