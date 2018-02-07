@@ -26,6 +26,7 @@
     @for(section <- summaryModel.sections) {
         @if(section.display) {
 
+        <div class="form-group">
             <section>
                 <dl class="govuk-check-your-answers cya-questions-long">
                     @*Iterates to display sections and rows*@
@@ -36,6 +37,7 @@
                     }
                 </dl>
             </section>
+        </div>
         }
     }
 
