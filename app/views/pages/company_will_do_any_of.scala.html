@@ -40,19 +40,18 @@
 
     @govHelpers.form(action = controllers.routes.EligibilityController.submitCompanyWillDoAnyOf) {
         <div class="form-group">
-            <fieldset class="inline">
-                <span id="companyWillDoAnyOfRadio"/>
-
-                @vatInputRadioGroup(
-                    field = companyWillDoAnyOfForm("companyWillDoAnyOfRadio"),
-                    Seq(
-                        "true" -> messages("app.common.yes"),
-                        "false" -> messages("app.common.no")
-                    ),
-                    '_labelAfter -> true,
-                    '_labelClass -> "block-label"
-                )
-            </fieldset>
+            @vatInputRadioGroup(
+                field = companyWillDoAnyOfForm("companyWillDoAnyOfRadio"),
+                Seq(
+                    "true" -> messages("app.common.yes"),
+                    "false" -> messages("app.common.no")
+                ),
+                '_groupClass -> "inline",
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_legend -> messages("pages.eligibility.companyWillDoAnyOf.heading"),
+                '_legendClass -> "visually-hidden"
+            )
         </div>
 
 

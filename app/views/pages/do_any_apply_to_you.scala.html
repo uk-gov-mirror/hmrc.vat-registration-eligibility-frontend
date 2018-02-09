@@ -44,19 +44,18 @@
 
     @govHelpers.form(action = controllers.routes.EligibilityController.submitDoAnyApplyToYou) {
         <div class="form-group">
-            <fieldset class="inline">
-                <span id="doAnyApplyToYouRadio"/>
-
-                @vatInputRadioGroup(
-                    field = doAnyApplyToYouForm("doAnyApplyToYouRadio"),
-                    Seq(
-                        "true" -> messages("app.common.yes"),
-                        "false" -> messages("app.common.no")
-                    ),
-                    '_labelAfter -> true,
-                    '_labelClass -> "block-label"
-                )
-            </fieldset>
+            @vatInputRadioGroup(
+                field = doAnyApplyToYouForm("doAnyApplyToYouRadio"),
+                Seq(
+                    "true" -> messages("app.common.yes"),
+                    "false" -> messages("app.common.no")
+                ),
+                '_groupClass -> "inline",
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_legend -> messages("pages.eligibility.doAnyApplyToYou.heading"),
+                '_legendClass -> "visually-hidden"
+            )
         </div>
 
         <div class="form-group">

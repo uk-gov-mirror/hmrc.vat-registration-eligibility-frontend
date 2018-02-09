@@ -45,19 +45,18 @@
 
     @govHelpers.form(action = controllers.routes.EligibilityController.submitDoingBusinessAbroad) {
         <div class="form-group">
-            <fieldset class="inline">
-                <span id="doingBusinessAbroadRadio"/>
-
-                @vatInputRadioGroup(
-                    field = doingBusinessAbroadForm("doingBusinessAbroadRadio"),
-                    Seq(
-                        "true" -> messages("app.common.yes"),
-                        "false" -> messages("app.common.no")
-                    ),
-                    '_labelAfter -> true,
-                    '_labelClass -> "block-label"
-                )
-            </fieldset>
+            @vatInputRadioGroup(
+                field = doingBusinessAbroadForm("doingBusinessAbroadRadio"),
+                Seq(
+                    "true" -> messages("app.common.yes"),
+                    "false" -> messages("app.common.no")
+                ),
+                '_groupClass -> "inline",
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_legend -> messages("pages.eligibility.doingBusinessAbroad.heading"),
+                '_legendClass -> "visually-hidden"
+            )
         </div>
 
 
