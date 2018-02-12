@@ -18,38 +18,32 @@ package controllers
 
 import javax.inject.Inject
 
+import config.AuthClientConnector
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services.{CurrentProfileService, SummaryService, VatRegistrationService}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 class EligibilitySummaryControllerImpl @Inject()(val messagesApi: MessagesApi,
                                                  val summaryService: SummaryService,
                                                  val vatRegistrationService: VatRegistrationService,
-                                                 val authConnector: AuthConnector,
+                                                 val authConnector: AuthClientConnector,
                                                  val currentProfileService: CurrentProfileService) extends EligibilitySummaryController
 
 trait EligibilitySummaryController extends VatRegistrationController with SessionProfile {
   val summaryService: SummaryService
   val vatRegistrationService: VatRegistrationService
 
-  def show: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          summaryService.getEligibilitySummary map (summary => Ok(views.html.pages.summary_eligibility(summary)))
-        }
+  def show: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      summaryService.getEligibilitySummary map (summary => Ok(views.html.pages.summary_eligibility(summary)))
   }
 
-  def submit: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          vatRegistrationService.getIncorporationDate map { date =>
-            val redirectLocation = date.fold(routes.TaxableTurnoverController.show())(_ => routes.ThresholdController.goneOverShow())
-            Redirect(redirectLocation)
-          }
-        }
+  def submit: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      vatRegistrationService.getIncorporationDate map { date =>
+        val redirectLocation = date.fold(routes.TaxableTurnoverController.show())(_ => routes.ThresholdController.goneOverShow())
+        Redirect(redirectLocation)
+      }
   }
 }

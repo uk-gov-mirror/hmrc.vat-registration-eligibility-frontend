@@ -19,22 +19,24 @@ package controllers
 import java.io.File
 import javax.inject.Inject
 
+import config.AuthClientConnector
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import services.CurrentProfileService
+import utils.SessionProfile
 import views.html.pages.error.TimeoutView
 
 import scala.concurrent.Future
 
-class SessionControllerImpl @Inject()(implicit val messagesApi: MessagesApi,
-                                      val authConnector: AuthConnector) extends SessionController
+class SessionControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                      val authConnector: AuthClientConnector,
+                                      val currentProfileService: CurrentProfileService) extends SessionController
 
-trait SessionController extends VatRegistrationController {
+trait SessionController extends VatRegistrationController with SessionProfile {
 
-  def renewSession: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        Future.successful(Ok.sendFile(new File("conf/renewSession.jpg")).as("image/jpeg"))
+  def renewSession: Action[AnyContent] = isAuthenticated {
+    implicit request =>
+      Future.successful(Ok.sendFile(new File("conf/renewSession.jpg")).as("image/jpeg"))
   }
 
   def destroySession: Action[AnyContent] = Action.async {

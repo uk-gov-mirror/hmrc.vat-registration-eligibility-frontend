@@ -17,25 +17,26 @@
 package controllers.test
 
 import connectors.{S4LConnector, VatRegistrationConnector}
-import helpers.VatRegSpec
+import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
-import services.CurrentProfileService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import play.api.test.FakeRequest
 import models.view.TaxableTurnover._
 import models.view.VoluntaryRegistration._
 import models.view.VoluntaryRegistrationReason._
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
+import play.api.mvc.{Request, Result}
+import play.api.test.FakeRequest
+import services.CurrentProfileService
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class TestSetupControllerSpec extends VatRegSpec {
+class TestSetupControllerSpec extends ControllerSpec with GuiceOneAppPerTest with FutureAssertions {
   val mockTestS4LBuilder = mock[TestS4LBuilder]
 
   trait Setup {
@@ -43,9 +44,9 @@ class TestSetupControllerSpec extends VatRegSpec {
       override val s4LBuilder: TestS4LBuilder = mockTestS4LBuilder
       override val vatRegistrationConnector: VatRegistrationConnector = mockRegConnector
       override val s4LConnector: S4LConnector = mockS4LConnector
-      override protected def authConnector: AuthConnector = mockAuthConnector
-      override val currentProfileService: CurrentProfileService = mockCurrentProfileService
-      override def messagesApi: MessagesApi = mockMessagesApi
+      val authConnector: AuthConnector = mockAuthClientConnector
+      val currentProfileService: CurrentProfileService = mockCurrentProfileService
+      val messagesApi: MessagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -57,7 +58,7 @@ class TestSetupControllerSpec extends VatRegSpec {
     "display the test setup form" in new Setup {
       when(mockS4LConnector.fetchAndGet(any(), any())(any(), any())).thenReturn(Future(None))
 
-      callAuthorised(testController.show())(_ includesText "Test Setup")
+      callAuthenticated(testController.show())(_ includesText "Test Setup")
     }
   }
 
@@ -92,7 +93,7 @@ class TestSetupControllerSpec extends VatRegSpec {
     "update patch threshold in backend" in new Setup {
       when(mockRegConnector.patchThreshold(any())(any(), any())).thenReturn(Future(Json.obj()))
 
-      callAuthorised(testController.addThresholdToBackend(Some("test"), Some("2017-08-17"), Some("2017-09-05")))(_ isA 200)
+      callAuthenticated(testController.addThresholdToBackend(Some("test"), Some("2017-08-17"), Some("2017-09-05")))(_ isA 200)
     }
   }
 }

@@ -17,27 +17,29 @@
 package controllers
 
 import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
+import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
 import models.view.VoluntaryRegistrationReason
 import models.view.VoluntaryRegistrationReason._
 import org.mockito.Mockito._
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.Future
 
-class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegistrationFixture {
+class VoluntaryRegistrationReasonControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture with FutureAssertions {
 
   class Setup {
     val testController = new VoluntaryRegistrationReasonController {
-      override val authConnector: AuthConnector = mockAuthConnector
+      override val authConnector: AuthConnector = mockAuthClientConnector
       override val thresholdService = mockThresholdService
       override val vatRegFrontendService = mockVatRegFrontendService
       override val currentProfileService = mockCurrentProfileService
-      override val messagesApi = mockMessages
+      override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -52,10 +54,10 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
     "return 200 with HTML not prepopulated when there is no view data" in new Setup{
         mockGetThresholdViewModel[VoluntaryRegistrationReason](Future.successful(None))
 
-      callAuthorised(testController.show()){ res =>
+      callAuthenticated(testController.show()){ res =>
         res includesText expectedText
         res passJsoupTest { doc =>
-          doc.getElementsByAttribute("checked").size shouldBe 0
+          doc.getElementsByAttribute("checked").size mustBe 0
         }
       }
     }
@@ -63,11 +65,11 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
     "return 200 with HTML prepopulated with SELLS when there is view data" in new Setup {
       mockGetThresholdViewModel[VoluntaryRegistrationReason](Future.successful(Some(validVoluntaryRegistrationReasonView.copy(reason = SELLS))))
 
-      callAuthorised(testController.show) {
+      callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
           val elements = doc.getElementsByAttribute("checked")
-          elements.size shouldBe 1
-          elements.first.attr("id") shouldBe "voluntaryRegistrationReasonRadio-alreadysellsvattaxablegoodsorservices"
+          elements.size mustBe 1
+          elements.first.attr("id") mustBe "voluntaryRegistrationReasonRadio-alreadysellsvattaxablegoodsorservices"
         }
       }
     }
@@ -75,11 +77,11 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
     "return 200 with HTML prepopulated with INTENDS when there is view data" in new Setup {
       mockGetThresholdViewModel[VoluntaryRegistrationReason](Future.successful(Some(validVoluntaryRegistrationReasonView.copy(reason = INTENDS_TO_SELL))))
 
-      callAuthorised(testController.show) {
+      callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
           val elements = doc.getElementsByAttribute("checked")
-          elements.size shouldBe 1
-          elements.first.attr("id") shouldBe "voluntaryRegistrationReasonRadio-intendstosellvattaxablegoodsorservices"
+          elements.size mustBe 1
+          elements.first.attr("id") mustBe "voluntaryRegistrationReasonRadio-intendstosellvattaxablegoodsorservices"
         }
       }
     }
@@ -87,11 +89,11 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
     "return 200 with HTML prepopulated with NEITHER when there is view data" in new Setup {
       mockGetThresholdViewModel[VoluntaryRegistrationReason](Future.successful(Some(validVoluntaryRegistrationReasonView.copy(reason = NEITHER))))
 
-      callAuthorised(testController.show) {
+      callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
           val elements = doc.getElementsByAttribute("checked")
-          elements.size shouldBe 1
-          elements.first.attr("id") shouldBe "voluntaryRegistrationReasonRadio-wontsellvattaxablegoodsorservices"
+          elements.size mustBe 1
+          elements.first.attr("id") mustBe "voluntaryRegistrationReasonRadio-wontsellvattaxablegoodsorservices"
         }
       }
     }

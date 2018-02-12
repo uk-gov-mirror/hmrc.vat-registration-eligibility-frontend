@@ -16,25 +16,36 @@
 
 package connectors
 
+import java.time.LocalDate
+
 import common.enums.VatRegStatus
-import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
-import models.external.IncorporationInfo
-import play.api.http.Status._
 import config.WSHttp
+import fixtures.VatRegistrationFixture
+import helpers.FutureAssertions
+import mocks.VatMocks
+import models.CurrentProfile
+import models.external.IncorporationInfo
 import models.view.VoluntaryRegistrationReason.SELLS
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import play.api.http.Status._
 import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
 
-import scala.language.postfixOps
-import uk.gov.hmrc.http.{HttpResponse, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
-
-class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixture {
+class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout
+                                   with VatRegistrationFixture with FutureAssertions {
   class Setup {
     val connector = new VatRegistrationConnector {
       override val vatRegUrl: String = "tst-url"
       override val http: WSHttp = mockWSHttp
     }
   }
+
+  val incorpDate = LocalDate.of(2016, 12, 21)
+  implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, Some(incorpDate))
+
+  implicit val hc = HeaderCarrier()
 
   val forbidden = Upstream4xxResponse(FORBIDDEN.toString, FORBIDDEN, FORBIDDEN)
   val internalServerError = Upstream5xxResponse(INTERNAL_SERVER_ERROR.toString, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
@@ -45,29 +56,29 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
 
     "return a IncorporationInfo when it can be retrieved from the microservice" in new Setup {
       mockHttpGET[IncorporationInfo]("tst-url", testIncorporationInfo)
-      await(connector.getIncorporationInfo("tstID")) shouldBe Some(testIncorporationInfo)
+      await(connector.getIncorporationInfo("tstID")) mustBe Some(testIncorporationInfo)
     }
 
     "fail when an Internal Server Error response is returned by the microservice" in new Setup {
       mockHttpFailedGET[IncorporationInfo]("test-url", notFound)
-      await(connector.getIncorporationInfo("tstID")) shouldBe None
+      await(connector.getIncorporationInfo("tstID")) mustBe None
     }
   }
 
   "Calling getStatus" should {
     "return a valid status" in new Setup {
       mockHttpGET[JsObject]("tst-url", Json.obj("status" -> VatRegStatus.draft))
-      await(connector.getStatus("testID")) shouldBe VatRegStatus.draft
+      await(connector.getStatus("testID")) mustBe VatRegStatus.draft
     }
 
     "fail when an Internal Server Error response is returned by the microservice" in new Setup {
       mockHttpFailedGET[JsObject]("test-url", notFound)
-      an[Exception] shouldBe thrownBy(await(connector.getStatus("testID")))
+      an[Exception] mustBe thrownBy(await(connector.getStatus("testID")))
     }
 
     "return an exception when the status is not valid" in new Setup {
       mockHttpGET[JsObject]("tst-url", Json.obj("status" -> "wrongStatus"))
-      an[Exception] shouldBe thrownBy(await(connector.getStatus("testID")))
+      an[Exception] mustBe thrownBy(await(connector.getStatus("testID")))
     }
   }
 

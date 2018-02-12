@@ -16,19 +16,24 @@
 
 package connectors
 
-import helpers.VatRegSpec
+import mocks.VatMocks
 import models.external.CompanyRegistrationProfile
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.http.BadRequestException
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import utils.VREFEFeatureSwitches
 
 import scala.concurrent.Future
 
-class CompanyRegistrationConnectorSpec extends VatRegSpec {
+class CompanyRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout {
 
   val testUrl = "testUrl"
   val testUri = "testUri"
   val mockFeatureSwitch = mock[VREFEFeatureSwitches]
+
+  implicit val hc = HeaderCarrier()
 
   class Setup(stubbed: Boolean) {
     val connector = new CompanyRegistrationConnector {
@@ -72,7 +77,7 @@ class CompanyRegistrationConnectorSpec extends VatRegSpec {
       mockHttpGET[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
 
       val result = await(connector.getCompanyRegistrationDetails("testRegId"))
-      result shouldBe CompanyRegistrationProfile(status, transactionId)
+      result mustBe CompanyRegistrationProfile(status, transactionId)
     }
 
     "throw a bad request exception" in new Setup(false) {
@@ -92,7 +97,7 @@ class CompanyRegistrationConnectorSpec extends VatRegSpec {
         mockHttpGET[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
 
         val result = await(connector.getCompanyRegistrationDetails("testRegId"))
-        result shouldBe CompanyRegistrationProfile(status, transactionId)
+        result mustBe CompanyRegistrationProfile(status, transactionId)
       }
 
       "throwing a bad request exception" in new Setup(false) {

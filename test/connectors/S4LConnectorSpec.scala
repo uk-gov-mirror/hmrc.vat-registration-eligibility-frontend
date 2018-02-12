@@ -22,15 +22,15 @@ import models.view.TaxableTurnover
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
-class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions {
+class S4LConnectorSpec extends PlaySpec with MockitoSugar with FutureAssertions {
 
   val mockShortLivedCache = mock[VatShortLivedCache]
 
@@ -50,7 +50,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions 
         (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Option(taxableTurnoverModel)))
 
-      await(s4lConnectorTest.fetchAndGet[TaxableTurnover]("", "")) shouldBe Some(taxableTurnoverModel)
+      await(s4lConnectorTest.fetchAndGet[TaxableTurnover]("", "")) mustBe Some(taxableTurnoverModel)
     }
   }
 
@@ -63,7 +63,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions 
         .thenReturn(Future.successful(returnCacheMap))
 
       val result = s4lConnectorTest.save[TaxableTurnover]("", "", taxableTurnoverModel)
-      await(result) shouldBe returnCacheMap
+      await(result) mustBe returnCacheMap
     }
   }
 
@@ -74,7 +74,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions 
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val result = s4lConnectorTest.clear("test")
-      await(result).status shouldBe HttpResponse(OK).status
+      await(result).status mustBe HttpResponse(OK).status
     }
   }
 
@@ -85,7 +85,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar with FutureAssertions 
         .thenReturn(Future.successful(Some(cacheMap)))
 
       val result = s4lConnectorTest.fetchAll("testUserId")
-      await(result) shouldBe Some(cacheMap)
+      await(result) mustBe Some(cacheMap)
     }
   }
 }

@@ -19,16 +19,16 @@ package helpers
 import cats.data.OptionT
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.Assertion
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.play.PlaySpec
 import play.api.http.Status
 import play.api.mvc.Result
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
 trait FutureAssertions extends ScalaFutures {
-  self: UnitSpec =>
+  self: PlaySpec =>
 
 
   implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
@@ -37,30 +37,30 @@ trait FutureAssertions extends ScalaFutures {
 
   implicit class FutureUnit(fu: Future[Unit]) {
 
-    def completedSuccessfully: Assertion = whenReady(fu)(_ shouldBe (()))
+    def completedSuccessfully: Assertion = whenReady(fu)(_ mustBe (()))
 
   }
 
 
   implicit class FutureReturns(f: Future[_]) {
 
-    def returns(o: Any): Assertion = whenReady(f)(_ shouldBe o)
+    def returns(o: Any): Assertion = whenReady(f)(_ mustBe o)
 
-    def failedWith(e: Exception): Assertion = whenReady(f.failed)(_ shouldBe e)
+    def failedWith(e: Exception): Assertion = whenReady(f.failed)(_ mustBe e)
 
-    def failedWith[F <: Throwable](exClass: Class[F]): Assertion = whenReady(f.failed)(_.getClass shouldBe exClass)
+    def failedWith[F <: Throwable](exClass: Class[F]): Assertion = whenReady(f.failed)(_.getClass mustBe exClass)
 
   }
 
   implicit class OptionTReturns[T](ot: OptionT[Future, T]) {
 
-    def returnsSome(t: T): Assertion = whenReady(ot.value)(_ shouldBe Some(t))
+    def returnsSome(t: T): Assertion = whenReady(ot.value)(_ mustBe Some(t))
 
-    def returnsNone: Assertion = whenReady(ot.value)(_ shouldBe Option.empty[T])
+    def returnsNone: Assertion = whenReady(ot.value)(_ mustBe Option.empty[T])
 
-    def failedWith(e: Exception): Assertion = whenReady(ot.value.failed)(_ shouldBe e)
+    def failedWith(e: Exception): Assertion = whenReady(ot.value.failed)(_ mustBe e)
 
-    def failedWith[F <: Throwable](exClass: Class[F]): Assertion = whenReady(ot.value.failed)(_.getClass shouldBe exClass)
+    def failedWith[F <: Throwable](exClass: Class[F]): Assertion = whenReady(ot.value.failed)(_.getClass mustBe exClass)
 
   }
 
@@ -68,25 +68,23 @@ trait FutureAssertions extends ScalaFutures {
   implicit class FutureResult(fr: Future[Result]) {
 
     def redirectsTo(url: String): Assertion = {
-      status(fr) shouldBe Status.SEE_OTHER
-      redirectLocation(fr) shouldBe Some(url)
+      status(fr) mustBe Status.SEE_OTHER
+      redirectLocation(fr) mustBe Some(url)
     }
 
     def isA(httpStatusCode: Int): Assertion = {
-      status(fr) shouldBe httpStatusCode
+      status(fr) mustBe httpStatusCode
     }
 
     def includesText(s: String): Assertion = {
-      status(fr) shouldBe OK
-      contentType(fr) shouldBe Some("text/html")
-      charset(fr) shouldBe Some("utf-8")
-      contentAsString(fr) should include(s)
+      status(fr) mustBe OK
+      contentType(fr) mustBe Some("text/html")
+      charset(fr) mustBe Some("utf-8")
+      contentAsString(fr) must include(s)
     }
 
     def passJsoupTest(f: Document => Assertion) = {
-      fr map { res =>
-        f(Jsoup.parse(contentAsString(res)))
-      }
+      f(Jsoup.parse(contentAsString(fr)))
     }
   }
 

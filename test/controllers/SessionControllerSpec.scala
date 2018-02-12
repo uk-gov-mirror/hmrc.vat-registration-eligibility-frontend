@@ -16,27 +16,31 @@
 
 package controllers
 
-import scala.concurrent.duration._
 import akka.util.Timeout
-import helpers.VatRegSpec
+import helpers.ControllerSpec
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentType, headers, redirectLocation}
 
-class SessionControllerSpec extends VatRegSpec {
+import scala.concurrent.duration._
+
+class SessionControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
 
   val testController = new SessionController {
-    override protected def authConnector = mockAuthConnector
-    override def messagesApi = mockMessages
+    val authConnector = mockAuthClientConnector
+    val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
+    val currentProfileService = mockCurrentProfileService
   }
 
   implicit val duration: Timeout = 5.seconds
+  implicit lazy val mat = fakeApplication.materializer
 
   "renewSession" should {
     "return 200 when hit with Authorised User" in {
-      callAuthorised(testController.renewSession()){ res =>
-        status(res) shouldBe 200
-        contentType(res) shouldBe Some("image/jpeg")
-        res.body.dataStream.toString.contains("""renewSession.jpg""")  shouldBe true
+      callAuthenticated(testController.renewSession()){ res =>
+        status(res) mustBe 200
+        contentType(res) mustBe Some("image/jpeg")
+        await(res).body.toString.contains("""renewSession.jpg""") mustBe true
       }
     }
   }
@@ -47,17 +51,17 @@ class SessionControllerSpec extends VatRegSpec {
       val fr = FakeRequest().withHeaders(("playFoo","no more"))
 
       val res = testController.destroySession()(fr)
-      status(res) shouldBe 303
-      headers(res).contains("playFoo") shouldBe false
+      status(res) mustBe 303
+      headers(res).contains("playFoo") mustBe false
 
-      redirectLocation(res) shouldBe Some(controllers.routes.SessionController.timeoutShow().url)
+      redirectLocation(res) mustBe Some(controllers.routes.SessionController.timeoutShow().url)
     }
   }
 
   "timeoutShow" should {
     "return 200" in {
       val res = testController.timeoutShow()(FakeRequest())
-      status(res) shouldBe 200
+      status(res) mustBe 200
     }
   }
 }

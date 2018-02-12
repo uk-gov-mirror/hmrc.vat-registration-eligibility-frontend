@@ -18,29 +18,26 @@ package controllers.test
 
 import javax.inject.Inject
 
+import config.AuthClientConnector
 import connectors.S4LConnector
 import controllers.VatRegistrationController
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import services.CurrentProfileService
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 class TestCacheControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                        val authConnector: AuthConnector,
+                                        val authConnector: AuthClientConnector,
                                         val currentProfileService: CurrentProfileService,
                                         val s4lConnector: S4LConnector) extends TestCacheController
 
 trait TestCacheController extends VatRegistrationController with SessionProfile {
   val s4lConnector: S4LConnector
 
-  def tearDownS4L: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          s4lConnector.clear(profile.registrationId).map {
-            _ => Ok("Eligibility Frontend Save4Later cleared")
-          }
-        }
+  def tearDownS4L: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      s4lConnector.clear(profile.registrationId).map {
+        _ => Ok("Eligibility Frontend Save4Later cleared")
+      }
   }
 }

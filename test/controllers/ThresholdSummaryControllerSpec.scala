@@ -17,26 +17,28 @@
 package controllers
 
 import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
+import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
 import models.view._
 import org.mockito.Mockito._
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixture {
+class ThresholdSummaryControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture with FutureAssertions {
 
   class Setup {
 
     val testController = new ThresholdSummaryController {
-      override val authConnector = mockAuthConnector
+      override val authConnector = mockAuthClientConnector
       override val thresholdService = mockThresholdService
       override val vatRegFrontendService = mockVatRegFrontendService
       override val currentProfileService = mockCurrentProfileService
-      override val messagesApi = mockMessages
+      override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -50,13 +52,13 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
     "return HTML with a valid threshold summary view" in new Setup {
       mockGetThreshold(Future.successful(validThresholdPreIncorp))
 
-      callAuthorised(testController.show)(_ includesText "Check and confirm your answers")
+      callAuthenticated(testController.show)(_ includesText "Check and confirm your answers")
     }
 
     "getThresholdSummary maps a valid VatThresholdSummary object to a Summary object" in new Setup {
     mockGetThreshold(Future.successful(validThresholdPostIncorp2))
 
-      testController.getThresholdSummary.map(summary => summary.sections.length shouldBe 2)
+      testController.getThresholdSummary.map(summary => summary.sections.length mustBe 2)
     }
   }
 
@@ -64,7 +66,7 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
     "redirect the user to the voluntary registration page if both overThreshold and expectationOverThreshold are false" in new Setup {
       mockGetThreshold(Future.successful(validThresholdPostIncorp))
 
-      callAuthorised(testController.submit) {
+      callAuthenticated(testController.submit) {
         _ redirectsTo controllers.routes.VoluntaryRegistrationController.show.url
       }
     }
@@ -75,7 +77,7 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
         .thenReturn("someEntryUrl")
 
-      callAuthorised(testController.submit) {
+      callAuthenticated(testController.submit) {
         _ redirectsTo s"someEntryUrl"
       }
     }
@@ -86,7 +88,7 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
         .thenReturn("someEntryUrl")
 
-      callAuthorised(testController.submit) {
+      callAuthenticated(testController.submit) {
         _ redirectsTo s"someEntryUrl"
       }
     }

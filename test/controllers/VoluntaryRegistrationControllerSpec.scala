@@ -17,26 +17,28 @@
 package controllers
 
 import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
+import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
 import models.view.VoluntaryRegistration
 import org.mockito.Mockito._
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.Future
 
-class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistrationFixture {
+class VoluntaryRegistrationControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture with FutureAssertions {
 
   class Setup {
     val testController = new VoluntaryRegistrationController {
-      override val authConnector: AuthConnector = mockAuthConnector
+      override val authConnector: AuthConnector = mockAuthClientConnector
       override val thresholdService = mockThresholdService
       override val vatRegFrontendService = mockVatRegFrontendService
       override val currentProfileService = mockCurrentProfileService
-      override val messagesApi = mockMessages
+      override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -52,11 +54,11 @@ class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistratio
     "return 200 with HTML not prepopulated when there is no view data" in new Setup {
       mockGetThresholdViewModel[VoluntaryRegistration](Future.successful(None))
 
-      callAuthorised(testController.show()) { res =>
+      callAuthenticated(testController.show()) { res =>
         res includesText expectedText
         res passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") shouldBe ""
-          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") shouldBe ""
+          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") mustBe ""
+          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") mustBe ""
         }
       }
     }
@@ -64,10 +66,10 @@ class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistratio
     "return 200 with HTML prepopulated to YES when there is view data" in new Setup {
       mockGetThresholdViewModel[VoluntaryRegistration](Future.successful(Some(validVoluntaryRegistrationView.copy(yesNo = VoluntaryRegistration.REGISTER_YES))))
 
-      callAuthorised(testController.show) {
+      callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") shouldBe ""
-          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") shouldBe "checked"
+          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") mustBe ""
+          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") mustBe "checked"
         }
       }
     }
@@ -75,10 +77,10 @@ class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistratio
     "return 200 with HTML prepopulated to NO when there is view data" in new Setup {
       mockGetThresholdViewModel[VoluntaryRegistration](Future.successful(Some(validVoluntaryRegistrationView.copy(yesNo = VoluntaryRegistration.REGISTER_NO))))
 
-      callAuthorised(testController.show) {
+      callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") shouldBe "checked"
-          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") shouldBe ""
+          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") mustBe "checked"
+          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") mustBe ""
         }
       }
     }

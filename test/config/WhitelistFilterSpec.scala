@@ -17,19 +17,14 @@
 package config
 
 import java.util.Base64
-
-import builders.SessionBuilder
 import org.scalatest.TestData
-import org.scalatest._
-import Matchers._
-import fixtures.LoginFixture
 import org.scalatestplus.play.{OneAppPerTest, PlaySpec}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.api.test._
 import play.api.{Application, Environment, Mode}
 
-class WhitelistFilterSpec extends PlaySpec with OneAppPerTest with SessionBuilder with LoginFixture {
+class WhitelistFilterSpec extends PlaySpec with OneAppPerTest {
 
   override def newAppForTest(td: TestData): Application = new GuiceApplicationBuilder()
     .in(Environment(new java.io.File("."), classOf[FakeApplication].getClassLoader, Mode.Test))
@@ -54,12 +49,10 @@ class WhitelistFilterSpec extends PlaySpec with OneAppPerTest with SessionBuilde
   "ProductionFrontendGlobal" must {
     "let requests passing" when {
       "coming from an IP in the white list must work as normal" in {
-        val request = FakeRequest(GET, "/check-if-you-can-register-for-vat/national-insurance-number").withHeaders("True-Client-IP" -> "11.22.33.44")
+        val request = FakeRequest(GET, "/check-if-you-can-register-for-vat/error/timeout").withHeaders("True-Client-IP" -> "11.22.33.44")
         val Some(result) = route(app, request)
 
-        status(result) mustBe SEE_OTHER
-
-        redirectLocation(result).get should include(authUrl)
+        status(result) mustBe OK
       }
 
       "coming from a IP NOT in the white-list and not with a white-listed path must be redirected" in {

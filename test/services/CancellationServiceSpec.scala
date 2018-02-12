@@ -16,16 +16,26 @@
 
 package services
 
+import java.time.LocalDate
+
+import common.enums.VatRegStatus
 import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
+import mocks.VatMocks
 import models.CurrentProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import uk.gov.hmrc.http.HttpResponse
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-class CancellationServiceSpec extends VatRegSpec with VatRegistrationFixture {
+class CancellationServiceSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout with VatRegistrationFixture {
+  val incorpDate = LocalDate.of(2016, 12, 21)
+  implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, Some(incorpDate))
+
+  implicit val hc = HeaderCarrier()
 
   class Setup {
     val service = new CancellationService {
@@ -34,14 +44,8 @@ class CancellationServiceSpec extends VatRegSpec with VatRegistrationFixture {
       override val currentProfileService = mockCurrentProfileService
     }
 
-    def mockBuildCurrentProfile(regId: String) = when(mockCurrentProfileService.buildCurrentProfile(ArgumentMatchers.any()))
+    def mockGetCurrentProfile(regId: String) = when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any()))
       .thenReturn(Future.successful(currentProfile.copy(registrationId = regId)))
-
-    def fetchProfileFromKeystore(regId: String, result: Boolean) = {
-      val profile = if(result) Some(currentProfile.copy(registrationId = regId)) else None
-      when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(profile))
-    }
 
     def removeFromKeystore = when(mockKeystoreConnector.remove()(ArgumentMatchers.any()))
       .thenReturn(Future.successful(HttpResponse(200)))
@@ -57,53 +61,31 @@ class CancellationServiceSpec extends VatRegSpec with VatRegistrationFixture {
   }
 
   "deleteEligibilityData" should {
-    "return true if the delete is succesful" in new Setup {
-      val regId = "SuccessId"
-      fetchProfileFromKeystore(regId, true)
+    val regId = "reg-123"
+
+    "return true if the delete is successful" in new Setup {
+      mockGetCurrentProfile(regId)
       removeFromKeystore
       clearFromS4Later
-      await(service.deleteEligibilityData(regId)) shouldBe true
+      await(service.deleteEligibilityData(regId)) mustBe true
     }
 
     "return false if the regId doesnt match the current profile ID" in new Setup {
-      val regId = "FailureId"
-      fetchProfileFromKeystore("DoesntMatch", true)
-      await(service.deleteEligibilityData(regId)) shouldBe false
-    }
-
-    "build current profile and return true if regId match" in new Setup {
-      val regId = "SuccessId"
-      fetchProfileFromKeystore(regId, false)
-      mockBuildCurrentProfile(regId)
-      removeFromKeystore
-      clearFromS4Later
-      await(service.deleteEligibilityData(regId)) shouldBe true
-    }
-
-    "build current profile and return false if regId dont match" in new Setup {
-      val regId = "FailureId"
-      fetchProfileFromKeystore(regId, false)
-      mockBuildCurrentProfile("DoesntMatch")
-      removeFromKeystore
-      clearFromS4Later
-      await(service.deleteEligibilityData(regId)) shouldBe false
+      mockGetCurrentProfile("DifferentId")
+      await(service.deleteEligibilityData(regId)) mustBe false
     }
 
     "throw an error if keystore remove failed with an error" in new Setup {
-      val regId = "SuccessId"
-      fetchProfileFromKeystore(regId, true)
-      mockBuildCurrentProfile(regId)
+      mockGetCurrentProfile(regId)
       failedRemoveFromKeystore
-      intercept[Exception](await(service.deleteEligibilityData(regId))).getMessage shouldBe "ThrownError"
+      intercept[Exception](await(service.deleteEligibilityData(regId))).getMessage mustBe "ThrownError"
     }
 
     "throw an error if s4l clear failed with an error" in new Setup {
-      val regId = "SuccessId"
-      fetchProfileFromKeystore(regId, true)
-      mockBuildCurrentProfile(regId)
+      mockGetCurrentProfile(regId)
       removeFromKeystore
       failedClearFromS4Later
-      intercept[Exception](await(service.deleteEligibilityData(regId))).getMessage shouldBe "ThrownError"
+      intercept[Exception](await(service.deleteEligibilityData(regId))).getMessage mustBe "ThrownError"
     }
   }
 }

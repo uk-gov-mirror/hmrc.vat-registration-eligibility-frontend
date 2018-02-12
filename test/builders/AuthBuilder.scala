@@ -16,59 +16,36 @@
 
 package builders
 
-import java.util.UUID
-
-import models.external.UserIDs
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.when
+import mocks.AuthMock
+import org.scalatest.mockito.MockitoSugar
 import play.api.mvc.{Action, AnyContent, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, ConfidenceLevel, CredentialStrength}
 
 import scala.concurrent.Future
 
-object AuthBuilder extends AuthBuilder {}
+trait AuthBuilder extends SessionBuilder with AuthMock {
+  self: MockitoSugar =>
 
-trait AuthBuilder {
-
-  def mockAuthorisedUser(userId: String, accounts: Accounts = Accounts())(implicit mockAuthConnector: AuthConnector) {
-    when(mockAuthConnector.currentAuthority(ArgumentMatchers.any(), ArgumentMatchers.any())) thenReturn {
-      Future.successful(Some(createUserAuthority(userId, accounts)))
-    }
-  }
-
-  def withAuthorisedUser(action: Action[AnyContent])(test: Future[Result] => Any)(implicit mockAuthConnector: AuthConnector) {
+  def withAuthorisedUser(action: Action[AnyContent])(test: Future[Result] => Any) {
     val userId = "testUserId"
-    mockAuthorisedUser(userId)
-    val result = action.apply(SessionBuilder.buildRequestWithSession(userId))
+    mockAuthenticated()
+    val result = action.apply(buildRequestWithSession(userId))
     test(result)
   }
 
   def submitWithUnauthorisedUser(action: Action[AnyContent], request: FakeRequest[AnyContentAsFormUrlEncoded])
-                                (test: Future[Result] => Any)(implicit mockAuthConnector: AuthConnector) {
-    when(mockAuthConnector.currentAuthority(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(None))
-    val result = action.apply(SessionBuilder.updateRequestFormWithSession(request, ""))
+                                (test: Future[Result] => Any) {
+    mockNotAuthenticated()
+    val result = action.apply(updateRequestFormWithSession(request, ""))
     test(result)
   }
 
   def submitWithAuthorisedUser(action: Action[AnyContent], request: FakeRequest[AnyContentAsFormUrlEncoded])
-                              (test: Future[Result] => Any)(implicit mockAuthConnector: AuthConnector) {
+                              (test: Future[Result] => Any) {
     val userId = "testUserId"
-    mockAuthorisedUser(userId)
-    val result = action.apply(SessionBuilder.updateRequestFormWithSession(request, userId))
+    mockAuthenticated()
+    val result = action.apply(updateRequestFormWithSession(request, userId))
     test(result)
-  }
-
-  def createTestUser: AuthContext = {
-    AuthContext.apply(createUserAuthority("testUserId"))
-  }
-
-  def createTestIds: UserIDs = UserIDs(UUID.randomUUID().toString, UUID.randomUUID().toString)
-
-  private[builders] def createUserAuthority(userId: String, accounts: Accounts = Accounts()): Authority = {
-    Authority(userId, accounts, None, None, CredentialStrength.Strong, ConfidenceLevel.L300, None, Some("testEnrolmentUri"), None, "")
   }
 }
 

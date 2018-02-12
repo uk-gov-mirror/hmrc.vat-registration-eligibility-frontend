@@ -18,6 +18,7 @@ package controllers
 
 import javax.inject.Inject
 
+import config.AuthClientConnector
 import controllers.builders.SummaryVatThresholdBuilder
 import models.CurrentProfile
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
@@ -26,13 +27,12 @@ import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
 class ThresholdSummaryControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                               val authConnector: AuthConnector,
+                                               val authConnector: AuthClientConnector,
                                                val vrs: VatRegistrationService,
                                                val currentProfileService: CurrentProfileService,
                                                val vatRegFrontendService: VatRegFrontendService,
@@ -42,29 +42,22 @@ trait ThresholdSummaryController extends VatRegistrationController with SessionP
   val thresholdService: ThresholdService
   val vatRegFrontendService: VatRegFrontendService
 
-  def show: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          hasIncorpDate { incorpDate =>
-            getThresholdSummary map { thresholdSummary =>
-              Ok(views.html.pages.threshold_summary(thresholdSummary, incorpDate.format(FORMAT_DD_MMMM_Y)))
-            }
-          }
+  def show: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      hasIncorpDate { incorpDate =>
+        getThresholdSummary map { thresholdSummary =>
+          Ok(views.html.pages.threshold_summary(thresholdSummary, incorpDate.format(FORMAT_DD_MMMM_Y)))
         }
+      }
   }
 
-  def submit: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request => {
-        withCurrentProfile { implicit profile =>
-          thresholdService.getThreshold map { t =>
-            if(t.overThreshold.exists(_.selection) || t.expectationOverThreshold.exists(_.selection)) {
-              Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
-            } else {
-              Redirect(controllers.routes.VoluntaryRegistrationController.show())
-            }
-          }
+  def submit: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      thresholdService.getThreshold map { t =>
+        if(t.overThreshold.exists(_.selection) || t.expectationOverThreshold.exists(_.selection)) {
+          Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
+        } else {
+          Redirect(controllers.routes.VoluntaryRegistrationController.show())
         }
       }
   }

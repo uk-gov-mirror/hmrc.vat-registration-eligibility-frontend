@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 import common.enums.CacheKeys.IneligibilityReason
 import common.enums.EligibilityQuestions
+import config.AuthClientConnector
 import connectors.KeystoreConnector
 import forms.ServiceCriteriaFormFactory
 import models.CurrentProfile
@@ -29,7 +30,6 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
 import services.{CurrentProfileService, EligibilityService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 import scala.concurrent.Future
@@ -39,7 +39,7 @@ class EligibilityControllerImpl @Inject()(val keystoreConnector: KeystoreConnect
                                           val currentProfileService: CurrentProfileService,
                                           val eligibilityService: EligibilityService,
                                           val messagesApi: MessagesApi,
-                                          val authConnector: AuthConnector) extends EligibilityController{}
+                                          val authConnector: AuthClientConnector) extends EligibilityController{}
 
 trait EligibilityController extends VatRegistrationController with SessionProfile {
   val keystoreConnector: KeystoreConnector
@@ -61,166 +61,127 @@ trait EligibilityController extends VatRegistrationController with SessionProfil
     optBoolean.fold(form)(x => form.fill(YesOrNoQuestion(question, x)))
   }
 
-  def ineligible(): Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          keystoreConnector.fetchAndGet[String](IneligibilityReason.toString) map {
-            case None         => InternalServerError
-            case Some(v) if v == EligibilityQuestions.applyingForVatExemption.toString => Ok(views.html.pages.ineligible.exemption_ineligible())
-            case Some(v)      => Ok(views.html.pages.ineligible.ineligible(v.toString))
-          }
-        }
+  def ineligible(): Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      keystoreConnector.fetchAndGet[String](IneligibilityReason.toString) map {
+        case None         => InternalServerError
+        case Some(v) if v == EligibilityQuestions.applyingForVatExemption.toString => Ok(views.html.pages.ineligible.exemption_ineligible())
+        case Some(v)      => Ok(views.html.pages.ineligible.ineligible(v.toString))
+      }
   }
 
-  def showHaveNino : Action[AnyContent] = authorised.async{
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          for {
-            eligibility <- eligibilityService.getEligibility
-            formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.haveNino, eligibility.haveNino)
-          } yield Ok(views.html.pages.have_nino(formFilled))
-        }
+  def showHaveNino : Action[AnyContent] = isAuthenticatedWithProfile{
+    implicit request => implicit profile =>
+      for {
+        eligibility <- eligibilityService.getEligibility
+        formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.haveNino, eligibility.haveNino)
+      } yield Ok(views.html.pages.have_nino(formFilled))
   }
 
-  def submitHaveNino: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          ServiceCriteriaFormFactory.form(EligibilityQuestions.haveNino).bindFromRequest.fold(
-            hasErrors => Future.successful(BadRequest(views.html.pages.have_nino(hasErrors))),
-            data => submitQuestion(EligibilityQuestions.haveNino, data.answer, !data.answer)(
-              success = Redirect(controllers.routes.EligibilityController.showDoingBusinessAbroad()),
-              fail    = Redirect(controllers.routes.EligibilityController.ineligible())
-            )
-          )
-        }
+  def submitHaveNino: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      ServiceCriteriaFormFactory.form(EligibilityQuestions.haveNino).bindFromRequest.fold(
+        hasErrors => Future.successful(BadRequest(views.html.pages.have_nino(hasErrors))),
+        data => submitQuestion(EligibilityQuestions.haveNino, data.answer, !data.answer)(
+          success = Redirect(controllers.routes.EligibilityController.showDoingBusinessAbroad()),
+          fail    = Redirect(controllers.routes.EligibilityController.ineligible())
+        )
+      )
   }
 
-  def showDoingBusinessAbroad : Action[AnyContent] = authorised.async{
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          for {
-            eligibility <- eligibilityService.getEligibility
-            formFilled = fillYesNoQuestionForm(EligibilityQuestions.doingBusinessAbroad, eligibility.doingBusinessAbroad)
-          } yield Ok(views.html.pages.doing_business_abroad(formFilled))
-        }
+  def showDoingBusinessAbroad : Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      for {
+        eligibility <- eligibilityService.getEligibility
+        formFilled = fillYesNoQuestionForm(EligibilityQuestions.doingBusinessAbroad, eligibility.doingBusinessAbroad)
+      } yield Ok(views.html.pages.doing_business_abroad(formFilled))
   }
 
-  def submitDoingBusinessAbroad: Action[AnyContent] = authorised.async {
-    implicit  user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          ServiceCriteriaFormFactory.form(EligibilityQuestions.doingBusinessAbroad).bindFromRequest.fold(
-            hasErrors => Future.successful(BadRequest(views.html.pages.doing_business_abroad(hasErrors))),
-            data => submitQuestion(EligibilityQuestions.doingBusinessAbroad, data.answer, data.answer)(
-              success = Redirect(controllers.routes.EligibilityController.showDoAnyApplyToYou()),
-              fail    = Redirect(controllers.routes.EligibilityController.ineligible())
-            )
-          )
-        }
+  def submitDoingBusinessAbroad: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      ServiceCriteriaFormFactory.form(EligibilityQuestions.doingBusinessAbroad).bindFromRequest.fold(
+        hasErrors => Future.successful(BadRequest(views.html.pages.doing_business_abroad(hasErrors))),
+        data => submitQuestion(EligibilityQuestions.doingBusinessAbroad, data.answer, data.answer)(
+          success = Redirect(controllers.routes.EligibilityController.showDoAnyApplyToYou()),
+          fail    = Redirect(controllers.routes.EligibilityController.ineligible())
+        )
+      )
   }
 
-  def showDoAnyApplyToYou : Action[AnyContent] = authorised.async{
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          for {
-            eligibility <- eligibilityService.getEligibility
-            formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.doAnyApplyToYou, eligibility.doAnyApplyToYou)
-          } yield Ok(views.html.pages.do_any_apply_to_you(formFilled))
-        }
+  def showDoAnyApplyToYou : Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      for {
+        eligibility <- eligibilityService.getEligibility
+        formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.doAnyApplyToYou, eligibility.doAnyApplyToYou)
+      } yield Ok(views.html.pages.do_any_apply_to_you(formFilled))
   }
 
-  def submitDoAnyApplyToYou: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          ServiceCriteriaFormFactory.form(EligibilityQuestions.doAnyApplyToYou).bindFromRequest.fold(
-            hasErrors => Future.successful(BadRequest(views.html.pages.do_any_apply_to_you(hasErrors))),
-            data => submitQuestion(EligibilityQuestions.doAnyApplyToYou, data.answer, data.answer)(
-              success = Redirect(controllers.routes.EligibilityController.showApplyingForAnyOf()),
-              fail    = Redirect(controllers.routes.EligibilityController.ineligible())
-            )
-          )
-        }
+  def submitDoAnyApplyToYou: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      ServiceCriteriaFormFactory.form(EligibilityQuestions.doAnyApplyToYou).bindFromRequest.fold(
+        hasErrors => Future.successful(BadRequest(views.html.pages.do_any_apply_to_you(hasErrors))),
+        data => submitQuestion(EligibilityQuestions.doAnyApplyToYou, data.answer, data.answer)(
+          success = Redirect(controllers.routes.EligibilityController.showApplyingForAnyOf()),
+          fail    = Redirect(controllers.routes.EligibilityController.ineligible())
+        )
+      )
   }
 
-  def showApplyingForAnyOf : Action[AnyContent] = authorised.async{
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          for {
-            eligibility <- eligibilityService.getEligibility
-            formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.applyingForAnyOf, eligibility.applyingForAnyOf)
-          } yield Ok(views.html.pages.applying_for_any_of(formFilled))
-        }
+  def showApplyingForAnyOf : Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      for {
+        eligibility <- eligibilityService.getEligibility
+        formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.applyingForAnyOf, eligibility.applyingForAnyOf)
+      } yield Ok(views.html.pages.applying_for_any_of(formFilled))
   }
 
-  def submitApplyingForAnyOf: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile{ implicit profile =>
-          ServiceCriteriaFormFactory.form(EligibilityQuestions.applyingForAnyOf).bindFromRequest.fold(
-            hasErrors => Future.successful(BadRequest(views.html.pages.applying_for_any_of(hasErrors))),
-            data => submitQuestion(EligibilityQuestions.applyingForAnyOf, data.answer, data.answer)(
-              success = Redirect(controllers.routes.EligibilityController.showExemptionCriteria()),
-              fail    = Redirect(controllers.routes.EligibilityController.ineligible())
-            )
-          )
-        }
+  def submitApplyingForAnyOf: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      ServiceCriteriaFormFactory.form(EligibilityQuestions.applyingForAnyOf).bindFromRequest.fold(
+        hasErrors => Future.successful(BadRequest(views.html.pages.applying_for_any_of(hasErrors))),
+        data => submitQuestion(EligibilityQuestions.applyingForAnyOf, data.answer, data.answer)(
+          success = Redirect(controllers.routes.EligibilityController.showExemptionCriteria()),
+          fail    = Redirect(controllers.routes.EligibilityController.ineligible())
+        )
+      )
   }
 
-  def showCompanyWillDoAnyOf : Action[AnyContent] = authorised.async{
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          for {
-            eligibility <- eligibilityService.getEligibility
-            formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.companyWillDoAnyOf, eligibility.companyWillDoAnyOf)
-          } yield Ok(views.html.pages.company_will_do_any_of(formFilled))
-        }
+  def showCompanyWillDoAnyOf : Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      for {
+        eligibility <- eligibilityService.getEligibility
+        formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.companyWillDoAnyOf, eligibility.companyWillDoAnyOf)
+      } yield Ok(views.html.pages.company_will_do_any_of(formFilled))
   }
 
-  def submitCompanyWillDoAnyOf: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          ServiceCriteriaFormFactory.form(EligibilityQuestions.companyWillDoAnyOf).bindFromRequest.fold(
-            hasErrors => Future.successful(BadRequest(views.html.pages.company_will_do_any_of(hasErrors))),
-            data => submitQuestion(EligibilityQuestions.companyWillDoAnyOf, data.answer, data.answer)(
-              success = Redirect(controllers.routes.EligibilitySummaryController.show()),
-              fail    = Redirect(controllers.routes.EligibilityController.ineligible())
-            )
-          )
-        }
+  def submitCompanyWillDoAnyOf: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      ServiceCriteriaFormFactory.form(EligibilityQuestions.companyWillDoAnyOf).bindFromRequest.fold(
+        hasErrors => Future.successful(BadRequest(views.html.pages.company_will_do_any_of(hasErrors))),
+        data => submitQuestion(EligibilityQuestions.companyWillDoAnyOf, data.answer, data.answer)(
+          success = Redirect(controllers.routes.EligibilitySummaryController.show()),
+          fail    = Redirect(controllers.routes.EligibilityController.ineligible())
+        )
+      )
   }
 
-  def showExemptionCriteria : Action[AnyContent] = authorised.async{
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          for {
-            eligibility <- eligibilityService.getEligibility
-            formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.applyingForVatExemption, eligibility.applyingForVatExemption)
-          } yield Ok(views.html.pages.applying_for_vat_exemption(formFilled))
-        }
+  def showExemptionCriteria : Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      for {
+        eligibility <- eligibilityService.getEligibility
+        formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.applyingForVatExemption, eligibility.applyingForVatExemption)
+      } yield Ok(views.html.pages.applying_for_vat_exemption(formFilled))
   }
 
-  def submitExemptionCriteria: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          ServiceCriteriaFormFactory.form(EligibilityQuestions.applyingForVatExemption).bindFromRequest.fold(
-            hasErrors => Future.successful(BadRequest(views.html.pages.applying_for_vat_exemption(hasErrors))),
-            data => submitQuestion(EligibilityQuestions.applyingForVatExemption, data.answer, data.answer)(
-              success = Redirect(controllers.routes.EligibilityController.showCompanyWillDoAnyOf()),
-              fail    = Redirect(controllers.routes.EligibilityController.ineligible())
-            )
-          )
-        }
+  def submitExemptionCriteria: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      ServiceCriteriaFormFactory.form(EligibilityQuestions.applyingForVatExemption).bindFromRequest.fold(
+        hasErrors => Future.successful(BadRequest(views.html.pages.applying_for_vat_exemption(hasErrors))),
+        data => submitQuestion(EligibilityQuestions.applyingForVatExemption, data.answer, data.answer)(
+          success = Redirect(controllers.routes.EligibilityController.showCompanyWillDoAnyOf()),
+          fail    = Redirect(controllers.routes.EligibilityController.ineligible())
+        )
+      )
   }
 }
 

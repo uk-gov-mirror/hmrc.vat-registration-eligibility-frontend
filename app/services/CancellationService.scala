@@ -36,13 +36,14 @@ trait CancellationService {
   val currentProfileService: CurrentProfileService
 
   def deleteEligibilityData(regId: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    getCurrentProfile flatMap { implicit profile =>
+    currentProfileService.getCurrentProfile flatMap { implicit profile =>
       if (regId != profile.registrationId) {
         logger.warn(s"[VatRegistrationService] [deleteEligibilityData] - Requested document regId: $regId does not correspond to the CurrentProfile regId")
         Future.successful(false)
       } else {
         clearSessionData
-      }} recover {
+      }
+    } recover {
       case ex: Exception =>
         logger.error(s"[VatRegistrationService] [deleteEligibilityData] - Received an error when deleting Registration regId: $regId - error: ${ex.getMessage}")
         throw ex
@@ -53,10 +54,4 @@ trait CancellationService {
     _ <- keystoreConnector.remove()
     _ <- s4LConnector.clear(profile.registrationId)
   } yield true
-
-  private def getCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
-    keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap(
-      _.fold(currentProfileService.buildCurrentProfile)(cp => Future.successful(cp))
-    )
-  }
 }
