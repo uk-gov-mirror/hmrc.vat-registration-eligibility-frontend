@@ -31,24 +31,22 @@
 
   @govHelpers.form(action = controllers.routes.VoluntaryRegistrationReasonController.submit()) {
   <div class="form-group">
-    <fieldset>
-        <span id="voluntaryRegistrationReasonRadio"/>
-        @vatInputRadioGroup(
-            field = voluntaryRegistrationForm("voluntaryRegistrationReasonRadio"),
-            Seq(
-              VoluntaryRegistrationReason.SELLS -> Messages("pages.voluntary.registration.reason.radio.sells"),
-              VoluntaryRegistrationReason.INTENDS_TO_SELL -> Messages("pages.voluntary.registration.reason.radio.intendsToSell"),
-              VoluntaryRegistrationReason.NEITHER -> Messages("pages.voluntary.registration.reason.radio.neither")
-            ),
-            '_labelAfter -> true,
-            '_labelClass -> "block-label"
-        )
-    </fieldset>
+    @vatInputRadioGroup(
+        field = voluntaryRegistrationForm("voluntaryRegistrationReasonRadio"),
+        Seq(
+          VoluntaryRegistrationReason.SELLS -> Messages("pages.voluntary.registration.reason.radio.sells"),
+          VoluntaryRegistrationReason.INTENDS_TO_SELL -> Messages("pages.voluntary.registration.reason.radio.intendsToSell"),
+          VoluntaryRegistrationReason.NEITHER -> Messages("pages.voluntary.registration.reason.radio.neither")
+        ),
+        '_labelAfter -> true,
+        '_labelClass -> "block-label",
+        '_legend -> messages("pages.voluntary.registration.reason.heading"),
+        '_legendClass -> "visually-hidden"
+    )
 
     <div class="panel panel-indent panel-border-narrow hidden" id="neither_panel">
         <p>@messages("pages.voluntary.registration.reason.panels.neither.para")</p>
     </div>
-
   </div>
 
   <div class="form-group">
