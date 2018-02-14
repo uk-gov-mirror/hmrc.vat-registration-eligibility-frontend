@@ -24,12 +24,14 @@ import helpers.FutureAssertions
 import mocks.{EligibilityServiceMock, VatMocks}
 import models.CurrentProfile
 import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class SummaryServiceSpec extends UnitSpec with MockitoSugar with VatMocks with FutureAssertions with VatRegistrationFixture with EligibilityServiceMock {
+class SummaryServiceSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout
+                         with FutureAssertions with VatRegistrationFixture with EligibilityServiceMock {
   implicit val hc = HeaderCarrier()
 
   implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1",
@@ -45,13 +47,13 @@ class SummaryServiceSpec extends UnitSpec with MockitoSugar with VatMocks with F
     "return a valid summary with the right amount of sections from a valid api model" in new Setup {
       mockGetEligibility(Future.successful(validEligibility))
       val response = await(service.getEligibilitySummary)
-      response.sections.length shouldBe 6
-      response.sections(0).id shouldBe "nationalInsurance"
-      response.sections(1).id shouldBe "internationalBusiness"
-      response.sections(2).id shouldBe "otherBusiness"
-      response.sections(3).id shouldBe "otherVatScheme"
-      response.sections(4).id shouldBe "vatExemption"
-      response.sections(5).id shouldBe "resources"
+      response.sections.length mustBe 6
+      response.sections(0).id mustBe "nationalInsurance"
+      response.sections(1).id mustBe "internationalBusiness"
+      response.sections(2).id mustBe "otherBusiness"
+      response.sections(3).id mustBe "otherVatScheme"
+      response.sections(4).id mustBe "vatExemption"
+      response.sections(5).id mustBe "resources"
     }
   }
 }

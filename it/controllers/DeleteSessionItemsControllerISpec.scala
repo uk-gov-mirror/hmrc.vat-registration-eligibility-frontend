@@ -61,8 +61,8 @@ class DeleteSessionItemsControllerISpec extends PlaySpec with AppAndStubs with R
       given()
         .user.isAuthorised
         .audit.writesAudit()
+        .keystore.keystoreGetNotFound()
         .businessReg.failsToGetBusinessProfile
-        .keystoreInScenario.keystoreGetNotFound()
         .corporationTaxRegistration.existsWithStatus("draft")
 
       val response = buildInternalCall(s"1/delete-session").withHeaders("X-Session-ID" -> "session-1112223355556").delete()

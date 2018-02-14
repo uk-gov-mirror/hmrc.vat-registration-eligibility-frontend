@@ -28,14 +28,16 @@ import models.external.{BusinessProfile, CompanyRegistrationProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Format
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class CurrentProfileServiceSpec extends UnitSpec with MockitoSugar with VatMocks with FutureAssertions with VatRegistrationFixture {
+class CurrentProfileServiceSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout
+                                with FutureAssertions with VatRegistrationFixture {
   val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
 
   val testService = new CurrentProfileService {
@@ -69,7 +71,7 @@ class CurrentProfileServiceSpec extends UnitSpec with MockitoSugar with VatMocks
           .thenReturn(Future.successful(Some(testCurrentProfile())))
 
         val result = await(testService.getCurrentProfile())
-        result shouldBe testCurrentProfile()
+        result mustBe testCurrentProfile()
       }
 
       "build and store in Keystore" in {
@@ -98,7 +100,7 @@ class CurrentProfileServiceSpec extends UnitSpec with MockitoSugar with VatMocks
           .thenReturn(Future.successful(CacheMap("", Map())))
 
         val result = await(testService.getCurrentProfile())
-        result shouldBe testCurrentProfile(testIncorporationInfo.statusEvent.incorporationDate)
+        result mustBe testCurrentProfile(testIncorporationInfo.statusEvent.incorporationDate)
       }
     }
   }

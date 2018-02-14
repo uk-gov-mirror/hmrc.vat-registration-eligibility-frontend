@@ -19,16 +19,16 @@ package services
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import helpers.FutureAssertions
 import mocks.VatMocks
-import org.scalatest.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsResultException, Json}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class IncorporationInformationServiceSpec extends UnitSpec with MockitoSugar with VatMocks with FutureAssertions {
+class IncorporationInformationServiceSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAssertions {
   class Setup {
     val service = new IncorporationInformationService {
       override val incorpInfoConnector: IncorporationInformationConnector = mockIIConnector

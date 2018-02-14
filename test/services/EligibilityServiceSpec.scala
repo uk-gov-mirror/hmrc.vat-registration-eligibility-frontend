@@ -25,15 +25,15 @@ import models.CurrentProfile
 import models.view.Eligibility
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.http.cache.client.CacheMap
 import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.PlaySpec
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks with FutureAssertions with VatRegistrationFixture {
+class EligibilityServiceSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAssertions with VatRegistrationFixture {
   implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft,None)
   implicit val hc = HeaderCarrier()
   val validEmptyEligibility = Eligibility(None, None, None, None, None, None)

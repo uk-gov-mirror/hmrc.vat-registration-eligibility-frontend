@@ -17,27 +17,29 @@
 package controllers
 
 import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
+import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
 import models.external.IncorporationInfo
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class EligibilitySummaryControllerSpec extends VatRegSpec with VatRegistrationFixture {
+class EligibilitySummaryControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture with FutureAssertions {
 
   class Setup {
 
     val testController = new EligibilitySummaryController {
-      override val authConnector = mockAuthConnector
+      override val authConnector = mockAuthClientConnector
       override val summaryService = mockSummaryService
       override val vatRegistrationService = mockVatRegistrationService
       override val currentProfileService = mockCurrentProfileService
-      override val messagesApi = mockMessages
+      override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -52,9 +54,9 @@ class EligibilitySummaryControllerSpec extends VatRegSpec with VatRegistrationFi
   "Calling eligibility summary to show the Eligibility summary page" should {
     "return HTML with a valid threshold summary view" in new Setup {
       when(mockSummaryService.getEligibilitySummary(ArgumentMatchers.any(),ArgumentMatchers.any()))
-        .thenReturn(validEligibilitySummary)
+        .thenReturn(Future.successful(validEligibilitySummary))
 
-      callAuthorised(testController.show)(_ includesText "Check and confirm your answers")
+      callAuthenticated(testController.show)(_ includesText "Check and confirm your answers")
     }
   }
 

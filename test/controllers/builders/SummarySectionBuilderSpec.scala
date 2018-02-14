@@ -16,11 +16,14 @@
 
 package controllers.builders
 
-import helpers.VatRegSpec
 import models.view.{SummaryRow, SummarySection}
+import org.scalatestplus.play.PlaySpec
 import play.api.mvc.Call
+import uk.gov.hmrc.http.HeaderCarrier
 
-class SummarySectionBuilderSpec extends VatRegSpec {
+class SummarySectionBuilderSpec extends PlaySpec {
+
+  implicit val hc = HeaderCarrier()
 
   object TestBuilder extends SummarySectionBuilder {
     override val sectionId: String = "section"
@@ -32,21 +35,21 @@ class SummarySectionBuilderSpec extends VatRegSpec {
   "yes or no row" should {
     "display Yes" when {
       "user answered Yes to a question" in {
-        TestBuilder.yesNoRow("row", Some(true), testCall) shouldBe
+        TestBuilder.yesNoRow("row", Some(true), testCall) mustBe
           SummaryRow("section.row", "app.common.yes", Some(testCall))
       }
     }
 
     "display No" when {
       "user answered No to a question" in {
-        TestBuilder.yesNoRow("row", Some(false), testCall) shouldBe
+        TestBuilder.yesNoRow("row", Some(false), testCall) mustBe
           SummaryRow("section.row", "app.common.no", Some(testCall))
       }
     }
 
     "display No" when {
       "user did not answer" in {
-        TestBuilder.yesNoRow("row", None, testCall) shouldBe
+        TestBuilder.yesNoRow("row", None, testCall) mustBe
           SummaryRow("section.row", "app.common.no", Some(testCall))
       }
     }
@@ -56,21 +59,21 @@ class SummarySectionBuilderSpec extends VatRegSpec {
   "applied row" should {
     "display Applied" when {
       "user answered Yes to a question" in {
-        TestBuilder.appliedRow("row", Some(true), testCall) shouldBe
+        TestBuilder.appliedRow("row", Some(true), testCall) mustBe
           SummaryRow("section.row", "app.common.applied", Some(testCall))
       }
     }
 
     "display No" when {
       "user answered No to a question" in {
-        TestBuilder.appliedRow("row", Some(false), testCall) shouldBe
+        TestBuilder.appliedRow("row", Some(false), testCall) mustBe
           SummaryRow("section.row", "app.common.not.applied", Some(testCall))
       }
     }
 
     "display No" when {
       "user did not answer" in {
-        TestBuilder.appliedRow("row", None, testCall) shouldBe
+        TestBuilder.appliedRow("row", None, testCall) mustBe
           SummaryRow("section.row", "app.common.not.applied", Some(testCall))
       }
     }

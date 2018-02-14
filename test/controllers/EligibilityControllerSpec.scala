@@ -19,30 +19,33 @@ package controllers
 import common.enums.CacheKeys.IneligibilityReason
 import common.enums.{EligibilityQuestions => Questions}
 import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
+import helpers.{ControllerSpec, FutureAssertions}
 import mocks.EligibilityServiceMock
 import models.CurrentProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import play.api.http.Status.INTERNAL_SERVER_ERROR
+import org.scalatest.Inspectors
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.Future
 
-class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture with EligibilityServiceMock {
+class EligibilityControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture
+                                with EligibilityServiceMock with Inspectors with FutureAssertions {
 
   class Setup {
     val testController = new EligibilityController {
-      override val authConnector: AuthConnector = mockAuthConnector
+      override val authConnector: AuthConnector = mockAuthClientConnector
       override val eligibilityService = mockEligibilityService
       override val keystoreConnector = mockKeystoreConnector
       override val currentProfileService = mockCurrentProfileService
-      override val messagesApi = mockMessages
+      override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -55,7 +58,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
       mockGetEligibility(Future.successful(validEligibility))
 
       val expectedTitle = "Will the company apply for a VAT registration exception or exemption?"
-      callAuthorised(testController.showExemptionCriteria())(a => a includesText expectedTitle)
+      callAuthenticated(testController.showExemptionCriteria())(a => a includesText expectedTitle)
     }
   }
 
@@ -79,7 +82,8 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
     "show ineligible screen on yes submitted" in new Setup {
       mockSaveEligibility(Future.successful(validEligibility))
 
-      when(mockKeystoreConnector.cache[String](any(), any())(any(), any())).thenReturn(CacheMap("id", Map()).pure)
+      when(mockKeystoreConnector.cache[String](any(), any())(any(), any()))
+        .thenReturn(Future.successful(CacheMap("id", Map())))
 
       submitAuthorised(testController.submitExemptionCriteria,
         FakeRequest().withFormUrlEncodedBody(s"${Questions.applyingForVatExemption}Radio" -> "true")
@@ -92,7 +96,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
       mockGetEligibility(Future.successful(validEligibility))
 
       val expectedTitle = "Do you have a UK National Insurance number?"
-      callAuthorised(testController.showHaveNino())(_ includesText expectedTitle)
+      callAuthenticated(testController.showHaveNino())(_ includesText expectedTitle)
     }
   }
 
@@ -116,7 +120,8 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
     "show ineligible screen on no submitted" in new Setup {
       mockSaveEligibility(Future.successful(validEligibility))
 
-      when(mockKeystoreConnector.cache[String](any(), any())(any(), any())).thenReturn(CacheMap("id", Map()).pure)
+      when(mockKeystoreConnector.cache[String](any(), any())(any(), any()))
+        .thenReturn(Future.successful(CacheMap("id", Map())))
 
       submitAuthorised(testController.submitHaveNino,
         FakeRequest().withFormUrlEncodedBody(s"${Questions.haveNino}Radio" -> "false")
@@ -129,7 +134,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
       mockGetEligibility(Future.successful(validEligibility))
 
       val expectedTitle = "Will the company do international business"
-      callAuthorised(testController.showDoingBusinessAbroad())(_ includesText expectedTitle)
+      callAuthenticated(testController.showDoingBusinessAbroad())(_ includesText expectedTitle)
     }
   }
 
@@ -153,7 +158,8 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
 
     "show ineligible screen on yes submitted" in new Setup {
       mockSaveEligibility(Future.successful(validEligibility))
-      when(mockKeystoreConnector.cache[String](any(), any())(any(), any())).thenReturn(CacheMap("id", Map()).pure)
+      when(mockKeystoreConnector.cache[String](any(), any())(any(), any()))
+        .thenReturn(Future.successful(CacheMap("id", Map())))
 
       submitAuthorised(testController.submitDoingBusinessAbroad,
         FakeRequest().withFormUrlEncodedBody(s"${Questions.doingBusinessAbroad}Radio" -> "true")
@@ -165,7 +171,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
     "return HTML for relevant page with no data in the form" in new Setup {
       mockGetEligibility(Future.successful(validEligibility))
       val expectedTitle = "Are you involved with more than one business or changing the legal status of your business?"
-      callAuthorised(testController.showDoAnyApplyToYou())(_ includesText expectedTitle)
+      callAuthenticated(testController.showDoAnyApplyToYou())(_ includesText expectedTitle)
     }
   }
 
@@ -190,7 +196,8 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
     "show ineligible screen on yes submitted" in new Setup {
       mockSaveEligibility(Future.successful(validEligibility))
 
-      when(mockKeystoreConnector.cache[String](any(), any())(any(), any())).thenReturn(CacheMap("id", Map()).pure)
+      when(mockKeystoreConnector.cache[String](any(), any())(any(), any()))
+        .thenReturn(Future.successful(CacheMap("id", Map())))
 
       submitAuthorised(testController.submitDoAnyApplyToYou,
         FakeRequest().withFormUrlEncodedBody(s"${Questions.doAnyApplyToYou}Radio" -> "true")
@@ -203,7 +210,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
       mockGetEligibility(Future.successful(validEligibility))
 
       val expectedTitle = "Is the company applying for either the Agricultural Flat Rate Scheme or the Annual Accounting Scheme?"
-      callAuthorised(testController.showApplyingForAnyOf())(_ includesText expectedTitle)
+      callAuthenticated(testController.showApplyingForAnyOf())(_ includesText expectedTitle)
     }
   }
 
@@ -228,7 +235,8 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
     "show ineligible screen on yes submitted" in new Setup {
       mockSaveEligibility(Future.successful(validEligibility))
 
-      when(mockKeystoreConnector.cache[String](any(), any())(any(), any())).thenReturn(CacheMap("id", Map()).pure)
+      when(mockKeystoreConnector.cache[String](any(), any())(any(), any()))
+        .thenReturn(Future.successful(CacheMap("id", Map())))
 
       submitAuthorised(testController.submitApplyingForAnyOf,
         FakeRequest().withFormUrlEncodedBody(s"${Questions.applyingForAnyOf}Radio" -> "true")
@@ -241,7 +249,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
       mockGetEligibility(Future.successful(validEligibility))
 
       val expectedTitle = "Will the company do any of the following once"
-      callAuthorised(testController.showCompanyWillDoAnyOf())(_ includesText expectedTitle)
+      callAuthenticated(testController.showCompanyWillDoAnyOf())(_ includesText expectedTitle)
     }
   }
 
@@ -266,7 +274,8 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
     "show ineligible screen on yes submitted" in new Setup {
       mockSaveEligibility(Future.successful(validEligibility))
 
-      when(mockKeystoreConnector.cache[String](any(), any())(any(), any())).thenReturn(CacheMap("id", Map()).pure)
+      when(mockKeystoreConnector.cache[String](any(), any())(any(), any()))
+        .thenReturn(Future.successful(CacheMap("id", Map())))
 
       submitAuthorised(testController.submitCompanyWillDoAnyOf,
         FakeRequest().withFormUrlEncodedBody(s"${Questions.companyWillDoAnyOf}Radio" -> "true")
@@ -294,7 +303,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
       forAll(eligibilityQuestions) { case (question, expectedTitle) =>
         when(mockKeystoreConnector.fetchAndGet[String](ArgumentMatchers.eq(IneligibilityReason.toString))(any(), any()))
           .thenReturn(Future.successful(Some(question.toString)))
-        callAuthorised(testController.ineligible())(_ includesText expectedTitle)
+        callAuthenticated(testController.ineligible())(_ includesText expectedTitle)
       }
     }
 
@@ -302,8 +311,8 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
       when(mockKeystoreConnector.fetchAndGet[Questions.Value](ArgumentMatchers.eq(IneligibilityReason.toString))(any(), any()))
         .thenReturn(Future.successful(None))
 
-      callAuthorised(testController.ineligible()) {
-        result => status(result) shouldBe INTERNAL_SERVER_ERROR
+      callAuthenticated(testController.ineligible()) {
+        result => status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
 

@@ -17,26 +17,28 @@
 package controllers.test
 
 import connectors.S4LConnector
-import helpers.VatRegSpec
+import helpers.ControllerSpec
 import models.CurrentProfile
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import services.CurrentProfileService
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.Future
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-class TestCacheControllerSpec extends VatRegSpec {
+class TestCacheControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
 
   class Setup {
     val controller = new TestCacheController {
       override val s4lConnector: S4LConnector = mockS4LConnector
-      override def messagesApi: MessagesApi = mockMessagesApi
-      override val currentProfileService: CurrentProfileService = mockCurrentProfileService
-      override protected def authConnector: AuthConnector = mockAuthConnector
+      val messagesApi: MessagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
+      val currentProfileService: CurrentProfileService = mockCurrentProfileService
+      val authConnector: AuthConnector = mockAuthClientConnector
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -48,7 +50,7 @@ class TestCacheControllerSpec extends VatRegSpec {
     "clear S4L" in new Setup {
       when(mockS4LConnector.clear(any())(any())).thenReturn(Future(HttpResponse(200)))
 
-      callAuthorised(controller.tearDownS4L)(_ isA 200)
+      callAuthenticated(controller.tearDownS4L)(status(_) mustBe 200)
     }
   }
 }

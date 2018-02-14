@@ -10,13 +10,14 @@ object AppDependencies {
 }
 
 object MainDependencies {
-  private val frontendBootstrapVersion        = "8.8.0"
+  private val frontendBootstrapVersion        = "8.17.0"
   private val playPartialsVersion             = "6.1.0"
-  private val httpCachingVersion              = "7.0.0"
+  private val httpCachingVersion              = "7.1.0"
   private val playWhitelistVersion            = "2.0.0"
   private val playConditionalMappingVersion   = "0.2.0"
   private val scalaCatsVersion                = "0.9.0"
   private val timeVersion                     = "3.1.0"
+  private val authClientVersion               = "2.5.0"
 
   def apply() = Seq(
     "uk.gov.hmrc"   %% "frontend-bootstrap"             % frontendBootstrapVersion,
@@ -25,16 +26,17 @@ object MainDependencies {
     "uk.gov.hmrc"   %% "play-whitelist-filter"          % playWhitelistVersion,
     "uk.gov.hmrc"   %% "play-conditional-form-mapping"  % playConditionalMappingVersion,
     "uk.gov.hmrc"   %% "time"                           % timeVersion,
+    "uk.gov.hmrc"   %% "auth-client"                    % authClientVersion,
     "org.typelevel" %% "cats"                           % scalaCatsVersion
   )
 }
 
 trait TestDependencies {
   val scalaTestPlusVersion     = "2.0.1"
-  val hmrcTestVersion          = "2.3.0"
+  val hmrcTestVersion          = "3.0.0"
   val scalaTestVersion         = "3.0.4"
   val pegdownVersion           = "1.6.0"
-  val mockitoCoreVersion       = "2.11.0"
+  val mockitoCoreVersion       = "2.13.0"
   val jsoupVersion             = "1.10.3"
   val wireMockVersion          = "2.9.0"
 

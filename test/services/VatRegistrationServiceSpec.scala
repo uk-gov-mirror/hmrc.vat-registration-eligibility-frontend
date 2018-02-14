@@ -16,20 +16,30 @@
 
 package services
 
+import java.time.LocalDate
+
 import common.enums.{CacheKeys, VatRegStatus}
 import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
+import helpers.FutureAssertions
+import mocks.VatMocks
 import models._
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import uk.gov.hmrc.http.BadRequestException
+import org.scalatest.BeforeAndAfter
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture {
+class VatRegistrationServiceSpec extends PlaySpec with BeforeAndAfter with MockitoSugar with VatMocks with FutureAssertions with VatRegistrationFixture {
+  val incorpDate = LocalDate.of(2016, 12, 21)
+  implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, Some(incorpDate))
+
+  implicit val hc = HeaderCarrier()
 
   class Setup {
     val service = new VatRegistrationService {
@@ -38,8 +48,8 @@ class VatRegistrationServiceSpec extends VatRegSpec with VatRegistrationFixture 
     }
   }
 
-  override def beforeEach() {
-    super.beforeEach()
+  def beforeEach() {
+    resetMocks()
     mockFetchRegId(testRegId)
     when(mockRegConnector.getIncorporationInfo(any())(any()))
       .thenReturn(Future.successful(None))

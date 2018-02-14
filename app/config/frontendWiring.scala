@@ -18,7 +18,9 @@ package config
 
 import javax.inject.Inject
 
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.mvc.Call
+import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
 import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
@@ -54,8 +56,8 @@ class WSHttpImpl @Inject()(config: ServicesConfig) extends WSHttp {
   override val appName = config.getString("appName")
 }
 
-class FrontendAuthConnector @Inject()(val http: WSHttp, config: ServicesConfig) extends AuthConnector {
-  val serviceUrl = config.baseUrl("auth")
+class AuthClientConnector @Inject()(val http: WSHttp, config: ServicesConfig) extends PlayAuthConnector {
+  override val serviceUrl: String = config.baseUrl("auth")
 }
 
 class VatShortLivedHttpCaching @Inject()(val http: WSHttp, config: ServicesConfig) extends ShortLivedHttpCaching {
@@ -84,4 +86,8 @@ object WhitelistFilter extends AkamaiWhitelistFilter with MicroserviceFilterSupp
   }
 
   override def destination: Call = Call("GET", "https://www.tax.service.gov.uk/outage-register-for-vat")
+}
+
+trait Logging {
+  val logger: Logger = LoggerFactory.getLogger(getClass)
 }

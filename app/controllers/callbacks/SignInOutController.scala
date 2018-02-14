@@ -18,29 +18,36 @@ package controllers.callbacks
 
 import javax.inject.Inject
 
+import config.AuthClientConnector
 import controllers.VatRegistrationController
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
+import services.CurrentProfileService
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import utils.SessionProfile
+
+import scala.concurrent.Future
 
 class SignInOutControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                        val authConnector: AuthConnector,
+                                        val authConnector: AuthClientConnector,
+                                        val currentProfileService: CurrentProfileService,
                                         config: ServicesConfig) extends SignInOutController {
   lazy val compRegFEURL = config.getConfString("company-registration-frontend.www.url", "")
   lazy val compRegFEURI = config.getConfString("company-registration-frontend.www.uri", "")
 }
 
-trait SignInOutController extends VatRegistrationController {
+trait SignInOutController extends VatRegistrationController with SessionProfile {
   val compRegFEURL: String
   val compRegFEURI: String
 
-  def postSignIn: Action[AnyContent] = authorised(implicit user => implicit request =>
-    Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in")
-  )
+  def postSignIn: Action[AnyContent] = isAuthenticated {
+    implicit request =>
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
+  }
 
-  def signOut: Action[AnyContent] = authorised { implicit user => implicit request =>
-    Redirect(s"$compRegFEURL$compRegFEURI/questionnaire").withNewSession
+  def signOut: Action[AnyContent] = isAuthenticated {
+    implicit request =>
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire").withNewSession)
   }
 }
 

@@ -16,17 +16,19 @@
 
 package connectors
 
-import helpers.VatRegSpec
+import mocks.VatMocks
 import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, NotFoundException, Upstream4xxResponse, Upstream5xxResponse }
 
-class BusinessRegistrationConnectorSpec extends VatRegSpec {
-
-  val mockBusRegConnector = mock[BusinessRegistrationConnector]
+class BusinessRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout {
+  implicit val hc = HeaderCarrier()
 
   trait Setup {
     val connector = new BusinessRegistrationConnector {
@@ -44,7 +46,7 @@ class BusinessRegistrationConnectorSpec extends VatRegSpec {
     "return a a CurrentProfile response if one is found in business registration micro-service" in new Setup {
       mockHttpGET[BusinessProfile]("testUrl", validBusinessRegistrationResponse)
 
-      await(connector.retrieveBusinessProfile) shouldBe validBusinessRegistrationResponse
+      await(connector.retrieveBusinessProfile) mustBe validBusinessRegistrationResponse
     }
 
     "return a Not Found response when a CurrentProfile record can not be found" in new Setup {

@@ -137,7 +137,7 @@ trait StubUtils {
     def failsToGetBusinessProfile = {
       stubFor(
         get(urlPathEqualTo("/business-registration/business-tax-registration"))
-          .willReturn(notFound())
+          .willReturn(serverError())
       )
       builder
     }
@@ -560,33 +560,21 @@ trait StubUtils {
 
     def isAuthorised(implicit requestHolder: RequestHolder): PreconditionBuilder = {
       requestHolder.request = requestWithSession(requestHolder.request, "anyUserId")
-      stubFor(
-        get(urlPathEqualTo("/auth/authority"))
-          .willReturn(ok(
-            s"""
-               |{
-               |  "uri":"anyUserId",
-               |  "loggedInAt": "2014-06-09T14:57:09.522Z",
-               |  "previouslyLoggedInAt": "2014-06-09T14:48:24.841Z",
-               |  "credentials": {"gatewayId":"xxx2"},
-               |  "accounts": {},
-               |  "levelOfAssurance": "2",
-               |  "confidenceLevel" : 50,
-               |  "credentialStrength": "strong",
-               |  "legacyOid": "1234567890",
-               |  "userDetailsLink": "http://localhost:11111/auth/userDetails",
-               |  "ids": "/auth/ids"
-               |}""".stripMargin
-          )))
+      stubFor(post(urlPathEqualTo("/auth/authorise")).willReturn(ok("""{}""")))
       builder
     }
 
     def isNotAuthorised  = {
       stubFor(
-        get(urlPathEqualTo("/auth/authority"))
-          .willReturn(unauthorized()))
+        post(urlPathEqualTo("/auth/authorise")).willReturn(unauthorized()))
       builder
      }
+
+    def hasNoActiveSession(implicit requestHolder: RequestHolder) = {
+      requestHolder.request = requestWithSession(requestHolder.request, "anyUserId")
+      stubFor(post(urlPathEqualTo("/auth/authorise")).willReturn(unauthorized().withHeader("WWW-Authenticate", """MDTP detail="MissingBearerToken"""")))
+      builder
+    }
   }
 
 

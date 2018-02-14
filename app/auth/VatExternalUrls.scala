@@ -26,5 +26,8 @@ object VatExternalUrls extends RunMode with ServicesConfig {
 
   val loginUrl = s"$companyAuthHost$loginPath"
   val continueUrl = s"$loginCallback${controllers.callbacks.routes.SignInOutController.postSignIn()}"
-
+  final lazy val defaultOrigin: String = {
+    lazy val appName = runModeConfiguration.getString("appName").getOrElse("undefined")
+    runModeConfiguration.getString("sosOrigin").getOrElse(appName)
+  }
 }

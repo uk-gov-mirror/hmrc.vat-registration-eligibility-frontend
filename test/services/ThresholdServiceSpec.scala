@@ -23,20 +23,22 @@ import fixtures.VatRegistrationFixture
 import helpers.FutureAssertions
 import mocks.VatMocks
 import models.CurrentProfile
-import models.view.{ExpectationOverThresholdView, OverThresholdView, TaxableTurnover, Threshold, VoluntaryRegistration, VoluntaryRegistrationReason}
 import models.view.VoluntaryRegistration._
 import models.view.VoluntaryRegistrationReason._
+import models.view.{ExpectationOverThresholdView, OverThresholdView, TaxableTurnover, Threshold, VoluntaryRegistration, VoluntaryRegistrationReason}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-class ThresholdServiceSpec extends UnitSpec with MockitoSugar with VatMocks with FutureAssertions with VatRegistrationFixture {
+class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits
+                           with DefaultAwaitTimeout with FutureAssertions with VatRegistrationFixture {
   implicit val hc = HeaderCarrier()
   implicit val currentProfilePreIncorp = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, None)
   val currentProfilePostIncorp = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, Some(LocalDate.of(2016, 12, 21)))
@@ -172,52 +174,52 @@ class ThresholdServiceSpec extends UnitSpec with MockitoSugar with VatMocks with
     val thresholdPostIncorpIncomplete = Threshold(None, Some(voluntaryRegistrationYES), None, Some(overThresholdFalse), Some(expectOverThresholdFalse))
 
     "save to S4L and return an incomplete pre incorp Threshold with Taxable Turnover set to NO" in new SetupForS4L {
-      await(service.saveThreshold(taxableTurnoverNO)) shouldBe thresholdTaxableTurnoverNO
+      await(service.saveThreshold(taxableTurnoverNO)) mustBe thresholdTaxableTurnoverNO
     }
 
     "save to S4L and return an incomplete pre incorp Threshold with Voluntary Registration set to YES" in new SetupForS4L(thresholdTaxableTurnoverNO) {
-      await(service.saveThreshold(voluntaryRegistrationYES)) shouldBe thresholdPreIncorpIncomplete
+      await(service.saveThreshold(voluntaryRegistrationYES)) mustBe thresholdPreIncorpIncomplete
     }
 
     "save to S4L and return an incomplete post incorp Threshold with OverThreshold set to false" in new SetupForS4L {
-      await(service.saveThreshold(overThresholdFalse)) shouldBe Threshold(None, None, None, Some(overThresholdFalse), None)
+      await(service.saveThreshold(overThresholdFalse)) mustBe Threshold(None, None, None, Some(overThresholdFalse), None)
     }
 
     "save to S4L and return an incomplete post incorp Threshold with ExpectationOverThreshold set to false" in new SetupForS4L {
-      await(service.saveThreshold(expectOverThresholdFalse)) shouldBe Threshold(None, None, None, None, Some(expectOverThresholdFalse))
+      await(service.saveThreshold(expectOverThresholdFalse)) mustBe Threshold(None, None, None, None, Some(expectOverThresholdFalse))
     }
 
     "save to S4L and return an incomplete post incorp Threshold with Voluntary Registration set to YES" in new SetupForS4L(thresholdOverThresholdFalse) {
-      await(service.saveThreshold(voluntaryRegistrationYES)) shouldBe thresholdPostIncorpIncomplete
+      await(service.saveThreshold(voluntaryRegistrationYES)) mustBe thresholdPostIncorpIncomplete
     }
 
     "save to backend and return a complete pre incorp Threshold with Taxable Turnover set to YES" in new SetupForSaveBackend(emptyThreshold) {
       val expected = Threshold(Some(taxableTurnoverYES), None, None, None, None)
-      await(service.saveThreshold(taxableTurnoverYES)) shouldBe expected
+      await(service.saveThreshold(taxableTurnoverYES)) mustBe expected
     }
 
     "save to backend and return a complete pre incorp Threshold with Taxable Turnover set to NO" in new SetupForSaveBackend(thresholdPreIncorpIncomplete) {
-      await(service.saveThreshold(voluntaryRegistrationReasonSELLS)) shouldBe thresholdPreIncorpComplete
+      await(service.saveThreshold(voluntaryRegistrationReasonSELLS)) mustBe thresholdPreIncorpComplete
     }
 
     "save to backend and return a complete pre incorp Threshold with Voluntary Registration Reason set to INTENDS_TO_SELL" in new SetupForSaveBackend(thresholdPreIncorpIncomplete) {
-      await(service.saveThreshold(voluntaryRegistrationReasonINTENDS)) shouldBe thresholdPreIncorpComplete.copy(voluntaryRegistrationReason = Some(voluntaryRegistrationReasonINTENDS))
+      await(service.saveThreshold(voluntaryRegistrationReasonINTENDS)) mustBe thresholdPreIncorpComplete.copy(voluntaryRegistrationReason = Some(voluntaryRegistrationReasonINTENDS))
     }
 
     "save to backend and return a complete pre incorp Threshold with Voluntary Registration Reason set to NEITHER" in new SetupForSaveBackend(thresholdPreIncorpIncomplete) {
-      await(service.saveThreshold(voluntaryRegistrationReasonNEITHER)) shouldBe thresholdPreIncorpComplete.copy(voluntaryRegistrationReason = Some(voluntaryRegistrationReasonNEITHER))
+      await(service.saveThreshold(voluntaryRegistrationReasonNEITHER)) mustBe thresholdPreIncorpComplete.copy(voluntaryRegistrationReason = Some(voluntaryRegistrationReasonNEITHER))
     }
 
     "save to backend and return a complete post incorp Threshold with OverThreshold set to YES" in new SetupForSaveBackend(emptyThreshold.copy(expectationOverThreshold = Some(expectOverThresholdFalse))) {
-      await(service.saveThreshold(overThresholdTrue)) shouldBe thresholdPostIncorpCompleteOver1
+      await(service.saveThreshold(overThresholdTrue)) mustBe thresholdPostIncorpCompleteOver1
     }
 
     "save to backend and return a complete post incorp Threshold with ExpectedOverThreshold set to YES" in new SetupForSaveBackend(emptyThreshold.copy(overThreshold = Some(overThresholdFalse))) {
-      await(service.saveThreshold(expectOverThresholdTrue)) shouldBe thresholdPostIncorpCompleteOver2
+      await(service.saveThreshold(expectOverThresholdTrue)) mustBe thresholdPostIncorpCompleteOver2
     }
 
     "save to backend and return a complete post incorp Threshold with Voluntary Registration set to YES" in new SetupForSaveBackend(thresholdPostIncorpIncomplete) {
-      await(service.saveThreshold(voluntaryRegistrationReasonSELLS)) shouldBe thresholdPostIncorpComplete
+      await(service.saveThreshold(voluntaryRegistrationReasonSELLS)) mustBe thresholdPostIncorpComplete
     }
   }
 }

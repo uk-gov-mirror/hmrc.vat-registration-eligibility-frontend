@@ -18,18 +18,18 @@ package controllers
 
 import javax.inject.Inject
 
+import config.AuthClientConnector
 import forms.VoluntaryRegistrationReasonForm
 import models.view.VoluntaryRegistrationReason
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services.{CurrentProfileService, ThresholdService, VatRegFrontendService}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
 class VoluntaryRegistrationReasonControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                                          val authConnector: AuthConnector,
+                                                          val authConnector: AuthClientConnector,
                                                           val currentProfileService: CurrentProfileService,
                                                           val vatRegFrontendService: VatRegFrontendService,
                                                           val thresholdService: ThresholdService) extends VoluntaryRegistrationReasonController
@@ -40,30 +40,24 @@ trait VoluntaryRegistrationReasonController extends VatRegistrationController wi
 
   val form = VoluntaryRegistrationReasonForm.form
 
-  def show: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          thresholdService.getThresholdViewModel[VoluntaryRegistrationReason].map { view =>
-            Ok(views.html.pages.voluntary_registration_reason(view.fold(form)(form.fill)))
-          }
-        }
+  def show: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      thresholdService.getThresholdViewModel[VoluntaryRegistrationReason].map { view =>
+        Ok(views.html.pages.voluntary_registration_reason(view.fold(form)(form.fill)))
+      }
   }
 
-  def submit: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          form.bindFromRequest().fold(
-            badForm => Future.successful(BadRequest(views.html.pages.voluntary_registration_reason(badForm))),
-            data    => thresholdService.saveThreshold(data) map { _ =>
-              if (data.reason == VoluntaryRegistrationReason.NEITHER) {
-                Redirect(vatRegFrontendService.buildVatRegFrontendUrlWelcome)
-              } else {
-                Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
-              }
-            }
-          )
+  def submit: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      form.bindFromRequest().fold(
+        badForm => Future.successful(BadRequest(views.html.pages.voluntary_registration_reason(badForm))),
+        data    => thresholdService.saveThreshold(data) map { _ =>
+          if (data.reason == VoluntaryRegistrationReason.NEITHER) {
+            Redirect(vatRegFrontendService.buildVatRegFrontendUrlWelcome)
+          } else {
+            Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
+          }
         }
+      )
   }
 }

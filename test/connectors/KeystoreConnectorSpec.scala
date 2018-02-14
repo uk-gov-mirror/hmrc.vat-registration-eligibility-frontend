@@ -17,18 +17,22 @@
 package connectors
 
 import config.VatSessionCache
-import helpers.VatRegSpec
+import helpers.FutureAssertions
 import mocks.VatMocks
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HttpResponse
 
-class KeystoreConnectorSpec extends VatRegSpec with VatMocks {
+class KeystoreConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAssertions {
+
+  implicit val hc = HeaderCarrier()
 
   val mockVatSessionCache = mock[VatSessionCache]
 
@@ -72,7 +76,7 @@ class KeystoreConnectorSpec extends VatRegSpec with VatMocks {
 
       when(mockVatSessionCache.fetch()(any(), any())).thenReturn(Future.successful(Some(returnCacheMap)))
 
-      await(connector.fetch()) shouldBe Some(returnCacheMap)
+      await(connector.fetch()) mustBe Some(returnCacheMap)
     }
   }
 
@@ -80,7 +84,7 @@ class KeystoreConnectorSpec extends VatRegSpec with VatMocks {
     "return a HTTP Response" in {
       when(mockVatSessionCache.remove()(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
 
-      await(connector.remove()).status shouldBe HttpResponse(OK).status
+      await(connector.remove()).status mustBe HttpResponse(OK).status
     }
   }
 }

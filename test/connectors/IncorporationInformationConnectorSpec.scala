@@ -16,15 +16,18 @@
 
 package connectors
 
-import helpers.VatRegSpec
-import play.api.libs.json.{JsValue, Json}
 import config.WSHttp
+import mocks.VatMocks
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import play.api.libs.json.{JsValue, Json}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.NotFoundException
 
-class IncorporationInformationConnectorSpec extends VatRegSpec {
-
+class IncorporationInformationConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout {
+  implicit val hc = HeaderCarrier()
 
   class Setup {
     val connector = new IncorporationInformationConnector {
@@ -44,20 +47,20 @@ class IncorporationInformationConnectorSpec extends VatRegSpec {
     "return a successful CoHo api response object for valid data" in new Setup {
       mockHttpGET[JsValue](connector.incorpInfoUrl, Future.successful(validCoHoCompanyDetailsResponse))
 
-      await(connector.getCompanyName("testRegID", "testTxID")) shouldBe validCoHoCompanyDetailsResponse
+      await(connector.getCompanyName("testRegID", "testTxID")) mustBe validCoHoCompanyDetailsResponse
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup {
       mockHttpGET[JsValue](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
 
-      a[NotFoundException] shouldBe thrownBy(await(connector.getCompanyName("testRegID", "testTxID")))
+      a[NotFoundException] mustBe thrownBy(await(connector.getCompanyName("testRegID", "testTxID")))
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup {
       val ex = new Exception("tstException")
       mockHttpGET[JsValue](connector.incorpInfoUrl, Future.failed(ex))
 
-      an[Exception] shouldBe thrownBy(await(connector.getCompanyName("testRegID", "testTxID")))
+      an[Exception] mustBe thrownBy(await(connector.getCompanyName("testRegID", "testTxID")))
     }
   }
 

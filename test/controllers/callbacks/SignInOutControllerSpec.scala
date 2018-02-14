@@ -16,39 +16,44 @@
 
 package controllers.callbacks
 
-import helpers.VatRegSpec
+import helpers.ControllerSpec
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 
-class SignInOutControllerSpec extends VatRegSpec {
+class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
   class Setup {
     val controller = new SignInOutController {
-      override val authConnector = mockAuthConnector
-      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
+
+      val authConnector = mockAuthClientConnector
+      val messagesApi: MessagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
+      val currentProfileService = mockCurrentProfileService
     }
   }
 
   "Calling the postSignIn action" should {
     "return 303 for an unauthorised user" in new Setup {
+      mockNoActiveSession()
+
       val result = controller.postSignIn()(FakeRequest())
-      status(result) shouldBe 303
+      status(result) mustBe 303
     }
 
     "redirect the user to the Company Registration post-sign-in action" in new Setup {
-      callAuthorised(controller.postSignIn()) { res =>
-        res isA 303
-        res redirectsTo s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in"
+      callAuthenticated(controller.postSignIn()) { res =>
+        status(res) mustBe 303
+        redirectLocation(res) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
       }
     }
   }
 
   "signOut" should {
     "redirect to the exit questionnaire and clear the session" in new Setup {
-      callAuthorised(controller.signOut()) { res =>
-        res isA 303
-        res redirectsTo s"${controller.compRegFEURL}${controller.compRegFEURI}/questionnaire"
+      callAuthenticated(controller.signOut()) { res =>
+        status(res) mustBe 303
+        redirectLocation(res) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/questionnaire")
       }
     }
   }

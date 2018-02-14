@@ -20,15 +20,18 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import fixtures.VatRegistrationFixture
-import helpers.VatRegSpec
 import models.view.{ExpectationOverThresholdView, OverThresholdView, SummaryRow, SummarySection}
+import org.scalatestplus.play.PlaySpec
+import uk.gov.hmrc.http.HeaderCarrier
 
 
-class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFixture {
+class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixture {
 
   val specificDate = LocalDate.of(2017, 11, 12)
 
   val monthYearPresentationFormatter = DateTimeFormatter.ofPattern("MMMM y")
+
+  implicit val hc = HeaderCarrier()
 
   "building a Summary vat threshold row" should {
     val validOtherThresholdPostIncorp = validThresholdPostIncorp.copy(
@@ -39,7 +42,7 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
       "return a summary row with 'YES' if overThreshold is true" in {
         val postIncorpBuilder = SummaryVatThresholdBuilder(validOtherThresholdPostIncorp)
 
-        postIncorpBuilder.overThresholdSelectionRow shouldBe SummaryRow(
+        postIncorpBuilder.overThresholdSelectionRow mustBe SummaryRow(
           "threshold.overThresholdSelection",
           "app.common.yes",
           Some(controllers.routes.ThresholdController.goneOverShow())
@@ -48,7 +51,7 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
 
       "return a summary row with 'NO' if overThreshold is FALSE" in {
         val noPostIncorpBuilder = SummaryVatThresholdBuilder(validThresholdPostIncorp)
-        noPostIncorpBuilder.overThresholdSelectionRow shouldBe SummaryRow(
+        noPostIncorpBuilder.overThresholdSelectionRow mustBe SummaryRow(
           "threshold.overThresholdSelection",
           "app.common.no",
           Some(controllers.routes.ThresholdController.goneOverShow())
@@ -59,7 +62,7 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
     "with overThresholdDateRow" should {
       "return a summary row with 'November 2017' if a date is given" in {
         val postIncorpBuilder = SummaryVatThresholdBuilder(validOtherThresholdPostIncorp)
-        postIncorpBuilder.overThresholdDateRow shouldBe SummaryRow(
+        postIncorpBuilder.overThresholdDateRow mustBe SummaryRow(
           "threshold.overThresholdDate",
           specificDate.format(monthYearPresentationFormatter),
           Some(controllers.routes.ThresholdController.goneOverShow())
@@ -68,7 +71,7 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
 
       "return a summary row with '' if no date is given" in {
         val noPostIncorpBuilder = SummaryVatThresholdBuilder(validThresholdPostIncorp)
-        noPostIncorpBuilder.overThresholdDateRow shouldBe SummaryRow(
+        noPostIncorpBuilder.overThresholdDateRow mustBe SummaryRow(
           "threshold.overThresholdDate",
           "",
           Some(controllers.routes.ThresholdController.goneOverShow())
@@ -78,7 +81,7 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
       "Section" should {
         "show the rows if overThreshold and ExpectedOverThreshold are true for both Questions" in {
           val postIncorpBuilder = SummaryVatThresholdBuilder(validOtherThresholdPostIncorp)
-          postIncorpBuilder.section shouldBe SummarySection(
+          postIncorpBuilder.section mustBe SummarySection(
             "threshold",
             Seq((postIncorpBuilder.overThresholdSelectionRow, true),
               (postIncorpBuilder.overThresholdDateRow, true),
@@ -89,7 +92,7 @@ class   SummaryVatThresholdBuilderSpec extends VatRegSpec with VatRegistrationFi
 
         "hide the rows if overThreshold and ExpectedOverThreshold are false for both questions" in {
           val noPostIncorpBuilder = SummaryVatThresholdBuilder(validThresholdPostIncorp)
-          noPostIncorpBuilder.section shouldBe SummarySection(
+          noPostIncorpBuilder.section mustBe SummarySection(
             "threshold",
             Seq((noPostIncorpBuilder.overThresholdSelectionRow, true),
               (noPostIncorpBuilder.overThresholdDateRow, false),

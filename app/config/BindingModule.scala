@@ -23,9 +23,9 @@ import controllers.callbacks._
 import controllers.internal._
 import controllers.test._
 import services._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
 import uk.gov.hmrc.play.config.inject.{DefaultServicesConfig, ServicesConfig}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.{FeatureManager, FeatureSwitchManager, VREFEFeatureSwitch, VREFEFeatureSwitches}
 
 class BindingModule extends AbstractModule {
@@ -80,7 +80,7 @@ class BindingModule extends AbstractModule {
   private def bindOther(): Unit = {
     bind(classOf[ServicesConfig]).to(classOf[DefaultServicesConfig]).asEagerSingleton()
     bind(classOf[WSHttp]).to(classOf[WSHttpImpl]).asEagerSingleton()
-    bind(classOf[AuthConnector]).to(classOf[FrontendAuthConnector]).asEagerSingleton()
+    bind(classOf[AuthConnector]).to(classOf[AuthClientConnector]).asEagerSingleton()
     bind(classOf[ShortLivedHttpCaching]).to(classOf[VatShortLivedHttpCaching]).asEagerSingleton()
     bind(classOf[ShortLivedCache]).to(classOf[VatShortLivedCache]).asEagerSingleton()
     bind(classOf[SessionCache]).to(classOf[VatSessionCache]).asEagerSingleton()

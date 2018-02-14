@@ -74,12 +74,12 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with Requests
       }
     }
     "return 303" when {
-      "[Q4] /agricultural-flat-rate the user is authorised but the request is invalid" in {
+      "[Q4] /agricultural-flat-rate the user has no active session" in {
         given()
-          .user.isNotAuthorised
+          .user.hasNoActiveSession
           .audit.writesAudit()
 
-        val response = buildClient("/agricultural-flat-rate")(HeaderNames.COOKIE -> "foo").get()
+        val response = buildClient("/agricultural-flat-rate").get()
         whenReady(response)(_.status) mustBe 303
       }
     }

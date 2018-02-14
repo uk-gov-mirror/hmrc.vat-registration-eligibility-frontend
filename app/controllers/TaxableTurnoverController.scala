@@ -18,18 +18,18 @@ package controllers
 
 import javax.inject.Inject
 
+import config.AuthClientConnector
 import forms.TaxableTurnoverForm
 import models.view.TaxableTurnover
 import models.view.TaxableTurnover.TAXABLE_YES
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import services._
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
-class TaxableTurnoverControllerImpl @Inject()(val authConnector: AuthConnector,
+class TaxableTurnoverControllerImpl @Inject()(val authConnector: AuthClientConnector,
                                               val messagesApi: MessagesApi,
                                               val vrs: VatRegistrationService,
                                               val currentProfileService: CurrentProfileService,
@@ -42,30 +42,24 @@ trait TaxableTurnoverController extends VatRegistrationController with SessionPr
 
   val form = TaxableTurnoverForm.form
 
-  def show: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          thresholdService.getThresholdViewModel[TaxableTurnover] map { view =>
-            Ok(views.html.pages.taxable_turnover(view.fold(form)(form.fill)))
-          }
-        }
+  def show: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      thresholdService.getThresholdViewModel[TaxableTurnover] map { view =>
+        Ok(views.html.pages.taxable_turnover(view.fold(form)(form.fill)))
+      }
   }
 
-  def submit: Action[AnyContent] = authorised.async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { implicit profile =>
-          form.bindFromRequest().fold(
-            badForm => Future.successful(BadRequest(views.html.pages.taxable_turnover(badForm))),
-            data    => thresholdService.saveThreshold(data) map { _ =>
-              if (data.yesNo == TAXABLE_YES) {
-                Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
-              } else {
-                Redirect(controllers.routes.VoluntaryRegistrationController.show())
-              }
-            }
-          )
+  def submit: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      form.bindFromRequest().fold(
+        badForm => Future.successful(BadRequest(views.html.pages.taxable_turnover(badForm))),
+        data    => thresholdService.saveThreshold(data) map { _ =>
+          if (data.yesNo == TAXABLE_YES) {
+            Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
+          } else {
+            Redirect(controllers.routes.VoluntaryRegistrationController.show())
+          }
         }
+      )
   }
 }
