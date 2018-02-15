@@ -95,3 +95,12 @@ $(document).ready($(function () {
         UI.preventNonNumericInput(numericInputs);
     }
 }(window.ExpectationOverThresholdPage = window.ExpectationOverThresholdPage || {}, jQuery));
+
+
+// VoluntaryRegistrationReasonPage module
+(function (VoluntaryRegistrationReasonPage, $, undefined) {
+    VoluntaryRegistrationReasonPage.init = function() {
+        UI.hideShowOnRadioButton("voluntaryRegistrationReasonRadio",
+            { "#voluntaryRegistrationReasonRadio-wontsellvattaxablegoodsorservices": "#neither_panel" });
+    }
+}(window.VoluntaryRegistrationReasonPage = window.VoluntaryRegistrationReasonPage || {}, jQuery));
