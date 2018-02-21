@@ -34,20 +34,24 @@ class SignInOutControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         config: ServicesConfig) extends SignInOutController {
   lazy val compRegFEURL = config.getConfString("company-registration-frontend.www.url", "")
   lazy val compRegFEURI = config.getConfString("company-registration-frontend.www.uri", "")
+  lazy val compRegFEPostSignIn = config.getConfString("company-registration-frontend.www.post-sign-in", "")
+  lazy val compRegFEQuestionnaire = config.getConfString("company-registration-frontend.www.questionnaire", "")
 }
 
 trait SignInOutController extends VatRegistrationController with SessionProfile {
   val compRegFEURL: String
   val compRegFEURI: String
+  val compRegFEPostSignIn: String
+  val compRegFEQuestionnaire: String
 
   def postSignIn: Action[AnyContent] = isAuthenticated {
     implicit request =>
-      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI$compRegFEPostSignIn"))
   }
 
   def signOut: Action[AnyContent] = isAuthenticated {
     implicit request =>
-      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire").withNewSession)
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI$compRegFEQuestionnaire").withNewSession)
   }
 }
 

@@ -378,7 +378,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
         val response = buildClient("/register-voluntarily").post(Map("voluntaryRegistrationRadio" -> Seq(REGISTER_NO)))
         whenReady(response) { res =>
           res.status mustBe 303
-          res.header(HeaderNames.LOCATION) mustBe Some("/vat-uri")
+          res.header(HeaderNames.LOCATION) mustBe Some (controllers.routes.VoluntaryRegistrationController.showChoseNoToVoluntary().url)
         }
       }
     }
