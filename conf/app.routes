@@ -48,6 +48,10 @@ POST        /check-confirm-threshold                            controllers.Thre
 GET         /register-voluntarily                             controllers.VoluntaryRegistrationController.show
 POST        /register-voluntarily                             controllers.VoluntaryRegistrationController.submit
 
+## NO TO VOLUNTARY REGISTRATION PAGE
+GET         /chose-not-to-register                            controllers.VoluntaryRegistrationController.showChoseNoToVoluntary
+GET         /chose-not-to-register-confirm                    controllers.VoluntaryRegistrationController.showClearS4lRedirectDashboard
+
 ## VOLUNTARY REGISTRATION REASON PAGE
 GET         /applies-company                                  controllers.VoluntaryRegistrationReasonController.show
 POST        /applies-company                                  controllers.VoluntaryRegistrationReasonController.submit

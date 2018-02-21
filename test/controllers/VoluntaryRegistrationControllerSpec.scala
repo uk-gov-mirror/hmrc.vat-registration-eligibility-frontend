@@ -16,17 +16,20 @@
 
 package controllers
 
+import connectors.S4LConnector
 import fixtures.VatRegistrationFixture
 import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
+import models.external.IncorporationInfo
 import models.view.VoluntaryRegistration
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 
 import scala.concurrent.Future
 
@@ -38,6 +41,10 @@ class VoluntaryRegistrationControllerSpec extends ControllerSpec with GuiceOneAp
       override val thresholdService = mockThresholdService
       override val vatRegFrontendService = mockVatRegFrontendService
       override val currentProfileService = mockCurrentProfileService
+      override val compRegFEURL: String = "testUrl"
+      override val compRegFEURI: String = "/testUri"
+      override val compRegFECompanyRegistrationOverview: String = "/testcompany-registration-overview"
+      override val s4LConnector: S4LConnector = mockS4LConnector
       override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
@@ -103,16 +110,38 @@ class VoluntaryRegistrationControllerSpec extends ControllerSpec with GuiceOneAp
     }
   }
 
+  "return 200 with HTML when user selects no to voluntary registration" in new Setup {
+    callAuthenticated(testController.showChoseNoToVoluntary) {
+      res => status(res) mustBe 200
+        res passJsoupTest { doc =>
+          doc.getElementById("confirm-and-continue").attr("id") mustBe "confirm-and-continue"
+        }
+    }
+  }
+
   s"POST ${routes.VoluntaryRegistrationController.submit()} with Voluntary Registration selected No" should {
-    "redirect to the welcome page" in new Setup {
+    "redirect to the dashboard page" in new Setup {
       mockSaveThreshold(Future.successful(validThresholdPreIncorp.copy(voluntaryRegistration = Some(VoluntaryRegistration(VoluntaryRegistration.REGISTER_NO)))))
-
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome)
-        .thenReturn(s"someUrl")
-
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "voluntaryRegistrationRadio" -> VoluntaryRegistration.REGISTER_NO
-      ))(_ redirectsTo "someUrl")
+      ))(_ redirectsTo controllers.routes.VoluntaryRegistrationController.showChoseNoToVoluntary().url)
+    }
+  }
+
+  s"GET ${controllers.routes.VoluntaryRegistrationController.showClearS4lRedirectDashboard()}" should {
+    "return 303 with clear s4l and redirect to dashboard" in new Setup {
+      mockS4LClear()
+      submitAuthorised(testController.showClearS4lRedirectDashboard(), fakeRequest.withFormUrlEncodedBody()) {
+        (_ redirectsTo (s"${testController.compRegFEURL}${testController.compRegFEURI}${testController.compRegFECompanyRegistrationOverview}"))
+      }
+    }
+  }
+
+  s"GET ${routes.VoluntaryRegistrationController.showClearS4lRedirectDashboard()} when S4l returns an exception" should {
+    "return exception" in new Setup {
+      when(mockS4LConnector.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]())).thenReturn(Future.failed(new Upstream5xxResponse("Forbidden", 500, 500)))
+      submitAuthorised(testController.showClearS4lRedirectDashboard(), fakeRequest.withFormUrlEncodedBody(
+      ))(result => intercept[Upstream5xxResponse](await(result)) mustBe  Upstream5xxResponse("Forbidden", 500, 500))
     }
   }
 }

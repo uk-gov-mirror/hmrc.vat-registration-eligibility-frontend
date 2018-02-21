@@ -19,11 +19,13 @@ package controllers
 import javax.inject.Inject
 
 import config.AuthClientConnector
+import connectors.S4LConnector
 import forms.VoluntaryRegistrationForm
 import models.view.VoluntaryRegistration
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services.{CurrentProfileService, ThresholdService, VatRegFrontendService}
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import utils.SessionProfile
 
 import scala.concurrent.Future
@@ -32,11 +34,21 @@ class VoluntaryRegistrationControllerImpl @Inject()(val messagesApi: MessagesApi
                                                     val authConnector: AuthClientConnector,
                                                     val currentProfileService: CurrentProfileService,
                                                     val vatRegFrontendService: VatRegFrontendService,
-                                                    val thresholdService: ThresholdService) extends VoluntaryRegistrationController
+                                                    val thresholdService: ThresholdService,
+                                                    val s4LConnector : S4LConnector,
+                                                    config: ServicesConfig) extends VoluntaryRegistrationController{
+  lazy val compRegFEURL = config.getConfString("company-registration-frontend.www.url", "")
+  lazy val compRegFEURI = config.getConfString("company-registration-frontend.www.uri", "")
+  lazy val compRegFECompanyRegistrationOverview = config.getConfString("company-registration-frontend.www.company-registration-overview", "")}
+
 
 trait VoluntaryRegistrationController extends VatRegistrationController with SessionProfile {
+  val compRegFEURL: String
+  val compRegFEURI: String
+  val compRegFECompanyRegistrationOverview: String
   val thresholdService: ThresholdService
   val vatRegFrontendService: VatRegFrontendService
+  val s4LConnector : S4LConnector
 
   val form = VoluntaryRegistrationForm.form
 
@@ -55,9 +67,22 @@ trait VoluntaryRegistrationController extends VatRegistrationController with Ses
           if (data.yesNo == VoluntaryRegistration.REGISTER_YES) {
             Redirect(controllers.routes.VoluntaryRegistrationReasonController.show())
           } else {
-            Redirect(vatRegFrontendService.buildVatRegFrontendUrlWelcome)
+            Redirect(controllers.routes.VoluntaryRegistrationController.showChoseNoToVoluntary())
           }
         }
       )
   }
+
+  def showChoseNoToVoluntary: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+        Future.successful(Ok(views.html.pages.chose_no_to_voluntary_registration()))
+
+    }
+
+
+  def showClearS4lRedirectDashboard: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      s4LConnector.clear(profile.registrationId).map(_ => Redirect(s"$compRegFEURL$compRegFEURI$compRegFECompanyRegistrationOverview"))
+  }
 }
+

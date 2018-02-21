@@ -26,6 +26,8 @@ class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
     val controller = new SignInOutController {
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
+      override val compRegFEPostSignIn: String = "/testpost-sign-in"
+      override val compRegFEQuestionnaire: String = "/questionnaire"
 
       val authConnector = mockAuthClientConnector
       val messagesApi: MessagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
@@ -44,7 +46,7 @@ class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
     "redirect the user to the Company Registration post-sign-in action" in new Setup {
       callAuthenticated(controller.postSignIn()) { res =>
         status(res) mustBe 303
-        redirectLocation(res) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
+        redirectLocation(res) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}${controller.compRegFEPostSignIn}")
       }
     }
   }
@@ -53,7 +55,7 @@ class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
     "redirect to the exit questionnaire and clear the session" in new Setup {
       callAuthenticated(controller.signOut()) { res =>
         status(res) mustBe 303
-        redirectLocation(res) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/questionnaire")
+        redirectLocation(res) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}${controller.compRegFEQuestionnaire}")
       }
     }
   }
