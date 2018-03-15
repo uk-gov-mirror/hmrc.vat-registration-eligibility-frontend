@@ -18,8 +18,8 @@ package services
 
 import javax.inject.Inject
 
-import common.enums.CacheKeys.{CurrentProfile => CurrentProfileKey}
-import common.enums.CacheKeys._
+import common.enums.CacheKeys.{CurrentProfile => CurrentProfileKey, _}
+import common.enums.VatRegStatus
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
 import models.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
@@ -46,17 +46,25 @@ trait CurrentProfileService {
     }
   }
 
+  private[services] def getRegIdAndStatus(implicit hc: HeaderCarrier): Future[(String, VatRegStatus.Value)] = {
+    for {
+      profile <- businessRegistrationConnector.retrieveBusinessProfile
+      status  <- vatRegistrationService.getStatus(profile.registrationID)
+    } yield {
+      (profile.registrationID, status)
+    }
+  }
+
   private[services] def buildCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
     for {
-      businessProfile       <- businessRegistrationConnector.retrieveBusinessProfile
-      companyProfile        <- compRegConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
-      companyName           <- incorpInfoService.getCompanyName(businessProfile.registrationID, companyProfile.transactionId)
+      (regId, status)       <- getRegIdAndStatus
+      companyProfile        <- compRegConnector.getCompanyRegistrationDetails(regId)
+      companyName           <- incorpInfoService.getCompanyName(regId, companyProfile.transactionId)
       incorpInfo            <- vatRegistrationService.getIncorporationInfo(companyProfile.transactionId)
-      status                <- vatRegistrationService.getStatus(businessProfile.registrationID)
       incorpDate            =  if(incorpInfo.isDefined) incorpInfo.get.statusEvent.incorporationDate else None
       profile               =  CurrentProfile(
         companyName           = companyName,
-        registrationId        = businessProfile.registrationID,
+        registrationId        = regId,
         transactionId         = companyProfile.transactionId,
         vatRegistrationStatus = status,
         incorporationDate     = incorpDate

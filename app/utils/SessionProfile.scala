@@ -21,10 +21,10 @@ import java.time.LocalDate
 import models.CurrentProfile
 import play.api.mvc.{Request, Result}
 import services.CurrentProfileService
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.http.HeaderCarrier
 
 trait SessionProfile {
   val currentProfileService: CurrentProfileService
