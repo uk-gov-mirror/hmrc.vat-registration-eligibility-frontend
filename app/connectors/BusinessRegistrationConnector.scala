@@ -23,8 +23,9 @@ import models.external.BusinessProfile
 import play.api.http.Status.FORBIDDEN
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import utils.InternalExceptions.BRDocumentNotFound
+
 import scala.concurrent.Future
 
 class BusinessRegistrationConnectorImpl @Inject()(val http: WSHttp, config: ServicesConfig) extends BusinessRegistrationConnector {
@@ -38,6 +39,9 @@ trait BusinessRegistrationConnector {
 
   def retrieveBusinessProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") recover {
+      case e : NotFoundException =>
+        logResponse(e, "retrieveBusinessProfile", "NotFoundException")
+        throw new BRDocumentNotFound("[CurrentProfileService] [getRegIdAndStatus] Could not find a BR document")
       case e => throw logResponse(e, "retrieveBusinessProfile", "retrieving business profile")
     }
   }

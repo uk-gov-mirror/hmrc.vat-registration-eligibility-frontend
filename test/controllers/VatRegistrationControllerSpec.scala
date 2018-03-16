@@ -17,12 +17,15 @@
 package controllers
 
 import helpers.ControllerSpec
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
+import utils.InternalExceptions.{BRDocumentNotFound, VatFootprintNotFound}
 import utils.SessionProfile
 
 import scala.concurrent.Future
@@ -118,6 +121,31 @@ class VatRegistrationControllerSpec extends ControllerSpec with GuiceOneAppPerTe
       val result = TestController.callAuthenticatedWithProfile(FakeRequest())
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some("http://localhost:9025/gg/sign-in?accountType=organisation&continue=http%3A%2F%2Flocalhost%3A9894%2Fcheck-if-you-can-register-for-vat%2Fpost-sign-in&origin=vat-registration-eligibility-frontend")
+    }
+
+    "redirect to startVat route" when {
+
+      val startVatRedirect: String = "/check-if-you-can-register-for-vat/start-vat"
+
+      "no BR document could be found" in {
+        mockAuthenticated()
+        when(mockCurrentProfileService.getCurrentProfile()(any())) thenReturn Future.failed(new BRDocumentNotFound(""))
+
+        val result = TestController.callAuthenticatedWithProfile(FakeRequest())
+
+        status(result) mustBe 303
+        redirectLocation(result) mustBe Some(startVatRedirect)
+
+      }
+      "no vat footprint could be found" in {
+        mockAuthenticated()
+        when(mockCurrentProfileService.getCurrentProfile()(any())) thenReturn Future.failed(new VatFootprintNotFound(""))
+
+        val result = TestController.callAuthenticatedWithProfile(FakeRequest())
+
+        status(result) mustBe 303
+        redirectLocation(result) mustBe Some(startVatRedirect)
+      }
     }
 
     "return 500 if user is Not Authenticated" in {

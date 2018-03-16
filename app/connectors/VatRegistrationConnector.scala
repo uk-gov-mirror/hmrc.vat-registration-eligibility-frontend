@@ -25,9 +25,10 @@ import models.external.IncorporationInfo
 import models.view.{Eligibility, Threshold}
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import utils.InternalExceptions.VatFootprintNotFound
 
 import scala.concurrent.Future
 
@@ -84,6 +85,9 @@ trait VatRegistrationConnector {
     http.GET[JsObject](s"$vatRegUrl/vatreg/$regId/status") map { json =>
       (json \ "status").as[VatRegStatus.Value]
     } recover {
+      case e: NotFoundException =>
+        logResponse(e, "getStatus")
+        throw new VatFootprintNotFound(s"[CurrentProfileService] [getRegIdAndStatus] Could not find a vat footprint for regId: $regId")
       case e: Exception => throw logResponse(e, "getStatus")
     }
   }

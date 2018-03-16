@@ -32,10 +32,13 @@ class SignInOutControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val authConnector: AuthClientConnector,
                                         val currentProfileService: CurrentProfileService,
                                         config: ServicesConfig) extends SignInOutController {
-  lazy val compRegFEURL = config.getConfString("company-registration-frontend.www.url", "")
-  lazy val compRegFEURI = config.getConfString("company-registration-frontend.www.uri", "")
-  lazy val compRegFEPostSignIn = config.getConfString("company-registration-frontend.www.post-sign-in", "")
-  lazy val compRegFEQuestionnaire = config.getConfString("company-registration-frontend.www.questionnaire", "")
+  lazy val compRegFEURL: String = config.getConfString("company-registration-frontend.www.url", "")
+  lazy val compRegFEURI: String = config.getConfString("company-registration-frontend.www.uri", "")
+  lazy val compRegFEPostSignIn: String = config.getConfString("company-registration-frontend.www.post-sign-in", "")
+  lazy val compRegFEQuestionnaire: String = config.getConfString("company-registration-frontend.www.questionnaire", "")
+  lazy val vatRegFEURL: String = config.getConfString("vat-registration-frontend.www.url", "")
+  lazy val vatRegFEBeforeYouRegister: String = config.getConfString("vat-registration-frontend.www.before-you-register", "")
+
 }
 
 trait SignInOutController extends VatRegistrationController with SessionProfile {
@@ -43,6 +46,8 @@ trait SignInOutController extends VatRegistrationController with SessionProfile 
   val compRegFEURI: String
   val compRegFEPostSignIn: String
   val compRegFEQuestionnaire: String
+  val vatRegFEURL: String
+  val vatRegFEBeforeYouRegister: String
 
   def postSignIn: Action[AnyContent] = isAuthenticated {
     implicit request =>
@@ -52,6 +57,11 @@ trait SignInOutController extends VatRegistrationController with SessionProfile 
   def signOut: Action[AnyContent] = isAuthenticated {
     implicit request =>
       Future.successful(Redirect(s"$compRegFEURL$compRegFEURI$compRegFEQuestionnaire").withNewSession)
+  }
+
+  def startVat: Action[AnyContent] = isAuthenticated {
+    implicit request =>
+      Future.successful(Redirect(s"$vatRegFEURL$vatRegFEBeforeYouRegister"))
   }
 }
 

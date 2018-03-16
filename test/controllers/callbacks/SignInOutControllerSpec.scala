@@ -19,7 +19,10 @@ package controllers.callbacks
 import helpers.ControllerSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.MessagesApi
+import play.api.mvc.Result
 import play.api.test.FakeRequest
+
+import scala.concurrent.Future
 
 class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
   class Setup {
@@ -28,6 +31,8 @@ class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
       override val compRegFEURI: String = "/testUri"
       override val compRegFEPostSignIn: String = "/testpost-sign-in"
       override val compRegFEQuestionnaire: String = "/questionnaire"
+      override val vatRegFEURL: String = "testUrl"
+      override val vatRegFEBeforeYouRegister: String = "/test-before-you-register"
 
       val authConnector = mockAuthClientConnector
       val messagesApi: MessagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
@@ -56,6 +61,23 @@ class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
       callAuthenticated(controller.signOut()) { res =>
         status(res) mustBe 303
         redirectLocation(res) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}${controller.compRegFEQuestionnaire}")
+      }
+    }
+  }
+
+  "startVat" must {
+
+    "return 303 for an unauthorised user" in new Setup {
+      mockNoActiveSession()
+
+      val result: Future[Result] = controller.postSignIn()(FakeRequest())
+      status(result) mustBe 303
+    }
+
+    "redirect to the vat before you register page" in new Setup {
+      callAuthenticated(controller.startVat()) { result =>
+        status(result) mustBe 303
+        redirectLocation(result) mustBe Some(s"${controller.vatRegFEURL}${controller.vatRegFEBeforeYouRegister}")
       }
     }
   }

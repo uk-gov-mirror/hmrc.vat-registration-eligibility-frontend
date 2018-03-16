@@ -24,6 +24,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
+import utils.InternalExceptions.BRDocumentNotFound
 
 import scala.concurrent.Future
 
@@ -54,7 +55,7 @@ class BusinessRegistrationConnectorSpec extends PlaySpec with MockitoSugar with 
         (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("not found")))
 
-      intercept[NotFoundException](await(connector.retrieveBusinessProfile))
+      intercept[BRDocumentNotFound](await(connector.retrieveBusinessProfile))
     }
 
     "return a Bad Request response when a bad request is send while getting CurrentProfile " in new Setup {
