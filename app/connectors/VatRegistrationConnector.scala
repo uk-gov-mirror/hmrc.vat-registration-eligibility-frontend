@@ -29,6 +29,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.InternalExceptions.VatFootprintNotFound
+import utils.RegistrationWhitelist
 
 import scala.concurrent.Future
 
@@ -36,7 +37,7 @@ class VatRegistrationConnectorImpl @Inject()(val http: WSHttp, config: ServicesC
   val vatRegUrl = config.baseUrl("vat-registration")
 }
 
-trait VatRegistrationConnector {
+trait VatRegistrationConnector extends RegistrationWhitelist {
 
   val vatRegUrl: String
   val http: WSHttp
@@ -75,11 +76,11 @@ trait VatRegistrationConnector {
     }
   }
 
-  def getIncorporationInfo(transactionId: String)(implicit hc: HeaderCarrier): Future[Option[IncorporationInfo]] = {
+  def getIncorporationInfo(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Option[IncorporationInfo]] = ifRegIdNotWhitelisted(regId){
     http.GET[IncorporationInfo](s"$vatRegUrl/vatreg/incorporation-information/$transactionId").map(Some(_)).recover {
       case _ => None
     }
-  }
+  }(returnDefaultIncorpInfo)
 
   def getStatus(regId: String)(implicit hc: HeaderCarrier): Future[VatRegStatus.Value] = {
     http.GET[JsObject](s"$vatRegUrl/vatreg/$regId/status") map { json =>

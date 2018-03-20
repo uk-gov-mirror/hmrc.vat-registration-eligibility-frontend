@@ -16,6 +16,7 @@
 
 package mocks
 
+import config.AppConfig
 import connectors.{CompanyRegistrationConnector, IncorporationInformationConnector}
 import org.mockito.Mockito.reset
 import org.scalatest.mockito.MockitoSugar
@@ -26,7 +27,7 @@ import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 trait VatMocks extends SaveForLaterMock with KeystoreMock with WSHTTPMock with ThresholdServiceMock
-               with EligibilityServiceMock with VatRegConnectorMock { this: MockitoSugar =>
+               with EligibilityServiceMock with VatRegConnectorMock with ConfigMock { this: MockitoSugar =>
 
   implicit lazy val mockMessagesAPI             = mock[MessagesApi]
   implicit lazy val mockSessionCache            = mock[SessionCache]
@@ -39,6 +40,7 @@ trait VatMocks extends SaveForLaterMock with KeystoreMock with WSHTTPMock with T
   implicit lazy val mockVatRegFrontendService   = mock[VatRegFrontendService]
   implicit lazy val mockSummaryService          = mock[SummaryService]
   implicit lazy val mockCancellationService     = mock[CancellationService]
+  lazy val mockAppConfig                        = mock[AppConfig]
 
   def resetMocks() {
     reset(
@@ -59,7 +61,8 @@ trait VatMocks extends SaveForLaterMock with KeystoreMock with WSHTTPMock with T
       mockSummaryService,
       mockCancellationService,
       mockThresholdService,
-      mockEligibilityService
+      mockEligibilityService,
+      mockAppConfig
     )
   }
 }

@@ -24,6 +24,7 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsResultException, Json}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -46,9 +47,9 @@ class IncorporationInformationServiceSpec extends PlaySpec with MockitoSugar wit
     }
 
     "return an exception if the company_name field is missing" in new Setup {
-      when(mockIIConnector.getCompanyName(any(), any())(any())).thenReturn(Future(Json.obj("foo" -> "bar")))
+      when(mockIIConnector.getCompanyName(any(), any())(any())).thenReturn(Future(Json.obj("foo" -> 12)))
 
-      service.getCompanyName("regId", "txId") failedWith classOf[JsResultException]
+      a[JsResultException] mustBe thrownBy(await(service.getCompanyName("regId", "txId")))
     }
   }
 }
