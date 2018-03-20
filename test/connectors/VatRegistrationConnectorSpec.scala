@@ -26,7 +26,6 @@ import mocks.VatMocks
 import models.CurrentProfile
 import models.external.IncorporationInfo
 import models.view.VoluntaryRegistrationReason.SELLS
-import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.http.Status._
@@ -40,9 +39,7 @@ class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMo
     val connector = new VatRegistrationConnector {
       override val vatRegUrl: String = "tst-url"
       override val http: WSHttp = mockWSHttp
-      override lazy val config = mockAppConfig
     }
-    when(mockAppConfig.whitelistedRegIds).thenReturn(Seq("foo"))
   }
 
   val incorpDate = LocalDate.of(2016, 12, 21)
@@ -59,12 +56,12 @@ class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMo
 
     "return a IncorporationInfo when it can be retrieved from the microservice" in new Setup {
       mockHttpGET[IncorporationInfo]("tst-url", testIncorporationInfo)
-      await(connector.getIncorporationInfo(testRegId,"tstID")) mustBe Some(testIncorporationInfo)
+      await(connector.getIncorporationInfo("tstID")) mustBe Some(testIncorporationInfo)
     }
 
     "fail when an Internal Server Error response is returned by the microservice" in new Setup {
       mockHttpFailedGET[IncorporationInfo]("test-url", notFound)
-      await(connector.getIncorporationInfo(testRegId,"tstID")) mustBe None
+      await(connector.getIncorporationInfo("tstID")) mustBe None
     }
   }
 

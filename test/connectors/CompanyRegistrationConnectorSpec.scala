@@ -23,12 +23,11 @@ import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.VREFEFeatureSwitches
-import org.mockito.Mockito.when
+
 import scala.concurrent.Future
 
-class CompanyRegistrationConnectorSpec extends UnitSpec with MockitoSugar with VatMocks {
+class CompanyRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout {
 
   val testUrl = "testUrl"
   val testUri = "testUri"
@@ -45,9 +44,7 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with MockitoSugar with V
       override val http = mockWSHttp
       override def useCompanyRegistration = stubbed
       override val featureSwitch = mockFeatureSwitch
-      override lazy val config = mockAppConfig
     }
-      when(mockAppConfig.whitelistedRegIds).thenReturn(Seq("foo"))
   }
 
   val status = "submitted"
@@ -80,7 +77,7 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with MockitoSugar with V
       mockHttpGET[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
 
       val result = await(connector.getCompanyRegistrationDetails("testRegId"))
-      result shouldBe CompanyRegistrationProfile(status, transactionId)
+      result mustBe CompanyRegistrationProfile(status, transactionId)
     }
 
     "throw a bad request exception" in new Setup(false) {
@@ -100,7 +97,7 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with MockitoSugar with V
         mockHttpGET[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
 
         val result = await(connector.getCompanyRegistrationDetails("testRegId"))
-        result shouldBe CompanyRegistrationProfile(status, transactionId)
+        result mustBe CompanyRegistrationProfile(status, transactionId)
       }
 
       "throwing a bad request exception" in new Setup(false) {

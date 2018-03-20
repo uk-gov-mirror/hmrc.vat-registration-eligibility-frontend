@@ -25,7 +25,7 @@ import helpers.FutureAssertions
 import mocks.VatMocks
 import models.CurrentProfile
 import models.external.{BusinessProfile, CompanyRegistrationProfile}
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
@@ -67,7 +67,7 @@ class CurrentProfileServiceSpec extends PlaySpec with MockitoSugar with VatMocks
 
     "return a CurrentProfile" when {
       "fetched from Keystore" in {
-        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](any())(any[HeaderCarrier](), any[Format[CurrentProfile]]()))
+        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CurrentProfile]]()))
           .thenReturn(Future.successful(Some(testCurrentProfile())))
 
         val result = await(testService.getCurrentProfile())
@@ -78,25 +78,25 @@ class CurrentProfileServiceSpec extends PlaySpec with MockitoSugar with VatMocks
         val businessProfile = BusinessProfile(regId, "EN")
         val compRegDetails = CompanyRegistrationProfile("accepted", txId)
 
-        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](any())(any[HeaderCarrier](), any[Format[CurrentProfile]]()))
+        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CurrentProfile]]()))
           .thenReturn(Future.successful(None))
 
-        when(mockBusinessRegistrationConnector.retrieveBusinessProfile(any[HeaderCarrier](), any[HttpReads[BusinessProfile]]()))
+        when(mockBusinessRegistrationConnector.retrieveBusinessProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]))
           .thenReturn(Future.successful(businessProfile))
 
-        when(mockCompanyRegConnector.getCompanyRegistrationDetails(any())(any[HeaderCarrier]()))
+        when(mockCompanyRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(compRegDetails))
 
-        when(mockIncorpInfoService.getCompanyName(any(), any())(any[HeaderCarrier]()))
+        when(mockIncorpInfoService.getCompanyName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testCompanyName))
 
-        when(mockVatRegistrationService.getStatus(any())(any[HeaderCarrier]()))
+        when(mockVatRegistrationService.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(VatRegStatus.draft))
 
-        when(mockVatRegistrationService.getIncorporationInfo(any(), any())(any[HeaderCarrier]()))
+        when(mockVatRegistrationService.getIncorporationInfo(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(Some(testIncorporationInfo)))
 
-        when(mockKeystoreConnector.cache[CurrentProfile](any(), any())(any(), any()))
+        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(CacheMap("", Map())))
 
         val result = await(testService.getCurrentProfile())

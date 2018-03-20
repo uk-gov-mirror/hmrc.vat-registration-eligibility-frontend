@@ -22,9 +22,8 @@ import config.WSHttp
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.RegistrationWhitelist
 
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 class IncorporationInformationConnectorImpl @Inject()(val http: WSHttp, config: ServicesConfig) extends IncorporationInformationConnector {
@@ -32,13 +31,13 @@ class IncorporationInformationConnectorImpl @Inject()(val http: WSHttp, config: 
   val incorpInfoUri = config.getConfString("incorporation-information.uri", "")
 }
 
-trait IncorporationInformationConnector extends RegistrationWhitelist {
+trait IncorporationInformationConnector {
   val incorpInfoUrl: String
   val incorpInfoUri: String
 
   val http: WSHttp
 
-  def getCompanyName(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[JsValue] = ifRegIdNotWhitelisted(regId){
+  def getCompanyName(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
     http.GET[JsValue](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile") recover {
       case notFound: NotFoundException =>
         logger.error(s"[getCompanyName] - Could not find company name for regId $regId (txId: $transactionId)")
@@ -47,5 +46,5 @@ trait IncorporationInformationConnector extends RegistrationWhitelist {
         logger.error(s"[getCompanyName] - There was a problem getting company for regId $regId (txId: $transactionId)", e)
         throw e
     }
-  }(returnDefaultCompanyName)
+  }
 }

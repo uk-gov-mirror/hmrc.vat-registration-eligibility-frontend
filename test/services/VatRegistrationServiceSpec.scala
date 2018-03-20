@@ -51,16 +51,16 @@ class VatRegistrationServiceSpec extends PlaySpec with BeforeAndAfter with Mocki
   def beforeEach() {
     resetMocks()
     mockFetchRegId(testRegId)
-    when(mockRegConnector.getIncorporationInfo(any(),any())(any()))
+    when(mockRegConnector.getIncorporationInfo(any())(any()))
       .thenReturn(Future.successful(None))
   }
 
   "Calling getIncorporationInfo" should {
     "successfully returns an incorporation information" in new Setup {
-      when(mockRegConnector.getIncorporationInfo(any(),any())(any()))
+      when(mockRegConnector.getIncorporationInfo(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(testIncorporationInfo)))
 
-      service.getIncorporationInfo(testRegId,"txId") returns Some(testIncorporationInfo)
+      service.getIncorporationInfo("txId") returns Some(testIncorporationInfo)
     }
   }
 
@@ -72,7 +72,7 @@ class VatRegistrationServiceSpec extends PlaySpec with BeforeAndAfter with Mocki
     }
 
     "successfully returns an incorporation date from microservice and save to keystore" in new Setup {
-      when(mockRegConnector.getIncorporationInfo(any(),any())(any()))
+      when(mockRegConnector.getIncorporationInfo(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(testIncorporationInfo)))
 
       mockKeystoreCache[String](CacheKeys.CurrentProfile.toString, CacheMap("", Map.empty))
@@ -83,14 +83,14 @@ class VatRegistrationServiceSpec extends PlaySpec with BeforeAndAfter with Mocki
 
   "Calling getStatus" should {
     "successfully returns a Registration Status" in new Setup {
-      when(mockRegConnector.getStatus(any())(any()))
+      when(mockRegConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(VatRegStatus.draft))
 
       service.getStatus("regId") returns VatRegStatus.draft
     }
 
     "return an Exception if fail to get the status" in new Setup {
-      when(mockRegConnector.getStatus(any())(any()))
+      when(mockRegConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(throw new BadRequestException("test")))
 
       service.getStatus("regId") failedWith classOf[BadRequestException]

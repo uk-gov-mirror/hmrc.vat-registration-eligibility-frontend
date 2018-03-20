@@ -348,19 +348,6 @@ trait StubUtils {
           )))
       builder
     }
-
-    def nameIs(name: String): PreconditionBuilder = {
-      stubFor(
-        get(urlPathEqualTo(s"/incorporation-information/000-434-1/company-profile"))
-          .willReturn(ok(
-            s"""
-               |{
-               |  "company_name": "$name"
-               |}
-             """.stripMargin
-          )))
-      builder
-    }
   }
 
 

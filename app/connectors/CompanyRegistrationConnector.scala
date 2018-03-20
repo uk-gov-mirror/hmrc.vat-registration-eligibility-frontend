@@ -24,20 +24,20 @@ import play.api.libs.json.JsObject
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.{RegistrationWhitelist, VREFEFeatureSwitches}
+import utils.VREFEFeatureSwitches
 
 import scala.concurrent.Future
 
 class CompanyRegistrationConnectorImpl @Inject()(val http: WSHttp,
                                                  val featureSwitch: VREFEFeatureSwitches,
-                                                 conf: ServicesConfig) extends CompanyRegistrationConnector {
-  lazy val companyRegistrationUrl: String = conf.baseUrl("company-registration")
-  lazy val companyRegistrationUri: String = conf.getConfString("company-registration.uri", "")
-  lazy val stubUrl: String                = conf.baseUrl("incorporation-frontend-stubs")
-  lazy val stubUri: String                = conf.getConfString("incorporation-frontend-stubs.uri","")
+                                                 config: ServicesConfig) extends CompanyRegistrationConnector {
+  lazy val companyRegistrationUrl: String = config.baseUrl("company-registration")
+  lazy val companyRegistrationUri: String = config.getConfString("company-registration.uri", "")
+  lazy val stubUrl: String                = config.baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String                = config.getConfString("incorporation-frontend-stubs.uri","")
 }
 
-trait CompanyRegistrationConnector extends RegistrationWhitelist {
+trait CompanyRegistrationConnector {
   val companyRegistrationUrl: String
   val companyRegistrationUri: String
   val stubUrl: String
@@ -47,7 +47,7 @@ trait CompanyRegistrationConnector extends RegistrationWhitelist {
 
   val featureSwitch: VREFEFeatureSwitches
 
-  def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyRegistrationProfile] = ifRegIdNotWhitelisted(regId){
+  def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyRegistrationProfile] = {
     val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration" else s"$stubUrl$stubUri"
 
     http.GET[JsObject](s"$url/$regId/corporation-tax-registration") map {
@@ -63,7 +63,7 @@ trait CompanyRegistrationConnector extends RegistrationWhitelist {
         logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId - error: ${ex.getMessage}")
         throw ex
     }
-  }(returnDefaultCompRegProfile)
+  }
 
   private[connectors] def useCompanyRegistration: Boolean = featureSwitch.companyReg.enabled
 }

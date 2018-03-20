@@ -53,9 +53,8 @@ trait AppAndStubs extends StartAndStopWireMock with StubUtils with OneServerPerS
     WS.url(s"http://localhost:$port/internal/$path").withFollowRedirects(false).withHeaders(headers,"Csrf-Token" -> "nocheck")
   }
 
-  lazy val additionalConfig: Map[String, String] = Map()
-
   override implicit lazy val app: FakeApplication = FakeApplication(
+    //override app config here, chaning hosts and ports to point app at Wiremock
     additionalConfiguration = replaceWithWiremock(Seq(
       "address-lookup-frontend",
       "auth",
@@ -68,7 +67,7 @@ trait AppAndStubs extends StartAndStopWireMock with StubUtils with OneServerPerS
       "incorporation-information",
       "cachable.short-lived-cache",
       "cachable.session-cache"
-    )) ++ additionalConfig
+    ))
   )
 
   private def replaceWithWiremock(services: Seq[String]) = {

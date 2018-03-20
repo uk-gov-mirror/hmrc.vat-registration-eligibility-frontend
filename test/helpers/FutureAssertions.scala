@@ -24,11 +24,10 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
 import play.api.http.Status
 import play.api.mvc.Result
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 import scala.concurrent.Future
 
-trait FutureAssertions extends ScalaFutures with FutureAwaits with DefaultAwaitTimeout{
+trait FutureAssertions extends ScalaFutures {
   self: PlaySpec =>
 
 

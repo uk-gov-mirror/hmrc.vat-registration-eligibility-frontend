@@ -18,7 +18,6 @@ package connectors
 
 import config.WSHttp
 import mocks.VatMocks
-import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsValue, Json}
@@ -32,12 +31,11 @@ class IncorporationInformationConnectorSpec extends PlaySpec with MockitoSugar w
 
   class Setup {
     val connector = new IncorporationInformationConnector {
+
       override val incorpInfoUrl = "testIIStubUrl"
       override val incorpInfoUri = "testIIUri"
       override val http : WSHttp = mockWSHttp
-      override lazy val config = mockAppConfig
     }
-    when(mockAppConfig.whitelistedRegIds).thenReturn(Seq("foo"))
   }
 
   val validCoHoCompanyDetailsResponse = Json.parse(
