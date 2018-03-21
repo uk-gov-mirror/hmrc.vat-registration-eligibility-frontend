@@ -39,14 +39,15 @@ trait VatRegistrationService extends FutureInstances {
   val vatRegConnector: VatRegistrationConnector
   val keystoreConnector: KeystoreConnector
 
-  def getIncorporationInfo(txId: String)(implicit headerCarrier: HeaderCarrier): Future[Option[IncorporationInfo]] = {
-    vatRegConnector.getIncorporationInfo(txId)
+  def getIncorporationInfo(regId:String, txId: String)(implicit headerCarrier: HeaderCarrier): Future[Option[IncorporationInfo]] = {
+    vatRegConnector.getIncorporationInfo(regId, txId)
   }
 
   def getIncorporationDate(implicit currentProfile: CurrentProfile, headerCarrier: HeaderCarrier): Future[Option[LocalDate]] = {
     currentProfile.incorporationDate match {
       case None => for {
-        incorpDate <- OptionT(getIncorporationInfo(currentProfile.transactionId)).subflatMap(_.statusEvent.incorporationDate).value
+        incorpDate <- OptionT(getIncorporationInfo(currentProfile.registrationId, currentProfile.transactionId))
+          .subflatMap(_.statusEvent.incorporationDate).value
         _          <- keystoreConnector.cache[CurrentProfile](CurrentProfile.toString, currentProfile.copy(incorporationDate = incorpDate))
       } yield incorpDate
       case o@_ => Future.successful(o)
