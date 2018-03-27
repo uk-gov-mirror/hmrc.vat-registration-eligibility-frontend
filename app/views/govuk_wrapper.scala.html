@@ -89,7 +89,8 @@
     @uiLayouts.serviceInfo(
       betaBanner = phaseBanner("BETA", appConfig.vatRegFrontendFeedbackUrl),
       includeGridWrapper = false,
-      serviceInfoContent = Some(serviceInfoContent))
+      serviceInfoContent = Some(serviceInfoContent),
+      includeHMRCBranding = false)
 }
 
 @getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
