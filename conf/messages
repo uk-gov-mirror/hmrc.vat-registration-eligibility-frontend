@@ -197,8 +197,8 @@ pages.thresholdQuestion2.year                             = Year
 #validation messages Q2
 validation.expectationOverThreshold.date.invalid          = Enter a valid date
 validation.expectationOverThreshold.date.missing          = Enter a date for when you first thought it would
-validation.expectationOverThreshold.date.range.below      = Enter a date which is on or after the date the company was incorporated
-validation.expectationOverThreshold.date.range.above      = Enter a date which is not in the future
+validation.expectationOverThreshold.date.range.below      = Enter a date that''s on or after the date the company was set up
+validation.expectationOverThreshold.date.range.above      = Enter a date that''s in the past
 validation.expectationOverThreshold.selection.missing     = Tell us if In the past, you ever thought the company''s VAT-taxable sales would go over the threshold in a 30-day period
 pages.thresholdQuestion2.panel.heading                    = When did you first think that the company would go over the threshold?
 
