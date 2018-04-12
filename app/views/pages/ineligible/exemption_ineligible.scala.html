@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@()(implicit request: Request[_], messages: Messages)
+@(vatThreshold: String)(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.helpers.form
 @import views.html.helpers.templates.newWindowLink
 
@@ -26,7 +26,7 @@
   <div id="applying-for-vat-exemption-text">
       <p>@messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1")
           @newWindowLink("https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-registration-applications-exceptions-and-changes", messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1.1"))
-          @messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1.2")</p>
+          @messages("pages.serviceCriteriaFailure.applyingForVatExemption.p1.2", vatThreshold)</p>
       <p>@messages("pages.serviceCriteriaFailure.applyingForVatExemption.p2")
           @newWindowLink("https://online.hmrc.gov.uk/registration/newbusiness/introduction", messages("pages.serviceCriteriaFailure.applyingForVatExemption.p2.1"))</p>
   </div>

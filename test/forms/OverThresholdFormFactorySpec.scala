@@ -18,13 +18,15 @@ package forms
 
 import java.time.LocalDate
 
+import helpers.FormInspectors._
 import models.MonthYearModel
 import models.view.OverThresholdView
 import uk.gov.hmrc.play.test.UnitSpec
-import helpers.FormInspectors._
 
 class OverThresholdFormFactorySpec extends UnitSpec {
-  val testForm = OverThresholdFormFactory.form(LocalDate.of(2016, 8, 5))
+
+  val vatThreshold = "12345"
+  val testForm = OverThresholdFormFactory.form(LocalDate.of(2016, 8, 5), vatThreshold)
 
   "Binding OverThresholdFormFactory to a model" should {
     "bind successfully with full data" in {

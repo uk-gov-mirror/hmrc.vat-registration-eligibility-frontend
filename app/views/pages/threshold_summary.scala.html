@@ -17,7 +17,7 @@
 @import helpers.templates.summaryRow
 @import models.view.Summary
 @import uk.gov.hmrc.play.views.html.helpers.form
-@(summaryModel: Summary, dateOfIncorporation: String)(implicit request: Request[_], messages: Messages)
+@(summaryModel: Summary, dateOfIncorporation: String, threshold: String)(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.thresholdSummary.title")) {
 
@@ -32,7 +32,7 @@
                     @*Iterates to display sections and rows*@
                     @for((row, doDisplayRow) <- section.rows) {
                         @if(doDisplayRow) {
-                            @summaryRow(row, dateOfIncorporation)
+                            @summaryRow(row, Seq(dateOfIncorporation, threshold))
                         }
                     }
                 </dl>

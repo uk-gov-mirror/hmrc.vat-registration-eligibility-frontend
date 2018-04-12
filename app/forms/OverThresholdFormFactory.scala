@@ -42,12 +42,12 @@ object OverThresholdFormFactory {
       }
     }.toOption
 
-  def form(dateOfIncorporation: LocalDate): Form[OverThresholdView] = {
+  def form(dateOfIncorporation: LocalDate, vatThreshold: String): Form[OverThresholdView] = {
     implicit val specificErrorCode: String = "overThreshold.date"
 
     Form(
       mapping(
-        RADIO_YES_NO -> missingBooleanFieldMappingArgs()(Seq(dateOfIncorporation.format(FORMAT_DD_MMMM_Y)))("overThreshold.selection"),
+        RADIO_YES_NO -> missingBooleanFieldMappingArgs()(Seq(dateOfIncorporation.format(FORMAT_DD_MMMM_Y), vatThreshold))("overThreshold.selection"),
         "overThreshold" -> mandatoryIf(
           isEqual(RADIO_YES_NO, "true"),
           mapping(

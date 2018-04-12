@@ -20,9 +20,9 @@ import java.time.LocalDate
 
 import common.enums.CacheKeys
 import helpers.RequestsFinder
-import models.view.{ExpectationOverThresholdView, OverThresholdView, Threshold, VoluntaryRegistration, VoluntaryRegistrationReason}
 import models.view.VoluntaryRegistration._
 import models.view.VoluntaryRegistrationReason._
+import models.view._
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
@@ -58,6 +58,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
           .s4lContainer.isEmpty
           .vatScheme.has("threshold", json)
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lData)
+          .vatRegistration.currentThreshold()
 
         val response = buildClient("/check-confirm-threshold").get()
         whenReady(response) { res =>
@@ -81,13 +82,14 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
            """.stripMargin)
         val s4lData = Threshold(None, Some(voluntaryRegistrationNO), None, Some(overThresholdTrue), Some(expectedOverThresholdTrue))
 
-          given()
+        given()
           .user.isAuthorised
           .currentProfile.withProfileAndIncorpDate()
           .audit.writesAudit()
           .s4lContainer.isEmpty
           .vatScheme.has("threshold", json)
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lData)
+          .vatRegistration.currentThreshold()
 
         val response = buildClient("/check-confirm-threshold").get()
         whenReady(response) { res =>

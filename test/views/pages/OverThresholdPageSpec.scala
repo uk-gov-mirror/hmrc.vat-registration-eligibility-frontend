@@ -39,13 +39,15 @@ class OverThresholdPageSpec extends UnitSpec with WithFakeApplication with I18nS
 
   val model = OverThresholdView(true, Some(MonthYearModel("9", "2016")).flatMap(_.toLocalDate))
 
-  lazy val form = OverThresholdFormFactory.form(incorpDate).fill(model)
-  lazy val view = overThresholdPage(form, sIncorpDate)
+  val vatThreshold = "12345"
+
+  lazy val form = OverThresholdFormFactory.form(incorpDate, vatThreshold).fill(model)
+  lazy val view = overThresholdPage(form, sIncorpDate, vatThreshold)
   lazy val document = Jsoup.parse(view.body)
 
   "Over threshold page" should {
     "display the correct title with the incorporation date" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.thresholdQuestion1.heading", sIncorpDate)
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.thresholdQuestion1.heading", sIncorpDate, vatThreshold)
     }
 
     "pre-select the correct radio" in {

@@ -18,8 +18,8 @@ package views.pages
 
 import java.time.LocalDate
 
-import forms.{ExpectationThresholdForm}
-import models.view.{ExpectationOverThresholdView}
+import forms.ExpectationThresholdForm
+import models.view.ExpectationOverThresholdView
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.Injector
@@ -39,7 +39,10 @@ class ExpectedOverThresholdPageSpec extends UnitSpec with WithFakeApplication wi
   val model = ExpectationOverThresholdView(true,Some(LocalDate.of(2017,1,1)))
   val form = ExpectationThresholdForm.form(incorpDate).fill(model)
 
-  lazy val view = expectedOverThresholdPage(form)
+  val currentVatThreshold = "12345"
+  val lastYearsVatThreshold = "67890"
+
+  lazy val view = expectedOverThresholdPage(form, currentVatThreshold)
   lazy val document = Jsoup.parse(view.body)
 
   "Expected Over threshold page" should {

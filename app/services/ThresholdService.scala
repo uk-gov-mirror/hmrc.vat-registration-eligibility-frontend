@@ -16,6 +16,7 @@
 
 package services
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 import common.enums.CacheKeys
@@ -31,11 +32,15 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 class ThresholdServiceImpl @Inject()(val s4LConnector: S4LConnector,
-                                     val vatRegistrationConnector: VatRegistrationConnector) extends ThresholdService
+                                     val vatRegistrationConnector: VatRegistrationConnector) extends ThresholdService {
+  override def now: LocalDate = LocalDate.now()
+}
 
 trait ThresholdService {
   val s4LConnector: S4LConnector
   val vatRegistrationConnector: VatRegistrationConnector
+
+  def now: LocalDate
 
   private def updateThreshold(data: Threshold)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] =
     vatRegistrationConnector.patchThreshold(data) flatMap { _ =>
@@ -130,5 +135,15 @@ trait ThresholdService {
 
     s4LConnector.fetchAndGet[Threshold](cp.registrationId, CacheKeys.Threshold).flatMap(
       _.fold(getFromApi)(a => Future.successful(a)))
+  }
+
+  def fetchCurrentVatThreshold(implicit hc: HeaderCarrier): Future[String] = {
+    vatRegistrationConnector.getVATThreshold(now).map { threshold =>
+      delimiterNumericString(threshold)
+    }
+  }
+
+  private def delimiterNumericString(number: String): String = {
+    "%,d".format(number.toInt)
   }
 }

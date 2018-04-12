@@ -30,6 +30,8 @@ import support.AppAndStubs
 
 class EligibilityControllerISpec extends PlaySpec with AppAndStubs with RequestsFinder with ScalaFutures {
 
+  val vatThreshold = "12345"
+
   "Eligibility questions on GET" should {
     "return 200" when {
       "[Q1] /national-insurance-number The user is authorised, current prof is setup, vatscheme is blank,audit is successful, s4l 404's" in {
@@ -99,6 +101,8 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with Requests
           .currentProfile.withProfile()
           .s4lContainer.contains(CacheKeys.Eligibility, s4lData)
           .audit.writesAudit()
+
+        stubFetchVatThreshold(vatThreshold)
 
         val response = buildClient("/apply-exception-exemption").get()
         whenReady(response) { res =>

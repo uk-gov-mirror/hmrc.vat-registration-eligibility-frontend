@@ -28,7 +28,7 @@ import models.view.YesOrNoQuestion
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
-import services.{CurrentProfileService, EligibilityService}
+import services.{CurrentProfileService, EligibilityService, ThresholdService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.SessionProfile
 
@@ -38,12 +38,14 @@ import scala.concurrent.Future
 class EligibilityControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                           val currentProfileService: CurrentProfileService,
                                           val eligibilityService: EligibilityService,
+                                          val thresholdService: ThresholdService,
                                           val messagesApi: MessagesApi,
                                           val authConnector: AuthClientConnector) extends EligibilityController{}
 
 trait EligibilityController extends VatRegistrationController with SessionProfile {
   val keystoreConnector: KeystoreConnector
   val eligibilityService: EligibilityService
+  val thresholdService: ThresholdService
 
   private def submitQuestion(question: EligibilityQuestions.Value, newValue: Boolean, exitCondition: Boolean)(success: => Result, fail: => Result)
                             (implicit currentProfile: CurrentProfile, hc: HeaderCarrier): Future[Result] = {
@@ -63,10 +65,14 @@ trait EligibilityController extends VatRegistrationController with SessionProfil
 
   def ineligible(): Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
-      keystoreConnector.fetchAndGet[String](IneligibilityReason.toString) map {
-        case None         => InternalServerError
-        case Some(v) if v == EligibilityQuestions.applyingForVatExemption.toString => Ok(views.html.pages.ineligible.exemption_ineligible())
-        case Some(v)      => Ok(views.html.pages.ineligible.ineligible(v.toString))
+      keystoreConnector.fetchAndGet[String](IneligibilityReason.toString) flatMap {
+        case None         => Future.successful(InternalServerError)
+        case Some(v)      => thresholdService.fetchCurrentVatThreshold.map{
+          case threshold if v == EligibilityQuestions.applyingForVatExemption.toString =>
+            Ok(views.html.pages.ineligible.exemption_ineligible(threshold))
+          case threshold =>
+            Ok(views.html.pages.ineligible.ineligible(v.toString, threshold))
+        }
       }
   }
 
@@ -170,13 +176,16 @@ trait EligibilityController extends VatRegistrationController with SessionProfil
       for {
         eligibility <- eligibilityService.getEligibility
         formFilled  =  fillYesNoQuestionForm(EligibilityQuestions.applyingForVatExemption, eligibility.applyingForVatExemption)
-      } yield Ok(views.html.pages.applying_for_vat_exemption(formFilled))
+        vatThreshold <- thresholdService.fetchCurrentVatThreshold
+      } yield Ok(views.html.pages.applying_for_vat_exemption(formFilled, vatThreshold))
   }
 
   def submitExemptionCriteria: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
       ServiceCriteriaFormFactory.form(EligibilityQuestions.applyingForVatExemption).bindFromRequest.fold(
-        hasErrors => Future.successful(BadRequest(views.html.pages.applying_for_vat_exemption(hasErrors))),
+        hasErrors => thresholdService.fetchCurrentVatThreshold.map{ threshold =>
+          BadRequest(views.html.pages.applying_for_vat_exemption(hasErrors, threshold))
+        },
         data => submitQuestion(EligibilityQuestions.applyingForVatExemption, data.answer, data.answer)(
           success = Redirect(controllers.routes.EligibilityController.showCompanyWillDoAnyOf()),
           fail    = Redirect(controllers.routes.EligibilityController.ineligible())

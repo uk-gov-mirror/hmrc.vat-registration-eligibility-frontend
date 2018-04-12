@@ -51,6 +51,7 @@ class ThresholdSummaryControllerSpec extends ControllerSpec with GuiceOneAppPerT
   "Calling threshold summary to show the threshold summary page" should {
     "return HTML with a valid threshold summary view" in new Setup {
       mockGetThreshold(Future.successful(validThresholdPreIncorp))
+      mockCurrentVatThreshold(Future.successful("50000"))
 
       callAuthenticated(testController.show)(_ includesText "Check and confirm your answers")
     }

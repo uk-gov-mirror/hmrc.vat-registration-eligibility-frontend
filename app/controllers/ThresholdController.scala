@@ -27,8 +27,6 @@ import play.api.mvc._
 import services._
 import utils.SessionProfile
 
-import scala.concurrent.Future
-
 class ThresholdControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val authConnector: AuthClientConnector,
                                         val currentProfileService: CurrentProfileService,
@@ -38,47 +36,61 @@ trait ThresholdController extends VatRegistrationController with SessionProfile 
   val thresholdService: ThresholdService
 
   def goneOverShow: Action[AnyContent] = isAuthenticatedWithProfile {
-    implicit request => implicit profile =>
-      hasIncorpDate { date =>
-        thresholdService.getThresholdViewModel[OverThresholdView].map {
-          view => {
+    implicit request =>
+      implicit profile =>
+        hasIncorpDate { date =>
+          for {
+            view         <- thresholdService.getThresholdViewModel[OverThresholdView]
+            vatThreshold <- thresholdService.fetchCurrentVatThreshold
+          } yield {
             val incorpDate = date.format(FORMAT_DD_MMMM_Y)
-            val form = OverThresholdFormFactory.form(date)
-            Ok(views.html.pages.over_threshold(view.fold(form)(form.fill), incorpDate))
+            val form = OverThresholdFormFactory.form(date, vatThreshold)
+            Ok(views.html.pages.over_threshold(view.fold(form)(form.fill), incorpDate, vatThreshold))
           }
         }
-      }
   }
 
   def goneOverSubmit: Action[AnyContent] = isAuthenticatedWithProfile {
-    implicit request => implicit profile =>
-      hasIncorpDate { date =>
-        OverThresholdFormFactory.form(date).bindFromRequest().fold(
-          badForm => Future.successful(BadRequest(views.html.pages.over_threshold(badForm, date.format(FORMAT_DD_MMMM_Y)))),
-          data    => thresholdService.saveThreshold(data) map {
-            _ => Redirect(controllers.routes.ThresholdController.expectationOverShow())
+    implicit request =>
+      implicit profile =>
+        hasIncorpDate { date =>
+          thresholdService.fetchCurrentVatThreshold.flatMap { threshold =>
+            OverThresholdFormFactory.form(date, threshold).bindFromRequest().fold(
+              badForm => thresholdService.fetchCurrentVatThreshold.map { threshold =>
+                BadRequest(views.html.pages.over_threshold(badForm, date.format(FORMAT_DD_MMMM_Y), threshold))
+              },
+              data => thresholdService.saveThreshold(data) map {
+                _ => Redirect(controllers.routes.ThresholdController.expectationOverShow())
+              }
+            )
           }
-        )
-      }
+        }
   }
 
   def expectationOverShow: Action[AnyContent] = isAuthenticatedWithProfile {
-    implicit request => implicit profile =>
-      hasIncorpDate { date =>
-        thresholdService.getThresholdViewModel[ExpectationOverThresholdView].map{
-          view => {
+    implicit request =>
+      implicit profile =>
+        hasIncorpDate { date =>
+          for {
+            view               <- thresholdService.getThresholdViewModel[ExpectationOverThresholdView]
+            currentThreshold   <- thresholdService.fetchCurrentVatThreshold
+          } yield {
             val form = ExpectationThresholdForm.form(date)
-            Ok(views.html.pages.expectation_over_threshold(view.fold(form)(form.fill)))
+            Ok(views.html.pages.expectation_over_threshold(view.fold(form)(form.fill), currentThreshold))
           }
         }
-      }
   }
 
   def expectationOverSubmit: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
       hasIncorpDate { date =>
         ExpectationThresholdForm.form(date).bindFromRequest().fold(
-          badForm => Future.successful(BadRequest(views.html.pages.expectation_over_threshold(badForm))),
+          badForm =>
+            for {
+              currentThreshold   <- thresholdService.fetchCurrentVatThreshold
+            } yield {
+              BadRequest(views.html.pages.expectation_over_threshold(badForm, currentThreshold))
+            },
           data => thresholdService.saveThreshold(data) map {
             _ => Redirect(controllers.routes.ThresholdSummaryController.show())
           }

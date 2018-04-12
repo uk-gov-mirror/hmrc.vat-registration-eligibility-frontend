@@ -3,10 +3,10 @@ package controllers
 
 import common.enums.CacheKeys
 import helpers.RequestsFinder
-import models.view.VoluntaryRegistration.{REGISTER_NO, REGISTER_YES}
 import models.view.TaxableTurnover.{TAXABLE_NO, TAXABLE_YES}
-import models.view.{ExpectationOverThresholdView, OverThresholdView, TaxableTurnover, Threshold, VoluntaryRegistration, VoluntaryRegistrationReason}
+import models.view.VoluntaryRegistration.{REGISTER_NO, REGISTER_YES}
 import models.view.VoluntaryRegistrationReason.{NEITHER, SELLS}
+import models.view._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
 import play.api.http.HeaderNames
@@ -15,6 +15,9 @@ import support.AppAndStubs
 
 
 class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFinder with ScalaFutures {
+
+  val vatThreshold = "12345"
+
   "GET Taxable Turnover page" should {
     "return 200" when {
       "user is authorised and all conditions are fulfilled" in {
@@ -27,6 +30,8 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.isEmpty
           .vatScheme.hasNoData("threshold")
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lData)
+
+        stubFetchVatThreshold(vatThreshold)
 
         val response = buildClient("/make-more-taxable-sales").get()
         whenReady(response)(_.status) mustBe 200
@@ -52,6 +57,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.cleared
           .vatScheme.patched("threshold", json)
           .audit.writesAudit()
+          .vatRegistration.currentThreshold()
 
         val response = buildClient("/make-more-taxable-sales").post(Map("taxableTurnoverRadio" -> Seq(TAXABLE_YES)))
         whenReady(response) { res =>
@@ -73,6 +79,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.contains(CacheKeys.Threshold, startedS4LData)
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lData)
           .audit.writesAudit()
+          .vatRegistration.currentThreshold()
 
         val response = buildClient("/make-more-taxable-sales").post(Map("taxableTurnoverRadio" -> Seq(TAXABLE_NO)))
         whenReady(response) { res =>
@@ -96,6 +103,8 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lData)
           .audit.writesAudit()
 
+        stubFetchVatThreshold(vatThreshold)
+
         val response = buildClient("/vat-taxable-turnover-gone-over").get()
         whenReady(response)(_.status) mustBe 200
       }
@@ -104,7 +113,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
   "POST Over Threshold page" should{
     "return 303" when {
-      "when the request is valid" in {
+      "the request is valid" in {
         val s4lData = Threshold(None, None, None, None, None)
         val s4lDataUpdated = Threshold(None, None, None, Some(OverThresholdView(selection = false, None)), None)
 
@@ -114,6 +123,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .audit.writesAudit()
           .s4lContainer.contains(CacheKeys.Threshold, s4lData)
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lDataUpdated)
+          .vatRegistration.currentThreshold()
 
         val response = buildClient("/vat-taxable-turnover-gone-over").post(Map("overThresholdRadio" ->Seq("false")))
         whenReady(response) { res =>
@@ -146,6 +156,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.contains(CacheKeys.Threshold, s4lData)
           .vatScheme.patched("threshold", json)
           .s4lContainer.cleared
+          .vatRegistration.currentThreshold()
 
         val response = buildClient("/vat-taxable-turnover-gone-over").post(
           Map("overThresholdRadio" -> Seq("true"),
@@ -180,6 +191,8 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .currentProfile.withProfileAndIncorpDate()
           .s4lContainer.contains(CacheKeys.Threshold, s4lData)
           .audit.writesAudit()
+
+        stubFetchVatThreshold(vatThreshold)
 
         val response = buildClient("/go-over-threshold-period").get()
         whenReady(response)(_.status) mustBe 200
