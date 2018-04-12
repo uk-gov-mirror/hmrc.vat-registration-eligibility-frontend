@@ -16,14 +16,16 @@
 
 package forms
 
+import forms.TaxableTurnoverForm.RADIO_YES_NO
 import helpers.FormInspectors._
 import models.view.TaxableTurnover
-import TaxableTurnoverForm.RADIO_YES_NO
-import TaxableTurnover.{TAXABLE_YES}
+import models.view.TaxableTurnover.TAXABLE_YES
 import uk.gov.hmrc.play.test.UnitSpec
 
 class TaxableTurnoverFormSpec extends UnitSpec {
-  val testForm = TaxableTurnoverForm.form
+
+  val vatThreshold = "12345"
+  val testForm = TaxableTurnoverForm.form(vatThreshold)
 
   "Binding TaxableTurnoverForm to a model" should {
     "bind successfully with full data" in {

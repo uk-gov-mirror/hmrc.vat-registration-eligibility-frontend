@@ -32,7 +32,7 @@ import org.scalatestplus.play.PlaySpec
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http._
 
 class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout
                                    with VatRegistrationFixture with FutureAssertions {
@@ -54,6 +54,7 @@ class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMo
   val internalServerError = Upstream5xxResponse(INTERNAL_SERVER_ERROR.toString, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
   val notFound = new NotFoundException(NOT_FOUND.toString)
   val exception = new Exception(BAD_GATEWAY.toString)
+  val testUrl = "test-url"
 
   "Calling getIncorporationInfo" should {
 
@@ -235,6 +236,55 @@ class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMo
     "throw an Exception if the call failed" in new Setup {
       mockHttpFailedPATCH[JsValue, JsValue]("tst-url", exception)
       connector.patchThreshold(validThresholdPreIncorp) failedWith exception
+    }
+  }
+
+  "getVATThreshold" should {
+
+    val threshold = "12345"
+    val date = LocalDate.of(1990, 12, 12)
+
+    "return a Vat threshold" in new Setup {
+      val httpResponse = HttpResponse(200, Some(Json.obj("taxable-threshold" -> threshold)))
+      mockHttpGET[HttpResponse](testUrl, httpResponse)
+
+      await(connector.getVATThreshold(date)) mustBe threshold
+    }
+
+    "throw an exception" when {
+
+      "there is no threshold key in the fetched json" in new Setup {
+        val httpResponse = HttpResponse(200, Some(Json.obj("otherKey" -> 1)))
+        mockHttpGET[HttpResponse](testUrl, httpResponse)
+
+        intercept[RuntimeException](await(connector.getVATThreshold(date)))
+      }
+
+      "empty json is returned" in new Setup {
+        val httpResponse = HttpResponse(200, Some(Json.obj()))
+        mockHttpGET[HttpResponse](testUrl, httpResponse)
+
+        intercept[RuntimeException](await(connector.getVATThreshold(date)))
+      }
+
+      "the threshold value is not a string" in new Setup {
+        val httpResponse = HttpResponse(200, Some(Json.obj("taxable-threshold" -> 12345)))
+        mockHttpGET[HttpResponse](testUrl, httpResponse)
+
+        intercept[RuntimeException](await(connector.getVATThreshold(date)))
+      }
+
+      "a 404 is returned" in new Setup {
+        mockHttpFailedGET[HttpResponse](testUrl, new NotFoundException(""))
+
+        intercept[NotFoundException](await(connector.getVATThreshold(date)))
+      }
+
+      "any http exception is returned" in new Setup {
+        mockHttpFailedGET[HttpResponse](testUrl, new HttpException("", 999))
+
+        intercept[HttpException](await(connector.getVATThreshold(date)))
+      }
     }
   }
 }

@@ -25,8 +25,9 @@ import mocks.VatMocks
 import models.CurrentProfile
 import models.view.VoluntaryRegistration._
 import models.view.VoluntaryRegistrationReason._
-import models.view.{ExpectationOverThresholdView, OverThresholdView, TaxableTurnover, Threshold, VoluntaryRegistration, VoluntaryRegistrationReason}
+import models.view._
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
@@ -58,10 +59,13 @@ class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with
   val thresholdPostIncorpCompleteOver1 = Threshold(None, None, None, Some(overThresholdTrue), Some(expectOverThresholdFalse))
   val thresholdPostIncorpCompleteOver2 = Threshold(None, None, None, Some(overThresholdFalse), Some(expectOverThresholdTrue))
 
+  val date = LocalDate.of(1990, 12, 12)
+
   class Setup(s4lData: Option[Threshold] = None, backendData: Option[JsValue] = None) {
     val service = new ThresholdService {
       override val s4LConnector = mockS4LConnector
       override val vatRegistrationConnector = mockRegConnector
+      override val now = date
     }
 
     when(mockS4LConnector.fetchAndGet[Threshold](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -77,6 +81,7 @@ class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with
     val service = new ThresholdService {
       override val vatRegistrationConnector = mockRegConnector
       override val s4LConnector = mockS4LConnector
+      override val now = date
 
       override def getThreshold(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
         Future.successful(t)
@@ -91,6 +96,7 @@ class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with
     val service = new ThresholdService {
       override val vatRegistrationConnector = mockRegConnector
       override val s4LConnector = mockS4LConnector
+      override val now = date
 
       override def getThreshold(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
         Future.successful(t)
@@ -220,6 +226,19 @@ class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with
 
     "save to backend and return a complete post incorp Threshold with Voluntary Registration set to YES" in new SetupForSaveBackend(thresholdPostIncorpIncomplete) {
       await(service.saveThreshold(voluntaryRegistrationReasonSELLS)) mustBe thresholdPostIncorpComplete
+    }
+  }
+
+  "fetchCurrentVatThreshold" should {
+
+    val vatThreshold = "12345"
+    val formattedThreshold = "12,345"
+
+    "fetch the current vat threshold and format it to have thousand separator" in new Setup {
+      when(mockRegConnector.getVATThreshold(any())(any()))
+        .thenReturn(Future.successful(vatThreshold))
+
+      await(service.fetchCurrentVatThreshold) mustBe formattedThreshold
     }
   }
 }

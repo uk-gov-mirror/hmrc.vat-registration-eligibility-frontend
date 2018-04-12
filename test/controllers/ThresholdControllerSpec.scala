@@ -60,6 +60,8 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
   }
 
+  val currentVatThreshold = "12345"
+
   val fakeRequest = FakeRequest(routes.ThresholdController.goneOverShow())
 
   s"GET ${routes.ThresholdController.goneOverShow()}" should {
@@ -73,6 +75,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return HTML when there is no view data" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetThresholdViewModel[OverThresholdView](Future.successful(None))
 
       callAuthenticated(testThresholdController.goneOverShow) { res =>
@@ -87,6 +90,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return HTML when there's an over threshold view data with date" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetThresholdViewModel[OverThresholdView](Future.successful(Some(validOverThresholdView.copy(true, Some(LocalDate.of(2017, 6, 30))))))
 
       callAuthenticated(testThresholdController.goneOverShow) {
@@ -99,6 +103,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return HTML when there's an over threshold view data with no date" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetThresholdViewModel[OverThresholdView](Future.successful(Some(validOverThresholdView.copy(false, None))))
 
       callAuthenticated(testThresholdController.goneOverShow) {
@@ -113,6 +118,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
 
   s"POST ${routes.ThresholdController.goneOverSubmit()}" should {
     "return Exception When Incorporation date is empty" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
 
       val res = intercept[Exception](submitAuthorised
       (testThresholdControllerWithoutIncorpDate.goneOverSubmit, fakeRequest.withFormUrlEncodedBody())
@@ -121,6 +127,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return 400 when no data posted" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
 
       submitAuthorised(
         testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody()) {
@@ -129,6 +136,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return 400 when partial data is posted" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
 
       submitAuthorised(
         testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
@@ -141,6 +149,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return 400 with incorrect data (date before incorporation date) - yes selected" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       val thresholdOverThresholdTrue = validThresholdPostIncorp.copy(overThreshold = Some(OverThresholdView(true, Some(LocalDate.of(2017, 6, 30)))))
       mockSaveThreshold(Future.successful(thresholdOverThresholdTrue))
 
@@ -156,6 +165,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     "return 303 with valid data - yes selected" in {
       val thresholdOverThresholdTrue = validThresholdPostIncorp.copy(overThreshold = Some(OverThresholdView(true, Some(LocalDate.of(2017, 1, 30)))))
       mockSaveThreshold(Future.successful(thresholdOverThresholdTrue))
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
 
       submitAuthorised(testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "true",
@@ -168,6 +178,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
 
     "return 303 with valid data - no selected" in {
       mockSaveThreshold(Future.successful(validThresholdPostIncorp))
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
 
       submitAuthorised(testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "false"
@@ -189,6 +200,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return 200 and the page is NOT prepopulated if there is no view data" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetThresholdViewModel[ExpectationOverThresholdView](Future.successful(None))
 
       callAuthenticated(testThresholdController.expectationOverShow()) {
@@ -202,6 +214,7 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return 200 and elements are populated when there's a over threshold view with date" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetThresholdViewModel[ExpectationOverThresholdView](Future.successful(Some(thresholdexpectOverThresholdTrue)))
 
       callAuthenticated(testThresholdController.expectationOverShow()) {
@@ -215,6 +228,8 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return 200 and elements are populated when there's a over threshold view with no date" in {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
+
       mockGetThresholdViewModel[ExpectationOverThresholdView](Future.successful(Some(thresholdexpectOverThresholdFalse)))
 
       callAuthenticated(testThresholdController.expectationOverShow()) {
@@ -238,6 +253,8 @@ class ThresholdControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
     }
 
     "return 400 when no data posted" in {
+
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
 
       submitAuthorised(
         testThresholdController.expectationOverSubmit(), fakeRequest.withFormUrlEncodedBody()) {

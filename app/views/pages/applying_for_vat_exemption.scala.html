@@ -15,7 +15,7 @@
  *@
 
 @import models.view.YesOrNoQuestion
-@(applyingForVatExemptionForm: Form[YesOrNoQuestion])(implicit request: Request[_], messages: Messages)
+@(applyingForVatExemptionForm: Form[YesOrNoQuestion], vatThreshold: String)(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.errorSummary
 @import views.html.helpers.templates.vatInputRadioGroup
@@ -35,7 +35,7 @@
 
     <div class="form-group">
     <ul class="list list-bullet">
-        <li>@messages("pages.eligibility.applyingForVatExemption.bullet1")</li>
+        <li>@messages("pages.eligibility.applyingForVatExemption.bullet1", vatThreshold)</li>
         <li>@messages("pages.eligibility.applyingForVatExemption.bullet2")</li>
     </ul>
     </div>

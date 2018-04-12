@@ -16,6 +16,7 @@
 
 package connectors
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 import common.enums.VatRegStatus
@@ -23,8 +24,9 @@ import config.WSHttp
 import models.CurrentProfile
 import models.external.IncorporationInfo
 import models.view.{Eligibility, Threshold}
+import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -91,6 +93,28 @@ trait VatRegistrationConnector extends RegistrationWhitelist {
         throw new VatFootprintNotFound(s"[CurrentProfileService] [getRegIdAndStatus] Could not find a vat footprint for regId: $regId")
       case e: Exception => throw logResponse(e, "getStatus")
     }
+  }
+
+  def getVATThreshold(date: LocalDate)(implicit hc: HeaderCarrier): Future[String] = {
+    http.GET[HttpResponse](s"$vatRegUrl/vatreg/threshold/${date.toString}").map{
+      _.json match {
+        case JsNull   => logAndThrow(s"[getVATThreshold] taxable-threshold for $date not found")
+        case json @ _ => (json \ "taxable-threshold").toOption match {
+          case Some(JsString(value)) => value
+          case Some(_)               => logAndThrow("[getVATThreshold] taxable-threshold is not a string")
+          case None                  => logAndThrow("[getVATThreshold] taxable-threshold key not found")
+        }
+      }
+    }.recoverWith(errorHandling("getVATThreshold"))
+  }
+
+  private def errorHandling[T](functionName: String): PartialFunction[Throwable, T] = {
+    case e: Exception => throw logResponse(e, functionName)
+  }
+
+  private def logAndThrow(msg: String) = {
+    Logger.error(msg)
+    throw new RuntimeException(msg)
   }
 }
 

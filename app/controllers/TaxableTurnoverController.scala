@@ -40,26 +40,32 @@ trait TaxableTurnoverController extends VatRegistrationController with SessionPr
   val thresholdService: ThresholdService
   val vatRegFrontendService: VatRegFrontendService
 
-  val form = TaxableTurnoverForm.form
+  def form(vatThreshold: String) = TaxableTurnoverForm.form(vatThreshold)
 
   def show: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
-      thresholdService.getThresholdViewModel[TaxableTurnover] map { view =>
-        Ok(views.html.pages.taxable_turnover(view.fold(form)(form.fill)))
+      for{
+        view      <- thresholdService.getThresholdViewModel[TaxableTurnover]
+        threshold <- thresholdService.fetchCurrentVatThreshold
+        form       = TaxableTurnoverForm.form(threshold)
+      } yield {
+        Ok(views.html.pages.taxable_turnover(view.fold(form)(form.fill), threshold))
       }
   }
 
   def submit: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
-      form.bindFromRequest().fold(
-        badForm => Future.successful(BadRequest(views.html.pages.taxable_turnover(badForm))),
-        data    => thresholdService.saveThreshold(data) map { _ =>
-          if (data.yesNo == TAXABLE_YES) {
-            Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
-          } else {
-            Redirect(controllers.routes.VoluntaryRegistrationController.show())
+      thresholdService.fetchCurrentVatThreshold.flatMap{ threshold =>
+        form(threshold).bindFromRequest().fold(
+          badForm => Future.successful(BadRequest(views.html.pages.taxable_turnover(badForm, threshold))),
+          data    => thresholdService.saveThreshold(data) map { _ =>
+            if (data.yesNo == TAXABLE_YES) {
+              Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
+            } else {
+              Redirect(controllers.routes.VoluntaryRegistrationController.show())
+            }
           }
-        }
-      )
+        )
+    }
   }
 }

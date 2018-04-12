@@ -18,6 +18,7 @@ package controllers
 
 import fixtures.VatRegistrationFixture
 import helpers.{ControllerSpec, FutureAssertions}
+import mocks.ThresholdServiceMock
 import models.CurrentProfile
 import models.view.TaxableTurnover
 import models.view.TaxableTurnover._
@@ -31,7 +32,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture with FutureAssertions {
+class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture
+  with FutureAssertions with ThresholdServiceMock {
 
   class Setup {
     val testController = new TaxableTurnoverController {
@@ -47,12 +49,15 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
     }
   }
 
+  val currentVatThreshold = "12345"
+
   val fakeRequest = FakeRequest(routes.TaxableTurnoverController.show())
 
   s"GET ${routes.TaxableTurnoverController.show()}" should {
-    val expectedText = "Over the next 30 days, do you think the company will make more than £85,000 in VAT-taxable sales?"
+    val expectedText = s"Over the next 30 days, do you think the company will make more than £$currentVatThreshold in VAT-taxable sales?"
 
     "return 200 with HTML not prepopulated when there is no view data" in new Setup {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetThresholdViewModel[TaxableTurnover](Future.successful(None))
 
       callAuthenticated(testController.show) { res =>
@@ -65,6 +70,7 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
     }
 
     "return 200 with HTML prepopulated to YES when there is view data" in new Setup {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetThresholdViewModel[TaxableTurnover](Future.successful(Some(TaxableTurnover(TAXABLE_YES))))
 
       callAuthenticated(testController.show) {
@@ -76,6 +82,7 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
     }
 
     "return 200 with HTML prepopulated to NO when there is view data" in new Setup {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetThresholdViewModel[TaxableTurnover](Future.successful(Some(TaxableTurnover(TAXABLE_NO))))
 
       callAuthenticated(testController.show) {
@@ -89,6 +96,7 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
 
   s"POST ${routes.TaxableTurnoverController.submit()} with Empty data" should {
     "return 400" in new Setup {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
       ))(result => result isA 400)
@@ -98,6 +106,7 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
   s"POST ${routes.TaxableTurnoverController.submit()} with Taxable Turnover selected Yes" should {
 
     "return 303" in new Setup {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockSaveThreshold(Future.successful(validThresholdPreIncorp.copy(taxableTurnover = Some(TaxableTurnover(TaxableTurnover.TAXABLE_YES)))))
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
         .thenReturn("someUrl")
@@ -113,6 +122,7 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
     "return 303" in new Setup {
       import models.view.TaxableTurnover.TAXABLE_NO
 
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockSaveThreshold(Future.successful(validThresholdPreIncorp))
 
       mockGetThresholdViewModel[TaxableTurnover](Future.successful(Some(validTaxableTurnOverView.copy(yesNo = TAXABLE_NO))))

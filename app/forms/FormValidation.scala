@@ -22,7 +22,7 @@ import models.{DayMonthYearModel, MonthYearModel}
 import org.apache.commons.lang3.StringUtils
 import play.api.Logger
 import play.api.data.format.Formatter
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, ValidationResult}
+import play.api.data.validation._
 import play.api.data.{FieldMapping, FormError, Mapping}
 
 import scala.util.Try
@@ -36,7 +36,7 @@ object FormValidation {
     if (StringUtils.isNotBlank(input)) Valid else Invalid(s"validation.$e.missing")
   }
 
-  def textMapping()(implicit e: ErrorCode): Mapping[String] = FieldMapping[String]()(stringFormat("missing")(Seq()))
+  def textMapping(args: String*)(implicit e: ErrorCode): Mapping[String] = FieldMapping[String]()(stringFormat("missing")(args))
 
   /* overrides Play's implicit stringFormatter and handles missing options (e.g. no radio button selected) */
   private def stringFormat(suffix: String)(args: Seq[Any] = Seq())(implicit e: ErrorCode): Formatter[String] = new Formatter[String] {

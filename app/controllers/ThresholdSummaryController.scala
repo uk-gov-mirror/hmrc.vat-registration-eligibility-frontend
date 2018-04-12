@@ -45,8 +45,10 @@ trait ThresholdSummaryController extends VatRegistrationController with SessionP
   def show: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
       hasIncorpDate { incorpDate =>
-        getThresholdSummary map { thresholdSummary =>
-          Ok(views.html.pages.threshold_summary(thresholdSummary, incorpDate.format(FORMAT_DD_MMMM_Y)))
+        thresholdService.fetchCurrentVatThreshold flatMap { threshold =>
+          getThresholdSummary map { thresholdSummary =>
+            Ok(views.html.pages.threshold_summary(thresholdSummary, incorpDate.format(FORMAT_DD_MMMM_Y), threshold))
+          }
         }
       }
   }

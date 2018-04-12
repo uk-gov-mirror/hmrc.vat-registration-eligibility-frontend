@@ -17,11 +17,11 @@
 package mocks
 
 import models.view.{Threshold, ThresholdView}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.mockito.MockitoSugar
 import services.ThresholdService
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 
 import scala.concurrent.Future
 
@@ -34,6 +34,10 @@ this: MockitoSugar =>
     when(mockThresholdService.getThreshold(any(),any())).thenReturn(res)
   }
 
+  def mockCurrentVatThreshold(res: Future[String]):OngoingStubbing[Future[String]] = {
+    when(mockThresholdService.fetchCurrentVatThreshold(any())) thenReturn res
+  }
+
   def mockGetThresholdViewModel[T <: ThresholdView](res: Future[Option[T]]): OngoingStubbing[Future[Option[T]]] ={
     when(mockThresholdService.getThresholdViewModel[T](any(),any(),any())).thenReturn(res)
   }
@@ -42,4 +46,8 @@ this: MockitoSugar =>
     when(mockThresholdService.saveThreshold(any())(any(),any())).thenReturn(res)
   }
 
+  def mockFetchCurrentVatThreshold(returns: Future[String]) = {
+    when(mockThresholdService.fetchCurrentVatThreshold(any()))
+      .thenReturn(returns)
+  }
 }

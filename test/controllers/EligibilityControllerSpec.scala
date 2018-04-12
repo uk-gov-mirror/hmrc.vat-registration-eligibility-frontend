@@ -20,7 +20,7 @@ import common.enums.CacheKeys.IneligibilityReason
 import common.enums.{EligibilityQuestions => Questions}
 import fixtures.VatRegistrationFixture
 import helpers.{ControllerSpec, FutureAssertions}
-import mocks.EligibilityServiceMock
+import mocks.{EligibilityServiceMock, ThresholdServiceMock}
 import models.CurrentProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
@@ -37,7 +37,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import scala.concurrent.Future
 
 class EligibilityControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture
-                                with EligibilityServiceMock with Inspectors with FutureAssertions {
+                                with EligibilityServiceMock with Inspectors with FutureAssertions with ThresholdServiceMock {
 
   class Setup {
     val testController = new EligibilityController {
@@ -45,6 +45,8 @@ class EligibilityControllerSpec extends ControllerSpec with GuiceOneAppPerTest w
       override val eligibilityService = mockEligibilityService
       override val keystoreConnector = mockKeystoreConnector
       override val currentProfileService = mockCurrentProfileService
+      override val thresholdService = mockThresholdService
+
       override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
@@ -53,8 +55,11 @@ class EligibilityControllerSpec extends ControllerSpec with GuiceOneAppPerTest w
     }
   }
 
+  val currentVatThreshold = "12345"
+
   "GET EligibilityController.showExemptionCriteria()" should {
     "return HTML for relevant page with no data in the form" in new Setup {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
       mockGetEligibility(Future.successful(validEligibility))
 
       val expectedTitle = "Will the company apply for a VAT registration exception or exemption?"
@@ -74,6 +79,8 @@ class EligibilityControllerSpec extends ControllerSpec with GuiceOneAppPerTest w
     }
 
     "400 for malformed requests" in new Setup {
+      mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
+
       submitAuthorised(testController.submitExemptionCriteria,
         FakeRequest().withFormUrlEncodedBody(s"${Questions.applyingForVatExemption}Radio" -> "foo")
       )(_ isA 400)
@@ -266,6 +273,7 @@ class EligibilityControllerSpec extends ControllerSpec with GuiceOneAppPerTest w
     }
 
     "400 for malformed requests" in new Setup {
+
       submitAuthorised(testController.submitCompanyWillDoAnyOf,
         FakeRequest().withFormUrlEncodedBody(s"${Questions.companyWillDoAnyOf}Radio" -> "foo")
       )(_ isA 400)
@@ -285,22 +293,24 @@ class EligibilityControllerSpec extends ControllerSpec with GuiceOneAppPerTest w
 
   "GET ineligible screen" should {
 
-    "return HTML for relevant ineligibility page" in new Setup {
+    //below the "" empty css class indicates that the section is showing (not "hidden")
+    val eligibilityQuestions = Seq[(Questions.Value, String)](
+      Questions.haveNino                -> """id="nino-text" class=""""",
+      Questions.doingBusinessAbroad     -> """id="business-abroad-text" class=""""",
+      Questions.doAnyApplyToYou         -> """id="do-any-apply-to-you-text" class=""""",
+      Questions.applyingForAnyOf        -> """id="applying-for-any-of-text" class=""""",
+      Questions.applyingForVatExemption -> """id="applying-for-vat-exemption-text"""",
+      Questions.companyWillDoAnyOf      -> """id="company-will-do-any-of-text" class="""""
+    )
 
-      when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(currentProfile))
+    forAll(eligibilityQuestions) { case (question, expectedTitle) =>
+      s"return HTML for relevant $question page" in new Setup {
 
-      //below the "" empty css class indicates that the section is showing (not "hidden")
-      val eligibilityQuestions = Seq[(Questions.Value, String)](
-        Questions.haveNino                -> """id="nino-text" class=""""",
-        Questions.doingBusinessAbroad     -> """id="business-abroad-text" class=""""",
-        Questions.doAnyApplyToYou         -> """id="do-any-apply-to-you-text" class=""""",
-        Questions.applyingForAnyOf        -> """id="applying-for-any-of-text" class=""""",
-        Questions.applyingForVatExemption -> """id="applying-for-vat-exemption-text"""",
-        Questions.companyWillDoAnyOf      -> """id="company-will-do-any-of-text" class="""""
-      )
+        mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
 
-      forAll(eligibilityQuestions) { case (question, expectedTitle) =>
+        when(mockCurrentProfileService.getCurrentProfile()(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(currentProfile))
+
         when(mockKeystoreConnector.fetchAndGet[String](ArgumentMatchers.eq(IneligibilityReason.toString))(any(), any()))
           .thenReturn(Future.successful(Some(question.toString)))
         callAuthenticated(testController.ineligible())(_ includesText expectedTitle)

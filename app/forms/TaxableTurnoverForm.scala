@@ -16,17 +16,17 @@
 
 package forms
 
+import forms.FormValidation.textMapping
 import models.view.TaxableTurnover
 import play.api.data.Form
 import play.api.data.Forms.mapping
-import forms.FormValidation.textMapping
 
 object TaxableTurnoverForm {
   val RADIO_YES_NO: String = "taxableTurnoverRadio"
 
-  val form = Form(
+  def form(vatThreshold: String) = Form(
     mapping(
-      RADIO_YES_NO -> textMapping()("taxable.turnover").verifying(TaxableTurnover.valid)
+      RADIO_YES_NO -> textMapping(vatThreshold)("taxable.turnover").verifying(TaxableTurnover.valid)
     )(TaxableTurnover.apply)(TaxableTurnover.unapply)
   )
 }

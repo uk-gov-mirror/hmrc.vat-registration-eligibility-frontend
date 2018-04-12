@@ -15,21 +15,21 @@
  *@
 
 @import models.view.TaxableTurnover
-@(taxableTurnoverForm:  Form[TaxableTurnover])(implicit request: Request[_], messages: Messages)
+@(taxableTurnoverForm:  Form[TaxableTurnover], vatThreshold: String)(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.errorSummary
 @import views.html.helpers.templates.vatInputRadioGroup
 
-@main_template(title = messages("pages.taxable.turnover.title")) {
+@main_template(title = messages("pages.taxable.turnover.title", vatThreshold)) {
 
   @errorSummary(
     Messages("app.common.errorSummaryLabel"),
     taxableTurnoverForm
   )
 
-  <h1 class="form-title heading-large" id="pageHeading">@messages("pages.taxable.turnover.heading")</h1>
+  <h1 class="form-title heading-large" id="pageHeading">@messages("pages.taxable.turnover.heading", vatThreshold)</h1>
 
-  <p>@messages("pages.taxable.turnover.p1")</p>
+  <p>@messages("pages.taxable.turnover.p1", vatThreshold)</p>
 
   <div class="panel panel-border-wide">
     <p>@Html(messages("pages.taxable.turnover.p2"))</p>
@@ -40,7 +40,7 @@
     <details role="group">
         <summary role="button" aria-controls="details-content-1" aria-expanded="false"><span class="summary">@messages("pages.taxable.turnover.panel.title")</span></summary>
         <div class="panel panel-border-narrow" id="details-content-1" aria-hidden="true">
-            <p>@messages("pages.taxable.turnover.panel.para")</p>
+            <p>@messages("pages.taxable.turnover.panel.para", vatThreshold)</p>
         </div>
     </details>
  </div>

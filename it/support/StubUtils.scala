@@ -16,9 +16,12 @@
 
 package support
 
+import java.time.LocalDate
+
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.matching.UrlPathPattern
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import common.enums.{CacheKeys, VatRegStatus}
 import play.api.libs.json.{Format, JsObject, JsValue, Json}
 import play.api.mvc.AnyContentAsFormUrlEncoded
@@ -73,6 +76,8 @@ trait StubUtils {
 
     def businessReg = BusinessRegStub()
 
+    def vatRegistration = VatRegistrationStub()
+
   }
 
   def given(): PreconditionBuilder = {
@@ -114,6 +119,21 @@ trait StubUtils {
       val mpPUT = currentState.fold(mpScenarioPUT)(mpScenarioPUT.whenScenarioStateIs)
       stubFor(nextState.fold(mpPUT)(mpPUT.willSetStateTo))
       builder
+    }
+  }
+
+  case class VatRegistrationStub()(implicit builder: PreconditionBuilder) {
+    def currentThreshold(date: LocalDate = LocalDate.now()): StubMapping = {
+      stubFor(
+        get(urlPathEqualTo(s"/vatreg/threshold/$date"))
+          .willReturn(ok(
+            """
+              |{
+              |  "taxable-threshold":"85000",
+              |  "since":"2017-06-06"
+              |}
+            """.stripMargin))
+      )
     }
   }
 
@@ -668,5 +688,17 @@ trait StubUtils {
     def failsToWriteAudit() = {
       writesAudit(404)
     }
+  }
+
+  def stubFetchVatThreshold(threshold: String) = {
+    stubFor(get(urlMatching("/vatreg/threshold/.*"))
+      .willReturn(
+        aResponse()
+          .withStatus(200)
+          .withBody(
+            Json.obj("taxable-threshold" -> threshold).toString()
+          )
+      )
+    )
   }
 }
