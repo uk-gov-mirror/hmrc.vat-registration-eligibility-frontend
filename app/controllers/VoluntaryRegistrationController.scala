@@ -21,7 +21,6 @@ import javax.inject.Inject
 import config.AuthClientConnector
 import connectors.S4LConnector
 import forms.VoluntaryRegistrationForm
-import models.view.VoluntaryRegistration
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services.{CurrentProfileService, ThresholdService, VatRegFrontendService}
@@ -54,8 +53,8 @@ trait VoluntaryRegistrationController extends VatRegistrationController with Ses
 
   def show: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
-      thresholdService.getThresholdViewModel[VoluntaryRegistration] map { view =>
-        Ok(views.html.pages.voluntary_registration(view.fold(form)(form.fill)))
+      thresholdService.getThreshold map { threshold =>
+        Ok(views.html.pages.voluntary_registration(threshold.voluntaryRegistration.fold(form)(form.fill)))
       }
   }
 
@@ -63,8 +62,8 @@ trait VoluntaryRegistrationController extends VatRegistrationController with Ses
     implicit request => implicit profile =>
       form.bindFromRequest().fold(
         badForm => Future.successful(BadRequest(views.html.pages.voluntary_registration(badForm))),
-        data    => thresholdService.saveThreshold(data) map { _ =>
-          if (data.yesNo == VoluntaryRegistration.REGISTER_YES) {
+        voluntary    => thresholdService.saveVoluntaryRegistration(voluntary) map { _ =>
+          if (voluntary) {
             Redirect(controllers.routes.VoluntaryRegistrationReasonController.show())
           } else {
             Redirect(controllers.routes.VoluntaryRegistrationController.showChoseNoToVoluntary())
@@ -76,7 +75,6 @@ trait VoluntaryRegistrationController extends VatRegistrationController with Ses
   def showChoseNoToVoluntary: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
         Future.successful(Ok(views.html.pages.chose_no_to_voluntary_registration()))
-
     }
 
 

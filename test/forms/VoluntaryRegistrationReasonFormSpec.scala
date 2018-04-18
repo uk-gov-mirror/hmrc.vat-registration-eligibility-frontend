@@ -16,20 +16,15 @@
 
 package forms
 
-import models.view.VoluntaryRegistrationReason
 import uk.gov.hmrc.play.test.UnitSpec
-import helpers.FormInspectors._
 
-/**
-  * Created by eric on 28/09/17.
-  */
 class VoluntaryRegistrationReasonFormSpec extends UnitSpec {
   val testForm = VoluntaryRegistrationReasonForm.form
 
   "binding a VoluntaryRegistrationReason to a form" should {
     "bind sucessfully if answer is intends to sell" in {
-      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReason.INTENDS_TO_SELL)
-      val model = VoluntaryRegistrationReason(VoluntaryRegistrationReason.INTENDS_TO_SELL)
+      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReasonForm.INTENDS_TO_SELL)
+      val model = VoluntaryRegistrationReasonForm.INTENDS_TO_SELL
       val boundForm = testForm.bind(data).fold(
         errors => errors,
         success => success
@@ -38,8 +33,8 @@ class VoluntaryRegistrationReasonFormSpec extends UnitSpec {
     }
 
     "bind sucessfully if answer is already sells" in {
-      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReason.SELLS)
-      val model = VoluntaryRegistrationReason(VoluntaryRegistrationReason.SELLS)
+      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReasonForm.SELLS)
+      val model = VoluntaryRegistrationReasonForm.SELLS
       val boundForm = testForm.bind(data).fold(
         errors => errors,
         success => success
@@ -48,8 +43,8 @@ class VoluntaryRegistrationReasonFormSpec extends UnitSpec {
     }
 
     "bind sucessfully if answer is neither" in {
-      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReason.NEITHER)
-      val model = VoluntaryRegistrationReason(VoluntaryRegistrationReason.NEITHER)
+      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReasonForm.NEITHER)
+      val model = VoluntaryRegistrationReasonForm.NEITHER
       val boundForm = testForm.bind(data).fold(
         errors => errors,
         success => success
@@ -57,37 +52,41 @@ class VoluntaryRegistrationReasonFormSpec extends UnitSpec {
       boundForm shouldBe model
     }
 
-    "should have errors if no field selected" in {
+    "have errors if no field selected" in {
       val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> "")
 
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq("voluntaryRegistrationReasonRadio" -> "error.unknown")
+      boundForm.errors map { formErrors =>
+        (formErrors.key, formErrors.message)
+      } shouldBe Seq("voluntaryRegistrationReasonRadio" -> "validation.voluntary.registration.reason.missing")
     }
 
-    "should have errors if an invalid reason is given" in {
+    "have errors if an invalid reason is given" in {
       val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> "skdfsdsdf")
 
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq("voluntaryRegistrationReasonRadio" -> "error.unknown")
+      boundForm.errors map { formErrors =>
+        (formErrors.key, formErrors.message)
+      } shouldBe Seq("voluntaryRegistrationReasonRadio" -> "validation.voluntary.registration.reason.missing")
     }
   }
 
   "unbinding a VoluntaryRegistrationReason from form" should {
     "unbind successfully for intends to sell" in {
-      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReason.INTENDS_TO_SELL)
-      val model = VoluntaryRegistrationReason(VoluntaryRegistrationReason.INTENDS_TO_SELL)
+      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReasonForm.INTENDS_TO_SELL)
+      val model = VoluntaryRegistrationReasonForm.INTENDS_TO_SELL
       testForm.fill(model).data shouldBe data
     }
     "unbind sucessfully for already sells" in {
-      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReason.SELLS)
-      val model = VoluntaryRegistrationReason(VoluntaryRegistrationReason.SELLS)
+      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReasonForm.SELLS)
+      val model = VoluntaryRegistrationReasonForm.SELLS
       testForm.fill(model).data shouldBe data
     }
     "unbind sucessfully for neither" in {
-      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReason.NEITHER)
-      val model = VoluntaryRegistrationReason(VoluntaryRegistrationReason.NEITHER)
+      val data = Map(VoluntaryRegistrationReasonForm.RADIO_REASON -> VoluntaryRegistrationReasonForm.NEITHER)
+      val model = VoluntaryRegistrationReasonForm.NEITHER
       testForm.fill(model).data shouldBe data
     }
   }

@@ -18,7 +18,6 @@ package forms
 
 import java.time.LocalDate
 
-import helpers.FormInspectors._
 import models.MonthYearModel
 import models.view.OverThresholdView
 import uk.gov.hmrc.play.test.UnitSpec
@@ -59,7 +58,9 @@ class OverThresholdFormFactorySpec extends UnitSpec {
       val data: Map[String,String] = Map()
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq(OverThresholdFormFactory.RADIO_YES_NO -> "validation.overThreshold.selection.missing")
+      boundForm.errors map { formErrors =>
+        (formErrors.key, formErrors.message)
+      } shouldBe Seq(OverThresholdFormFactory.RADIO_YES_NO -> "validation.overThreshold.selection.missing")
     }
 
     "have the correct error if data is below incorporation date" in {
@@ -68,7 +69,10 @@ class OverThresholdFormFactorySpec extends UnitSpec {
                                          "overThreshold.year" -> "2016")
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq("overThreshold" -> "validation.overThreshold.date.range.below")
+      boundForm.errors map { formErrors =>
+        (formErrors.key, formErrors.message)
+      } shouldBe Seq("overThreshold" -> "validation.overThreshold.date.range.below")
+
     }
 
     "have the correct error if data is above current date" in {
@@ -77,7 +81,9 @@ class OverThresholdFormFactorySpec extends UnitSpec {
         "overThreshold.year" -> LocalDate.now().plusYears(1).getYear.toString)
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq("overThreshold" -> "validation.overThreshold.date.range.above")
+      boundForm.errors map { formErrors =>
+        (formErrors.key, formErrors.message)
+      } shouldBe Seq("overThreshold" -> "validation.overThreshold.date.range.above")
     }
 
     "have the correct error if data is an incomplete date" in {
@@ -86,7 +92,9 @@ class OverThresholdFormFactorySpec extends UnitSpec {
         "overThreshold.year" -> "2016")
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq("overThreshold" -> "validation.overThreshold.date.invalid")
+      boundForm.errors map { formErrors =>
+        (formErrors.key, formErrors.message)
+      } shouldBe Seq("overThreshold" -> "validation.overThreshold.date.invalid")
     }
   }
 

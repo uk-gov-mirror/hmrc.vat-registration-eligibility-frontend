@@ -22,10 +22,7 @@ import javax.inject.Inject
 import common.enums.CacheKeys
 import connectors.{S4LConnector, VatRegistrationConnector}
 import models.CurrentProfile
-import models.view.TaxableTurnover._
-import models.view.VoluntaryRegistration._
 import models.view._
-import transformers.ToThresholdView
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
@@ -42,63 +39,52 @@ trait ThresholdService {
 
   def now: LocalDate
 
-  private def updateThreshold(data: Threshold)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] =
+  private def updateThreshold(data: Threshold)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
     vatRegistrationConnector.patchThreshold(data) flatMap { _ =>
       s4LConnector.clear(cp.registrationId) map {
         _ => data
       }
     }
+  }
 
   private def updateVoluntaryInfo(threshold: Threshold): Threshold = threshold match {
-    case Threshold(Some(TaxableTurnover(TAXABLE_YES)), _, _, _, _) =>
+    case Threshold(Some(true), _, _, _, _) =>
       threshold.copy(voluntaryRegistration = None, voluntaryRegistrationReason = None)
     case Threshold(None, _, _, Some(OverThresholdView(s1, _)), Some(ExpectationOverThresholdView(s2, _))) if s1 || s2 =>
       threshold.copy(voluntaryRegistration = None, voluntaryRegistrationReason = None)
-    case Threshold(_, Some(VoluntaryRegistration(REGISTER_NO)), Some(_), _, _) =>
+    case Threshold(_, Some(false), Some(_), _, _) =>
       threshold.copy(voluntaryRegistrationReason = None)
     case _ => threshold
   }
 
-  private def updateModel(view: ThresholdView, threshold: Threshold): Threshold = {
-    val model = view match {
-      case a: TaxableTurnover => threshold.copy(taxableTurnover = Some(a))
-      case b: OverThresholdView => threshold.copy(overThreshold = Some(b))
-      case c: ExpectationOverThresholdView => threshold.copy(expectationOverThreshold = Some(c))
-      case d: VoluntaryRegistration => threshold.copy(voluntaryRegistration = Some(d))
-      case e: VoluntaryRegistrationReason => threshold.copy(voluntaryRegistrationReason = Some(e))
-    }
-
-    updateVoluntaryInfo(model)
-  }
-
-  private def isModelComplete(threshold: Threshold)(implicit cp: CurrentProfile): Completion[Threshold] = threshold match {
+  private[services] def isModelComplete(threshold: Threshold)(implicit cp: CurrentProfile): Completion[Threshold] = threshold match {
     case Threshold(
-      Some(TaxableTurnover(TAXABLE_YES)),
+      Some(true),
       None,
       None,
       None,
       None) => Completed(threshold)
     case Threshold(
-      Some(TaxableTurnover(TAXABLE_NO)),
-      Some(VoluntaryRegistration(REGISTER_NO)),
+      Some(false),
+      Some(false),
       None,
       None,
       None) => Completed(threshold)
     case Threshold(
-      Some(TaxableTurnover(TAXABLE_NO)),
-      Some(VoluntaryRegistration(REGISTER_YES)),
-      Some(VoluntaryRegistrationReason(_)),
+      Some(false),
+      Some(true),
+      Some(_),
       None,
       None) => Completed(threshold)
     case Threshold(
       None,
-      Some(VoluntaryRegistration(REGISTER_YES)),
-      Some(VoluntaryRegistrationReason(_)),
+      Some(true),
+      Some(_),
       Some(OverThresholdView(false, _)),
       Some(ExpectationOverThresholdView(false, _))) => Completed(threshold)
     case Threshold(
       None,
-      Some(VoluntaryRegistration(REGISTER_NO)),
+      Some(false),
       None,
       Some(OverThresholdView(false, _)),
       Some(ExpectationOverThresholdView(false, _))) => Incomplete(threshold)
@@ -111,30 +97,52 @@ trait ThresholdService {
     case _ => Incomplete(threshold)
   }
 
-  def saveThreshold(view: ThresholdView)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
-    getThreshold flatMap { threshold =>
-      isModelComplete(updateModel(view, threshold)).fold(
-        incomplete => s4LConnector.save(cp.registrationId, CacheKeys.Threshold, incomplete).map(_ => incomplete),
-        complete => updateThreshold(complete)
-      )
+  private[services] def saveThreshold(updatedThreshold: Threshold)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+    isModelComplete(updateVoluntaryInfo(updatedThreshold)) match {
+      case Incomplete(threshold) => s4LConnector.save(cp.registrationId, CacheKeys.Threshold, threshold).map(_ => threshold)
+      case Completed(threshold) => updateThreshold(threshold)
     }
   }
 
-  private def viewModelConvert[T <: ThresholdView](threshold: Threshold)(implicit f: Threshold => Option[T]): Option[T] = f(threshold)
+  def saveTaxableTurnover(taxableTurnover: Boolean)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+    getThreshold flatMap { storedThreshold =>
+      saveThreshold(storedThreshold.copy(taxableTurnover = Some(taxableTurnover)))
+    }
+  }
 
-  def getThresholdViewModel[T <: ThresholdView](implicit cp: CurrentProfile, hc: HeaderCarrier, f: Threshold => Option[T]): Future[Option[T]] =
-    getThreshold map viewModelConvert[T]
+  def saveVoluntaryRegistration(voluntaryRegistration: Boolean)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+    getThreshold flatMap { storedThreshold =>
+      saveThreshold(storedThreshold.copy(voluntaryRegistration = Some(voluntaryRegistration)))
+    }
+  }
+
+  def saveVoluntaryRegistrationReason(reason: String)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+    getThreshold flatMap { storedThreshold =>
+      saveThreshold(storedThreshold.copy(voluntaryRegistrationReason = Some(reason)))
+    }
+  }
+
+  def saveOverThreshold(overThreshold: OverThresholdView)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+    getThreshold flatMap { storedThreshold =>
+      saveThreshold(storedThreshold.copy(overThreshold = Some(overThreshold)))
+    }
+  }
+
+  def saveExpectationOverThreshold(expectationOverThreshold: ExpectationOverThresholdView)
+                                  (implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+    getThreshold flatMap { storedThreshold =>
+      saveThreshold(storedThreshold.copy(expectationOverThreshold = Some(expectationOverThreshold)))
+    }
+  }
 
   def getThreshold(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
-    def getFromApi: Future[Threshold] = vatRegistrationConnector.getThreshold flatMap {
-      _.fold(Future.successful(Threshold(None, None, None, None, None))) { jsonApi =>
-        val threshold = ToThresholdView.fromAPI(jsonApi, cp.incorporationDate.isDefined)
-        s4LConnector.save(cp.registrationId, CacheKeys.Threshold, threshold).map(_ => threshold)
+    s4LConnector.fetchAndGet[Threshold](cp.registrationId, CacheKeys.Threshold) flatMap {
+      case Some(s4l) => Future.successful(s4l)
+      case None => vatRegistrationConnector.getThreshold map {
+        case Some(threshold) => threshold
+        case None => Threshold(None, None, None, None, None)
       }
     }
-
-    s4LConnector.fetchAndGet[Threshold](cp.registrationId, CacheKeys.Threshold).flatMap(
-      _.fold(getFromApi)(a => Future.successful(a)))
   }
 
   def fetchCurrentVatThreshold(implicit hc: HeaderCarrier): Future[String] = {

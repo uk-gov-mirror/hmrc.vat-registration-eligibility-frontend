@@ -20,7 +20,6 @@ import javax.inject.Inject
 
 import config.AuthClientConnector
 import forms.VoluntaryRegistrationReasonForm
-import models.view.VoluntaryRegistrationReason
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services.{CurrentProfileService, ThresholdService, VatRegFrontendService}
@@ -42,17 +41,18 @@ trait VoluntaryRegistrationReasonController extends VatRegistrationController wi
 
   def show: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
-      thresholdService.getThresholdViewModel[VoluntaryRegistrationReason].map { view =>
-        Ok(views.html.pages.voluntary_registration_reason(view.fold(form)(form.fill)))
+      thresholdService.getThreshold map { threshold =>
+        Ok(views.html.pages.voluntary_registration_reason(threshold.voluntaryRegistrationReason.fold(form)(form.fill)))
       }
   }
 
   def submit: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
       form.bindFromRequest().fold(
-        badForm => Future.successful(BadRequest(views.html.pages.voluntary_registration_reason(badForm))),
-        data    => thresholdService.saveThreshold(data) map { _ =>
-          if (data.reason == VoluntaryRegistrationReason.NEITHER) {
+        badForm =>
+          Future.successful(BadRequest(views.html.pages.voluntary_registration_reason(badForm))),
+        reason    => thresholdService.saveVoluntaryRegistrationReason(reason) map { _ =>
+          if (reason == VoluntaryRegistrationReasonForm.NEITHER) {
             Redirect(vatRegFrontendService.buildVatRegFrontendUrlWelcome)
           } else {
             Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)

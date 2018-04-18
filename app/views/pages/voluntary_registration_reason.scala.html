@@ -14,11 +14,12 @@
  * limitations under the License.
  *@
 
-@import models.view.VoluntaryRegistrationReason
-@(voluntaryRegistrationForm:  Form[VoluntaryRegistrationReason])(implicit request: Request[_], messages: Messages)
+@(voluntaryRegistrationForm:  Form[String])(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import uk.gov.hmrc.play.views.html.helpers.{form, input}
 @import views.html.helpers.errorSummary
 @import views.html.helpers.templates.vatInputRadioGroup
+@import forms.VoluntaryRegistrationReasonForm
 
 @main_template(title = messages("pages.voluntary.registration.reason.title")) {
 
@@ -34,9 +35,9 @@
     @vatInputRadioGroup(
         field = voluntaryRegistrationForm("voluntaryRegistrationReasonRadio"),
         Seq(
-          VoluntaryRegistrationReason.SELLS -> Messages("pages.voluntary.registration.reason.radio.sells"),
-          VoluntaryRegistrationReason.INTENDS_TO_SELL -> Messages("pages.voluntary.registration.reason.radio.intendsToSell"),
-          VoluntaryRegistrationReason.NEITHER -> Messages("pages.voluntary.registration.reason.radio.neither")
+          VoluntaryRegistrationReasonForm.SELLS -> Messages("pages.voluntary.registration.reason.radio.sells"),
+          VoluntaryRegistrationReasonForm.INTENDS_TO_SELL -> Messages("pages.voluntary.registration.reason.radio.intendsToSell"),
+          VoluntaryRegistrationReasonForm.NEITHER -> Messages("pages.voluntary.registration.reason.radio.neither")
         ),
         '_labelAfter -> true,
         '_labelClass -> "block-label",

@@ -25,7 +25,6 @@ import helpers.FutureAssertions
 import mocks.VatMocks
 import models.CurrentProfile
 import models.external.IncorporationInfo
-import models.view.VoluntaryRegistrationReason.SELLS
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
@@ -33,6 +32,8 @@ import play.api.http.Status._
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http._
+import forms.VoluntaryRegistrationReasonForm._
+import models.view.Threshold
 
 class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout
                                    with VatRegistrationFixture with FutureAssertions {
@@ -46,7 +47,7 @@ class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMo
   }
 
   val incorpDate = LocalDate.of(2016, 12, 21)
-  implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, Some(incorpDate))
+  implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, None)
 
   implicit val hc = HeaderCarrier()
 
@@ -170,12 +171,13 @@ class VatRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMo
          |  "mandatoryRegistration": true
          |}
        """.stripMargin)
+    val validThreshold = Threshold(Some(true))
     val httpRespOK = HttpResponse(OK, Some(validJson))
     val httpRespNOCONTENT = HttpResponse(NO_CONTENT, None)
 
     "return a JsValue" in new Setup {
       mockHttpGET[HttpResponse]("tst-url", httpRespOK)
-      connector.getThreshold returns Some(validJson)
+      connector.getThreshold returns Some(validThreshold)
     }
 
     "return None if there is no data for the registration" in new Setup {

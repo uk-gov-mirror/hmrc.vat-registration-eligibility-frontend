@@ -16,17 +16,19 @@
 
 package forms
 
-import forms.FormValidation.textMapping
-import models.view.TaxableTurnover
+import forms.helpers.RequiredBoolean
 import play.api.data.Form
-import play.api.data.Forms.mapping
+import play.api.data.Forms.single
 
-object TaxableTurnoverForm {
+object TaxableTurnoverForm extends RequiredBoolean {
+
   val RADIO_YES_NO: String = "taxableTurnoverRadio"
 
-  def form(vatThreshold: String) = Form(
-    mapping(
-      RADIO_YES_NO -> textMapping(vatThreshold)("taxable.turnover").verifying(TaxableTurnover.valid)
-    )(TaxableTurnover.apply)(TaxableTurnover.unapply)
+  val errorMessage = "validation.taxable.turnover.missing"
+
+  def form(taxableTurnover: String): Form[Boolean] = Form(
+    single(
+      RADIO_YES_NO -> requiredBoolean(errorMessage, taxableTurnover)
+    )
   )
 }

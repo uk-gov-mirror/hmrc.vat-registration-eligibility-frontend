@@ -16,7 +16,7 @@
 
 package mocks
 
-import models.view.{Threshold, ThresholdView}
+import models.view.Threshold
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.mockito.stubbing.OngoingStubbing
@@ -28,25 +28,37 @@ import scala.concurrent.Future
 trait ThresholdServiceMock {
 this: MockitoSugar =>
 
-  lazy val mockThresholdService = mock[ThresholdService]
+  lazy val mockThresholdService: ThresholdService = mock[ThresholdService]
 
-  def mockGetThreshold(res: Future[Threshold]):OngoingStubbing[Future[Threshold]] = {
-    when(mockThresholdService.getThreshold(any(),any())).thenReturn(res)
+  def mockGetThreshold(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.getThreshold(any(), any())) thenReturn res
   }
 
-  def mockCurrentVatThreshold(res: Future[String]):OngoingStubbing[Future[String]] = {
+  def mockCurrentVatThreshold(res: Future[String]): OngoingStubbing[Future[String]] = {
     when(mockThresholdService.fetchCurrentVatThreshold(any())) thenReturn res
   }
 
-  def mockGetThresholdViewModel[T <: ThresholdView](res: Future[Option[T]]): OngoingStubbing[Future[Option[T]]] ={
-    when(mockThresholdService.getThresholdViewModel[T](any(),any(),any())).thenReturn(res)
+  def mockSaveTaxableTurnover(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveTaxableTurnover(any())(any(), any())) thenReturn res
   }
 
-  def mockSaveThreshold(res:Future[Threshold]):OngoingStubbing[Future[Threshold]] = {
-    when(mockThresholdService.saveThreshold(any())(any(),any())).thenReturn(res)
+  def mockSaveVoluntaryRegistration(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveVoluntaryRegistration(any())(any(), any())) thenReturn res
   }
 
-  def mockFetchCurrentVatThreshold(returns: Future[String]) = {
+  def mockSaveVoluntaryRegistrationReason(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveVoluntaryRegistrationReason(any())(any(), any())) thenReturn res
+  }
+
+  def mockSaveOverThreshold(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveOverThreshold(any())(any(), any())) thenReturn res
+  }
+
+  def mockSaveExpectationOverThreshold(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveExpectationOverThreshold(any())(any(), any())) thenReturn res
+  }
+
+  def mockFetchCurrentVatThreshold(returns: Future[String]): OngoingStubbing[Future[String]] = {
     when(mockThresholdService.fetchCurrentVatThreshold(any()))
       .thenReturn(returns)
   }

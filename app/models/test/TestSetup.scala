@@ -19,13 +19,13 @@ package models.test
 import models.view.Eligibility
 import play.api.libs.json.Json
 
-case class ThresholdTestSetup(taxableTurnoverChoice: Option[String],
-                              voluntaryChoice: Option[String],
+case class ThresholdTestSetup(taxableTurnoverChoice: Option[Boolean],
+                              voluntaryChoice: Option[Boolean],
                               voluntaryRegistrationReason: Option[String],
-                              overThresholdSelection: Option[String],
+                              overThresholdSelection: Option[Boolean],
                               overThresholdMonth: Option[String],
                               overThresholdYear: Option[String],
-                              expectationOverThresholdSelection: Option[String],
+                              expectationOverThresholdSelection: Option[Boolean],
                               expectationOverThresholdDay: Option[String],
                               expectationOverThresholdMonth: Option[String],
                               expectationOverThresholdYear: Option[String])

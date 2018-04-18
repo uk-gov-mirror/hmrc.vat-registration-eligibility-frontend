@@ -52,10 +52,11 @@ trait VatRegistrationConnector extends RegistrationWhitelist {
     }
   }
 
-  def getThreshold(implicit currentProfile: CurrentProfile, hc: HeaderCarrier): Future[Option[JsValue]] = {
+  def getThreshold(implicit currentProfile: CurrentProfile, hc: HeaderCarrier): Future[Option[Threshold]] = {
     http.GET[HttpResponse](s"$vatRegUrl/vatreg/${currentProfile.registrationId}/threshold").map { res =>
-      if (res.status == NO_CONTENT) None else Some(res.json)
+      if (res.status == NO_CONTENT) None else Some(res.json.as[Threshold](Threshold.apiReads(currentProfile.incorporationDate)))
     } recover {
+      case js: JsResultException => throw logResponse(js, "getThreshold")
       case e: Exception => throw logResponse(e,"getThreshold")
     }
   }

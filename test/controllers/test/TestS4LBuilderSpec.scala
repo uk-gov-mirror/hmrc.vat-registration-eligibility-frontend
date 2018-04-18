@@ -19,10 +19,8 @@ package controllers.test
 import java.time.LocalDate
 
 import models.test.ThresholdTestSetup
-import models.view.TaxableTurnover._
-import models.view.{ExpectationOverThresholdView, OverThresholdView, TaxableTurnover, Threshold, VoluntaryRegistration, VoluntaryRegistrationReason}
-import models.view.VoluntaryRegistration._
-import models.view.VoluntaryRegistrationReason._
+import models.view.{ExpectationOverThresholdView, OverThresholdView, Threshold}
+import forms.VoluntaryRegistrationReasonForm._
 import uk.gov.hmrc.play.test.UnitSpec
 
 class TestS4LBuilderSpec extends UnitSpec {
@@ -31,22 +29,22 @@ class TestS4LBuilderSpec extends UnitSpec {
   "thresholdFromData" should {
     "return a full valid Threshold view model" in {
       val data = ThresholdTestSetup(
-        taxableTurnoverChoice = Some(TAXABLE_NO),
-        voluntaryChoice = Some(REGISTER_YES),
+        taxableTurnoverChoice = Some(false),
+        voluntaryChoice = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThresholdSelection = Some("true"),
+        overThresholdSelection = Some(true),
         overThresholdMonth = Some("9"),
         overThresholdYear = Some("2017"),
-        expectationOverThresholdSelection = Some("true"),
+        expectationOverThresholdSelection = Some(true),
         expectationOverThresholdDay = Some("6"),
         expectationOverThresholdMonth = Some("8"),
         expectationOverThresholdYear = Some("2016")
       )
 
       val expected = Threshold(
-        taxableTurnover = Some(TaxableTurnover(TAXABLE_NO)),
-        voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
-        voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(SELLS)),
+        taxableTurnover = Some(false),
+        voluntaryRegistration = Some(true),
+        voluntaryRegistrationReason = Some(SELLS),
         overThreshold = Some(OverThresholdView(true, Some(LocalDate.of(2017, 9, 30)))),
         expectationOverThreshold = Some(ExpectationOverThresholdView(true, Some(LocalDate.of(2016, 8, 6))))
       )
@@ -56,22 +54,22 @@ class TestS4LBuilderSpec extends UnitSpec {
 
     "return a partial valid Threshold view model" in {
       val data = ThresholdTestSetup(
-        taxableTurnoverChoice = Some(TAXABLE_NO),
-        voluntaryChoice = Some(REGISTER_YES),
+        taxableTurnoverChoice = Some(false),
+        voluntaryChoice = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThresholdSelection = Some("false"),
+        overThresholdSelection = Some(false),
         overThresholdMonth = Some("9"),
         overThresholdYear = Some("2017"),
-        expectationOverThresholdSelection = Some("false"),
+        expectationOverThresholdSelection = Some(false),
         expectationOverThresholdDay = Some("6"),
         expectationOverThresholdMonth = Some("8"),
         expectationOverThresholdYear = Some("2016")
       )
 
       val expected = Threshold(
-        taxableTurnover = Some(TaxableTurnover(TAXABLE_NO)),
-        voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
-        voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(SELLS)),
+        taxableTurnover = Some(false),
+        voluntaryRegistration = Some(true),
+        voluntaryRegistrationReason = Some(SELLS),
         overThreshold = Some(OverThresholdView(false, None)),
         expectationOverThreshold = Some(ExpectationOverThresholdView(false, None))
       )
@@ -81,22 +79,22 @@ class TestS4LBuilderSpec extends UnitSpec {
 
     "return a partial valid Threshold view model without Threshold dates" in {
       val data = ThresholdTestSetup(
-        taxableTurnoverChoice = Some(TAXABLE_NO),
-        voluntaryChoice = Some(REGISTER_YES),
+        taxableTurnoverChoice = Some(false),
+        voluntaryChoice = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThresholdSelection = Some("fadfgdfgse"),
+        overThresholdSelection = None,
         overThresholdMonth = Some("9"),
         overThresholdYear = Some("2017"),
-        expectationOverThresholdSelection = Some("gdfg"),
+        expectationOverThresholdSelection = None,
         expectationOverThresholdDay = Some("6"),
         expectationOverThresholdMonth = Some("8"),
         expectationOverThresholdYear = Some("2016")
       )
 
       val expected = Threshold(
-        taxableTurnover = Some(TaxableTurnover(TAXABLE_NO)),
-        voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
-        voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(SELLS)),
+        taxableTurnover = Some(false),
+        voluntaryRegistration = Some(true),
+        voluntaryRegistrationReason = Some(SELLS),
         overThreshold = None,
         expectationOverThreshold = None
       )

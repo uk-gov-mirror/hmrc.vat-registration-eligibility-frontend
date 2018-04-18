@@ -20,18 +20,17 @@ import java.time.LocalDate
 
 import common.enums.VatRegStatus
 import fixtures.VatRegistrationFixture
+import forms.VoluntaryRegistrationReasonForm._
 import helpers.FutureAssertions
 import mocks.VatMocks
 import models.CurrentProfile
-import models.view.VoluntaryRegistration._
-import models.view.VoluntaryRegistrationReason._
 import models.view._
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -43,189 +42,145 @@ class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with
   implicit val hc = HeaderCarrier()
   implicit val currentProfilePreIncorp = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, None)
   val currentProfilePostIncorp = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, Some(LocalDate.of(2016, 12, 21)))
-
-  val emptyThreshold = Threshold(None, None, None, None, None)
-  val taxableTurnoverNO = TaxableTurnover(TaxableTurnover.TAXABLE_NO)
-  val taxableTurnoverYES = TaxableTurnover(TaxableTurnover.TAXABLE_YES)
-  val voluntaryRegistrationYES = VoluntaryRegistration(REGISTER_YES)
-  val voluntaryRegistrationNO = VoluntaryRegistration(REGISTER_NO)
-  val voluntaryRegistrationReasonSELLS = VoluntaryRegistrationReason(SELLS)
-  val thresholdPreIncorpComplete = Threshold(Some(taxableTurnoverNO), Some(voluntaryRegistrationYES), Some(voluntaryRegistrationReasonSELLS), None, None)
+  val thresholdPreIncorpComplete = Threshold(Some(false), Some(true), Some(SELLS), None, None)
   val overThresholdFalse = OverThresholdView(false, None)
   val overThresholdTrue = OverThresholdView(true, testDate)
   val expectOverThresholdFalse = ExpectationOverThresholdView(false, None)
   val expectOverThresholdTrue = ExpectationOverThresholdView(true, testDate)
-  val thresholdPostIncorpComplete = Threshold(None, Some(voluntaryRegistrationYES), Some(voluntaryRegistrationReasonSELLS), Some(overThresholdFalse), Some(expectOverThresholdFalse))
+  val thresholdPostIncorpComplete = Threshold(None, Some(true), Some(SELLS), Some(overThresholdFalse), Some(expectOverThresholdFalse))
   val thresholdPostIncorpCompleteOver1 = Threshold(None, None, None, Some(overThresholdTrue), Some(expectOverThresholdFalse))
   val thresholdPostIncorpCompleteOver2 = Threshold(None, None, None, Some(overThresholdFalse), Some(expectOverThresholdTrue))
 
   val date = LocalDate.of(1990, 12, 12)
 
-  class Setup(s4lData: Option[Threshold] = None, backendData: Option[JsValue] = None) {
+  val incompleteThreshold = Threshold(Some(false), Some(true))
+
+  class Setup {
     val service = new ThresholdService {
       override val s4LConnector = mockS4LConnector
       override val vatRegistrationConnector = mockRegConnector
       override val now = date
     }
 
-    when(mockS4LConnector.fetchAndGet[Threshold](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(s4lData))
+    def mockAllGetThreshold(s4l: Option[Threshold] = None, backend: Option[Threshold] = None): OngoingStubbing[Future[Option[Threshold]]] = {
+      when(mockS4LConnector.fetchAndGet[Threshold](any(), any())(any(), any())) thenReturn Future.successful(s4l)
+      when(mockRegConnector.getThreshold(any(), any())) thenReturn Future.successful(backend)
+    }
 
-    getThresholdMock(Future.successful(backendData))
+    def mockSaveComplete() = {
+      when(mockRegConnector.patchThreshold(any())(any(), any())) thenReturn Future.successful(Json.obj())
+      when(mockS4LConnector.clear(any())(any())) thenReturn Future.successful(HttpResponse(200))
+    }
 
-    when(mockS4LConnector.save(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(CacheMap("", Map())))
+    def mockSaveIncomplete() = {
+      when(mockS4LConnector.save[Threshold](any(),any(), any())(any(), any())) thenReturn Future.successful(CacheMap("test", Map.empty))
+    }
+
+    resetMocks()
   }
+  
 
-  class SetupForS4L(t: Threshold = emptyThreshold) {
-    val service = new ThresholdService {
-      override val vatRegistrationConnector = mockRegConnector
-      override val s4LConnector = mockS4LConnector
-      override val now = date
+  "Calling getThreshold" must {
+    "retrieve a Threshold from S4L if it is present in S4L" in new Setup {
+      when(mockS4LConnector.fetchAndGet[Threshold](any(), any())(any(), any())) thenReturn Future.successful(Some(incompleteThreshold))
 
-      override def getThreshold(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
-        Future.successful(t)
-      }
+      await(service.getThreshold) mustBe incompleteThreshold
     }
 
-    when(mockS4LConnector.save(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(CacheMap("", Map())))
-  }
+    "retrieve a Threshold from the backend if not in S4L" in new Setup {
+      when(mockS4LConnector.fetchAndGet[Threshold](any(), any())(any(), any())) thenReturn Future.successful(None)
+      when(mockRegConnector.getThreshold(any(), any())) thenReturn Future.successful(Some(incompleteThreshold))
 
-  class SetupForSaveBackend(t: Threshold = validThresholdPreIncorp) {
-    val service = new ThresholdService {
-      override val vatRegistrationConnector = mockRegConnector
-      override val s4LConnector = mockS4LConnector
-      override val now = date
-
-      override def getThreshold(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
-        Future.successful(t)
-      }
-    }
-    patchThresholdMock(Future.successful(Json.toJson("""{}""")))
-
-
-    when(mockS4LConnector.clear(ArgumentMatchers.any())(ArgumentMatchers.any()))
-      .thenReturn(Future.successful(HttpResponse(200)))
-  }
-
-  "Calling getThreshold" should {
-    val partialThreshold = Threshold(Some(taxableTurnoverNO), Some(voluntaryRegistrationYES), None, None, None)
-    val jsonMandatoryNO = Json.parse(
-      s"""
-         |{
-         |  "mandatoryRegistration": false,
-         |  "voluntaryReason": "$SELLS"
-         |}
-       """.stripMargin)
-    val jsonPreIncorpMandatoryYES = Json.parse(
-      s"""
-         |{
-         |  "mandatoryRegistration": true
-         |}
-       """.stripMargin)
-    val jsonPostIncorpMandatoryYES1 = Json.parse(
-      s"""
-         |{
-         |  "mandatoryRegistration": true,
-         |  "overThresholdDate": "2017-03-21"
-         |}
-       """.stripMargin)
-    val jsonPostIncorpMandatoryYES2 = Json.parse(
-      s"""
-         |{
-         |  "mandatoryRegistration": true,
-         |  "expectedOverThresholdDate": "2017-03-21"
-         |}
-       """.stripMargin)
-
-    "return a default Threshold view model if nothing is in S4L & backend" in new Setup {
-      service.getThreshold returns emptyThreshold
+      await(service.getThreshold) mustBe incompleteThreshold
     }
 
-    "return a partial Threshold view model from S4L" in new Setup(Some(partialThreshold)) {
-      service.getThreshold returns partialThreshold
-    }
+    "return back an empty Threshold model if not present in S4L or backend" in new Setup {
+      when(mockS4LConnector.fetchAndGet[Threshold](any(), any())(any(), any())) thenReturn Future.successful(None)
+      when(mockRegConnector.getThreshold(any(), any())) thenReturn Future.successful(None)
 
-    "return a complete pre incorp Threshold view model with Taxable Turnover set to NO from backend" in new Setup(None, Some(jsonMandatoryNO)) {
-      service.getThreshold returns thresholdPreIncorpComplete
-    }
-
-    "return a complete pre incorp Threshold view model with Taxable Turnover set to YES from backend" in new Setup(None, Some(jsonPreIncorpMandatoryYES)) {
-      val expected = Threshold(Some(taxableTurnoverYES), None, None, None, None)
-
-      service.getThreshold returns expected
-    }
-
-    "return a complete post incorp Threshold view model with both OverThreshold set to false from backend" in new Setup(None, Some(jsonMandatoryNO)) {
-      service.getThreshold(currentProfilePostIncorp, hc) returns thresholdPostIncorpComplete
-    }
-
-    "return a complete post incorp Threshold view model with OverThreshold set to true from backend" in new Setup(None, Some(jsonPostIncorpMandatoryYES1)) {
-      service.getThreshold(currentProfilePostIncorp, hc) returns thresholdPostIncorpCompleteOver1
-    }
-
-    "return a complete post incorp Threshold view model with ExpectedOverThreshold set to true from backend" in new Setup(None, Some(jsonPostIncorpMandatoryYES2)) {
-      service.getThreshold(currentProfilePostIncorp, hc) returns thresholdPostIncorpCompleteOver2
+      await(service.getThreshold) mustBe emptyThreshold
     }
   }
 
-  "Calling saveThreshold" should {
-    val voluntaryRegistrationReasonINTENDS = VoluntaryRegistrationReason(INTENDS_TO_SELL)
-    val voluntaryRegistrationReasonNEITHER = VoluntaryRegistrationReason(NEITHER)
+  "saveTaxableTurnover" must {
+    "save a complete model" in new Setup {
+      mockAllGetThreshold()
+      mockSaveComplete()
+      await(service.saveTaxableTurnover(taxableTurnover = true)) mustBe Threshold(Some(true))
+    }
+    "save an incomplete model" in new Setup {
+      mockAllGetThreshold()
+      mockSaveIncomplete()
+      await(service.saveTaxableTurnover(taxableTurnover = false)) mustBe Threshold(Some(false))
+    }
+  }
 
-    val thresholdTaxableTurnoverNO = Threshold(Some(taxableTurnoverNO), None, None, None, None)
-    val thresholdPreIncorpIncomplete = Threshold(Some(taxableTurnoverNO), Some(voluntaryRegistrationYES), None, None, None)
-    val thresholdOverThresholdFalse = Threshold(None, None, None, Some(overThresholdFalse), Some(expectOverThresholdFalse))
-    val thresholdPostIncorpIncomplete = Threshold(None, Some(voluntaryRegistrationYES), None, Some(overThresholdFalse), Some(expectOverThresholdFalse))
-
-    "save to S4L and return an incomplete pre incorp Threshold with Taxable Turnover set to NO" in new SetupForS4L {
-      await(service.saveThreshold(taxableTurnoverNO)) mustBe thresholdTaxableTurnoverNO
+  "saveVoluntaryRegistration" must {
+    "save a complete model" in new Setup {
+      val incomplete = Threshold(Some(false), None, Some("test"))
+      mockAllGetThreshold(Some(incomplete))
+      mockSaveComplete()
+      await(service.saveVoluntaryRegistration(voluntaryRegistration = true)) mustBe incomplete.copy(voluntaryRegistration = Some(true))
     }
 
-    "save to S4L and return an incomplete pre incorp Threshold with Voluntary Registration set to YES" in new SetupForS4L(thresholdTaxableTurnoverNO) {
-      await(service.saveThreshold(voluntaryRegistrationYES)) mustBe thresholdPreIncorpIncomplete
+    "save a complete model where they choose not to register voluntary but there is already a reason" in new Setup {
+      val incomplete = Threshold(Some(false), None, Some("test"))
+      val expected = Threshold(Some(false), Some(false))
+      mockAllGetThreshold(Some(incomplete))
+      mockSaveComplete()
+      await(service.saveVoluntaryRegistration(voluntaryRegistration = false)) mustBe expected
     }
 
-    "save to S4L and return an incomplete post incorp Threshold with OverThreshold set to false" in new SetupForS4L {
-      await(service.saveThreshold(overThresholdFalse)) mustBe Threshold(None, None, None, Some(overThresholdFalse), None)
+    "save an incomplete model" in new Setup {
+      mockAllGetThreshold()
+      mockSaveIncomplete()
+      await(service.saveVoluntaryRegistration(voluntaryRegistration = false)) mustBe Threshold(voluntaryRegistration = Some(false))
     }
+  }
 
-    "save to S4L and return an incomplete post incorp Threshold with ExpectationOverThreshold set to false" in new SetupForS4L {
-      await(service.saveThreshold(expectOverThresholdFalse)) mustBe Threshold(None, None, None, None, Some(expectOverThresholdFalse))
+  "saveVoluntaryRegistrationReason" must {
+    "save a complete model" in new Setup {
+      val incomplete = Threshold(Some(false), Some(true))
+      mockAllGetThreshold(Some(incomplete))
+      mockSaveComplete()
+      await(service.saveVoluntaryRegistrationReason(reason = "testReason")) mustBe incomplete.copy(voluntaryRegistrationReason = Some("testReason"))
     }
-
-    "save to S4L and return an incomplete post incorp Threshold with Voluntary Registration set to YES" in new SetupForS4L(thresholdOverThresholdFalse) {
-      await(service.saveThreshold(voluntaryRegistrationYES)) mustBe thresholdPostIncorpIncomplete
+    "save an incomplete model" in new Setup {
+      mockAllGetThreshold()
+      mockSaveIncomplete()
+      await(service.saveVoluntaryRegistrationReason(reason = "testReason")) mustBe Threshold(voluntaryRegistrationReason = Some("testReason"))
     }
+  }
 
-    "save to backend and return a complete pre incorp Threshold with Taxable Turnover set to YES" in new SetupForSaveBackend(emptyThreshold) {
-      val expected = Threshold(Some(taxableTurnoverYES), None, None, None, None)
-      await(service.saveThreshold(taxableTurnoverYES)) mustBe expected
+  "saveOverThreshold" must {
+    val overThreshold = OverThresholdView(selection = true, Some(LocalDate.now()))
+
+    "save a complete model" in new Setup {
+      val incomplete = Threshold(None, None, None, None, Some(ExpectationOverThresholdView(selection = false, None)))
+      mockAllGetThreshold(Some(incomplete))
+      mockSaveComplete()
+      await(service.saveOverThreshold(overThreshold)) mustBe incomplete.copy(overThreshold = Some(overThreshold))
     }
-
-    "save to backend and return a complete pre incorp Threshold with Taxable Turnover set to NO" in new SetupForSaveBackend(thresholdPreIncorpIncomplete) {
-      await(service.saveThreshold(voluntaryRegistrationReasonSELLS)) mustBe thresholdPreIncorpComplete
+    "save an incomplete model" in new Setup {
+      mockAllGetThreshold()
+      mockSaveIncomplete()
+      await(service.saveOverThreshold(overThreshold)) mustBe Threshold(None, None, None, Some(overThreshold))
     }
+  }
 
-    "save to backend and return a complete pre incorp Threshold with Voluntary Registration Reason set to INTENDS_TO_SELL" in new SetupForSaveBackend(thresholdPreIncorpIncomplete) {
-      await(service.saveThreshold(voluntaryRegistrationReasonINTENDS)) mustBe thresholdPreIncorpComplete.copy(voluntaryRegistrationReason = Some(voluntaryRegistrationReasonINTENDS))
+  "saveExpectationOverThreshold" must {
+    val expectationOverThreshold = ExpectationOverThresholdView(selection = true, Some(LocalDate.now()))
+
+    "save a complete model" in new Setup {
+      val incomplete = Threshold(None, None, None, Some(OverThresholdView(selection = false, None)))
+      mockAllGetThreshold(Some(incomplete))
+      mockSaveComplete()
+      await(service.saveExpectationOverThreshold(expectationOverThreshold)) mustBe incomplete.copy(expectationOverThreshold = Some(expectationOverThreshold))
     }
-
-    "save to backend and return a complete pre incorp Threshold with Voluntary Registration Reason set to NEITHER" in new SetupForSaveBackend(thresholdPreIncorpIncomplete) {
-      await(service.saveThreshold(voluntaryRegistrationReasonNEITHER)) mustBe thresholdPreIncorpComplete.copy(voluntaryRegistrationReason = Some(voluntaryRegistrationReasonNEITHER))
-    }
-
-    "save to backend and return a complete post incorp Threshold with OverThreshold set to YES" in new SetupForSaveBackend(emptyThreshold.copy(expectationOverThreshold = Some(expectOverThresholdFalse))) {
-      await(service.saveThreshold(overThresholdTrue)) mustBe thresholdPostIncorpCompleteOver1
-    }
-
-    "save to backend and return a complete post incorp Threshold with ExpectedOverThreshold set to YES" in new SetupForSaveBackend(emptyThreshold.copy(overThreshold = Some(overThresholdFalse))) {
-      await(service.saveThreshold(expectOverThresholdTrue)) mustBe thresholdPostIncorpCompleteOver2
-    }
-
-    "save to backend and return a complete post incorp Threshold with Voluntary Registration set to YES" in new SetupForSaveBackend(thresholdPostIncorpIncomplete) {
-      await(service.saveThreshold(voluntaryRegistrationReasonSELLS)) mustBe thresholdPostIncorpComplete
+    "save an incomplete model" in new Setup {
+      mockAllGetThreshold()
+      mockSaveIncomplete()
+      await(service.saveExpectationOverThreshold(expectationOverThreshold)) mustBe Threshold(None, None, None, None, Some(expectationOverThreshold))
     }
   }
 

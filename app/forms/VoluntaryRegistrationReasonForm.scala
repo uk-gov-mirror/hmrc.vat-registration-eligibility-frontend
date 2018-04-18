@@ -16,19 +16,23 @@
 
 package forms
 
-import forms.FormValidation.textMapping
-import models.view.VoluntaryRegistrationReason
+import forms.FormValidation._
 import play.api.data.Form
-import play.api.data.Forms.mapping
+import play.api.data.Forms._
 
 object VoluntaryRegistrationReasonForm {
 
   val RADIO_REASON: String = "voluntaryRegistrationReasonRadio"
 
+  implicit val errorMessage: ErrorCode = "validation.voluntary.registration.reason.missing"
+
+  val SELLS           = "alreadySellsVATTaxableGoodsOrServices"
+  val INTENDS_TO_SELL = "intendsToSellVATTaxableGoodsOrServices"
+  val NEITHER         = "wontSellVATTaxableGoodsOrServices"
+
   val form = Form(
-    mapping(
-      RADIO_REASON -> textMapping()("voluntary.registration.reason")
-        .verifying(VoluntaryRegistrationReason.valid)
-    )(VoluntaryRegistrationReason.apply)(VoluntaryRegistrationReason.unapply)
+    single(
+      RADIO_REASON -> of[String].verifying(matches(List(SELLS, INTENDS_TO_SELL, NEITHER)))
+    )
   )
 }

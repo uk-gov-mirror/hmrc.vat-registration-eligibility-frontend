@@ -32,7 +32,7 @@ trait VatRegConnectorMock {
 
   lazy val mockRegConnector = mock[VatRegistrationConnector]
 
-  def getThresholdMock(res: Future[Option[JsValue]]): OngoingStubbing[Future[Option[JsValue]]] ={
+  def getThresholdMock(res: Future[Option[Threshold]]): OngoingStubbing[Future[Option[Threshold]]] ={
     when(mockRegConnector.getThreshold(any(),any())).thenReturn(res)
   }
 

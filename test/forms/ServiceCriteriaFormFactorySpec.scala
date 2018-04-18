@@ -16,7 +16,6 @@
 
 package forms
 
-import helpers.FormInspectors._
 import models.view.YesOrNoQuestion
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -39,7 +38,9 @@ class ServiceCriteriaFormFactorySpec extends UnitSpec {
       val data: Map[String,String] = Map()
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq("testQuestionRadio" -> "validation.eligibility.testQuestion.missing")
+      boundForm.errors map { formErrors =>
+        (formErrors.key, formErrors.message)
+      } shouldBe Seq("testQuestionRadio" -> "validation.eligibility.testQuestion.missing")
     }
   }
 

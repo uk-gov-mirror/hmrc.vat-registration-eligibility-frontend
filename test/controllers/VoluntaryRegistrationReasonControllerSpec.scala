@@ -17,10 +17,9 @@
 package controllers
 
 import fixtures.VatRegistrationFixture
+import forms.VoluntaryRegistrationReasonForm
 import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
-import models.view.VoluntaryRegistrationReason
-import models.view.VoluntaryRegistrationReason._
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.MessagesApi
@@ -52,7 +51,7 @@ class VoluntaryRegistrationReasonControllerSpec extends ControllerSpec with Guic
   s"GET ${routes.VoluntaryRegistrationReasonController.show()}" should {
     val expectedText = "Which one applies to the company?"
     "return 200 with HTML not prepopulated when there is no view data" in new Setup{
-        mockGetThresholdViewModel[VoluntaryRegistrationReason](Future.successful(None))
+      mockGetThreshold(Future.successful(emptyThreshold))
 
       callAuthenticated(testController.show()){ res =>
         res includesText expectedText
@@ -63,7 +62,7 @@ class VoluntaryRegistrationReasonControllerSpec extends ControllerSpec with Guic
     }
 
     "return 200 with HTML prepopulated with SELLS when there is view data" in new Setup {
-      mockGetThresholdViewModel[VoluntaryRegistrationReason](Future.successful(Some(validVoluntaryRegistrationReasonView.copy(reason = SELLS))))
+      mockGetThreshold(Future.successful(emptyThreshold.copy(voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.SELLS))))
 
       callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
@@ -75,7 +74,7 @@ class VoluntaryRegistrationReasonControllerSpec extends ControllerSpec with Guic
     }
 
     "return 200 with HTML prepopulated with INTENDS when there is view data" in new Setup {
-      mockGetThresholdViewModel[VoluntaryRegistrationReason](Future.successful(Some(validVoluntaryRegistrationReasonView.copy(reason = INTENDS_TO_SELL))))
+      mockGetThreshold(Future.successful(emptyThreshold.copy(voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.INTENDS_TO_SELL))))
 
       callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
@@ -87,7 +86,7 @@ class VoluntaryRegistrationReasonControllerSpec extends ControllerSpec with Guic
     }
 
     "return 200 with HTML prepopulated with NEITHER when there is view data" in new Setup {
-      mockGetThresholdViewModel[VoluntaryRegistrationReason](Future.successful(Some(validVoluntaryRegistrationReasonView.copy(reason = NEITHER))))
+      mockGetThreshold(Future.successful(emptyThreshold.copy(voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.NEITHER))))
 
       callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
@@ -108,13 +107,13 @@ class VoluntaryRegistrationReasonControllerSpec extends ControllerSpec with Guic
 
   s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Voluntary Registration Reason selected Sells" should {
     "return 303" in new Setup {
-      mockSaveThreshold(Future.successful(validThresholdPreIncorp))
+      mockSaveVoluntaryRegistrationReason(Future.successful(validThresholdPreIncorp))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
         .thenReturn(s"someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.SELLS
+        "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReasonForm.SELLS
       ))(_ redirectsTo s"someUrl")
     }
   }
@@ -122,16 +121,16 @@ class VoluntaryRegistrationReasonControllerSpec extends ControllerSpec with Guic
   s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Voluntary Registration Reason selected Intends to sell" should {
     "return 303" in new Setup {
       val validOtherThresholdPreIncorp = validThresholdPreIncorp.copy(
-        voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(VoluntaryRegistrationReason.INTENDS_TO_SELL))
+        voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.INTENDS_TO_SELL)
       )
 
-      mockSaveThreshold(Future.successful(validOtherThresholdPreIncorp))
+      mockSaveVoluntaryRegistrationReason(Future.successful(validOtherThresholdPreIncorp))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
         .thenReturn(s"someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.INTENDS_TO_SELL
+        "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReasonForm.INTENDS_TO_SELL
       )){_ redirectsTo s"someUrl"}
     }
   }
@@ -139,16 +138,16 @@ class VoluntaryRegistrationReasonControllerSpec extends ControllerSpec with Guic
   s"POST ${routes.VoluntaryRegistrationReasonController.submit()} with Voluntary Registration selected Neither" should {
     "redirect to the welcome page" in new Setup {
       val validOtherThresholdPreIncorp = validThresholdPreIncorp.copy(
-        voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(VoluntaryRegistrationReason.NEITHER))
+        voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.NEITHER)
       )
 
-      mockSaveThreshold(Future.successful(validOtherThresholdPreIncorp))
+      mockSaveVoluntaryRegistrationReason(Future.successful(validOtherThresholdPreIncorp))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome)
         .thenReturn(s"someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.NEITHER
+        "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReasonForm.NEITHER
       ))(_ redirectsTo "someUrl")
     }
   }
