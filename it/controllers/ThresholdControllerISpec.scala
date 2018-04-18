@@ -2,10 +2,8 @@
 package controllers
 
 import common.enums.CacheKeys
+import forms.VoluntaryRegistrationReasonForm._
 import helpers.RequestsFinder
-import models.view.TaxableTurnover.{TAXABLE_NO, TAXABLE_YES}
-import models.view.VoluntaryRegistration.{REGISTER_NO, REGISTER_YES}
-import models.view.VoluntaryRegistrationReason.{NEITHER, SELLS}
 import models.view._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
@@ -42,7 +40,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
   "POST Taxable Turnover page" should {
     "return 303" when {
       "user choose taxable turnover YES value and save data to backend" in {
-        val startedS4LData = Threshold(Some(TaxableTurnover(TAXABLE_NO)), None, None, None, None)
+        val startedS4LData = Threshold(Some(false), None, None, None, None)
         val json = Json.parse(
           s"""
              |{
@@ -59,7 +57,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .audit.writesAudit()
           .vatRegistration.currentThreshold()
 
-        val response = buildClient("/make-more-taxable-sales").post(Map("taxableTurnoverRadio" -> Seq(TAXABLE_YES)))
+        val response = buildClient("/make-more-taxable-sales").post(Map("taxableTurnoverRadio" -> Seq("true")))
         whenReady(response) { res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some("/vat-uri/who-is-registering-the-company-for-vat")
@@ -70,8 +68,8 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       }
 
       "user choose taxable turnover NO value and save to S4L" in {
-        val startedS4LData = Threshold(Some(TaxableTurnover(TAXABLE_YES)), None, None, None, None)
-        val s4lData = Threshold(Some(TaxableTurnover(TAXABLE_NO)), None, None, None, None)
+        val startedS4LData = Threshold(Some(true), None, None, None, None)
+        val s4lData = Threshold(Some(false), None, None, None, None)
 
         given()
           .user.isAuthorised
@@ -81,7 +79,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .audit.writesAudit()
           .vatRegistration.currentThreshold()
 
-        val response = buildClient("/make-more-taxable-sales").post(Map("taxableTurnoverRadio" -> Seq(TAXABLE_NO)))
+        val response = buildClient("/make-more-taxable-sales").post(Map("taxableTurnoverRadio" -> Seq("false")))
         whenReady(response) { res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VoluntaryRegistrationController.show().url)
@@ -135,7 +133,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "the request is valid with overThreshold value set to true AND save to backend" in {
         val s4lData = Threshold(
           None,
-          Some(VoluntaryRegistration(REGISTER_YES)),
+          Some(true),
           None,
           Some(OverThresholdView(selection = false, None)),
           Some(ExpectationOverThresholdView(selection = false, None))
@@ -229,7 +227,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "the request is valid with expectedOverThreshold value set to true AND save to backend" in {
         val s4lData = Threshold(
           None,
-          Some(VoluntaryRegistration(REGISTER_YES)),
+          Some(true),
           None,
           Some(OverThresholdView(selection = false, None)),
           Some(ExpectationOverThresholdView(selection = false, None))
@@ -271,8 +269,8 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "the data is complete and saved into backend" in {
         val s4lData = Threshold(
           None,
-          Some(VoluntaryRegistration(REGISTER_YES)),
-          Some(VoluntaryRegistrationReason(SELLS)),
+          Some(true),
+          Some(SELLS),
           Some(OverThresholdView(selection = false)),
           Some(ExpectationOverThresholdView(selection = false))
         )
@@ -344,7 +342,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
         val s4lDataUpdated = Threshold(
           None,
-          Some(VoluntaryRegistration(REGISTER_YES)),
+          Some(true),
           None,
           Some(OverThresholdView(selection = false)),
           Some(ExpectationOverThresholdView(selection = false))
@@ -357,7 +355,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.contains(CacheKeys.Threshold, s4lData)
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lDataUpdated)
 
-        val response = buildClient("/register-voluntarily").post(Map("voluntaryRegistrationRadio" -> Seq(REGISTER_YES)))
+        val response = buildClient("/register-voluntarily").post(Map("voluntaryRegistrationRadio" -> Seq("true")))
         whenReady(response) { res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VoluntaryRegistrationReasonController.show().url)
@@ -375,7 +373,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
         val s4lDataUpdated = Threshold(
           None,
-          Some(VoluntaryRegistration(REGISTER_NO)),
+          Some(false),
           None,
           Some(OverThresholdView(selection = false)),
           Some(ExpectationOverThresholdView(selection = false))
@@ -388,7 +386,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.contains(CacheKeys.Threshold, s4lData)
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lDataUpdated)
 
-        val response = buildClient("/register-voluntarily").post(Map("voluntaryRegistrationRadio" -> Seq(REGISTER_NO)))
+        val response = buildClient("/register-voluntarily").post(Map("voluntaryRegistrationRadio" -> Seq("false")))
         whenReady(response) { res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some (controllers.routes.VoluntaryRegistrationController.showChoseNoToVoluntary().url)
@@ -402,7 +400,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
       "the request is valid" in {
         val s4lData = Threshold(
           None,
-          Some(VoluntaryRegistration(REGISTER_YES)),
+          Some(true),
           None,
           Some(OverThresholdView(selection = false)),
           Some(ExpectationOverThresholdView(selection = false))
@@ -423,8 +421,8 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
   "POST Voluntary Registration Reason page" should {
     "return 303" when {
       val s4lData = Threshold(
-        Some(TaxableTurnover(TAXABLE_NO)),
-        Some(VoluntaryRegistration(REGISTER_YES)),
+        Some(false),
+        Some(true),
         None,
         None,
         None

@@ -20,8 +20,6 @@ import fixtures.VatRegistrationFixture
 import helpers.{ControllerSpec, FutureAssertions}
 import mocks.ThresholdServiceMock
 import models.CurrentProfile
-import models.view.TaxableTurnover
-import models.view.TaxableTurnover._
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.MessagesApi
@@ -58,37 +56,37 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
 
     "return 200 with HTML not prepopulated when there is no view data" in new Setup {
       mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
-      mockGetThresholdViewModel[TaxableTurnover](Future.successful(None))
+      mockGetThreshold(Future.successful(emptyThreshold))
 
       callAuthenticated(testController.show) { res =>
         res includesText expectedText
         res passJsoupTest { doc =>
-          doc.getElementById("taxableTurnoverRadio-taxable_yes").attr("checked") mustBe ""
-          doc.getElementById("taxableTurnoverRadio-taxable_no").attr("checked") mustBe ""
+          doc.getElementById("taxableTurnoverRadio-true").attr("checked") mustBe ""
+          doc.getElementById("taxableTurnoverRadio-false").attr("checked") mustBe ""
         }
       }
     }
 
     "return 200 with HTML prepopulated to YES when there is view data" in new Setup {
       mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
-      mockGetThresholdViewModel[TaxableTurnover](Future.successful(Some(TaxableTurnover(TAXABLE_YES))))
+      mockGetThreshold(Future.successful(emptyThreshold.copy(taxableTurnover = Some(true))))
 
       callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
-          doc.getElementById("taxableTurnoverRadio-taxable_yes").attr("checked") mustBe "checked"
-          doc.getElementById("taxableTurnoverRadio-taxable_no").attr("checked") mustBe ""
+          doc.getElementById("taxableTurnoverRadio-true").attr("checked") mustBe "checked"
+          doc.getElementById("taxableTurnoverRadio-false").attr("checked") mustBe ""
         }
       }
     }
 
     "return 200 with HTML prepopulated to NO when there is view data" in new Setup {
       mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
-      mockGetThresholdViewModel[TaxableTurnover](Future.successful(Some(TaxableTurnover(TAXABLE_NO))))
+      mockGetThreshold(Future.successful(emptyThreshold.copy(taxableTurnover = Some(false))))
 
       callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
-          doc.getElementById("taxableTurnoverRadio-taxable_yes").attr("checked") mustBe ""
-          doc.getElementById("taxableTurnoverRadio-taxable_no").attr("checked") mustBe "checked"
+          doc.getElementById("taxableTurnoverRadio-true").attr("checked") mustBe ""
+          doc.getElementById("taxableTurnoverRadio-false").attr("checked") mustBe "checked"
         }
       }
     }
@@ -107,12 +105,12 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
 
     "return 303" in new Setup {
       mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
-      mockSaveThreshold(Future.successful(validThresholdPreIncorp.copy(taxableTurnover = Some(TaxableTurnover(TaxableTurnover.TAXABLE_YES)))))
+      mockSaveTaxableTurnover(Future.successful(validThresholdPreIncorp.copy(taxableTurnover = Some(true))))
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
         .thenReturn("someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "taxableTurnoverRadio" -> TaxableTurnover.TAXABLE_YES
+        "taxableTurnoverRadio" -> "true"
       ))(_ redirectsTo "someUrl")
 
     }
@@ -120,15 +118,14 @@ class TaxableTurnoverControllerSpec extends ControllerSpec with GuiceOneAppPerTe
 
   s"POST ${routes.TaxableTurnoverController.submit()} with Taxable Turnover selected No" should {
     "return 303" in new Setup {
-      import models.view.TaxableTurnover.TAXABLE_NO
 
       mockFetchCurrentVatThreshold(Future.successful(currentVatThreshold))
-      mockSaveThreshold(Future.successful(validThresholdPreIncorp))
+      mockSaveTaxableTurnover(Future.successful(validThresholdPreIncorp))
 
-      mockGetThresholdViewModel[TaxableTurnover](Future.successful(Some(validTaxableTurnOverView.copy(yesNo = TAXABLE_NO))))
+      mockGetThreshold(Future.successful(emptyThreshold.copy(taxableTurnover = Some(false))))
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "taxableTurnoverRadio" -> TaxableTurnover.TAXABLE_NO
+        "taxableTurnoverRadio" -> "false"
       ))(_ redirectsTo routes.VoluntaryRegistrationController.show.url)
     }
   }

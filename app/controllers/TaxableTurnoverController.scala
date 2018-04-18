@@ -20,8 +20,7 @@ import javax.inject.Inject
 
 import config.AuthClientConnector
 import forms.TaxableTurnoverForm
-import models.view.TaxableTurnover
-import models.view.TaxableTurnover.TAXABLE_YES
+import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import services._
@@ -40,16 +39,16 @@ trait TaxableTurnoverController extends VatRegistrationController with SessionPr
   val thresholdService: ThresholdService
   val vatRegFrontendService: VatRegFrontendService
 
-  def form(vatThreshold: String) = TaxableTurnoverForm.form(vatThreshold)
+  def form(vatThreshold: String): Form[Boolean] = TaxableTurnoverForm.form(vatThreshold)
 
   def show: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
       for{
-        view      <- thresholdService.getThresholdViewModel[TaxableTurnover]
-        threshold <- thresholdService.fetchCurrentVatThreshold
-        form       = TaxableTurnoverForm.form(threshold)
+        threshold      <- thresholdService.getThreshold
+        currentThreshold <- thresholdService.fetchCurrentVatThreshold
+        form       = TaxableTurnoverForm.form(currentThreshold)
       } yield {
-        Ok(views.html.pages.taxable_turnover(view.fold(form)(form.fill), threshold))
+        Ok(views.html.pages.taxable_turnover(threshold.taxableTurnover.fold(form)(form.fill), currentThreshold))
       }
   }
 
@@ -58,8 +57,8 @@ trait TaxableTurnoverController extends VatRegistrationController with SessionPr
       thresholdService.fetchCurrentVatThreshold.flatMap{ threshold =>
         form(threshold).bindFromRequest().fold(
           badForm => Future.successful(BadRequest(views.html.pages.taxable_turnover(badForm, threshold))),
-          data    => thresholdService.saveThreshold(data) map { _ =>
-            if (data.yesNo == TAXABLE_YES) {
+          taxableTurnover    => thresholdService.saveTaxableTurnover(taxableTurnover) map { _ =>
+            if (taxableTurnover) {
               Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
             } else {
               Redirect(controllers.routes.VoluntaryRegistrationController.show())

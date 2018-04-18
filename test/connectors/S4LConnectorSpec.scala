@@ -17,8 +17,9 @@
 package connectors
 
 import config.VatShortLivedCache
+import fixtures.VatRegistrationFixture
 import helpers.FutureAssertions
-import models.view.TaxableTurnover
+import models.view.Threshold
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -30,7 +31,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-class S4LConnectorSpec extends PlaySpec with MockitoSugar with FutureAssertions {
+class S4LConnectorSpec extends PlaySpec with MockitoSugar with FutureAssertions with VatRegistrationFixture {
 
   val mockShortLivedCache = mock[VatShortLivedCache]
 
@@ -40,29 +41,28 @@ class S4LConnectorSpec extends PlaySpec with MockitoSugar with FutureAssertions 
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val taxableTurnoverModel = TaxableTurnover(TaxableTurnover.TAXABLE_NO)
-  val cacheMap = CacheMap("", Map("" -> Json.toJson(taxableTurnoverModel)))
+  val cacheMap = CacheMap("", Map("" -> Json.toJson(false)))
 
   "Fetching from save4later" should {
     "return the correct model" in {
 
-      when(mockShortLivedCache.fetchAndGetEntry[TaxableTurnover](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
+      when(mockShortLivedCache.fetchAndGetEntry[Threshold](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
         (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Option(taxableTurnoverModel)))
+        .thenReturn(Future.successful(Some(emptyThreshold)))
 
-      await(s4lConnectorTest.fetchAndGet[TaxableTurnover]("", "")) mustBe Some(taxableTurnoverModel)
+      await(s4lConnectorTest.fetchAndGet[Threshold]("", "")) mustBe Some(emptyThreshold)
     }
   }
 
   "Saving a model into save4later" should {
     "save the model" in {
-      val returnCacheMap = CacheMap("", Map("" -> Json.toJson(taxableTurnoverModel)))
+      val returnCacheMap = CacheMap("", Map("" -> Json.toJson(false)))
 
-      when(mockShortLivedCache.cache[TaxableTurnover](ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any())
+      when(mockShortLivedCache.cache[Threshold](ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any())
         (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      val result = s4lConnectorTest.save[TaxableTurnover]("", "", taxableTurnoverModel)
+      val result = s4lConnectorTest.save[Threshold]("", "", emptyThreshold)
       await(result) mustBe returnCacheMap
     }
   }

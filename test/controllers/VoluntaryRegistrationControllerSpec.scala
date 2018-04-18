@@ -20,8 +20,6 @@ import connectors.S4LConnector
 import fixtures.VatRegistrationFixture
 import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
-import models.external.IncorporationInfo
-import models.view.VoluntaryRegistration
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
@@ -59,35 +57,33 @@ class VoluntaryRegistrationControllerSpec extends ControllerSpec with GuiceOneAp
     val expectedText = "You can still choose to register it voluntarily. If you do, the company may be able to reclaim VAT on business-related purchases."
 
     "return 200 with HTML not prepopulated when there is no view data" in new Setup {
-      mockGetThresholdViewModel[VoluntaryRegistration](Future.successful(None))
+      mockGetThreshold(Future.successful(emptyThreshold))
 
       callAuthenticated(testController.show()) { res =>
         res includesText expectedText
         res passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") mustBe ""
-          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") mustBe ""
+          doc.getElementById("voluntaryRegistrationRadio-false").attr("checked") mustBe ""
+          doc.getElementById("voluntaryRegistrationRadio-true").attr("checked") mustBe ""
         }
       }
     }
 
     "return 200 with HTML prepopulated to YES when there is view data" in new Setup {
-      mockGetThresholdViewModel[VoluntaryRegistration](Future.successful(Some(validVoluntaryRegistrationView.copy(yesNo = VoluntaryRegistration.REGISTER_YES))))
-
+      mockGetThreshold(Future.successful(emptyThreshold.copy(voluntaryRegistration = Some(true))))
       callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") mustBe ""
-          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") mustBe "checked"
+          doc.getElementById("voluntaryRegistrationRadio-false").attr("checked") mustBe ""
+          doc.getElementById("voluntaryRegistrationRadio-true").attr("checked") mustBe "checked"
         }
       }
     }
 
     "return 200 with HTML prepopulated to NO when there is view data" in new Setup {
-      mockGetThresholdViewModel[VoluntaryRegistration](Future.successful(Some(validVoluntaryRegistrationView.copy(yesNo = VoluntaryRegistration.REGISTER_NO))))
-
+      mockGetThreshold(Future.successful(emptyThreshold.copy(voluntaryRegistration = Some(false))))
       callAuthenticated(testController.show) {
         _ passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-register_no").attr("checked") mustBe "checked"
-          doc.getElementById("voluntaryRegistrationRadio-register_yes").attr("checked") mustBe ""
+          doc.getElementById("voluntaryRegistrationRadio-false").attr("checked") mustBe "checked"
+          doc.getElementById("voluntaryRegistrationRadio-true").attr("checked") mustBe ""
         }
       }
     }
@@ -103,9 +99,9 @@ class VoluntaryRegistrationControllerSpec extends ControllerSpec with GuiceOneAp
 
   s"POST ${routes.VoluntaryRegistrationController.submit()} with Voluntary Registration selected Yes" should {
     "return 303" in new Setup {
-      mockSaveThreshold(Future.successful(validThresholdPreIncorp))
+      mockSaveVoluntaryRegistration(Future.successful(validThresholdPreIncorp))
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "voluntaryRegistrationRadio" -> VoluntaryRegistration.REGISTER_YES
+        "voluntaryRegistrationRadio" -> "true"
       ))(_ redirectsTo controllers.routes.VoluntaryRegistrationReasonController.show().url)
     }
   }
@@ -121,9 +117,9 @@ class VoluntaryRegistrationControllerSpec extends ControllerSpec with GuiceOneAp
 
   s"POST ${routes.VoluntaryRegistrationController.submit()} with Voluntary Registration selected No" should {
     "redirect to the dashboard page" in new Setup {
-      mockSaveThreshold(Future.successful(validThresholdPreIncorp.copy(voluntaryRegistration = Some(VoluntaryRegistration(VoluntaryRegistration.REGISTER_NO)))))
+      mockSaveVoluntaryRegistration(Future.successful(validThresholdPreIncorp.copy(voluntaryRegistration = Some(false))))
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "voluntaryRegistrationRadio" -> VoluntaryRegistration.REGISTER_NO
+        "voluntaryRegistrationRadio" -> "false"
       ))(_ redirectsTo controllers.routes.VoluntaryRegistrationController.showChoseNoToVoluntary().url)
     }
   }
@@ -132,14 +128,15 @@ class VoluntaryRegistrationControllerSpec extends ControllerSpec with GuiceOneAp
     "return 303 with clear s4l and redirect to dashboard" in new Setup {
       mockS4LClear()
       submitAuthorised(testController.showClearS4lRedirectDashboard(), fakeRequest.withFormUrlEncodedBody()) {
-        (_ redirectsTo (s"${testController.compRegFEURL}${testController.compRegFEURI}${testController.compRegFECompanyRegistrationOverview}"))
+        _ redirectsTo s"${testController.compRegFEURL}${testController.compRegFEURI}${testController.compRegFECompanyRegistrationOverview}"
       }
     }
   }
 
   s"GET ${routes.VoluntaryRegistrationController.showClearS4lRedirectDashboard()} when S4l returns an exception" should {
     "return exception" in new Setup {
-      when(mockS4LConnector.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]())).thenReturn(Future.failed(new Upstream5xxResponse("Forbidden", 500, 500)))
+      when(mockS4LConnector.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.failed(new Upstream5xxResponse("Forbidden", 500, 500)))
       submitAuthorised(testController.showClearS4lRedirectDashboard(), fakeRequest.withFormUrlEncodedBody(
       ))(result => intercept[Upstream5xxResponse](await(result)) mustBe  Upstream5xxResponse("Forbidden", 500, 500))
     }

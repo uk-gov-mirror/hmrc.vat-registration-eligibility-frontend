@@ -17,9 +17,8 @@
 package forms
 import java.time.LocalDate
 
-import uk.gov.hmrc.play.test.UnitSpec
-import helpers.FormInspectors._
 import models.view.ExpectationOverThresholdView
+import uk.gov.hmrc.play.test.UnitSpec
 
 class ExpectationThresholdFormSpec extends UnitSpec {
   val tForm = ExpectationThresholdForm.form(LocalDate.of(1995,1,1))
@@ -31,7 +30,10 @@ class ExpectationThresholdFormSpec extends UnitSpec {
         "expectationOverThreshold.month" -> "11",
         "expectationOverThreshold.year" -> "11")
       val boundModel = tForm.bind(data)
-     boundModel  shouldHaveErrors Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.invalid"))
+
+      boundModel.errors map { formError =>
+        (formError.key, formError.message)
+      } shouldBe Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.invalid"))
     }
       "return no model when false but date is invalid" in {
         val data = Map(ExpectationThresholdForm.RADIO_YES_NO -> "false",
@@ -55,18 +57,26 @@ class ExpectationThresholdFormSpec extends UnitSpec {
         "expectationOverThreshold.month" -> "",
         "expectationOverThreshold.year" -> "")
       val boundModel = tForm.bind(data)
-      boundModel shouldHaveErrors Seq(("expectationOverThresholdRadio","validation.expectationOverThreshold.selection.missing"))
+
+      boundModel.errors map { formError =>
+        (formError.key, formError.message)
+      } shouldBe Seq(("expectationOverThresholdRadio","validation.expectationOverThreshold.selection.missing"))
     }
   }
   "Binding form incorporation checks" should {
     "return validation error if date > today" in {
       val date = LocalDate.now().plusDays(1)
-    val data = Map(ExpectationThresholdForm.RADIO_YES_NO -> "true",
-      "expectationOverThreshold.day" -> s"${date.getDayOfMonth}",
-      "expectationOverThreshold.month" -> s"${date.getMonthValue}",
-      "expectationOverThreshold.year" -> s"${date.getYear}")
-    val boundModel = tForm.bind(data)
-    boundModel shouldHaveErrors  Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.range.above"))
+      val data = Map(
+        ExpectationThresholdForm.RADIO_YES_NO -> "true",
+        "expectationOverThreshold.day" -> s"${date.getDayOfMonth}",
+        "expectationOverThreshold.month" -> s"${date.getMonthValue}",
+        "expectationOverThreshold.year" -> s"${date.getYear}"
+      )
+      val boundModel = tForm.bind(data)
+
+      boundModel.errors map { formError =>
+        (formError.key, formError.message)
+      } shouldBe Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.range.above"))
   }
     "return validation error if date < incorp date" in {
       val data = Map(ExpectationThresholdForm.RADIO_YES_NO -> "true",
@@ -74,7 +84,10 @@ class ExpectationThresholdFormSpec extends UnitSpec {
         "expectationOverThreshold.month" -> "01",
         "expectationOverThreshold.year" -> "1980")
       val boundModel = tForm.bind(data)
-      boundModel shouldHaveErrors  Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.range.below"))
+
+      boundModel.errors map { formError =>
+        (formError.key, formError.message)
+      } shouldBe Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.range.below"))
     }
   }
 }

@@ -17,11 +17,9 @@
 package controllers.test
 
 import connectors.{S4LConnector, VatRegistrationConnector}
+import forms.VoluntaryRegistrationReasonForm._
 import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
-import models.view.TaxableTurnover._
-import models.view.VoluntaryRegistration._
-import models.view.VoluntaryRegistrationReason._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
@@ -74,8 +72,8 @@ class TestSetupControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
           "applyingForAnyOf" -> "false",
           "applyingForVatExemption" -> "false",
           "companyWillDoAnyOf" -> "false",
-          "taxableTurnoverChoice" -> TAXABLE_YES,
-          "voluntaryChoice" -> REGISTER_YES,
+          "taxableTurnoverChoice" -> "true",
+          "voluntaryChoice" -> "true",
           "voluntaryRegistrationReason" -> SELLS,
           "overThresholdSelection" -> "false",
           "overThresholdMonth" -> "",

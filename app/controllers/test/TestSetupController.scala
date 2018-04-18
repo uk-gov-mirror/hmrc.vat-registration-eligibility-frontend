@@ -32,7 +32,6 @@ import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import services.CurrentProfileService
-import transformers.ToThresholdView
 import utils.SessionProfile
 
 import scala.concurrent.Future
@@ -58,13 +57,13 @@ trait TestSetupController extends VatRegistrationController with SessionProfile 
         testSetup = TestSetup(
           eligibility.getOrElse(Eligibility(None, None, None, None, None, None)),
           ThresholdTestSetup(
-            taxableTurnoverChoice = threshold.flatMap(_.taxableTurnover.map(_.yesNo)),
-            voluntaryChoice = threshold.flatMap(_.voluntaryRegistration).map(_.yesNo),
-            voluntaryRegistrationReason = threshold.flatMap(_.voluntaryRegistrationReason).map(_.reason),
-            overThresholdSelection = threshold.flatMap(_.overThreshold).map(_.selection.toString),
+            taxableTurnoverChoice = threshold.flatMap(_.taxableTurnover),
+            voluntaryChoice = threshold.flatMap(_.voluntaryRegistration),
+            voluntaryRegistrationReason = threshold.flatMap(_.voluntaryRegistrationReason),
+            overThresholdSelection = threshold.flatMap(_.overThreshold).map(_.selection),
             overThresholdMonth = threshold.flatMap(_.overThreshold).flatMap(_.date).map(_.getMonthValue.toString),
             overThresholdYear = threshold.flatMap(_.overThreshold).flatMap(_.date).map(_.getYear.toString),
-            expectationOverThresholdSelection = threshold.flatMap(_.expectationOverThreshold).map(_.selection.toString),
+            expectationOverThresholdSelection = threshold.flatMap(_.expectationOverThreshold).map(_.selection),
             expectationOverThresholdDay = threshold.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getDayOfMonth.toString),
             expectationOverThresholdMonth = threshold.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getMonthValue.toString),
             expectationOverThresholdYear = threshold.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getYear.toString)
@@ -99,8 +98,8 @@ trait TestSetupController extends VatRegistrationController with SessionProfile 
     }
   }
 
-  private def getThresholdFromJson(json: JsValue): Threshold = {
-    ToThresholdView.fromAPI(json, true)
+  private def getThresholdFromJson(json: JsValue)(implicit profile: CurrentProfile): Threshold = {
+    Json.fromJson[Threshold](json)(Threshold.apiReads(profile.incorporationDate)).getOrElse(Threshold())
   }
 
   private def buildThreshold(reason: Option[String], overDate: Option[LocalDate], expectedOverDate: Option[LocalDate]) = {

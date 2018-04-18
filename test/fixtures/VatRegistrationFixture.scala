@@ -18,10 +18,8 @@ package fixtures
 
 import java.time.LocalDate
 
+import forms.VoluntaryRegistrationReasonForm
 import models.external.{IncorporationInfo, _}
-import models.view.TaxableTurnover._
-import models.view.VoluntaryRegistration._
-import models.view.VoluntaryRegistrationReason._
 import models.view._
 
 trait VatRegistrationFixture {
@@ -31,34 +29,32 @@ trait VatRegistrationFixture {
 
   //Api models
   val validThresholdPreIncorp = Threshold(
-    taxableTurnover = Some(TaxableTurnover(TAXABLE_NO)),
-    voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
-    voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(SELLS)),
+    taxableTurnover = Some(false),
+    voluntaryRegistration = Some(true),
+    voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.SELLS),
     overThreshold = None,
     expectationOverThreshold = None
   )
   val validThresholdPostIncorp = Threshold(
     taxableTurnover = None,
-    voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
-    voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(SELLS)),
+    voluntaryRegistration = Some(true),
+    voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.SELLS),
     overThreshold = Some(OverThresholdView(selection = false, None)),
     expectationOverThreshold = Some(ExpectationOverThresholdView(selection = false, None))
   )
   val validThresholdPostIncorp2 = Threshold(
     taxableTurnover = None,
-    voluntaryRegistration = Some(VoluntaryRegistration(REGISTER_YES)),
-    voluntaryRegistrationReason = Some(VoluntaryRegistrationReason(SELLS)),
+    voluntaryRegistration = Some(true),
+    voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.SELLS),
     overThreshold = Some(OverThresholdView(selection = true, testDate)),
     expectationOverThreshold = Some(ExpectationOverThresholdView(selection = true, testDate))
   )
+  val emptyThreshold = Threshold(None, None, None, None, None)
 
   val validEligibility = Eligibility(Some(true),Some(false),Some(false),Some(false),Some(false),Some(false))
 
   // View Models
   val validOverThresholdView = OverThresholdView(false,None)
-  val validTaxableTurnOverView = TaxableTurnover(TaxableTurnover.TAXABLE_YES)
-  val validVoluntaryRegistrationView = VoluntaryRegistration(VoluntaryRegistration.REGISTER_YES)
-  val validVoluntaryRegistrationReasonView = VoluntaryRegistrationReason(VoluntaryRegistrationReason.SELLS)
 
   val testIncorporationInfo = IncorporationInfo(
     IncorpSubscription(

@@ -20,8 +20,6 @@ import java.time.LocalDate
 
 import common.enums.CacheKeys
 import helpers.RequestsFinder
-import models.view.VoluntaryRegistration._
-import models.view.VoluntaryRegistrationReason._
 import models.view._
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
@@ -29,15 +27,13 @@ import org.scalatestplus.play.PlaySpec
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
 import support.AppAndStubs
+import forms.VoluntaryRegistrationReasonForm._
 
 class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with RequestsFinder with ScalaFutures {
-  val voluntaryRegistrationYES = VoluntaryRegistration(REGISTER_YES)
-  val voluntaryRegistrationNO = VoluntaryRegistration(REGISTER_NO)
   val overThresholdTrue = OverThresholdView(true, Some(LocalDate.parse("2016-10-29")))
   val expectedOverThresholdTrue = ExpectationOverThresholdView(true, Some(LocalDate.parse("2016-11-25")))
   val overThresholdFalse = OverThresholdView(false, None)
   val expectedOverThresholdFalse = ExpectationOverThresholdView(false, None)
-  val voluntaryRegistrationSELLS = VoluntaryRegistrationReason(SELLS)
 
   "GET Threshold Summary page" should {
     "return 200" when {
@@ -49,7 +45,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
              |  "voluntaryReason": "$SELLS"
              |}
            """.stripMargin)
-        val s4lData = Threshold(None, Some(voluntaryRegistrationYES), Some(voluntaryRegistrationSELLS), Some(overThresholdFalse), Some(expectedOverThresholdFalse))
+        val s4lData = Threshold(None, Some(true), Some(SELLS), Some(overThresholdFalse), Some(expectedOverThresholdFalse))
 
         given()
           .user.isAuthorised
@@ -80,7 +76,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
              |  "expectedOverThresholdDate": "2016-11-25"
              |}
            """.stripMargin)
-        val s4lData = Threshold(None, Some(voluntaryRegistrationNO), None, Some(overThresholdTrue), Some(expectedOverThresholdTrue))
+        val s4lData = Threshold(None, Some(false), None, Some(overThresholdTrue), Some(expectedOverThresholdTrue))
 
         given()
           .user.isAuthorised
@@ -126,7 +122,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
              |  "overThresholdDate": "2016-10-29"
              |}
            """.stripMargin)
-        val s4lData = Threshold(None, Some(voluntaryRegistrationNO), None, Some(overThresholdTrue), Some(expectedOverThresholdFalse))
+        val s4lData = Threshold(None, Some(false), None, Some(overThresholdTrue), Some(expectedOverThresholdFalse))
 
         given()
           .user.isAuthorised
@@ -151,7 +147,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
              |  "expectedOverThresholdDate": "2016-11-25"
              |}
            """.stripMargin)
-        val s4lData = Threshold(None, Some(voluntaryRegistrationNO), None, Some(overThresholdFalse), Some(expectedOverThresholdTrue))
+        val s4lData = Threshold(None, Some(false), None, Some(overThresholdFalse), Some(expectedOverThresholdTrue))
 
         given()
           .user.isAuthorised
@@ -176,7 +172,7 @@ class ThresholdSummaryControllerISpec extends PlaySpec with AppAndStubs with Req
              |  "voluntaryReason": "$SELLS"
              |}
            """.stripMargin)
-        val s4lData = Threshold(None, Some(voluntaryRegistrationYES), Some(voluntaryRegistrationSELLS), Some(overThresholdFalse), Some(expectedOverThresholdFalse))
+        val s4lData = Threshold(None, Some(true), Some(SELLS), Some(overThresholdFalse), Some(expectedOverThresholdFalse))
 
         given()
           .user.isAuthorised

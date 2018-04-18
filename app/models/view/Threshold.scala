@@ -16,50 +16,60 @@
 
 package models.view
 
-import play.api.libs.json.{JsValue, Json, Writes}
-import models.view.VoluntaryRegistration.REGISTER_NO
-import models.view.TaxableTurnover._
+import java.time.LocalDate
 
-case class Threshold(taxableTurnover: Option[TaxableTurnover],
-                     voluntaryRegistration: Option[VoluntaryRegistration],
-                     voluntaryRegistrationReason: Option[VoluntaryRegistrationReason],
-                     overThreshold: Option[OverThresholdView],
-                     expectationOverThreshold: Option[ExpectationOverThresholdView])
+import play.api.libs.json._
+
+case class Threshold(taxableTurnover: Option[Boolean] = None,
+                     voluntaryRegistration: Option[Boolean] = None,
+                     voluntaryRegistrationReason: Option[String] = None,
+                     overThreshold: Option[OverThresholdView] = None,
+                     expectationOverThreshold: Option[ExpectationOverThresholdView] = None)
 
 object Threshold{
-  implicit val format = Json.format[Threshold]
+
+  implicit val format: OFormat[Threshold] = Json.format[Threshold]
+
+  def apiReads(incorpDate : Option[LocalDate]): Reads[Threshold] = new Reads[Threshold] {
+    override def reads(json: JsValue): JsResult[Threshold] = {
+      val mandatoryRegistration = (json \ "mandatoryRegistration").as[Boolean]
+      val voluntaryReason = (json \ "voluntaryReason").asOpt[String]
+      val overThresholdDate = (json \ "overThresholdDate").asOpt[LocalDate]
+      val expectedOverThresholdDate = (json \ "expectedOverThresholdDate").asOpt[LocalDate]
+      //another one here for story
+
+      val voluntary = if (mandatoryRegistration) None else Some(voluntaryReason.nonEmpty)
+
+      incorpDate match {
+        case Some(_) =>
+          val overThresholdView = Some(OverThresholdView(overThresholdDate.isDefined, overThresholdDate))
+          val expectedOverThresholdView = Some(ExpectationOverThresholdView(expectedOverThresholdDate.isDefined, expectedOverThresholdDate))
+          JsSuccess(Threshold(None, voluntary, voluntaryReason, overThresholdView, expectedOverThresholdView))
+        case None   =>
+          JsSuccess(Threshold(Some(mandatoryRegistration), voluntary, voluntaryReason, None, None))
+      }
+    }
+  }
 
   val apiWrites: Writes[Threshold] = new Writes[Threshold] {
-    override def writes(o: Threshold): JsValue = {
-      def toMandatoryRegistration(t: Threshold): Boolean = {
-        (t.taxableTurnover, t.overThreshold, t.expectationOverThreshold) match {
-          case (Some(TaxableTurnover(TAXABLE_YES)), None, None) => true
-          case (Some(TaxableTurnover(TAXABLE_NO)), None, None) => false
-          case (None, Some(OverThresholdView(false, None)), Some(ExpectationOverThresholdView(false, None))) => false
-          case (None, Some(_), Some(_)) => true
-          case _ => throw new IllegalStateException("Can not determine mandatoryRegistration value to save to backend")
-        }
-      }
+    override def writes(threshold: Threshold): JsValue = {
+      def purgeNull(jsObj : JsObject) : JsObject =
+        JsObject(jsObj.value.filterNot {
+          case (_, value) => value == JsNull
+        })
 
-      val voluntaryRegistrationReason = if (toMandatoryRegistration(o)) Json.obj() else o.voluntaryRegistrationReason.fold(Json.obj())(v => Json.obj("voluntaryReason" -> v.reason))
+      val isMandatory: Boolean = List(
+        threshold.taxableTurnover.fold(false)(identity),
+        threshold.overThreshold.fold(false)(od => od.selection),
+        threshold.expectationOverThreshold.fold(false)(od => od.selection)
+      ).contains(true)
 
-      val overThresholdDate = o.overThreshold.fold(Json.obj()) { overThreshold =>
-        if (overThreshold.selection) {
-          Json.obj("overThresholdDate" -> overThreshold.date.getOrElse(throw new IllegalStateException("Missing overThreshold date to save into backend")))
-        } else {
-          Json.obj()
-        }
-      }
-
-      val expectedOverThresholdDate = o.expectationOverThreshold.fold(Json.obj()) { expectedOverThreshold =>
-        if (expectedOverThreshold.selection) {
-          Json.obj("expectedOverThresholdDate" -> expectedOverThreshold.date.getOrElse(throw new IllegalStateException("Missing expectedOverThreshold date to save into backend")))
-        } else {
-          Json.obj()
-        }
-      }
-
-      Json.obj("mandatoryRegistration" -> toMandatoryRegistration(o)) ++ voluntaryRegistrationReason ++ overThresholdDate ++ expectedOverThresholdDate
+      purgeNull(Json.obj(
+        "mandatoryRegistration" -> isMandatory,
+        "voluntaryReason" -> (if (isMandatory) None else threshold.voluntaryRegistrationReason),
+        "overThresholdDate" -> threshold.overThreshold.filter(_.selection == true).flatMap(_.date),
+        "expectedOverThresholdDate" -> threshold.expectationOverThreshold.filter(_.selection == true).flatMap(_.date)
+      ))
     }
   }
 }

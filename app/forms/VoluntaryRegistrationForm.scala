@@ -16,17 +16,20 @@
 
 package forms
 
-import forms.FormValidation.textMapping
-import models.view.VoluntaryRegistration
+import forms.helpers.RequiredBoolean
 import play.api.data.Form
-import play.api.data.Forms.mapping
+import play.api.data.Forms.single
 
-object VoluntaryRegistrationForm {
+object VoluntaryRegistrationForm extends RequiredBoolean {
+
   val RADIO_YES_NO: String = "voluntaryRegistrationRadio"
 
-  val form = Form(
-    mapping(
-      RADIO_YES_NO -> textMapping()("voluntary.registration").verifying(VoluntaryRegistration.valid)
-    )(VoluntaryRegistration.apply)(VoluntaryRegistration.unapply)
+  val errorMessage = "validation.voluntary.registration.missing"
+
+  val form: Form[Boolean] = Form(
+    single(
+      RADIO_YES_NO -> requiredBoolean(errorMessage)
+    )
   )
+
 }

@@ -24,13 +24,13 @@ import play.api.data.Forms._
 object TestSetupForm {
 
   val thresholdTestSetupMapping = mapping(
-    "taxableTurnoverChoice" -> optional(text),
-    "voluntaryChoice" -> optional(text),
+    "taxableTurnoverChoice" -> optional(boolean),
+    "voluntaryChoice" -> optional(boolean),
     "voluntaryRegistrationReason" -> optional(text),
-    "overThresholdSelection" -> optional(text),
+    "overThresholdSelection" -> optional(boolean),
     "overThresholdMonth" -> optional(text),
     "overThresholdYear" -> optional(text),
-    "expectationOverThresholdSelection" -> optional(text),
+    "expectationOverThresholdSelection" -> optional(boolean),
     "expectationOverThresholdDay" -> optional(text),
     "expectationOverThresholdMonth" -> optional(text),
     "expectationOverThresholdYear" -> optional(text)

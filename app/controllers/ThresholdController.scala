@@ -21,7 +21,7 @@ import javax.inject.Inject
 import config.AuthClientConnector
 import forms.{ExpectationThresholdForm, OverThresholdFormFactory}
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
-import models.view.{ExpectationOverThresholdView, OverThresholdView}
+import models.view.ExpectationOverThresholdView
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services._
@@ -40,12 +40,12 @@ trait ThresholdController extends VatRegistrationController with SessionProfile 
       implicit profile =>
         hasIncorpDate { date =>
           for {
-            view         <- thresholdService.getThresholdViewModel[OverThresholdView]
+            threshold    <- thresholdService.getThreshold
             vatThreshold <- thresholdService.fetchCurrentVatThreshold
           } yield {
             val incorpDate = date.format(FORMAT_DD_MMMM_Y)
             val form = OverThresholdFormFactory.form(date, vatThreshold)
-            Ok(views.html.pages.over_threshold(view.fold(form)(form.fill), incorpDate, vatThreshold))
+            Ok(views.html.pages.over_threshold(threshold.overThreshold.fold(form)(form.fill), incorpDate, vatThreshold))
           }
         }
   }
@@ -59,7 +59,7 @@ trait ThresholdController extends VatRegistrationController with SessionProfile 
               badForm => thresholdService.fetchCurrentVatThreshold.map { threshold =>
                 BadRequest(views.html.pages.over_threshold(badForm, date.format(FORMAT_DD_MMMM_Y), threshold))
               },
-              data => thresholdService.saveThreshold(data) map {
+              data => thresholdService.saveOverThreshold(data) map {
                 _ => Redirect(controllers.routes.ThresholdController.expectationOverShow())
               }
             )
@@ -72,11 +72,11 @@ trait ThresholdController extends VatRegistrationController with SessionProfile 
       implicit profile =>
         hasIncorpDate { date =>
           for {
-            view               <- thresholdService.getThresholdViewModel[ExpectationOverThresholdView]
+            threshold          <- thresholdService.getThreshold
             currentThreshold   <- thresholdService.fetchCurrentVatThreshold
           } yield {
             val form = ExpectationThresholdForm.form(date)
-            Ok(views.html.pages.expectation_over_threshold(view.fold(form)(form.fill), currentThreshold))
+            Ok(views.html.pages.expectation_over_threshold(threshold.expectationOverThreshold.fold(form)(form.fill), currentThreshold))
           }
         }
   }
@@ -91,7 +91,7 @@ trait ThresholdController extends VatRegistrationController with SessionProfile 
             } yield {
               BadRequest(views.html.pages.expectation_over_threshold(badForm, currentThreshold))
             },
-          data => thresholdService.saveThreshold(data) map {
+          data => thresholdService.saveExpectationOverThreshold(data) map {
             _ => Redirect(controllers.routes.ThresholdSummaryController.show())
           }
         )

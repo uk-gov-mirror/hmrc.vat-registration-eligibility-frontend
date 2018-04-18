@@ -17,9 +17,6 @@
 package forms
 
 import forms.TaxableTurnoverForm.RADIO_YES_NO
-import helpers.FormInspectors._
-import models.view.TaxableTurnover
-import models.view.TaxableTurnover.TAXABLE_YES
 import uk.gov.hmrc.play.test.UnitSpec
 
 class TaxableTurnoverFormSpec extends UnitSpec {
@@ -29,37 +26,39 @@ class TaxableTurnoverFormSpec extends UnitSpec {
 
   "Binding TaxableTurnoverForm to a model" should {
     "bind successfully with full data" in {
-      val data = Map(RADIO_YES_NO -> TAXABLE_YES)
-      val model = TaxableTurnover(TAXABLE_YES)
+      val data = Map(RADIO_YES_NO -> "true")
 
-      val boundModel = testForm.bind(data).fold(
+      val boundForm = testForm.bind(data).fold(
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundForm shouldBe true
     }
 
     "have the correct error if no data is provided" in {
       val data: Map[String,String] = Map()
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq(RADIO_YES_NO -> "validation.taxable.turnover.missing")
+      boundForm.errors map { formError =>
+        (formError.key, formError.message)
+      } shouldBe Seq(RADIO_YES_NO -> "validation.taxable.turnover.missing")
     }
 
     "have the correct error if wrong data is provided" in {
       val data = Map(RADIO_YES_NO -> "wrong data")
       val boundForm = testForm.bind(data)
 
-      boundForm shouldHaveErrors Seq(RADIO_YES_NO -> "error.unknown")
+      boundForm.errors map { formError =>
+        (formError.key, formError.message)
+      } shouldBe Seq(RADIO_YES_NO -> "validation.taxable.turnover.missing")
     }
   }
 
   "Unbinding TaxableTurnoverForm to a model" should {
     "Unbind successfully with full data" in {
-      val data = Map(RADIO_YES_NO -> TAXABLE_YES)
-      val model = TaxableTurnover(TAXABLE_YES)
+      val data = Map(RADIO_YES_NO -> "true")
 
-      testForm.fill(model).data shouldBe data
+      testForm.fill(true).data shouldBe data
     }
   }
 }

@@ -25,35 +25,35 @@ class TestS4LBuilderImpl extends TestS4LBuilder
 
 trait TestS4LBuilder {
   def thresholdFromData(data: ThresholdTestSetup): Threshold = {
-    val taxableTurnover: Option[String] = data.taxableTurnoverChoice
+    val taxableTurnover: Option[Boolean] = data.taxableTurnoverChoice
 
     val overThresholdView: Option[OverThresholdView] = data.overThresholdSelection match {
-      case Some("true") => Some(OverThresholdView(selection = true, Some(LocalDate.of(
+      case Some(true) => Some(OverThresholdView(selection = true, Some(LocalDate.of(
         data.overThresholdYear.map(_.toInt).get,
         data.overThresholdMonth.map(_.toInt).get,
         1
       ).`with`(TemporalAdjusters.lastDayOfMonth()))))
-      case Some("false") => Some(OverThresholdView(selection = false, None))
+      case Some(false) => Some(OverThresholdView(selection = false, None))
       case _ => None
     }
 
     val expectationOverThresholdView: Option[ExpectationOverThresholdView] = data.expectationOverThresholdSelection match {
-      case Some("true") => Some(ExpectationOverThresholdView(selection = true, Some(LocalDate.of(
+      case Some(true) => Some(ExpectationOverThresholdView(selection = true, Some(LocalDate.of(
         data.expectationOverThresholdYear.map(_.toInt).get,
         data.expectationOverThresholdMonth.map(_.toInt).get,
         data.expectationOverThresholdDay.map(_.toInt).get
       ))))
-      case Some("false") => Some(ExpectationOverThresholdView(selection = false, None))
+      case Some(false) => Some(ExpectationOverThresholdView(selection = false, None))
       case _ => None
     }
 
-    val voluntaryRegistration: Option[String] = data.voluntaryChoice
+    val voluntaryRegistration: Option[Boolean] = data.voluntaryChoice
     val voluntaryRegistrationReason: Option[String] = data.voluntaryRegistrationReason
 
     Threshold(
-      taxableTurnover = taxableTurnover.map(TaxableTurnover(_)),
-      voluntaryRegistration = voluntaryRegistration.map(VoluntaryRegistration(_)),
-      voluntaryRegistrationReason = voluntaryRegistrationReason.map(VoluntaryRegistrationReason(_)),
+      taxableTurnover = taxableTurnover,
+      voluntaryRegistration = voluntaryRegistration,
+      voluntaryRegistrationReason = voluntaryRegistrationReason,
       overThreshold = overThresholdView,
       expectationOverThreshold = expectationOverThresholdView
     )

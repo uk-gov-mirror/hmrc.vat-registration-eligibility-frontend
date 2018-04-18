@@ -30,6 +30,15 @@ import scala.util.Try
 object FormValidation {
   type ErrorCode = String
 
+  def matches(matchers: List[String])(implicit e: ErrorCode): Constraint[String] = Constraint { input: String =>
+    if(matchers.contains(input)) Valid else Invalid(e)
+  }
+
+  implicit def reqStringFormat(implicit errorMessage : ErrorCode): Formatter[String] = new Formatter[String] {
+    def bind(key: String, data: Map[String, String]) = data.get(key).toRight(Seq(FormError(key, errorMessage, Nil)))
+    def unbind(key: String, value: String) = Map(key -> value)
+  }
+
   private def unconstrained[T] = Constraint[T] { (t: T) => Valid }
 
   def mandatoryText()(implicit e: ErrorCode): Constraint[String] = Constraint { input: String =>
