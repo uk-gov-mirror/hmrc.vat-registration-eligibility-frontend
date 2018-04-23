@@ -16,11 +16,12 @@
 
 @import java.time.format.DateTimeFormatter
 
-@import models.view.OverThresholdView
-@(overThresholdForm: Form[OverThresholdView], dateOfIncorporation: String, vatThreshold: String)(implicit request: Request[_], messages: Messages)
+@import models.view.ThresholdView
+@(overThresholdForm: Form[ThresholdView], dateOfIncorporation: String, vatThreshold: String)(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.errorSummary
 @import views.html.helpers.templates.{vatInput, vatInputRadioGroup}
+@import views.html.helpers.templates.newWindowLink
 
 @main_template(title = messages("pages.thresholdQuestion1.title"), scriptElem = Some(Html(s"""<script type="text/javascript" src='${routes.Assets.at("javascripts/main.js")}'></script>"""))) {
 
@@ -30,16 +31,25 @@
         overThresholdForm
     )
 
-    <header class="page-header">
-        <h1 class="form-title heading-xlarge" id="pageHeading">
-        @messages("pages.thresholdQuestion1.heading", dateOfIncorporation, vatThreshold)
-        </h1>
-    </header>
+    <h1 class="form-title heading-xlarge" id="pageHeading">
+        @messages("pages.thresholdQuestion1.heading")
+    </h1>
 
+    <p>@messages("pages.thresholdQuestion1.p1", vatThreshold, dateOfIncorporation)</p>
 
-    <p>@messages("pages.thresholdQuestion1.p1", vatThreshold)</p>
+    <p>@messages("pages.thresholdQuestion1.p2")</p>
 
-    @govHelpers.form(action = controllers.routes.ThresholdController.goneOverSubmit()) {
+    <ul class="list list-bullet">
+        <li>@messages("pages.thresholdQuestion1.bullet1")</li>
+        <li>@messages("pages.thresholdQuestion1.bullet2", vatThreshold)</li>
+    </ul>
+
+    <p>
+        @messages("pages.thresholdQuestion1.p3")
+        @newWindowLink("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies", messages("pages.thresholdQuestion1.p3.1"))
+    </p>
+
+    @govHelpers.form(action = controllers.routes.ThresholdController.goneOverTwelveSubmit()) {
         <div class="form-group" data-hidden="hidden">
             <fieldset class="inline">
                 @defining(DateTimeFormatter

@@ -22,13 +22,18 @@ import play.api.libs.json.Json
 case class ThresholdTestSetup(taxableTurnoverChoice: Option[Boolean],
                               voluntaryChoice: Option[Boolean],
                               voluntaryRegistrationReason: Option[String],
-                              overThresholdSelection: Option[Boolean],
-                              overThresholdMonth: Option[String],
-                              overThresholdYear: Option[String],
-                              expectationOverThresholdSelection: Option[Boolean],
-                              expectationOverThresholdDay: Option[String],
-                              expectationOverThresholdMonth: Option[String],
-                              expectationOverThresholdYear: Option[String])
+                              overThresholdTwelveSelection: Option[Boolean],
+                              overThresholdTwelveMonth: Option[String],
+                              overThresholdTwelveYear: Option[String],
+                              pastOverThresholdThirtySelection: Option[Boolean],
+                              pastOverThresholdThirtyDay: Option[String],
+                              pastOverThresholdThirtyMonth: Option[String],
+                              pastOverThresholdThirtyYear: Option[String],
+                              overThresholdThirtySelection: Option[Boolean],
+                              overThresholdThirtyDay: Option[String],
+                              overThresholdThirtyMonth: Option[String],
+                              overThresholdThirtyYear: Option[String]
+                             )
 
 object ThresholdTestSetup {
   implicit val format = Json.format[ThresholdTestSetup]

@@ -42,7 +42,9 @@ trait ControllerSpec extends PlaySpec with MockitoSugar with AuthMock with AuthB
                      with ResultExtractors with Status with HeaderNames {
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val incorpDate = LocalDate.of(2016, 12, 21)
+  val incorpDate: LocalDate = LocalDate.of(2016, 12, 21)
+  val incorpDateWithinYear: LocalDate = LocalDate.now().minusMonths(6)
+
   implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, Some(incorpDate))
 
   override def beforeEach() {

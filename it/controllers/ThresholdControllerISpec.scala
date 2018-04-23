@@ -57,7 +57,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .audit.writesAudit()
           .vatRegistration.currentThreshold()
 
-        val response = buildClient("/make-more-taxable-sales").post(Map("taxableTurnoverRadio" -> Seq("true")))
+        val response = buildClient("/make-more-taxable-sales").post(Map("overThresholdThirtyPreIncorpRadio" -> Seq("true")))
         whenReady(response) { res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some("/vat-uri/who-is-registering-the-company-for-vat")
@@ -79,7 +79,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .audit.writesAudit()
           .vatRegistration.currentThreshold()
 
-        val response = buildClient("/make-more-taxable-sales").post(Map("taxableTurnoverRadio" -> Seq("false")))
+        val response = buildClient("/make-more-taxable-sales").post(Map("overThresholdThirtyPreIncorpRadio" -> Seq("false")))
         whenReady(response) { res =>
           res.status mustBe 303
           res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VoluntaryRegistrationController.show().url)
@@ -103,7 +103,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
         stubFetchVatThreshold(vatThreshold)
 
-        val response = buildClient("/vat-taxable-turnover-gone-over").get()
+        val response = buildClient("/gone-over-threshold").get()
         whenReady(response)(_.status) mustBe 200
       }
     }
@@ -113,7 +113,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
     "return 303" when {
       "the request is valid" in {
         val s4lData = Threshold(None, None, None, None, None)
-        val s4lDataUpdated = Threshold(None, None, None, Some(OverThresholdView(selection = false, None)), None)
+        val s4lDataUpdated = Threshold(None, None, None, Some(ThresholdView(selection = false, None)), None)
 
         given()
           .user.isAuthorised
@@ -123,10 +123,10 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lDataUpdated)
           .vatRegistration.currentThreshold()
 
-        val response = buildClient("/vat-taxable-turnover-gone-over").post(Map("overThresholdRadio" ->Seq("false")))
+        val response = buildClient("/gone-over-threshold").post(Map("overThresholdRadio" ->Seq("false")))
         whenReady(response) { res =>
           res.status mustBe 303
-          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.expectationOverShow().url)
+          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdSummaryController.show().url)
         }
       }
 
@@ -135,15 +135,16 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           None,
           Some(true),
           None,
-          Some(OverThresholdView(selection = false, None)),
-          Some(ExpectationOverThresholdView(selection = false, None))
+          Some(ThresholdView(selection = false, None)),
+          Some(ThresholdView(selection = false, None)),
+          Some(ThresholdView(selection = false, None))
         )
 
         val json = Json.parse(
           s"""
              |{
              |  "mandatoryRegistration": true,
-             |  "overThresholdDate": "2016-08-31"
+             |  "overThresholdOccuredTwelveMonth": "2016-08-31"
              |}
            """.stripMargin)
 
@@ -156,7 +157,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.cleared
           .vatRegistration.currentThreshold()
 
-        val response = buildClient("/vat-taxable-turnover-gone-over").post(
+        val response = buildClient("/gone-over-threshold").post(
           Map("overThresholdRadio" -> Seq("true"),
             "overThreshold.day" -> Seq("06"),
             "overThreshold.month" -> Seq("08"),
@@ -166,13 +167,14 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
         whenReady(response) { res =>
           res.status mustBe 303
-          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.expectationOverShow().url)
+          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdSummaryController.show().url)
 
 
           val json = getPATCHRequestJsonBody(s"/vatreg/1/threshold")
           (json \ "mandatoryRegistration").as[JsBoolean].value mustBe true
-          (json \ "overThresholdDate").as[JsString].value mustBe "2016-08-31"
-          (json \ "expectedOverThresholdDate").validateOpt[JsString].get mustBe None
+          (json \ "overThresholdOccuredTwelveMonth").as[JsString].value mustBe "2016-08-31"
+          (json \ "pastOverThresholdDateThirtyDays").validateOpt[JsString].get mustBe None
+          (json \ "overThresholdDateThirtyDays").validateOpt[JsString].get mustBe None
           (json \ "voluntaryReason").validateOpt[JsString].get mustBe None
         }
       }
@@ -182,7 +184,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
   "GET Expected Over Threshold page" should {
     "return 200" when {
       "user is authorised and has a date of incorporation" in {
-        val s4lData = Threshold(None, None, None, Some(OverThresholdView(selection = false, None)), None)
+        val s4lData = Threshold(None, None, None, Some(ThresholdView(selection = false, None)), None)
 
         given()
           .user.isAuthorised
@@ -192,7 +194,7 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
 
         stubFetchVatThreshold(vatThreshold)
 
-        val response = buildClient("/go-over-threshold-period").get()
+        val response = buildClient("/gone-over-threshold-period").get()
         whenReady(response)(_.status) mustBe 200
       }
     }
@@ -201,13 +203,13 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
   "POST Expectation Over Threshold page" should{
     "return 303" when {
       "the request is valid" in {
-        val s4lData = Threshold(None, None, None, Some(OverThresholdView(selection = false, None)), None)
+        val s4lData = Threshold(None, None, None, Some(ThresholdView(selection = false, None)), None)
         val s4lDataUpdated = Threshold(
           None,
           None,
           None,
-          Some(OverThresholdView(selection = false, None)),
-          Some(ExpectationOverThresholdView(selection = false, None))
+          Some(ThresholdView(selection = false, None)),
+          Some(ThresholdView(selection = false, None))
         )
 
         given()
@@ -216,11 +218,12 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .audit.writesAudit()
           .s4lContainer.contains(CacheKeys.Threshold, s4lData)
           .s4lContainer.isUpdatedWith(CacheKeys.Threshold, s4lDataUpdated)
+          .vatRegistration.currentThreshold()
 
-        val response = buildClient("/go-over-threshold-period").post(Map("expectationOverThresholdRadio" -> Seq("false")))
+        val response = buildClient("/gone-over-threshold-period").post(Map("pastThirtyDayPeriodRadio" -> Seq("false")))
         whenReady(response) { res =>
           res.status mustBe 303
-          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdSummaryController.show().url)
+          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.goneOverTwelveShow().url)
         }
       }
 
@@ -229,15 +232,16 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           None,
           Some(true),
           None,
-          Some(OverThresholdView(selection = false, None)),
-          Some(ExpectationOverThresholdView(selection = false, None))
+          Some(ThresholdView(selection = false, None)),
+          Some(ThresholdView(selection = false, None)),
+          Some(ThresholdView(selection = false, None))
         )
 
         val json = Json.parse(
           s"""
              |{
              |  "mandatoryRegistration": true,
-             |  "expectedOverThresholdDate": "2016-08-06"
+             |  "pastOverThresholdDateThirtyDays": "2016-08-06"
              |}
            """.stripMargin)
 
@@ -248,20 +252,21 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.contains(CacheKeys.Threshold, s4lData)
           .vatScheme.patched("threshold", json)
           .s4lContainer.cleared
+          .vatRegistration.currentThreshold()
 
-        val response = buildClient("/go-over-threshold-period").post(Map("expectationOverThresholdRadio" -> Seq("true"),
-                                                                             "expectationOverThreshold.day" -> Seq("06"),
-                                                                             "expectationOverThreshold.month" -> Seq("08"),
-                                                                             "expectationOverThreshold.year" -> Seq("2016")))
+        val response = buildClient("/gone-over-threshold-period").post(Map("pastThirtyDayPeriodRadio" -> Seq("true"),
+                                                                             "pastThirtyDayPeriod.day" -> Seq("06"),
+                                                                             "pastThirtyDayPeriod.month" -> Seq("08"),
+                                                                             "pastThirtyDayPeriod.year" -> Seq("2016")))
         whenReady(response) { res =>
           res.status mustBe 303
-          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdSummaryController.show().url)
+          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.goneOverTwelveShow().url)
 
 
           val json = getPATCHRequestJsonBody(s"/vatreg/1/threshold")
           (json \ "mandatoryRegistration").as[JsBoolean].value mustBe true
-          (json \ "expectedOverThresholdDate").as[JsString].value mustBe "2016-08-06"
-          (json \ "overThresholdDate").validateOpt[JsString].get mustBe None
+          (json \ "overThresholdOccuredTwelveMonth").validateOpt[JsString].get mustBe None
+          (json \ "pastOverThresholdDateThirtyDays").as[JsString].value mustBe "2016-08-06"
           (json \ "voluntaryReason").validateOpt[JsString].get mustBe None
         }
       }
@@ -271,8 +276,9 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           None,
           Some(true),
           Some(SELLS),
-          Some(OverThresholdView(selection = false)),
-          Some(ExpectationOverThresholdView(selection = false))
+          Some(ThresholdView(selection = false)),
+          Some(ThresholdView(selection = false)),
+          Some(ThresholdView(selection = false))
         )
 
         val json = Json.parse(
@@ -290,17 +296,18 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           .s4lContainer.contains(CacheKeys.Threshold, s4lData)
           .vatScheme.patched("threshold", json)
           .s4lContainer.cleared
+          .vatRegistration.currentThreshold()
 
-        val response = buildClient("/go-over-threshold-period").post(Map("expectationOverThresholdRadio" -> Seq("false")))
+        val response = buildClient("/gone-over-threshold-period").post(Map("pastThirtyDayPeriodRadio" -> Seq("false")))
         whenReady(response) { res =>
           res.status mustBe 303
-          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdSummaryController.show().url)
+          res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.goneOverTwelveShow().url)
 
           val json = getPATCHRequestJsonBody(s"/vatreg/1/threshold")
           (json \ "mandatoryRegistration").as[JsBoolean].value mustBe false
           (json \ "voluntaryReason").as[JsString].value mustBe SELLS
-          (json \ "overThresholdDate").validateOpt[JsString].get mustBe None
-          (json \ "expectedOverThresholdDate").validateOpt[JsString].get mustBe None
+          (json \ "overThresholdOccuredTwelveMonth").validateOpt[JsString].get mustBe None
+          (json \ "pastOverThresholdDateThirtyDays").validateOpt[JsString].get mustBe None
         }
       }
     }
@@ -313,8 +320,8 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           None,
           None,
           None,
-          Some(OverThresholdView(selection = false)),
-          Some(ExpectationOverThresholdView(selection = false))
+          Some(ThresholdView(selection = false)),
+          Some(ThresholdView(selection = false))
         )
 
         given()
@@ -336,16 +343,16 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           None,
           None,
           None,
-          Some(OverThresholdView(selection = false)),
-          Some(ExpectationOverThresholdView(selection = false))
+          Some(ThresholdView(selection = false)),
+          Some(ThresholdView(selection = false))
         )
 
         val s4lDataUpdated = Threshold(
           None,
           Some(true),
           None,
-          Some(OverThresholdView(selection = false)),
-          Some(ExpectationOverThresholdView(selection = false))
+          Some(ThresholdView(selection = false)),
+          Some(ThresholdView(selection = false))
         )
 
         given()
@@ -367,16 +374,16 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           None,
           None,
           None,
-          Some(OverThresholdView(selection = false)),
-          Some(ExpectationOverThresholdView(selection = false))
+          Some(ThresholdView(selection = false)),
+          Some(ThresholdView(selection = false))
         )
 
         val s4lDataUpdated = Threshold(
           None,
           Some(false),
           None,
-          Some(OverThresholdView(selection = false)),
-          Some(ExpectationOverThresholdView(selection = false))
+          Some(ThresholdView(selection = false)),
+          Some(ThresholdView(selection = false))
         )
 
         given()
@@ -402,8 +409,8 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with RequestsFi
           None,
           Some(true),
           None,
-          Some(OverThresholdView(selection = false)),
-          Some(ExpectationOverThresholdView(selection = false))
+          Some(ThresholdView(selection = false)),
+          Some(ThresholdView(selection = false))
         )
 
         given()

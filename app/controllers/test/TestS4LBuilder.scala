@@ -27,23 +27,33 @@ trait TestS4LBuilder {
   def thresholdFromData(data: ThresholdTestSetup): Threshold = {
     val taxableTurnover: Option[Boolean] = data.taxableTurnoverChoice
 
-    val overThresholdView: Option[OverThresholdView] = data.overThresholdSelection match {
-      case Some(true) => Some(OverThresholdView(selection = true, Some(LocalDate.of(
-        data.overThresholdYear.map(_.toInt).get,
-        data.overThresholdMonth.map(_.toInt).get,
+    val overThresholdView: Option[ThresholdView] = data.overThresholdTwelveSelection match {
+      case Some(true) => Some(ThresholdView(selection = true, Some(LocalDate.of(
+        data.overThresholdTwelveYear.map(_.toInt).get,
+        data.overThresholdTwelveMonth.map(_.toInt).get,
         1
       ).`with`(TemporalAdjusters.lastDayOfMonth()))))
-      case Some(false) => Some(OverThresholdView(selection = false, None))
+      case Some(false) => Some(ThresholdView(selection = false, None))
       case _ => None
     }
 
-    val expectationOverThresholdView: Option[ExpectationOverThresholdView] = data.expectationOverThresholdSelection match {
-      case Some(true) => Some(ExpectationOverThresholdView(selection = true, Some(LocalDate.of(
-        data.expectationOverThresholdYear.map(_.toInt).get,
-        data.expectationOverThresholdMonth.map(_.toInt).get,
-        data.expectationOverThresholdDay.map(_.toInt).get
+    val pastOverThresholdView: Option[ThresholdView] = data.pastOverThresholdThirtySelection match {
+      case Some(true) => Some(ThresholdView(selection = true, Some(LocalDate.of(
+        data.pastOverThresholdThirtyYear.map(_.toInt).get,
+        data.pastOverThresholdThirtyMonth.map(_.toInt).get,
+        data.pastOverThresholdThirtyDay.map(_.toInt).get
       ))))
-      case Some(false) => Some(ExpectationOverThresholdView(selection = false, None))
+      case Some(false) => Some(ThresholdView(selection = false, None))
+      case _ => None
+    }
+
+    val overThresholdThirtyView: Option[ThresholdView] = data.overThresholdThirtySelection match {
+      case Some(true) => Some(ThresholdView(selection = true, Some(LocalDate.of(
+        data.overThresholdThirtyYear.map(_.toInt).get,
+        data.overThresholdThirtyMonth.map(_.toInt).get,
+        data.overThresholdThirtyDay.map(_.toInt).get
+      ))))
+      case Some(false) => Some(ThresholdView(selection = false, None))
       case _ => None
     }
 
@@ -51,11 +61,12 @@ trait TestS4LBuilder {
     val voluntaryRegistrationReason: Option[String] = data.voluntaryRegistrationReason
 
     Threshold(
-      taxableTurnover = taxableTurnover,
+      overThresholdThirtyDaysPreIncorp = taxableTurnover,
       voluntaryRegistration = voluntaryRegistration,
       voluntaryRegistrationReason = voluntaryRegistrationReason,
-      overThreshold = overThresholdView,
-      expectationOverThreshold = expectationOverThresholdView
+      overThresholdOccuredTwelveMonth = overThresholdView,
+      pastOverThresholdThirtyDays = pastOverThresholdView,
+      overThresholdThirtyDays = overThresholdThirtyView
     )
   }
 }

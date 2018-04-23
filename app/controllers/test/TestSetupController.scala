@@ -29,7 +29,7 @@ import models._
 import models.test.{TestSetup, ThresholdTestSetup}
 import models.view.{Eligibility, Threshold}
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import services.CurrentProfileService
 import utils.SessionProfile
@@ -57,16 +57,20 @@ trait TestSetupController extends VatRegistrationController with SessionProfile 
         testSetup = TestSetup(
           eligibility.getOrElse(Eligibility(None, None, None, None, None, None)),
           ThresholdTestSetup(
-            taxableTurnoverChoice = threshold.flatMap(_.taxableTurnover),
+            taxableTurnoverChoice = threshold.flatMap(_.overThresholdThirtyDaysPreIncorp),
             voluntaryChoice = threshold.flatMap(_.voluntaryRegistration),
             voluntaryRegistrationReason = threshold.flatMap(_.voluntaryRegistrationReason),
-            overThresholdSelection = threshold.flatMap(_.overThreshold).map(_.selection),
-            overThresholdMonth = threshold.flatMap(_.overThreshold).flatMap(_.date).map(_.getMonthValue.toString),
-            overThresholdYear = threshold.flatMap(_.overThreshold).flatMap(_.date).map(_.getYear.toString),
-            expectationOverThresholdSelection = threshold.flatMap(_.expectationOverThreshold).map(_.selection),
-            expectationOverThresholdDay = threshold.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getDayOfMonth.toString),
-            expectationOverThresholdMonth = threshold.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getMonthValue.toString),
-            expectationOverThresholdYear = threshold.flatMap(_.expectationOverThreshold).flatMap(_.date).map(_.getYear.toString)
+            overThresholdTwelveSelection = threshold.flatMap(_.overThresholdOccuredTwelveMonth).map(_.selection),
+            overThresholdTwelveMonth = threshold.flatMap(_.overThresholdOccuredTwelveMonth).flatMap(_.date).map(_.getMonthValue.toString),
+            overThresholdTwelveYear = threshold.flatMap(_.overThresholdOccuredTwelveMonth).flatMap(_.date).map(_.getYear.toString),
+            pastOverThresholdThirtySelection = threshold.flatMap(_.pastOverThresholdThirtyDays).map(_.selection),
+            pastOverThresholdThirtyDay = threshold.flatMap(_.pastOverThresholdThirtyDays).flatMap(_.date).map(_.getDayOfMonth.toString),
+            pastOverThresholdThirtyMonth = threshold.flatMap(_.pastOverThresholdThirtyDays).flatMap(_.date).map(_.getMonthValue.toString),
+            pastOverThresholdThirtyYear = threshold.flatMap(_.pastOverThresholdThirtyDays).flatMap(_.date).map(_.getYear.toString),
+            overThresholdThirtySelection = threshold.flatMap(_.overThresholdThirtyDays).map(_.selection),
+            overThresholdThirtyDay = threshold.flatMap(_.overThresholdThirtyDays).flatMap(_.date).map(_.getDayOfMonth.toString),
+            overThresholdThirtyMonth = threshold.flatMap(_.overThresholdThirtyDays).flatMap(_.date).map(_.getMonthValue.toString),
+            overThresholdThirtyYear = threshold.flatMap(_.overThresholdThirtyDays).flatMap(_.date).map(_.getYear.toString)
           )
         )
         form = TestSetupForm.form.fill(testSetup)
@@ -88,11 +92,15 @@ trait TestSetupController extends VatRegistrationController with SessionProfile 
         })
   }
 
-  def addThresholdToBackend(reason: Option[String], overDate: Option[String], expectedDate: Option[String]): Action[AnyContent] = isAuthenticatedWithProfile {
+  def addThresholdToBackend(reason: Option[String],
+                            overTwelveDate: Option[String],
+                            pastThirtyDate: Option[String],
+                            overThirtyDate: Option[String]): Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile => {
-      val od = overDate.map(LocalDate.parse)
-      val eod = expectedDate.map(LocalDate.parse)
-      val threshold = getThresholdFromJson(buildThreshold(reason, od, eod))
+      val overTwelve = overTwelveDate.map(LocalDate.parse)
+      val pastThirty = pastThirtyDate.map(LocalDate.parse)
+      val overThirty = overThirtyDate.map(LocalDate.parse)
+      val threshold = getThresholdFromJson(buildThreshold(reason, overTwelve, pastThirty, overThirty))
 
       vatRegistrationConnector.patchThreshold(threshold) map (_ => Ok("Threshold Inserted"))
     }
@@ -102,13 +110,23 @@ trait TestSetupController extends VatRegistrationController with SessionProfile 
     Json.fromJson[Threshold](json)(Threshold.apiReads(profile.incorporationDate)).getOrElse(Threshold())
   }
 
-  private def buildThreshold(reason: Option[String], overDate: Option[LocalDate], expectedOverDate: Option[LocalDate]) = {
-    (reason, overDate, expectedOverDate) match {
-      case (Some(r),_,_)            => Json.obj("mandatoryRegistration" -> false, "voluntaryReason" -> r)
-      case (_, Some(od), Some(eod)) => Json.obj("mandatoryRegistration" -> true, "overThresholdDate" -> od, "expectedOverThresholdDate" -> eod)
-      case (_, Some(od), _)         => Json.obj("mandatoryRegistration" -> true, "overThresholdDate" -> od)
-      case (_, _, Some(eod))        => Json.obj("mandatoryRegistration" -> true, "expectedOverThresholdDate" -> eod)
-      case _                        => Json.obj("mandatoryRegistration" -> false)
+  private def purgeNull(jsObj : JsObject) : JsObject =
+    JsObject(jsObj.value.filterNot {
+      case (_, value) => value == JsNull
+    })
+
+  private def buildThreshold(reason: Option[String],
+                             overThresholdTwelveDate: Option[LocalDate],
+                             pastThirtyOverDate: Option[LocalDate],
+                             overThresholdThirtyDate: Option[LocalDate]) = {
+    (reason, overThresholdTwelveDate, pastThirtyOverDate, overThresholdThirtyDate) match {
+      case (Some(r), _, _, _) => Json.obj("mandatoryRegistration" -> false, "voluntaryReason" -> r)
+      case _ => purgeNull(Json.obj(
+        "mandatoryRegistration" -> true,
+        "overThresholdOccuredTwelveMonth" -> overThresholdTwelveDate,
+        "pastOverThresholdDateThirtyDays" -> pastThirtyOverDate,
+        "overThresholdDateThirtyDays" -> overThresholdThirtyDate
+      ))
     }
   }
 }

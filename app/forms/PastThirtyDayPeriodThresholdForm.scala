@@ -18,7 +18,7 @@ package forms
 
 import java.time.LocalDate
 
-import models.view.ExpectationOverThresholdView
+import models.view.ThresholdView
 import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.data.Forms._
@@ -30,26 +30,26 @@ import models.MonthYearModel.FORMAT_DD_MMMM_Y
 
 import scala.util.Try
 
-object ExpectationThresholdForm {
-  val RADIO_YES_NO = "expectationOverThresholdRadio"
+object PastThirtyDayPeriodThresholdForm {
+  val RADIO_YES_NO = "pastThirtyDayPeriodRadio"
 
-  def bind(selection: Boolean, dateModel: Option[DayMonthYearModel]): ExpectationOverThresholdView =
-    ExpectationOverThresholdView(selection, dateModel.fold[Option[LocalDate]](None)(_.toLocalDate))
+  def bind(selection: Boolean, dateModel: Option[DayMonthYearModel]): ThresholdView =
+    ThresholdView(selection, dateModel.fold[Option[LocalDate]](None)(_.toLocalDate))
 
-  def unbind(expect: ExpectationOverThresholdView): Option[(Boolean, Option[DayMonthYearModel])] =
+  def unbind(expect: ThresholdView): Option[(Boolean, Option[DayMonthYearModel])] =
     Try {
       expect.date.fold((expect.selection, Option.empty[DayMonthYearModel])) {
         d => (expect.selection, Some(DayMonthYearModel.fromLocalDate(d)))
       }
     }.toOption
 
-  def form(dateOfIncorporation: LocalDate): Form[ExpectationOverThresholdView] = {
-    implicit val specificErrorCode: String = "expectationOverThreshold.date"
+  def form(dateOfIncorporation: LocalDate): Form[ThresholdView] = {
+    implicit val specificErrorCode: String = "pastThirtyDayPeriod.date"
 
     Form(
       mapping(
-        RADIO_YES_NO -> missingBooleanFieldMappingArgs()(Seq(dateOfIncorporation.format(FORMAT_DD_MMMM_Y)))("expectationOverThreshold.selection"),
-        "expectationOverThreshold" -> mandatoryIf(
+        RADIO_YES_NO -> missingBooleanFieldMappingArgs()(Seq(dateOfIncorporation.format(FORMAT_DD_MMMM_Y)))("pastThirtyDayPeriod.selection"),
+        "pastThirtyDayPeriod" -> mandatoryIf(
           isEqual(RADIO_YES_NO, "true"),
           mapping(
             "day" -> text,

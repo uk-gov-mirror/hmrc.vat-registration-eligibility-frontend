@@ -16,11 +16,15 @@
 
 package controllers.test
 
+import java.time.LocalDate
+
+import common.enums.CacheKeys
 import connectors.{S4LConnector, VatRegistrationConnector}
 import forms.VoluntaryRegistrationReasonForm._
 import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
-import org.mockito.ArgumentMatchers.any
+import models.view.{Eligibility, Threshold, ThresholdView}
+import org.mockito.ArgumentMatchers.{any, matches}
 import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.MessagesApi
@@ -53,15 +57,31 @@ class TestSetupControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
   }
 
   "Calling show" should {
-    "display the test setup form" in new Setup {
+    val eligibility = Eligibility(Some(true), Some(false), Some(false), Some(false), Some(false), Some(false))
+    val thresholdPreIncorp = Threshold(Some(false), Some(true), Some("test"), None, None, None)
+    val thresholdView = ThresholdView(true, Some(LocalDate.now))
+    val thresholdPostIncorp = Threshold(None, None, None, Some(thresholdView), Some(thresholdView), Some(thresholdView))
+
+    "display the test setup form with no data" in new Setup {
       when(mockS4LConnector.fetchAndGet(any(), any())(any(), any())).thenReturn(Future(None))
+      callAuthenticated(testController.show())(_ includesText "Test Setup")
+    }
+    "display the test setup form with data for voluntary" in new Setup {
+      when(mockS4LConnector.fetchAndGet[Threshold](any(), matches(CacheKeys.Threshold))(any(), any())) thenReturn Future.successful(Some(thresholdPreIncorp))
+      when(mockS4LConnector.fetchAndGet[Eligibility](any(), matches(CacheKeys.Eligibility))(any(), any())) thenReturn Future.successful(Some(eligibility))
+
+      callAuthenticated(testController.show())(_ includesText "Test Setup")
+    }
+    "display the test setup form with data for mandatory post incorp" in new Setup {
+      when(mockS4LConnector.fetchAndGet[Threshold](any(), matches(CacheKeys.Threshold))(any(), any())) thenReturn Future.successful(Some(thresholdPostIncorp))
+      when(mockS4LConnector.fetchAndGet[Eligibility](any(), matches(CacheKeys.Eligibility))(any(), any())) thenReturn Future.successful(Some(eligibility))
 
       callAuthenticated(testController.show())(_ includesText "Test Setup")
     }
   }
 
   "Calling submit" should {
-    "save Eligibility and Threshold view models into S4L" in new Setup {
+    "save Eligibility and Threshold view models into S4L when voluntary" in new Setup {
       when(mockS4LConnector.save(any(), any(), any())(any(), any())).thenReturn(Future(CacheMap("id", Map())))
 
       submitAuthorised(testController.submit(),
@@ -75,23 +95,61 @@ class TestSetupControllerSpec extends ControllerSpec with GuiceOneAppPerTest wit
           "taxableTurnoverChoice" -> "true",
           "voluntaryChoice" -> "true",
           "voluntaryRegistrationReason" -> SELLS,
-          "overThresholdSelection" -> "false",
-          "overThresholdMonth" -> "",
-          "overThresholdYear" -> "",
-          "expectationOverThresholdSelection" -> "true",
-          "expectationOverThresholdDay" -> "6",
-          "expectationOverThresholdMonth" -> "8",
-          "expectationOverThresholdYear" -> "2017"
+          "overThresholdTwelveSelection" -> "false",
+          "overThresholdTwelveMonth" -> "",
+          "overThresholdTwelveYear" -> "",
+          "pastOverThresholdThirtySelection" -> "false",
+          "pastOverThresholdThirtyDay" -> "",
+          "pastOverThresholdThirtyMonth" -> "",
+          "pastOverThresholdThirtyYear" -> "",
+          "overThresholdThirtySelection" -> "false",
+          "overThresholdThirtyDay" -> "",
+          "overThresholdThirtyMonth" -> "",
+          "overThresholdThirtyYear" -> ""
+        )
+      )(_ isA 200)
+    }
+
+    "save Eligibility and Threshold view models into S4L when mandatory" in new Setup {
+      when(mockS4LConnector.save(any(), any(), any())(any(), any())).thenReturn(Future(CacheMap("id", Map())))
+
+      submitAuthorised(testController.submit(),
+        FakeRequest().withFormUrlEncodedBody(
+          "haveNino" -> "true",
+          "doingBusinessAbroad" -> "false",
+          "doAnyApplyToYou" -> "false",
+          "applyingForAnyOf" -> "false",
+          "applyingForVatExemption" -> "false",
+          "companyWillDoAnyOf" -> "false",
+          "taxableTurnoverChoice" -> "true",
+          "voluntaryChoice" -> "false",
+          "voluntaryRegistrationReason" -> "",
+          "overThresholdTwelveSelection" -> "true",
+          "overThresholdTwelveMonth" -> "08",
+          "overThresholdTwelveYear" -> "2017",
+          "pastOverThresholdThirtySelection" -> "true",
+          "pastOverThresholdThirtyDay" -> "15",
+          "pastOverThresholdThirtyMonth" -> "08",
+          "pastOverThresholdThirtyYear" -> "2017",
+          "overThresholdThirtySelection" -> "true",
+          "overThresholdThirtyDay" -> "15",
+          "overThresholdThirtyMonth" -> "08",
+          "overThresholdThirtyYear" -> "2017"
         )
       )(_ isA 200)
     }
   }
 
   "Calling addThresholdToBackend" should {
-    "update patch threshold in backend" in new Setup {
+    "update patch threshold in backend when voluntary" in new Setup {
       when(mockRegConnector.patchThreshold(any())(any(), any())).thenReturn(Future(Json.obj()))
-
-      callAuthenticated(testController.addThresholdToBackend(Some("test"), Some("2017-08-17"), Some("2017-09-05")))(_ isA 200)
+      callAuthenticated(testController.addThresholdToBackend(Some("test"), None, None, None))(_ isA 200)
     }
+
+    "update patch threshold in backend when mandatory with all dates" in new Setup {
+      when(mockRegConnector.patchThreshold(any())(any(), any())).thenReturn(Future(Json.obj()))
+      callAuthenticated(testController.addThresholdToBackend(None, Some("2017-08-17"), Some("2017-09-05"), Some("2017-08-17")))(_ isA 200)
+    }
+
   }
 }

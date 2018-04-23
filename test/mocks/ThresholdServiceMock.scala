@@ -38,8 +38,8 @@ this: MockitoSugar =>
     when(mockThresholdService.fetchCurrentVatThreshold(any())) thenReturn res
   }
 
-  def mockSaveTaxableTurnover(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
-    when(mockThresholdService.saveTaxableTurnover(any())(any(), any())) thenReturn res
+  def mockSaveOverThresholdThirtyPreIncorp(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveOverThresholdThirtyDaysPreIncorp(any())(any(), any())) thenReturn res
   }
 
   def mockSaveVoluntaryRegistration(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
@@ -51,11 +51,19 @@ this: MockitoSugar =>
   }
 
   def mockSaveOverThreshold(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
-    when(mockThresholdService.saveOverThreshold(any())(any(), any())) thenReturn res
+    when(mockThresholdService.saveOverThresholdThirtyDays(any())(any(), any())) thenReturn res
   }
 
-  def mockSaveExpectationOverThreshold(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
-    when(mockThresholdService.saveExpectationOverThreshold(any())(any(), any())) thenReturn res
+  def mockSaveOverTwelveThreshold(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveOverThresholdTwelveMonths(any())(any(), any())) thenReturn res
+  }
+
+  def mockSaveOverSinceIncorp(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveOverThresholdSinceIncorp(any())(any(), any())) thenReturn res
+  }
+
+  def mockPastThirty(res: Future[Threshold]): OngoingStubbing[Future[Threshold]] = {
+    when(mockThresholdService.saveOverThresholdPastThirtyDays(any())(any(), any())) thenReturn res
   }
 
   def mockFetchCurrentVatThreshold(returns: Future[String]): OngoingStubbing[Future[String]] = {

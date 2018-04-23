@@ -18,10 +18,10 @@ package models.views
 
 import java.time.LocalDate
 
-import models.view.{ExpectationOverThresholdView, OverThresholdView, Threshold}
+import forms.VoluntaryRegistrationReasonForm._
+import models.view.{Threshold, ThresholdView}
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.play.test.UnitSpec
-import forms.VoluntaryRegistrationReasonForm._
 
 class ThresholdSpec extends UnitSpec {
 
@@ -56,13 +56,14 @@ class ThresholdSpec extends UnitSpec {
     }
 
     "return a correct model for post-incorp" when {
-      "the registration is mandatory and both dates provided" in {
+      "the registration is mandatory and all dates provided" in {
         val json = Json.parse(
           s"""
             |{
             |  "mandatoryRegistration":true,
-            |  "overThresholdDate":"$incorpDate",
-            |  "expectedOverThresholdDate":"$incorpDate"
+            |  "overThresholdOccuredTwelveMonth":"$incorpDate",
+            |  "pastOverThresholdDateThirtyDays":"$incorpDate",
+            |  "overThresholdDateThirtyDays":"$incorpDate"
             |}
           """.stripMargin)
         val parseResult = JsSuccess(
@@ -70,8 +71,9 @@ class ThresholdSpec extends UnitSpec {
             None,
             None,
             None,
-            Some(OverThresholdView(selection = true, Some(incorpDate))),
-            Some(ExpectationOverThresholdView(selection = true, Some(incorpDate)))
+            Some(ThresholdView(selection = true, Some(incorpDate))),
+            Some(ThresholdView(selection = true, Some(incorpDate))),
+            Some(ThresholdView(selection = true, Some(incorpDate)))
           )
         )
 
@@ -90,8 +92,9 @@ class ThresholdSpec extends UnitSpec {
             None,
             None,
             None,
-            Some(OverThresholdView(selection = false, None)),
-            Some(ExpectationOverThresholdView(selection = false, None))
+            Some(ThresholdView(selection = false, None)),
+            Some(ThresholdView(selection = false, None)),
+            Some(ThresholdView(selection = false, None))
           )
         )
 
@@ -104,8 +107,9 @@ class ThresholdSpec extends UnitSpec {
              |{
              |  "mandatoryRegistration":false,
              |  "voluntaryReason":"a reason",
-             |  "overThresholdDate":"$incorpDate",
-             |  "expectedOverThresholdDate":"$incorpDate"
+             |  "overThresholdOccuredTwelveMonth":"$incorpDate",
+             |  "pastOverThresholdDateThirtyDays":"$incorpDate",
+             |  "overThresholdDateThirtyDays":"$incorpDate"
              |}
           """.stripMargin)
         val parseResult = JsSuccess(
@@ -113,8 +117,9 @@ class ThresholdSpec extends UnitSpec {
             None,
             Some(true),
             Some("a reason"),
-            Some(OverThresholdView(selection = true, Some(incorpDate))),
-            Some(ExpectationOverThresholdView(selection = true, Some(incorpDate)))
+            Some(ThresholdView(selection = true, Some(incorpDate))),
+            Some(ThresholdView(selection = true, Some(incorpDate))),
+            Some(ThresholdView(selection = true, Some(incorpDate)))
           )
         )
 
@@ -179,19 +184,19 @@ class ThresholdSpec extends UnitSpec {
           None,
           Some(true),
           Some(SELLS),
-          Some(OverThresholdView(false, None)),
-          Some(ExpectationOverThresholdView(false, None))
+          Some(ThresholdView(false, None)),
+          Some(ThresholdView(false, None))
         )
 
         Json.toJson(threshold)(Threshold.apiWrites) shouldBe expectedJson
       }
 
-      "the registration is mandatory with Over Threshold Date" in {
+      "the registration is mandatory when overThresholdOccuredTwelveMonth is present with a date" in {
         val expectedJson = Json.parse(
           s"""
              |{
              |  "mandatoryRegistration": true,
-             |  "overThresholdDate": "2017-12-03"
+             |  "overThresholdOccuredTwelveMonth": "2017-12-03"
              |}
          """.stripMargin)
 
@@ -199,19 +204,20 @@ class ThresholdSpec extends UnitSpec {
           None,
           Some(true),
           Some(SELLS),
-          Some(OverThresholdView(true, Some(LocalDate.of(2017, 12, 3)))),
-          Some(ExpectationOverThresholdView(false, None))
+          Some(ThresholdView(true, Some(LocalDate.of(2017, 12, 3)))),
+          Some(ThresholdView(false, None)),
+          Some(ThresholdView(false, None))
         )
 
         Json.toJson(threshold)(Threshold.apiWrites) shouldBe expectedJson
       }
 
-      "the registration is mandatory with Expected Over Threshold Date" in {
+      "the registration is mandatory when pastOverThresholdDateThirtyDays is present with a date" in {
         val expectedJson = Json.parse(
           s"""
              |{
              |  "mandatoryRegistration": true,
-             |  "expectedOverThresholdDate": "2017-12-03"
+             |  "pastOverThresholdDateThirtyDays": "2017-12-03"
              |}
          """.stripMargin)
 
@@ -219,20 +225,20 @@ class ThresholdSpec extends UnitSpec {
           None,
           Some(true),
           Some(SELLS),
-          Some(OverThresholdView(false, None)),
-          Some(ExpectationOverThresholdView(true, Some(LocalDate.of(2017, 12, 3))))
+          Some(ThresholdView(false, None)),
+          Some(ThresholdView(true, Some(LocalDate.of(2017, 12, 3)))),
+          Some(ThresholdView(false, None))
         )
 
         Json.toJson(threshold)(Threshold.apiWrites) shouldBe expectedJson
       }
 
-      "the registration is mandatory with both Threshold dates" in {
+      "the registration is mandatory when overThresholdDateThirtyDays is present with a date" in {
         val expectedJson = Json.parse(
           s"""
              |{
              |  "mandatoryRegistration": true,
-             |  "overThresholdDate": "2017-12-03",
-             |  "expectedOverThresholdDate": "2017-12-03"
+             |  "overThresholdDateThirtyDays": "2017-12-03"
              |}
          """.stripMargin)
 
@@ -240,8 +246,32 @@ class ThresholdSpec extends UnitSpec {
           None,
           Some(true),
           Some(SELLS),
-          Some(OverThresholdView(true, Some(LocalDate.of(2017, 12, 3)))),
-          Some(ExpectationOverThresholdView(true, Some(LocalDate.of(2017, 12, 3))))
+          Some(ThresholdView(false, None)),
+          Some(ThresholdView(false, None)),
+          Some(ThresholdView(true, Some(LocalDate.of(2017, 12, 3))))
+        )
+
+        Json.toJson(threshold)(Threshold.apiWrites) shouldBe expectedJson
+      }
+
+      "the registration is mandatory with all Threshold dates" in {
+        val expectedJson = Json.parse(
+          s"""
+             |{
+             |  "mandatoryRegistration": true,
+             |  "overThresholdOccuredTwelveMonth": "2017-12-03",
+             |  "pastOverThresholdDateThirtyDays": "2017-12-03",
+             |  "overThresholdDateThirtyDays": "2017-12-03"
+             |}
+         """.stripMargin)
+
+        val threshold = Threshold(
+          None,
+          Some(true),
+          Some(SELLS),
+          Some(ThresholdView(true, Some(LocalDate.of(2017, 12, 3)))),
+          Some(ThresholdView(true, Some(LocalDate.of(2017, 12, 3)))),
+          Some(ThresholdView(true, Some(LocalDate.of(2017, 12, 3))))
         )
 
         Json.toJson(threshold)(Threshold.apiWrites) shouldBe expectedJson

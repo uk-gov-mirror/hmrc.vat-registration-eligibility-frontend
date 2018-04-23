@@ -4,4 +4,4 @@ GET         /s4l-teardown                      controllers.test.TestCacheControl
 GET         /test-setup                        controllers.test.TestSetupController.show()
 POST        /test-setup                        controllers.test.TestSetupController.submit()
 
-GET         /setup-threshold                   controllers.test.TestSetupController.addThresholdToBackend(reason: Option[String], overDate: Option[String], expectedOverDate: Option[String])
+GET         /setup-threshold                   controllers.test.TestSetupController.addThresholdToBackend(reason: Option[String], overTwelveDate: Option[String], pastThirtyDate: Option[String], overThirtyDate: Option[String])

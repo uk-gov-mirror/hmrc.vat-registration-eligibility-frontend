@@ -20,11 +20,15 @@ import java.time.LocalDate
 
 import play.api.libs.json._
 
-case class Threshold(taxableTurnover: Option[Boolean] = None,
-                     voluntaryRegistration: Option[Boolean] = None,
-                     voluntaryRegistrationReason: Option[String] = None,
-                     overThreshold: Option[OverThresholdView] = None,
-                     expectationOverThreshold: Option[ExpectationOverThresholdView] = None)
+case class Threshold(
+                      overThresholdThirtyDaysPreIncorp: Option[Boolean] = None,
+                      voluntaryRegistration: Option[Boolean] = None,
+                      voluntaryRegistrationReason: Option[String] = None,
+                      overThresholdOccuredTwelveMonth: Option[ThresholdView] = None,
+                      pastOverThresholdThirtyDays : Option[ThresholdView] = None,
+                      overThresholdThirtyDays: Option[ThresholdView] = None
+                    )
+
 
 object Threshold{
 
@@ -34,17 +38,19 @@ object Threshold{
     override def reads(json: JsValue): JsResult[Threshold] = {
       val mandatoryRegistration = (json \ "mandatoryRegistration").as[Boolean]
       val voluntaryReason = (json \ "voluntaryReason").asOpt[String]
-      val overThresholdDate = (json \ "overThresholdDate").asOpt[LocalDate]
-      val expectedOverThresholdDate = (json \ "expectedOverThresholdDate").asOpt[LocalDate]
-      //another one here for story
+      val apiTwelveMonth = (json \ "overThresholdOccuredTwelveMonth").asOpt[LocalDate]
+      val apiPastThirtyDays = (json \ "pastOverThresholdDateThirtyDays").asOpt[LocalDate]
+      val apiNextThirtyDays = (json \ "overThresholdDateThirtyDays").asOpt[LocalDate]
 
       val voluntary = if (mandatoryRegistration) None else Some(voluntaryReason.nonEmpty)
 
+      implicit def dateToView(date : Option[LocalDate]): Option[ThresholdView] = {
+        Some(ThresholdView(date.isDefined, date))
+      }
+
       incorpDate match {
         case Some(_) =>
-          val overThresholdView = Some(OverThresholdView(overThresholdDate.isDefined, overThresholdDate))
-          val expectedOverThresholdView = Some(ExpectationOverThresholdView(expectedOverThresholdDate.isDefined, expectedOverThresholdDate))
-          JsSuccess(Threshold(None, voluntary, voluntaryReason, overThresholdView, expectedOverThresholdView))
+          JsSuccess(Threshold(None, voluntary, voluntaryReason, apiTwelveMonth, apiPastThirtyDays, apiNextThirtyDays))
         case None   =>
           JsSuccess(Threshold(Some(mandatoryRegistration), voluntary, voluntaryReason, None, None))
       }
@@ -58,17 +64,24 @@ object Threshold{
           case (_, value) => value == JsNull
         })
 
-      val isMandatory: Boolean = List(
-        threshold.taxableTurnover.fold(false)(identity),
-        threshold.overThreshold.fold(false)(od => od.selection),
-        threshold.expectationOverThreshold.fold(false)(od => od.selection)
+      implicit def viewToBool(thresholdView: Option[ThresholdView]) : Boolean = thresholdView match {
+        case Some(sel) => sel.selection
+        case _         => false
+      }
+
+      val isMandatory: Boolean = List[Boolean](
+        threshold.overThresholdThirtyDaysPreIncorp.contains(true),
+        threshold.overThresholdOccuredTwelveMonth,
+        threshold.pastOverThresholdThirtyDays,
+        threshold.overThresholdThirtyDays
       ).contains(true)
 
       purgeNull(Json.obj(
         "mandatoryRegistration" -> isMandatory,
         "voluntaryReason" -> (if (isMandatory) None else threshold.voluntaryRegistrationReason),
-        "overThresholdDate" -> threshold.overThreshold.filter(_.selection == true).flatMap(_.date),
-        "expectedOverThresholdDate" -> threshold.expectationOverThreshold.filter(_.selection == true).flatMap(_.date)
+        "overThresholdOccuredTwelveMonth" -> threshold.overThresholdOccuredTwelveMonth.filter(_.selection == true).flatMap(_.date),
+        "pastOverThresholdDateThirtyDays" -> threshold.pastOverThresholdThirtyDays.filter(_.selection == true).flatMap(_.date),
+        "overThresholdDateThirtyDays" -> threshold.overThresholdThirtyDays.filter(_.selection == true).flatMap(_.date)
       ))
     }
   }

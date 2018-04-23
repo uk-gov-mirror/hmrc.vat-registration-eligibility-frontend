@@ -19,21 +19,21 @@ package forms
 import java.time.LocalDate
 
 import models.MonthYearModel
-import models.view.OverThresholdView
+import models.view.ThresholdView
 import uk.gov.hmrc.play.test.UnitSpec
 
 class OverThresholdFormFactorySpec extends UnitSpec {
 
   val vatThreshold = "12345"
-  val testForm = OverThresholdFormFactory.form(LocalDate.of(2016, 8, 5), vatThreshold)
+  val testForm = OverThresholdTwelveMonthsForm.form(LocalDate.of(2016, 8, 5), vatThreshold)
 
   "Binding OverThresholdFormFactory to a model" should {
     "bind successfully with full data" in {
-      val data = Map(OverThresholdFormFactory.RADIO_YES_NO -> "true",
+      val data = Map(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "true",
                      "overThreshold.month" -> "9",
                      "overThreshold.year" -> "2016")
 
-      val model = OverThresholdView(true, Some(MonthYearModel("9", "2016")).flatMap(_.toLocalDate))
+      val model = ThresholdView(true, Some(MonthYearModel("9", "2016")).flatMap(_.toLocalDate))
 
       val boundModel = testForm.bind(data).fold(
         errors => errors,
@@ -43,9 +43,9 @@ class OverThresholdFormFactorySpec extends UnitSpec {
     }
 
     "bind successfully with partial data" in {
-      val data = Map(OverThresholdFormFactory.RADIO_YES_NO -> "false")
+      val data = Map(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "false")
 
-      val model = OverThresholdView(false, None)
+      val model = ThresholdView(false, None)
 
       val boundModel = testForm.bind(data).fold(
         errors => errors,
@@ -60,11 +60,11 @@ class OverThresholdFormFactorySpec extends UnitSpec {
 
       boundForm.errors map { formErrors =>
         (formErrors.key, formErrors.message)
-      } shouldBe Seq(OverThresholdFormFactory.RADIO_YES_NO -> "validation.overThreshold.selection.missing")
+      } shouldBe Seq(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "validation.overThreshold.selection.missing")
     }
 
     "have the correct error if data is below incorporation date" in {
-      val data: Map[String,String] = Map(OverThresholdFormFactory.RADIO_YES_NO -> "true",
+      val data: Map[String,String] = Map(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "true",
                                          "overThreshold.month" -> "7",
                                          "overThreshold.year" -> "2016")
       val boundForm = testForm.bind(data)
@@ -76,7 +76,7 @@ class OverThresholdFormFactorySpec extends UnitSpec {
     }
 
     "have the correct error if data is above current date" in {
-      val data: Map[String,String] = Map(OverThresholdFormFactory.RADIO_YES_NO -> "true",
+      val data: Map[String,String] = Map(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "true",
         "overThreshold.month" -> "7",
         "overThreshold.year" -> LocalDate.now().plusYears(1).getYear.toString)
       val boundForm = testForm.bind(data)
@@ -87,7 +87,7 @@ class OverThresholdFormFactorySpec extends UnitSpec {
     }
 
     "have the correct error if data is an incomplete date" in {
-      val data: Map[String,String] = Map(OverThresholdFormFactory.RADIO_YES_NO -> "true",
+      val data: Map[String,String] = Map(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "true",
         "overThreshold.month" -> "",
         "overThreshold.year" -> "2016")
       val boundForm = testForm.bind(data)
@@ -98,26 +98,26 @@ class OverThresholdFormFactorySpec extends UnitSpec {
     }
   }
 
-  "Unbinding a OverThresholdView model to a form" should {
+  "Unbinding a ThresholdView model to a form" should {
     "unbind successfully when selection is false" in {
-      val data = Map(OverThresholdFormFactory.RADIO_YES_NO -> "false")
-      val model = OverThresholdView(false, None)
+      val data = Map(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "false")
+      val model = ThresholdView(false, None)
 
       testForm.fill(model).data shouldBe data
     }
 
     "unbind successfully when selection is true with a date" in {
-      val data = Map(OverThresholdFormFactory.RADIO_YES_NO -> "true",
+      val data = Map(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "true",
                      "overThreshold.month" -> "9",
                      "overThreshold.year" -> "2016")
-      val model = OverThresholdView(true, Some(MonthYearModel("9", "2016")).flatMap(_.toLocalDate))
+      val model = ThresholdView(true, Some(MonthYearModel("9", "2016")).flatMap(_.toLocalDate))
 
       testForm.fill(model).data shouldBe data
     }
 
     "unbind successfully when selection is true with no date" in {
-      val data = Map(OverThresholdFormFactory.RADIO_YES_NO -> "true")
-      val model = OverThresholdView(true, None)
+      val data = Map(OverThresholdTwelveMonthsForm.RADIO_YES_NO -> "true")
+      val model = ThresholdView(true, None)
 
       testForm.fill(model).data shouldBe data
     }

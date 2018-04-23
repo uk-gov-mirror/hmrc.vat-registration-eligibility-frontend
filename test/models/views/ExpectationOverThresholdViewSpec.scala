@@ -19,9 +19,9 @@ package models.views
 import java.time.LocalDate
 
 import fixtures.VatRegistrationFixture
-import forms.ExpectationThresholdForm
+import forms.PastThirtyDayPeriodThresholdForm
 import models.DayMonthYearModel
-import models.view.ExpectationOverThresholdView
+import models.view.ThresholdView
 import org.scalatest.Inside
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -29,20 +29,20 @@ import uk.gov.hmrc.play.test.UnitSpec
 class ExpectationOverThresholdViewSpec  extends UnitSpec with VatRegistrationFixture with Inside {
 
   val date = LocalDate.of(2017, 3, 31)
-  val yesView = ExpectationOverThresholdView(true, Some(date))
-  val noView = ExpectationOverThresholdView(false, None)
+  val yesView = ThresholdView(true, Some(testDate))
+  val noView = ThresholdView(false, None)
 
   "unbind" should {
     "decompose an over threshold view with a date" in {
-      inside(ExpectationThresholdForm.unbind(yesView)) {
+      inside(PastThirtyDayPeriodThresholdForm.unbind(yesView)) {
         case Some((selection, otDate)) =>
           selection shouldBe true
-          otDate shouldBe Some(DayMonthYearModel.fromLocalDate(date))
+          otDate shouldBe Some(DayMonthYearModel.fromLocalDate(testDate))
       }
     }
 
     "decompose an over threshold view without a date" in {
-      inside(ExpectationThresholdForm.unbind(noView)) {
+      inside(PastThirtyDayPeriodThresholdForm.unbind(noView)) {
         case Some((selection, otDate)) =>
           selection shouldBe false
           otDate shouldBe None
@@ -51,11 +51,11 @@ class ExpectationOverThresholdViewSpec  extends UnitSpec with VatRegistrationFix
   }
 
   "bind" should {
-    "create OverThresholdView when MonthYearModel is present" in {
-      ExpectationThresholdForm.bind(true, Some(DayMonthYearModel.fromLocalDate(date))) shouldBe ExpectationOverThresholdView(true, Some(date))
+    "create ThresholdView when MonthYearModel is present" in {
+      PastThirtyDayPeriodThresholdForm.bind(true, Some(DayMonthYearModel.fromLocalDate(date))) shouldBe ThresholdView(true, Some(date))
     }
-    "create OverThresholdView when MonthYearModel is NOT present" in {
-      ExpectationThresholdForm.bind(false, None) shouldBe ExpectationOverThresholdView(false, None)
+    "create ThresholdView when MonthYearModel is NOT present" in {
+      PastThirtyDayPeriodThresholdForm.bind(false, None) shouldBe ThresholdView(false, None)
     }
   }
 }

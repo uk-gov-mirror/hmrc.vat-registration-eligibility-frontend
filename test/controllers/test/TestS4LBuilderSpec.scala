@@ -18,9 +18,9 @@ package controllers.test
 
 import java.time.LocalDate
 
-import models.test.ThresholdTestSetup
-import models.view.{ExpectationOverThresholdView, OverThresholdView, Threshold}
 import forms.VoluntaryRegistrationReasonForm._
+import models.test.ThresholdTestSetup
+import models.view.{Threshold, ThresholdView}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class TestS4LBuilderSpec extends UnitSpec {
@@ -32,21 +32,26 @@ class TestS4LBuilderSpec extends UnitSpec {
         taxableTurnoverChoice = Some(false),
         voluntaryChoice = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThresholdSelection = Some(true),
-        overThresholdMonth = Some("9"),
-        overThresholdYear = Some("2017"),
-        expectationOverThresholdSelection = Some(true),
-        expectationOverThresholdDay = Some("6"),
-        expectationOverThresholdMonth = Some("8"),
-        expectationOverThresholdYear = Some("2016")
+        overThresholdTwelveSelection = Some(true),
+        overThresholdTwelveMonth = Some("9"),
+        overThresholdTwelveYear = Some("2017"),
+        pastOverThresholdThirtySelection = Some(true),
+        pastOverThresholdThirtyDay = Some("6"),
+        pastOverThresholdThirtyMonth = Some("8"),
+        pastOverThresholdThirtyYear = Some("2016"),
+        overThresholdThirtySelection = Some(true),
+        overThresholdThirtyDay = Some("6"),
+        overThresholdThirtyMonth = Some("8"),
+        overThresholdThirtyYear = Some("2016")
       )
 
       val expected = Threshold(
-        taxableTurnover = Some(false),
+        overThresholdThirtyDaysPreIncorp = Some(false),
         voluntaryRegistration = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThreshold = Some(OverThresholdView(true, Some(LocalDate.of(2017, 9, 30)))),
-        expectationOverThreshold = Some(ExpectationOverThresholdView(true, Some(LocalDate.of(2016, 8, 6))))
+        overThresholdThirtyDays = Some(ThresholdView(true, Some(LocalDate.of(2016, 8, 6)))),
+        pastOverThresholdThirtyDays = Some(ThresholdView(true, Some(LocalDate.of(2016, 8, 6)))),
+        overThresholdOccuredTwelveMonth = Some(ThresholdView(true, Some(LocalDate.of(2017, 9, 30))))
       )
 
       TestBuilder.thresholdFromData(data) shouldBe expected
@@ -57,21 +62,26 @@ class TestS4LBuilderSpec extends UnitSpec {
         taxableTurnoverChoice = Some(false),
         voluntaryChoice = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThresholdSelection = Some(false),
-        overThresholdMonth = Some("9"),
-        overThresholdYear = Some("2017"),
-        expectationOverThresholdSelection = Some(false),
-        expectationOverThresholdDay = Some("6"),
-        expectationOverThresholdMonth = Some("8"),
-        expectationOverThresholdYear = Some("2016")
+        overThresholdTwelveSelection = Some(false),
+        overThresholdTwelveMonth = Some("9"),
+        overThresholdTwelveYear = Some("2017"),
+        pastOverThresholdThirtySelection = Some(false),
+        pastOverThresholdThirtyDay = Some("6"),
+        pastOverThresholdThirtyMonth = Some("8"),
+        pastOverThresholdThirtyYear = Some("2016"),
+        overThresholdThirtySelection = Some(false),
+        overThresholdThirtyDay = Some("6"),
+        overThresholdThirtyMonth = Some("8"),
+        overThresholdThirtyYear = Some("2016")
       )
 
       val expected = Threshold(
-        taxableTurnover = Some(false),
+        overThresholdThirtyDaysPreIncorp = Some(false),
         voluntaryRegistration = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThreshold = Some(OverThresholdView(false, None)),
-        expectationOverThreshold = Some(ExpectationOverThresholdView(false, None))
+        overThresholdThirtyDays = Some(ThresholdView(false, None)),
+        pastOverThresholdThirtyDays = Some(ThresholdView(false, None)),
+        overThresholdOccuredTwelveMonth = Some(ThresholdView(false, None))
       )
 
       TestBuilder.thresholdFromData(data) shouldBe expected
@@ -82,21 +92,26 @@ class TestS4LBuilderSpec extends UnitSpec {
         taxableTurnoverChoice = Some(false),
         voluntaryChoice = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThresholdSelection = None,
-        overThresholdMonth = Some("9"),
-        overThresholdYear = Some("2017"),
-        expectationOverThresholdSelection = None,
-        expectationOverThresholdDay = Some("6"),
-        expectationOverThresholdMonth = Some("8"),
-        expectationOverThresholdYear = Some("2016")
+        overThresholdTwelveSelection = None,
+        overThresholdTwelveMonth = Some("9"),
+        overThresholdTwelveYear = Some("2017"),
+        pastOverThresholdThirtySelection = None,
+        pastOverThresholdThirtyDay = Some("6"),
+        pastOverThresholdThirtyMonth = Some("8"),
+        pastOverThresholdThirtyYear = Some("2016"),
+        overThresholdThirtySelection = None,
+        overThresholdThirtyDay = Some("6"),
+        overThresholdThirtyMonth = Some("8"),
+        overThresholdThirtyYear = Some("2016")
       )
 
       val expected = Threshold(
-        taxableTurnover = Some(false),
+        overThresholdThirtyDaysPreIncorp = Some(false),
         voluntaryRegistration = Some(true),
         voluntaryRegistrationReason = Some(SELLS),
-        overThreshold = None,
-        expectationOverThreshold = None
+        overThresholdThirtyDays = None,
+        pastOverThresholdThirtyDays = None,
+        overThresholdOccuredTwelveMonth = None
       )
 
       TestBuilder.thresholdFromData(data) shouldBe expected

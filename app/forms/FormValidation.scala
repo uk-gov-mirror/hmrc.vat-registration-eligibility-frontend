@@ -31,7 +31,7 @@ object FormValidation {
   type ErrorCode = String
 
   def matches(matchers: List[String])(implicit e: ErrorCode): Constraint[String] = Constraint { input: String =>
-    if(matchers.contains(input)) Valid else Invalid(e)
+    if (matchers.contains(input)) Valid else Invalid(e)
   }
 
   implicit def reqStringFormat(implicit errorMessage : ErrorCode): Formatter[String] = new Formatter[String] {

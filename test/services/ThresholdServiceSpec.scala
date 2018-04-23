@@ -43,10 +43,10 @@ class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with
   implicit val currentProfilePreIncorp = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, None)
   val currentProfilePostIncorp = CurrentProfile("Test Me", testRegId, "000-434-1", VatRegStatus.draft, Some(LocalDate.of(2016, 12, 21)))
   val thresholdPreIncorpComplete = Threshold(Some(false), Some(true), Some(SELLS), None, None)
-  val overThresholdFalse = OverThresholdView(false, None)
-  val overThresholdTrue = OverThresholdView(true, testDate)
-  val expectOverThresholdFalse = ExpectationOverThresholdView(false, None)
-  val expectOverThresholdTrue = ExpectationOverThresholdView(true, testDate)
+  val overThresholdFalse = ThresholdView(false, None)
+  val overThresholdTrue = ThresholdView(true, optTestDate)
+  val expectOverThresholdFalse = ThresholdView(false, None)
+  val expectOverThresholdTrue = ThresholdView(true, optTestDate)
   val thresholdPostIncorpComplete = Threshold(None, Some(true), Some(SELLS), Some(overThresholdFalse), Some(expectOverThresholdFalse))
   val thresholdPostIncorpCompleteOver1 = Threshold(None, None, None, Some(overThresholdTrue), Some(expectOverThresholdFalse))
   val thresholdPostIncorpCompleteOver2 = Threshold(None, None, None, Some(overThresholdFalse), Some(expectOverThresholdTrue))
@@ -106,12 +106,12 @@ class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with
     "save a complete model" in new Setup {
       mockAllGetThreshold()
       mockSaveComplete()
-      await(service.saveTaxableTurnover(taxableTurnover = true)) mustBe Threshold(Some(true))
+      await(service.saveOverThresholdThirtyDaysPreIncorp(taxableTurnover = true)) mustBe Threshold(Some(true))
     }
     "save an incomplete model" in new Setup {
       mockAllGetThreshold()
       mockSaveIncomplete()
-      await(service.saveTaxableTurnover(taxableTurnover = false)) mustBe Threshold(Some(false))
+      await(service.saveOverThresholdThirtyDaysPreIncorp(taxableTurnover = false)) mustBe Threshold(Some(false))
     }
   }
 
@@ -152,35 +152,68 @@ class ThresholdServiceSpec extends PlaySpec with MockitoSugar with VatMocks with
     }
   }
 
-  "saveOverThreshold" must {
-    val overThreshold = OverThresholdView(selection = true, Some(LocalDate.now()))
+  "saveOverThresholdThirtyDays" must {
+    val overThreshold = ThresholdView(selection = true, Some(LocalDate.now()))
 
-    "save a complete model" in new Setup {
-      val incomplete = Threshold(None, None, None, None, Some(ExpectationOverThresholdView(selection = false, None)))
+    "save a complete model, missing the past 30 day period question" in new Setup {
+      val incomplete = Threshold(None, None, None, Some(overThreshold), None)
       mockAllGetThreshold(Some(incomplete))
       mockSaveComplete()
-      await(service.saveOverThreshold(overThreshold)) mustBe incomplete.copy(overThreshold = Some(overThreshold))
+      await(service.saveOverThresholdThirtyDays(true)) mustBe incomplete.copy(overThresholdThirtyDays = Some(overThreshold))
     }
     "save an incomplete model" in new Setup {
       mockAllGetThreshold()
       mockSaveIncomplete()
-      await(service.saveOverThreshold(overThreshold)) mustBe Threshold(None, None, None, Some(overThreshold))
+      await(service.saveOverThresholdThirtyDays(true)) mustBe Threshold(None, None, None, None, None, Some(overThreshold))
+    }
+  }
+  "saveOverThresholdSinceIncorp" must {
+    val overThreshold = ThresholdView(selection = true, currentProfilePostIncorp.incorporationDate)
+
+    "save a complete model" in new Setup {
+      val incomplete = Threshold(None, None, None, None, Some(overThreshold), Some(overThreshold))
+      mockAllGetThreshold(Some(incomplete))
+      mockSaveComplete()
+      await(service.saveOverThresholdSinceIncorp(true)(currentProfilePostIncorp, hc)) mustBe
+        incomplete.copy(overThresholdOccuredTwelveMonth = Some(overThreshold))
+    }
+    "save an incomplete model" in new Setup {
+      mockAllGetThreshold()
+      mockSaveIncomplete()
+      await(service.saveOverThresholdSinceIncorp(true)(currentProfilePostIncorp, hc)) mustBe
+        Threshold(None, None, None, Some(overThreshold), None, None)
     }
   }
 
-  "saveExpectationOverThreshold" must {
-    val expectationOverThreshold = ExpectationOverThresholdView(selection = true, Some(LocalDate.now()))
+  "saveOverThresholdPastThirtyDays" must {
+    val overThreshold = ThresholdView(selection = true, Some(LocalDate.now()))
 
     "save a complete model" in new Setup {
-      val incomplete = Threshold(None, None, None, Some(OverThresholdView(selection = false, None)))
+      val incomplete = Threshold(None, None, None, Some(overThreshold), None, Some(overThreshold))
       mockAllGetThreshold(Some(incomplete))
       mockSaveComplete()
-      await(service.saveExpectationOverThreshold(expectationOverThreshold)) mustBe incomplete.copy(expectationOverThreshold = Some(expectationOverThreshold))
+      await(service.saveOverThresholdPastThirtyDays(overThreshold)) mustBe incomplete.copy(pastOverThresholdThirtyDays = Some(overThreshold))
     }
     "save an incomplete model" in new Setup {
       mockAllGetThreshold()
       mockSaveIncomplete()
-      await(service.saveExpectationOverThreshold(expectationOverThreshold)) mustBe Threshold(None, None, None, None, Some(expectationOverThreshold))
+      await(service.saveOverThresholdPastThirtyDays(overThreshold)) mustBe Threshold(None, None, None, None, Some(overThreshold))
+    }
+  }
+
+  "saveOverThresholdTwelveMonths" must {
+    val overThreshold = ThresholdView(selection = true, Some(LocalDate.now()))
+
+    "save a complete model" in new Setup {
+      val incomplete = Threshold(None, None, None, None, Some(overThreshold), Some(overThreshold))
+      mockAllGetThreshold(Some(incomplete))
+      mockSaveComplete()
+      await(service.saveOverThresholdTwelveMonths(overThreshold)) mustBe incomplete.copy(overThresholdOccuredTwelveMonth = Some(overThreshold))
+    }
+    "save an incomplete model" in new Setup {
+      mockAllGetThreshold()
+      mockSaveIncomplete()
+      await(service.saveOverThresholdTwelveMonths(overThreshold)) mustBe Threshold(None, None, None, Some(overThreshold))
     }
   }
 

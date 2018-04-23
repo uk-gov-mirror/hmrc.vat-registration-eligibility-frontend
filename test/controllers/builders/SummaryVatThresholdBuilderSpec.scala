@@ -20,12 +20,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import fixtures.VatRegistrationFixture
-import models.view.{ExpectationOverThresholdView, OverThresholdView, SummaryRow, SummarySection}
+import models.view.{SummaryRow, SummarySection, ThresholdView}
 import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.http.HeaderCarrier
 
 
-class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixture {
+class SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixture {
 
   val specificDate = LocalDate.of(2017, 11, 12)
 
@@ -35,8 +35,9 @@ class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixt
 
   "building a Summary vat threshold row" should {
     val validOtherThresholdPostIncorp = validThresholdPostIncorp.copy(
-      overThreshold = Some(OverThresholdView(true, Some(specificDate))),
-      expectationOverThreshold = Some(ExpectationOverThresholdView(true, Some(specificDate)))
+      overThresholdThirtyDays = Some(ThresholdView(true, Some(specificDate))),
+      pastOverThresholdThirtyDays = Some(ThresholdView(true, Some(specificDate))),
+      overThresholdOccuredTwelveMonth = Some(ThresholdView(true, Some(specificDate)))
     )
     "with ThresholdSelectionRow" should {
       "return a summary row with 'YES' if overThreshold is true" in {
@@ -45,7 +46,7 @@ class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixt
         postIncorpBuilder.overThresholdSelectionRow mustBe SummaryRow(
           "threshold.overThresholdSelection",
           "app.common.yes",
-          Some(controllers.routes.ThresholdController.goneOverShow())
+          Some(controllers.routes.ThresholdController.goneOverTwelveShow())
         )
       }
 
@@ -54,7 +55,7 @@ class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixt
         noPostIncorpBuilder.overThresholdSelectionRow mustBe SummaryRow(
           "threshold.overThresholdSelection",
           "app.common.no",
-          Some(controllers.routes.ThresholdController.goneOverShow())
+          Some(controllers.routes.ThresholdController.goneOverTwelveShow())
         )
       }
     }
@@ -65,7 +66,7 @@ class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixt
         postIncorpBuilder.overThresholdDateRow mustBe SummaryRow(
           "threshold.overThresholdDate",
           specificDate.format(monthYearPresentationFormatter),
-          Some(controllers.routes.ThresholdController.goneOverShow())
+          Some(controllers.routes.ThresholdController.goneOverTwelveShow())
         )
       }
 
@@ -74,7 +75,7 @@ class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixt
         noPostIncorpBuilder.overThresholdDateRow mustBe SummaryRow(
           "threshold.overThresholdDate",
           "",
-          Some(controllers.routes.ThresholdController.goneOverShow())
+          Some(controllers.routes.ThresholdController.goneOverTwelveShow())
         )
       }
 
@@ -83,10 +84,11 @@ class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixt
           val postIncorpBuilder = SummaryVatThresholdBuilder(validOtherThresholdPostIncorp)
           postIncorpBuilder.section mustBe SummarySection(
             "threshold",
-            Seq((postIncorpBuilder.overThresholdSelectionRow, true),
-              (postIncorpBuilder.overThresholdDateRow, true),
-              (postIncorpBuilder.expectedOverThresholdSelectionRow,true),
-              (postIncorpBuilder.expectedOverThresholdDateRow, true))
+            Seq((postIncorpBuilder.overThresholdThirtySelectionRow, true),
+              (postIncorpBuilder.pastOverThresholdSelectionRow, true),
+              (postIncorpBuilder.pastOverThresholdDateRow,true),
+              (postIncorpBuilder.overThresholdSelectionRow, true),
+              (postIncorpBuilder.overThresholdDateRow,true))
           )
         }
 
@@ -94,10 +96,11 @@ class   SummaryVatThresholdBuilderSpec extends PlaySpec with VatRegistrationFixt
           val noPostIncorpBuilder = SummaryVatThresholdBuilder(validThresholdPostIncorp)
           noPostIncorpBuilder.section mustBe SummarySection(
             "threshold",
-            Seq((noPostIncorpBuilder.overThresholdSelectionRow, true),
-              (noPostIncorpBuilder.overThresholdDateRow, false),
-              (noPostIncorpBuilder.expectedOverThresholdSelectionRow,true),
-              (noPostIncorpBuilder.expectedOverThresholdDateRow,false))
+            Seq((noPostIncorpBuilder.overThresholdThirtySelectionRow, true),
+              (noPostIncorpBuilder.pastOverThresholdSelectionRow, true),
+              (noPostIncorpBuilder.pastOverThresholdDateRow,false),
+              (noPostIncorpBuilder.overThresholdSelectionRow,true),
+              (noPostIncorpBuilder.overThresholdDateRow,false))
           )
         }
       }

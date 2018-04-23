@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package models.view
+package forms
 
-import java.time.LocalDate
+import forms.helpers.RequiredBoolean
+import play.api.data.Form
+import play.api.data.Forms._
 
-import play.api.libs.json.Json
+object OverThresholdThirtyDaysForm extends RequiredBoolean {
 
-case class ThresholdView(selection: Boolean, date: Option[LocalDate] = None)
+  val RADIO_YES_NO = "overThresholdThirtyRadio"
 
-object ThresholdView {
-  implicit val format = Json.format[ThresholdView]
+  val selectionError = "validation.thresholdQuestion3Post.missing"
+
+  def form(taxableTurnover: String): Form[Boolean] = {
+    Form(single(
+      RADIO_YES_NO -> requiredBoolean(selectionError, taxableTurnover)
+    ))
+  }
 }
+

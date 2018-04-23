@@ -131,7 +131,7 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
     }
   }
   "Save and continue on eligibility summary for an incorporated company" should {
-    "redirect to threshold page" in {
+    "redirect to over threshold in next thirty days page" in {
       given()
         .user.isAuthorised
         .currentProfile.withProfileAndIncorpDate()
@@ -141,13 +141,13 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
       val response = buildClient("/check-confirm-eligibility").post(Map("" -> Seq("")))
       whenReady(response) { res =>
         res.status mustBe 303
-        res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.goneOverShow().url)
+        res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.overThresholdThirtyShow().url)
       }
     }
   }
 
   "Save and continue on eligibility summary for a none incorporated company" should {
-    "redirect to taxable turnover page" in {
+    "redirect to over threshold in next 30 days pre incorp page" in {
       val profile = Json.parse(s"""
                       |{
                       | "companyName" : "testCompanyName",
@@ -167,7 +167,33 @@ class EligibilitySummaryControllerISpec extends PlaySpec with AppAndStubs with R
       val response = buildClient("/check-confirm-eligibility").post(Map("" -> Seq("")))
       whenReady(response) { res =>
         res.status mustBe 303
-        res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.TaxableTurnoverController.show().url)
+        res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.overThresholdThirtyShow().url)
+      }
+    }
+  }
+
+  "Save and continue on eligibility summary for company incorporated within a year" should {
+    "redirect to over threshold since incorp page" in {
+      val profile = Json.parse(s"""
+                                  |{
+                                  | "companyName" : "testCompanyName",
+                                  | "registrationID" : "1",
+                                  | "transactionID" : "000-434-1",
+                                  | "vatRegistrationStatus" : "${VatRegStatus.draft}"
+                                  |}
+                    """.stripMargin)
+      given()
+        .user.isAuthorised
+        .currentProfile.withProfileWithinYearIncorp()
+        .company.incorporationStatusNotKnown()
+        .keystore.putKeyStoreValue(CacheKeys.CurrentProfile, profile.toString)
+        .audit.writesAudit()
+        .s4lContainer.contains(CacheKeys.Eligibility, s4lData)
+
+      val response = buildClient("/check-confirm-eligibility").post(Map("" -> Seq("")))
+      whenReady(response) { res =>
+        res.status mustBe 303
+        res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdController.goneOverSinceIncorpShow().url)
       }
     }
   }

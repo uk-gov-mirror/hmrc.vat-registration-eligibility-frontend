@@ -20,11 +20,11 @@ import forms.helpers.RequiredBoolean
 import play.api.data.Form
 import play.api.data.Forms.single
 
-object TaxableTurnoverForm extends RequiredBoolean {
+object OverThresholdThirtyDaysPreIncForm extends RequiredBoolean {
 
-  val RADIO_YES_NO: String = "taxableTurnoverRadio"
+  val RADIO_YES_NO: String = "overThresholdThirtyPreIncorpRadio"
 
-  val errorMessage = "validation.taxable.turnover.missing"
+  val errorMessage = "validation.thresholdQuestion3.missing"
 
   def form(taxableTurnover: String): Form[Boolean] = Form(
     single(

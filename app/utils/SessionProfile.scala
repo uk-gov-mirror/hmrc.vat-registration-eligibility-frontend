@@ -33,6 +33,16 @@ trait SessionProfile {
     currentProfileService.getCurrentProfile flatMap f
   }
 
-  def hasIncorpDate(f: LocalDate => Future[Result])(implicit cp: CurrentProfile) =
-    cp.incorporationDate.fold(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))(f)
+  val missingDateText = "Date of Incorporation data expected to be found in Incorporation"
+  val incorpDateNotWithin12Months = "Incorporation date not within last 12 months"
+
+  def hasIncorpDate(f: LocalDate => Future[Result])(implicit cp: CurrentProfile): Future[Result] =
+    cp.incorporationDate.fold(throw new IllegalStateException(missingDateText))(f)
+
+  def hasIncorpDateWithinTwelveMonths(f: LocalDate => Future[Result])(implicit cp: CurrentProfile): Future[Result] =
+    cp.incorporationDate match {
+      case Some(id) if id.isAfter(LocalDate.now().minusYears(1)) => f(id)
+      case Some(_)                                               => throw new IllegalStateException(incorpDateNotWithin12Months)
+      case _                                                     => throw new IllegalStateException(missingDateText)
+    }
 }

@@ -19,8 +19,8 @@ package models.views
 import java.time.LocalDate
 
 import fixtures.VatRegistrationFixture
-import forms.OverThresholdFormFactory
-import models.view.OverThresholdView
+import forms.OverThresholdTwelveMonthsForm
+import models.view.ThresholdView
 import models.MonthYearModel
 import org.scalatest.Inside
 import uk.gov.hmrc.play.test.UnitSpec
@@ -28,20 +28,20 @@ import uk.gov.hmrc.play.test.UnitSpec
 class OverThresholdViewSpec extends UnitSpec with VatRegistrationFixture with Inside {
 
   val date = LocalDate.of(2017, 3, 31)
-  val yesView = OverThresholdView(true, Some(date))
-  val noView = OverThresholdView(false, None)
+  val yesView = ThresholdView(true, Some(testDate))
+  val noView = ThresholdView(false, None)
 
   "unbind" should {
     "decompose an over threshold view with a date" in {
-      inside(OverThresholdFormFactory.unbind(yesView)) {
+      inside(OverThresholdTwelveMonthsForm.unbind(yesView)) {
         case Some((selection, otDate)) =>
           selection shouldBe true
-          otDate shouldBe Some(MonthYearModel.fromLocalDate(date))
+          otDate shouldBe Some(MonthYearModel.fromLocalDate(testDate))
       }
     }
 
     "decompose an over threshold view without a date" in {
-      inside(OverThresholdFormFactory.unbind(noView)) {
+      inside(OverThresholdTwelveMonthsForm.unbind(noView)) {
         case Some((selection, otDate)) =>
           selection shouldBe false
           otDate shouldBe None
@@ -50,11 +50,11 @@ class OverThresholdViewSpec extends UnitSpec with VatRegistrationFixture with In
   }
 
   "bind" should {
-    "create OverThresholdView when MonthYearModel is present" in {
-      OverThresholdFormFactory.bind(true, Some(MonthYearModel.fromLocalDate(date))) shouldBe OverThresholdView(true, Some(date))
+    "create ThresholdView when MonthYearModel is present" in {
+      OverThresholdTwelveMonthsForm.bind(true, Some(MonthYearModel.fromLocalDate(date))) shouldBe ThresholdView(true, Some(date))
     }
-    "create OverThresholdView when MonthYearModel is NOT present" in {
-      OverThresholdFormFactory.bind(false, None) shouldBe OverThresholdView(false, None)
+    "create ThresholdView when MonthYearModel is NOT present" in {
+      OverThresholdTwelveMonthsForm.bind(false, None) shouldBe ThresholdView(false, None)
     }
   }
 }

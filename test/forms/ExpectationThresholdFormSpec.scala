@@ -17,77 +17,77 @@
 package forms
 import java.time.LocalDate
 
-import models.view.ExpectationOverThresholdView
+import models.view.ThresholdView
 import uk.gov.hmrc.play.test.UnitSpec
 
 class ExpectationThresholdFormSpec extends UnitSpec {
-  val tForm = ExpectationThresholdForm.form(LocalDate.of(1995,1,1))
+  val tForm = PastThirtyDayPeriodThresholdForm.form(LocalDate.of(1995,1,1))
 
   "Binding form no incorporation date checks" should {
     "return an invalid date error when true and invalid date" in {
-      val data = Map(ExpectationThresholdForm.RADIO_YES_NO -> "true",
-        "expectationOverThreshold.day" -> "11",
-        "expectationOverThreshold.month" -> "11",
-        "expectationOverThreshold.year" -> "11")
+      val data = Map(PastThirtyDayPeriodThresholdForm.RADIO_YES_NO -> "true",
+        "pastThirtyDayPeriod.day" -> "11",
+        "pastThirtyDayPeriod.month" -> "11",
+        "pastThirtyDayPeriod.year" -> "11")
       val boundModel = tForm.bind(data)
 
       boundModel.errors map { formError =>
         (formError.key, formError.message)
-      } shouldBe Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.invalid"))
+      } shouldBe Seq(("pastThirtyDayPeriod","validation.pastThirtyDayPeriod.date.invalid"))
     }
       "return no model when false but date is invalid" in {
-        val data = Map(ExpectationThresholdForm.RADIO_YES_NO -> "false",
-          "expectationOverThreshold.day" -> "foo",
-          "expectationOverThreshold.month" -> "bar",
-          "expectationOverThreshold.year" -> "fizz")
+        val data = Map(PastThirtyDayPeriodThresholdForm.RADIO_YES_NO -> "false",
+          "pastThirtyDayPeriod.day" -> "foo",
+          "pastThirtyDayPeriod.month" -> "bar",
+          "pastThirtyDayPeriod.year" -> "fizz")
         val boundModel = tForm.bind(data)
-        boundModel.value shouldBe Some(ExpectationOverThresholdView(false,None))
+        boundModel.value shouldBe Some(ThresholdView(false,None))
       }
     "return model if true and date is valid" in {
-      val data = Map(ExpectationThresholdForm.RADIO_YES_NO -> "true",
-        "expectationOverThreshold.day" -> "01",
-        "expectationOverThreshold.month" -> "01",
-        "expectationOverThreshold.year" -> "2017")
+      val data = Map(PastThirtyDayPeriodThresholdForm.RADIO_YES_NO -> "true",
+        "pastThirtyDayPeriod.day" -> "01",
+        "pastThirtyDayPeriod.month" -> "01",
+        "pastThirtyDayPeriod.year" -> "2017")
       val boundModel = tForm.bind(data)
-      boundModel.value shouldBe Some(ExpectationOverThresholdView(true,Some(LocalDate.of(2017,1,1))))
+      boundModel.value shouldBe Some(ThresholdView(true,Some(LocalDate.of(2017,1,1))))
     }
     "return error with empty Form" in {
-      val data = Map(ExpectationThresholdForm.RADIO_YES_NO -> "",
-        "expectationOverThreshold.day" -> "",
-        "expectationOverThreshold.month" -> "",
-        "expectationOverThreshold.year" -> "")
+      val data = Map(PastThirtyDayPeriodThresholdForm.RADIO_YES_NO -> "",
+        "pastThirtyDayPeriod.day" -> "",
+        "pastThirtyDayPeriod.month" -> "",
+        "pastThirtyDayPeriod.year" -> "")
       val boundModel = tForm.bind(data)
 
       boundModel.errors map { formError =>
         (formError.key, formError.message)
-      } shouldBe Seq(("expectationOverThresholdRadio","validation.expectationOverThreshold.selection.missing"))
+      } shouldBe Seq(("pastThirtyDayPeriodRadio","validation.pastThirtyDayPeriod.selection.missing"))
     }
   }
   "Binding form incorporation checks" should {
     "return validation error if date > today" in {
       val date = LocalDate.now().plusDays(1)
       val data = Map(
-        ExpectationThresholdForm.RADIO_YES_NO -> "true",
-        "expectationOverThreshold.day" -> s"${date.getDayOfMonth}",
-        "expectationOverThreshold.month" -> s"${date.getMonthValue}",
-        "expectationOverThreshold.year" -> s"${date.getYear}"
+        PastThirtyDayPeriodThresholdForm.RADIO_YES_NO -> "true",
+        "pastThirtyDayPeriod.day" -> s"${date.getDayOfMonth}",
+        "pastThirtyDayPeriod.month" -> s"${date.getMonthValue}",
+        "pastThirtyDayPeriod.year" -> s"${date.getYear}"
       )
       val boundModel = tForm.bind(data)
 
       boundModel.errors map { formError =>
         (formError.key, formError.message)
-      } shouldBe Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.range.above"))
+      } shouldBe Seq(("pastThirtyDayPeriod","validation.pastThirtyDayPeriod.date.range.above"))
   }
     "return validation error if date < incorp date" in {
-      val data = Map(ExpectationThresholdForm.RADIO_YES_NO -> "true",
-        "expectationOverThreshold.day" -> "01",
-        "expectationOverThreshold.month" -> "01",
-        "expectationOverThreshold.year" -> "1980")
+      val data = Map(PastThirtyDayPeriodThresholdForm.RADIO_YES_NO -> "true",
+        "pastThirtyDayPeriod.day" -> "01",
+        "pastThirtyDayPeriod.month" -> "01",
+        "pastThirtyDayPeriod.year" -> "1980")
       val boundModel = tForm.bind(data)
 
       boundModel.errors map { formError =>
         (formError.key, formError.message)
-      } shouldBe Seq(("expectationOverThreshold","validation.expectationOverThreshold.date.range.below"))
+      } shouldBe Seq(("pastThirtyDayPeriod","validation.pastThirtyDayPeriod.date.range.below"))
     }
   }
 }
