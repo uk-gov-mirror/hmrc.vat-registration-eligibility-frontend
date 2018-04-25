@@ -21,7 +21,7 @@ import java.time.LocalDate
 import controllers.builders.SummaryVatThresholdBuilder
 import fixtures.VatRegistrationFixture
 import models.MonthYearModel
-import models.view.{OverThresholdView, Summary}
+import models.view.{ThresholdView, Summary}
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
@@ -38,8 +38,8 @@ class ThresholdSummaryPageSpec extends UnitSpec with WithFakeApplication with I1
   val incorpDate = MonthYearModel.FORMAT_DD_MMMM_Y.format(LocalDate.of(2017,7,8))
   val formattedThreshold = "85,000"
 
-  "Rendering the summary page for a post incorporprated company that has gone over threshold" should{
-    val data = validThresholdPostIncorp.copy(overThreshold = Some(OverThresholdView(true, Some(LocalDate.of(2017,8,5)))))
+  "Rendering the summary page for a post incorporated company that has gone over threshold" should{
+    val data = validThresholdPostIncorp.copy(overThresholdOccuredTwelveMonth = Some(ThresholdView(true, Some(LocalDate.of(2017,8,5)))))
     val summarySection = SummaryVatThresholdBuilder(data).section
     lazy val view = threshold_summary(Summary(Seq(summarySection)),incorpDate, formattedThreshold)
     lazy val document = Jsoup.parse(view.body)
@@ -73,7 +73,7 @@ class ThresholdSummaryPageSpec extends UnitSpec with WithFakeApplication with I1
       document.getElementById("threshold.overThresholdSelectionQuestion").text shouldBe
         messagesApi("pages.summary.threshold.overThresholdSelection", incorpDate, formattedThreshold)
     }
-    "display the post incorp selection answer as Noo" in {
+    "display the post incorp selection answer as No" in {
       document.getElementById("threshold.overThresholdSelectionAnswer").text shouldBe "No"
     }
     "the date row should not be shown" in {

@@ -16,6 +16,7 @@
 
 package controllers
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 import config.AuthClientConnector
@@ -23,6 +24,8 @@ import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services.{CurrentProfileService, SummaryService, VatRegistrationService}
 import utils.SessionProfile
+
+import scala.concurrent.Future
 
 class EligibilitySummaryControllerImpl @Inject()(val messagesApi: MessagesApi,
                                                  val summaryService: SummaryService,
@@ -39,11 +42,13 @@ trait EligibilitySummaryController extends VatRegistrationController with Sessio
       summaryService.getEligibilitySummary map (summary => Ok(views.html.pages.summary_eligibility(summary)))
   }
 
+  private def incorpDateToRedirectLocation(incorpDate : Option[LocalDate]) : Call = incorpDate match {
+    case Some(id) if id.isAfter(LocalDate.now().minusMonths(12)) => routes.ThresholdController.goneOverSinceIncorpShow()
+    case _                                                       => routes.ThresholdController.overThresholdThirtyShow()
+  }
+
   def submit: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
-      vatRegistrationService.getIncorporationDate map { date =>
-        val redirectLocation = date.fold(routes.TaxableTurnoverController.show())(_ => routes.ThresholdController.goneOverShow())
-        Redirect(redirectLocation)
-      }
+      Future.successful(Redirect(incorpDateToRedirectLocation(profile.incorporationDate)))
   }
 }

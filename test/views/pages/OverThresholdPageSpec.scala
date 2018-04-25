@@ -18,16 +18,16 @@ package views.pages
 
 import java.time.LocalDate
 
-import forms.OverThresholdFormFactory
+import forms.OverThresholdTwelveMonthsForm
 import models.MonthYearModel
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
-import models.view.OverThresholdView
+import models.view.ThresholdView
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.Injector
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import views.html.pages.{over_threshold => overThresholdPage}
+import views.html.pages.{over_threshold_twelve_month => overThresholdPage}
 
 class OverThresholdPageSpec extends UnitSpec with WithFakeApplication with I18nSupport {
   implicit val request = FakeRequest()
@@ -37,11 +37,11 @@ class OverThresholdPageSpec extends UnitSpec with WithFakeApplication with I18nS
   val incorpDate = LocalDate.of(2016, 8, 5)
   val sIncorpDate = incorpDate.format(FORMAT_DD_MMMM_Y)
 
-  val model = OverThresholdView(true, Some(MonthYearModel("9", "2016")).flatMap(_.toLocalDate))
+  val model = ThresholdView(true, Some(MonthYearModel("9", "2016")).flatMap(_.toLocalDate))
 
   val vatThreshold = "12345"
 
-  lazy val form = OverThresholdFormFactory.form(incorpDate, vatThreshold).fill(model)
+  lazy val form = OverThresholdTwelveMonthsForm.form(incorpDate, vatThreshold).fill(model)
   lazy val view = overThresholdPage(form, sIncorpDate, vatThreshold)
   lazy val document = Jsoup.parse(view.body)
 
@@ -51,7 +51,7 @@ class OverThresholdPageSpec extends UnitSpec with WithFakeApplication with I18nS
     }
 
     "pre-select the correct radio" in {
-      document.getElementById(s"${OverThresholdFormFactory.RADIO_YES_NO}-true").attr("checked") shouldBe "checked"
+      document.getElementById(s"${OverThresholdTwelveMonthsForm.RADIO_YES_NO}-true").attr("checked") shouldBe "checked"
     }
 
     "display the correct prepopulated date" in {

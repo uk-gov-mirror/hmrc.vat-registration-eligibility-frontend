@@ -26,37 +26,44 @@ case class SummaryVatThresholdBuilder(t: Threshold) extends SummarySectionBuilde
 
   val overThresholdSelectionRow: SummaryRow = SummaryRow(
     s"$sectionId.overThresholdSelection",
-    t.overThreshold.fold("")(o => if (o.selection) "app.common.yes" else "app.common.no"),
-    Some(controllers.routes.ThresholdController.goneOverShow())
+    t.overThresholdOccuredTwelveMonth.fold("")(o => if (o.selection) "app.common.yes" else "app.common.no"),
+    Some(controllers.routes.ThresholdController.goneOverTwelveShow())
   )
 
   val overThresholdDateRow: SummaryRow = SummaryRow(
     s"$sectionId.overThresholdDate",
-    t.overThreshold.flatMap(_.date).fold("")(d => d.format(monthYearPresentationFormatter)),
-    Some(controllers.routes.ThresholdController.goneOverShow())
+    t.overThresholdOccuredTwelveMonth.flatMap(_.date).fold("")(d => d.format(monthYearPresentationFormatter)),
+    Some(controllers.routes.ThresholdController.goneOverTwelveShow())
   )
 
   val dayMonthYearPresentationFormatter = DateTimeFormatter.ofPattern("dd MMMM y")
 
-  val expectedOverThresholdSelectionRow: SummaryRow = SummaryRow(
+  val pastOverThresholdSelectionRow: SummaryRow = SummaryRow(
     s"$sectionId.expectationOverThresholdSelection",
-    t.expectationOverThreshold.fold("")(o => if (o.selection) "app.common.yes" else "app.common.no"),
-    Some(controllers.routes.ThresholdController.expectationOverShow())
+    t.pastOverThresholdThirtyDays.fold("")(o => if (o.selection) "app.common.yes" else "app.common.no"),
+    Some(controllers.routes.ThresholdController.pastThirtyDaysShow())
   )
 
-  val expectedOverThresholdDateRow: SummaryRow = SummaryRow(
+  val pastOverThresholdDateRow: SummaryRow = SummaryRow(
     s"$sectionId.expectationOverThresholdDate",
-    t.expectationOverThreshold.flatMap(_.date).fold("")(d => d.format(dayMonthYearPresentationFormatter)),
-    Some(controllers.routes.ThresholdController.expectationOverShow())
+    t.pastOverThresholdThirtyDays.flatMap(_.date).fold("")(d => d.format(dayMonthYearPresentationFormatter)),
+    Some(controllers.routes.ThresholdController.pastThirtyDaysShow())
+  )
+
+  val overThresholdThirtySelectionRow: SummaryRow = SummaryRow(
+    s"$sectionId.overThresholdThirtySelection",
+    t.overThresholdThirtyDays.fold("")(o => if (o.selection) "app.common.yes" else "app.common.no"),
+    Some(controllers.routes.ThresholdController.overThresholdThirtyShow())
   )
 
   val section: SummarySection = SummarySection(
     sectionId,
     rows = Seq(
+      (overThresholdThirtySelectionRow, true),
+      (pastOverThresholdSelectionRow, true),
+      (pastOverThresholdDateRow, t.pastOverThresholdThirtyDays.flatMap(_.date).isDefined),
       (overThresholdSelectionRow, true),
-      (overThresholdDateRow, t.overThreshold.flatMap(_.date).isDefined),
-      (expectedOverThresholdSelectionRow, true),
-      (expectedOverThresholdDateRow, t.expectationOverThreshold.flatMap(_.date).isDefined)
+      (overThresholdDateRow, t.overThresholdOccuredTwelveMonth.flatMap(_.date).isDefined)
     )
   )
 }

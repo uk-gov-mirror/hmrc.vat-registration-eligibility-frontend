@@ -22,27 +22,27 @@ import forms.FormValidation.Dates.{incorporationDateValidation, nonEmptyMonthYea
 import forms.FormValidation.missingBooleanFieldMappingArgs
 import models.MonthYearModel
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
-import models.view.OverThresholdView
+import models.view.ThresholdView
 import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 
 import scala.util.Try
 
-object OverThresholdFormFactory {
+object OverThresholdTwelveMonthsForm {
   val RADIO_YES_NO = "overThresholdRadio"
 
-  def bind(selection: Boolean, dateModel: Option[MonthYearModel]): OverThresholdView =
-    OverThresholdView(selection, dateModel.flatMap(_.toLocalDate))
+  def bind(selection: Boolean, dateModel: Option[MonthYearModel]): ThresholdView =
+    ThresholdView(selection, dateModel.flatMap(_.toLocalDate))
 
-  def unbind(overThreshold: OverThresholdView): Option[(Boolean, Option[MonthYearModel])] =
+  def unbind(overThreshold: ThresholdView): Option[(Boolean, Option[MonthYearModel])] =
     Try {
       overThreshold.date.fold((overThreshold.selection, Option.empty[MonthYearModel])) {
         d => (overThreshold.selection, Some(MonthYearModel.fromLocalDate(d)))
       }
     }.toOption
 
-  def form(dateOfIncorporation: LocalDate, vatThreshold: String): Form[OverThresholdView] = {
+  def form(dateOfIncorporation: LocalDate, vatThreshold: String): Form[ThresholdView] = {
     implicit val specificErrorCode: String = "overThreshold.date"
 
     Form(

@@ -56,7 +56,11 @@ trait ThresholdSummaryController extends VatRegistrationController with SessionP
   def submit: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
       thresholdService.getThreshold map { t =>
-        if(t.overThreshold.exists(_.selection) || t.expectationOverThreshold.exists(_.selection)) {
+        if(
+            t.overThresholdOccuredTwelveMonth.exists(_.selection) ||
+            t.pastOverThresholdThirtyDays.exists(_.selection) ||
+            t.overThresholdThirtyDays.exists(_.selection)
+        ) {
           Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
         } else {
           Redirect(controllers.routes.VoluntaryRegistrationController.show())

@@ -18,14 +18,14 @@ package views.pages
 
 import java.time.LocalDate
 
-import forms.ExpectationThresholdForm
-import models.view.ExpectationOverThresholdView
+import forms.PastThirtyDayPeriodThresholdForm
+import models.view.ThresholdView
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.Injector
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import views.html.pages.{expectation_over_threshold => expectedOverThresholdPage}
+import views.html.pages.{past_thirty_day_period_threshold => expectedOverThresholdPage}
 
 
 class ExpectedOverThresholdPageSpec extends UnitSpec with WithFakeApplication with I18nSupport{
@@ -36,8 +36,8 @@ class ExpectedOverThresholdPageSpec extends UnitSpec with WithFakeApplication wi
   val incorpDate = LocalDate.of(2016, 8, 5)
 
 
-  val model = ExpectationOverThresholdView(true,Some(LocalDate.of(2017,1,1)))
-  val form = ExpectationThresholdForm.form(incorpDate).fill(model)
+  val model = ThresholdView(true,Some(LocalDate.of(2017,1,1)))
+  val form = PastThirtyDayPeriodThresholdForm.form(incorpDate).fill(model)
 
   val currentVatThreshold = "12345"
   val lastYearsVatThreshold = "67890"
@@ -51,7 +51,7 @@ class ExpectedOverThresholdPageSpec extends UnitSpec with WithFakeApplication wi
     }
   }
   "pre-select the correct radio" in {
-    document.getElementById(s"${ExpectationThresholdForm.RADIO_YES_NO}-true").attr("checked") shouldBe "checked"
+    document.getElementById(s"${PastThirtyDayPeriodThresholdForm.RADIO_YES_NO}-true").attr("checked") shouldBe "checked"
   }
   "prepopulate the correct fields" in {
     document.getElementsByClass("form-control").get(0).attr("value") shouldBe "1"

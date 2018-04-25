@@ -48,53 +48,73 @@ trait ThresholdService {
   }
 
   private def updateVoluntaryInfo(threshold: Threshold): Threshold = threshold match {
-    case Threshold(Some(true), _, _, _, _) =>
+    case Threshold(Some(true), _, _, _, _, _) =>
       threshold.copy(voluntaryRegistration = None, voluntaryRegistrationReason = None)
-    case Threshold(None, _, _, Some(OverThresholdView(s1, _)), Some(ExpectationOverThresholdView(s2, _))) if s1 || s2 =>
+    case Threshold(None,_, _,
+      Some(ThresholdView(s1, _)),
+      Some(ThresholdView(s2, _)),
+      Some(ThresholdView(s3, _))
+    ) if s1 || s2 || s3 =>
       threshold.copy(voluntaryRegistration = None, voluntaryRegistrationReason = None)
-    case Threshold(_, Some(false), Some(_), _, _) =>
+    case Threshold(_, Some(false), Some(_), _, _, _) =>
       threshold.copy(voluntaryRegistrationReason = None)
     case _ => threshold
   }
 
-  private[services] def isModelComplete(threshold: Threshold)(implicit cp: CurrentProfile): Completion[Threshold] = threshold match {
-    case Threshold(
-      Some(true),
-      None,
-      None,
-      None,
-      None) => Completed(threshold)
-    case Threshold(
-      Some(false),
-      Some(false),
-      None,
-      None,
-      None) => Completed(threshold)
-    case Threshold(
-      Some(false),
-      Some(true),
-      Some(_),
-      None,
-      None) => Completed(threshold)
-    case Threshold(
-      None,
-      Some(true),
-      Some(_),
-      Some(OverThresholdView(false, _)),
-      Some(ExpectationOverThresholdView(false, _))) => Completed(threshold)
-    case Threshold(
-      None,
-      Some(false),
-      None,
-      Some(OverThresholdView(false, _)),
-      Some(ExpectationOverThresholdView(false, _))) => Incomplete(threshold)
-    case Threshold(
-      None,
-      None,
-      None,
-      Some(OverThresholdView(s1, _)),
-      Some(ExpectationOverThresholdView(s2, _))) if s1 || s2 => Completed(threshold)
-    case _ => Incomplete(threshold)
+  private def thresholdViewsMandatory(threshold : Threshold): Boolean = {
+    List[Option[ThresholdView]](
+      threshold.overThresholdOccuredTwelveMonth,
+      threshold.pastOverThresholdThirtyDays,
+      threshold.overThresholdThirtyDays
+    ).foldLeft(false)((current, tv) =>
+      current || (tv.isDefined && tv.get.selection)
+    )
+  }
+
+  private[services] def isModelComplete(threshold: Threshold)(implicit cp: CurrentProfile): Completion[Threshold] = {
+    (threshold, thresholdViewsMandatory(threshold)) match {
+      case (Threshold(
+        Some(true),
+        None,
+        None,
+        None,
+        None,
+        None
+      ), _)       => Completed(threshold)
+      case (Threshold(
+        Some(false),
+        Some(false),
+        None,
+        None,
+        None,
+        None
+      ), _)       => Completed(threshold)
+      case (Threshold(
+        Some(false),
+        Some(true),
+        Some(_),
+        None,
+        None,
+        None
+      ), _)       => Completed(threshold)
+      case (Threshold(
+        None,
+        Some(true),
+        Some(_),
+        Some(_),
+        _,
+        Some(_)
+      ), false)   => Completed(threshold)
+      case (Threshold(
+        None,
+        None,
+        None,
+        Some(_),
+        _,
+        Some(_)
+      ), true)    => Completed(threshold)
+      case _      => Incomplete(threshold)
+    }
   }
 
   private[services] def saveThreshold(updatedThreshold: Threshold)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
@@ -104,9 +124,9 @@ trait ThresholdService {
     }
   }
 
-  def saveTaxableTurnover(taxableTurnover: Boolean)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+  def saveOverThresholdThirtyDaysPreIncorp(taxableTurnover: Boolean)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
     getThreshold flatMap { storedThreshold =>
-      saveThreshold(storedThreshold.copy(taxableTurnover = Some(taxableTurnover)))
+      saveThreshold(storedThreshold.copy(overThresholdThirtyDaysPreIncorp = Some(taxableTurnover)))
     }
   }
 
@@ -122,16 +142,33 @@ trait ThresholdService {
     }
   }
 
-  def saveOverThreshold(overThreshold: OverThresholdView)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+  def saveOverThresholdThirtyDays(overThreshold: Boolean)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
     getThreshold flatMap { storedThreshold =>
-      saveThreshold(storedThreshold.copy(overThreshold = Some(overThreshold)))
+      saveThreshold(storedThreshold.copy(overThresholdThirtyDays = Some(
+        ThresholdView(overThreshold, if (overThreshold) Some(LocalDate.now()) else None)))
+      )
     }
   }
 
-  def saveExpectationOverThreshold(expectationOverThreshold: ExpectationOverThresholdView)
+  def saveOverThresholdPastThirtyDays(pastThreshold: ThresholdView)(implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+    getThreshold flatMap { storedThreshold =>
+      saveThreshold(storedThreshold.copy(pastOverThresholdThirtyDays = Some(pastThreshold)))
+    }
+  }
+
+  def saveOverThresholdSinceIncorp(occuredSince : Boolean)
                                   (implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
     getThreshold flatMap { storedThreshold =>
-      saveThreshold(storedThreshold.copy(expectationOverThreshold = Some(expectationOverThreshold)))
+      saveThreshold(storedThreshold.copy(overThresholdOccuredTwelveMonth = Some(
+        ThresholdView(occuredSince, if (occuredSince) cp.incorporationDate else None)))
+      )
+    }
+  }
+
+  def saveOverThresholdTwelveMonths(overOccuredTv: ThresholdView)
+                                   (implicit cp: CurrentProfile, hc: HeaderCarrier): Future[Threshold] = {
+    getThreshold flatMap { storedThreshold =>
+      saveThreshold(storedThreshold.copy(overThresholdOccuredTwelveMonth = Some(overOccuredTv)))
     }
   }
 

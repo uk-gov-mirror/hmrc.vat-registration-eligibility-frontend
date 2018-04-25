@@ -73,7 +73,7 @@ class ThresholdSummaryControllerSpec extends ControllerSpec with GuiceOneAppPerT
     }
 
     "redirect the user to the completion capacity page if overThreshold is true" in new Setup {
-      mockGetThreshold(Future.successful(validThresholdPostIncorp2.copy(expectationOverThreshold = Some(ExpectationOverThresholdView(false, None)))))
+      mockGetThreshold(Future.successful(validThresholdPostIncorp2.copy(pastOverThresholdThirtyDays = Some(ThresholdView(false, None)))))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
         .thenReturn("someEntryUrl")
@@ -84,7 +84,7 @@ class ThresholdSummaryControllerSpec extends ControllerSpec with GuiceOneAppPerT
     }
 
     "redirect the user to the completion capacity page if expectationOverThreshold is true" in new Setup {
-      mockGetThreshold(Future.successful(validThresholdPostIncorp2.copy(overThreshold = Some(OverThresholdView(false, None)))))
+      mockGetThreshold(Future.successful(validThresholdPostIncorp2.copy(overThresholdThirtyDays = Some(ThresholdView(false, None)))))
 
       when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
         .thenReturn("someEntryUrl")

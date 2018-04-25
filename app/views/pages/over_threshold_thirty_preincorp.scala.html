@@ -20,35 +20,23 @@
 
 @(taxableTurnoverForm:  Form[Boolean], vatThreshold: String)(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("pages.taxable.turnover.title", vatThreshold)) {
+@main_template(title = messages("pages.thresholdQuestion3.title", vatThreshold)) {
 
   @errorSummary(
     Messages("app.common.errorSummaryLabel"),
     taxableTurnoverForm
   )
 
-  <h1 class="form-title heading-large" id="pageHeading">@messages("pages.taxable.turnover.heading", vatThreshold)</h1>
+  <h1 class="form-title heading-large" id="pageHeading">@messages("pages.thresholdQuestion3.heading", vatThreshold)</h1>
 
-  <p>@messages("pages.taxable.turnover.p1", vatThreshold)</p>
-
-  <div class="panel panel-border-wide">
-    <p>@Html(messages("pages.taxable.turnover.p2"))</p>
+  <div class="form-group">
+      @messages("pages.thresholdQuestion3.p1", vatThreshold)
   </div>
-  <br/>
 
- <div class="form-group">
-    <details role="group">
-        <summary role="button" aria-controls="details-content-1" aria-expanded="false"><span class="summary">@messages("pages.taxable.turnover.panel.title")</span></summary>
-        <div class="panel panel-border-narrow" id="details-content-1" aria-hidden="true">
-            <p>@messages("pages.taxable.turnover.panel.para", vatThreshold)</p>
-        </div>
-    </details>
- </div>
-
-  @govHelpers.form(action = controllers.routes.TaxableTurnoverController.submit()) {
+  @govHelpers.form(action = controllers.routes.ThresholdController.overThresholdThirtySubmit()) {
   <div class="form-group">
     @vatInputRadioGroup(
-      field = taxableTurnoverForm("taxableTurnoverRadio"),
+      field = taxableTurnoverForm("overThresholdThirtyPreIncorpRadio"),
       Seq(
         "true" -> Messages("app.common.yes"),
         "false" -> Messages("app.common.no")
@@ -56,7 +44,7 @@
       '_groupClass -> "inline",
       '_labelAfter -> true,
       '_labelClass -> "block-label",
-      '_legend -> messages("pages.taxable.turnover.heading"),
+      '_legend -> messages("pages.thresholdQuestion3.heading"),
       '_legendClass -> "visually-hidden"
     )
   </div>

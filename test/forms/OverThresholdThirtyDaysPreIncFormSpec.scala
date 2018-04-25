@@ -16,15 +16,15 @@
 
 package forms
 
-import forms.TaxableTurnoverForm.RADIO_YES_NO
+import forms.OverThresholdThirtyDaysPreIncForm.RADIO_YES_NO
 import uk.gov.hmrc.play.test.UnitSpec
 
-class TaxableTurnoverFormSpec extends UnitSpec {
+class OverThresholdThirtyDaysPreIncFormSpec extends UnitSpec {
 
   val vatThreshold = "12345"
-  val testForm = TaxableTurnoverForm.form(vatThreshold)
+  val testForm = OverThresholdThirtyDaysPreIncForm.form(vatThreshold)
 
-  "Binding TaxableTurnoverForm to a model" should {
+  "Binding OverThresholdThirtyDaysPreIncForm to a model" should {
     "bind successfully with full data" in {
       val data = Map(RADIO_YES_NO -> "true")
 
@@ -41,7 +41,7 @@ class TaxableTurnoverFormSpec extends UnitSpec {
 
       boundForm.errors map { formError =>
         (formError.key, formError.message)
-      } shouldBe Seq(RADIO_YES_NO -> "validation.taxable.turnover.missing")
+      } shouldBe Seq(RADIO_YES_NO -> "validation.thresholdQuestion3.missing")
     }
 
     "have the correct error if wrong data is provided" in {
@@ -50,11 +50,11 @@ class TaxableTurnoverFormSpec extends UnitSpec {
 
       boundForm.errors map { formError =>
         (formError.key, formError.message)
-      } shouldBe Seq(RADIO_YES_NO -> "validation.taxable.turnover.missing")
+      } shouldBe Seq(RADIO_YES_NO -> "validation.thresholdQuestion3.missing")
     }
   }
 
-  "Unbinding TaxableTurnoverForm to a model" should {
+  "Unbinding OverThresholdThirtyDaysPreIncForm to a model" should {
     "Unbind successfully with full data" in {
       val data = Map(RADIO_YES_NO -> "true")
 

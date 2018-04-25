@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.time.LocalDate
+
 import fixtures.VatRegistrationFixture
 import helpers.{ControllerSpec, FutureAssertions}
 import models.CurrentProfile
@@ -32,7 +34,7 @@ import scala.concurrent.Future
 
 class EligibilitySummaryControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture with FutureAssertions {
 
-  class Setup {
+  class SetupOverYear {
 
     val testController = new EligibilitySummaryController {
       override val authConnector = mockAuthClientConnector
@@ -49,10 +51,42 @@ class EligibilitySummaryControllerSpec extends ControllerSpec with GuiceOneAppPe
     val INCORPORATION_STATUS = "incorporationStatus"
   }
 
+  class SetupWithinYear {
+    val testController = new EligibilitySummaryController {
+      override val authConnector = mockAuthClientConnector
+      override val summaryService = mockSummaryService
+      override val vatRegistrationService = mockVatRegistrationService
+      override val currentProfileService = mockCurrentProfileService
+      override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
+
+      override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(currentProfile.copy(incorporationDate = Some(incorpDateWithinYear)))
+      }
+    }
+
+    val INCORPORATION_STATUS = "incorporationStatus"
+  }
+
+  class SetupNoIncorp {
+    val testController = new EligibilitySummaryController {
+      override val authConnector = mockAuthClientConnector
+      override val summaryService = mockSummaryService
+      override val vatRegistrationService = mockVatRegistrationService
+      override val currentProfileService = mockCurrentProfileService
+      override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
+
+      override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(currentProfile.copy(incorporationDate = None))
+      }
+    }
+
+    val INCORPORATION_STATUS = "incorporationStatus"
+  }
+
   val fakeRequest = FakeRequest(controllers.routes.EligibilitySummaryController.show())
 
   "Calling eligibility summary to show the Eligibility summary page" should {
-    "return HTML with a valid threshold summary view" in new Setup {
+    "return HTML with a valid threshold summary view" in new SetupOverYear {
       when(mockSummaryService.getEligibilitySummary(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEligibilitySummary))
 
@@ -61,14 +95,23 @@ class EligibilitySummaryControllerSpec extends ControllerSpec with GuiceOneAppPe
   }
 
   s"POST ${controllers.routes.EligibilitySummaryController.submit()}" should {
-    "return 303 with valid data - Company NOT INCORPORATED" in new Setup {
-      when(mockVatRegistrationService.getIncorporationDate(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(None))
-
+    "return 303 and redirect to overThresholdThirtyShow when the company is not incorporated" in new SetupNoIncorp {
       mockKeystoreFetchAndGet[IncorporationInfo](INCORPORATION_STATUS, None)
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody()) {
-        _ redirectsTo controllers.routes.TaxableTurnoverController.show().url
+        _ redirectsTo controllers.routes.ThresholdController.overThresholdThirtyShow().url
+      }
+    }
+
+    "return 303 and redirect to goneOverSinceIncorpShow when the company was incorporated less than a year ago" in new SetupWithinYear {
+      submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody()) {
+        _ redirectsTo controllers.routes.ThresholdController.goneOverSinceIncorpShow().url
+      }
+    }
+
+    "return 303 and redirect to overThresholdThirtyShow when the company has been incorporated for over a year" in new SetupOverYear {
+      submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody()) {
+        _ redirectsTo controllers.routes.ThresholdController.overThresholdThirtyShow().url
       }
     }
   }

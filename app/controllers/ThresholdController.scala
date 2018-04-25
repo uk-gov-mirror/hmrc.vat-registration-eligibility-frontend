@@ -16,26 +16,32 @@
 
 package controllers
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 import config.AuthClientConnector
-import forms.{ExpectationThresholdForm, OverThresholdFormFactory}
+import forms._
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
-import models.view.ExpectationOverThresholdView
+import models.view.Threshold
+import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services._
 import utils.SessionProfile
 
+import scala.concurrent.Future
+
 class ThresholdControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val authConnector: AuthClientConnector,
                                         val currentProfileService: CurrentProfileService,
-                                        val thresholdService: ThresholdService) extends ThresholdController
+                                        val thresholdService: ThresholdService,
+                                        val vatRegFrontendService: VatRegFrontendService) extends ThresholdController
 
 trait ThresholdController extends VatRegistrationController with SessionProfile {
   val thresholdService: ThresholdService
+  val vatRegFrontendService : VatRegFrontendService
 
-  def goneOverShow: Action[AnyContent] = isAuthenticatedWithProfile {
+  def goneOverTwelveShow: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request =>
       implicit profile =>
         hasIncorpDate { date =>
@@ -44,30 +50,65 @@ trait ThresholdController extends VatRegistrationController with SessionProfile 
             vatThreshold <- thresholdService.fetchCurrentVatThreshold
           } yield {
             val incorpDate = date.format(FORMAT_DD_MMMM_Y)
-            val form = OverThresholdFormFactory.form(date, vatThreshold)
-            Ok(views.html.pages.over_threshold(threshold.overThreshold.fold(form)(form.fill), incorpDate, vatThreshold))
+            val form = OverThresholdTwelveMonthsForm.form(date, vatThreshold)
+            Ok(views.html.pages.over_threshold_twelve_month(threshold.overThresholdOccuredTwelveMonth.fold(form)(form.fill), incorpDate, vatThreshold))
           }
         }
   }
 
-  def goneOverSubmit: Action[AnyContent] = isAuthenticatedWithProfile {
+  def goneOverTwelveSubmit: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request =>
       implicit profile =>
         hasIncorpDate { date =>
           thresholdService.fetchCurrentVatThreshold.flatMap { threshold =>
-            OverThresholdFormFactory.form(date, threshold).bindFromRequest().fold(
+            OverThresholdTwelveMonthsForm.form(date, threshold).bindFromRequest().fold(
               badForm => thresholdService.fetchCurrentVatThreshold.map { threshold =>
-                BadRequest(views.html.pages.over_threshold(badForm, date.format(FORMAT_DD_MMMM_Y), threshold))
+                BadRequest(views.html.pages.over_threshold_twelve_month(badForm, date.format(FORMAT_DD_MMMM_Y), threshold))
               },
-              data => thresholdService.saveOverThreshold(data) map {
-                _ => Redirect(controllers.routes.ThresholdController.expectationOverShow())
+              data => thresholdService.saveOverThresholdTwelveMonths(data) map {
+                _ => Redirect(controllers.routes.ThresholdSummaryController.show())
               }
             )
           }
         }
   }
 
-  def expectationOverShow: Action[AnyContent] = isAuthenticatedWithProfile {
+  def goneOverSinceIncorpShow: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request =>
+      implicit profile =>
+        hasIncorpDateWithinTwelveMonths { date =>
+          for {
+            threshold    <- thresholdService.getThreshold
+            vatThreshold <- thresholdService.fetchCurrentVatThreshold
+          } yield {
+            val incorpDate = date.format(FORMAT_DD_MMMM_Y)
+            val form = OverThresholdSinceIncorpForm.form(incorpDate, vatThreshold)
+            Ok(views.html.pages.over_threshold_since_incorp(
+              threshold.overThresholdOccuredTwelveMonth.fold(form)(tv => form.fill(tv.selection)), incorpDate, vatThreshold
+            ))
+          }
+        }
+  }
+
+  def goneOverSinceIncorpSubmit: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request =>
+      implicit profile =>
+        hasIncorpDateWithinTwelveMonths { date =>
+          thresholdService.fetchCurrentVatThreshold.flatMap { threshold =>
+            val incorpDate = date.format(FORMAT_DD_MMMM_Y)
+            OverThresholdSinceIncorpForm.form(incorpDate, threshold).bindFromRequest().fold(
+              badForm => thresholdService.fetchCurrentVatThreshold.map { threshold =>
+                BadRequest(views.html.pages.over_threshold_since_incorp(badForm, date.format(FORMAT_DD_MMMM_Y), threshold))
+              },
+              data => thresholdService.saveOverThresholdSinceIncorp(data) map {
+                _ => Redirect(controllers.routes.ThresholdController.overThresholdThirtyShow())
+              }
+            )
+          }
+        }
+  }
+
+  def pastThirtyDaysShow: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request =>
       implicit profile =>
         hasIncorpDate { date =>
@@ -75,26 +116,83 @@ trait ThresholdController extends VatRegistrationController with SessionProfile 
             threshold          <- thresholdService.getThreshold
             currentThreshold   <- thresholdService.fetchCurrentVatThreshold
           } yield {
-            val form = ExpectationThresholdForm.form(date)
-            Ok(views.html.pages.expectation_over_threshold(threshold.expectationOverThreshold.fold(form)(form.fill), currentThreshold))
+            val form = PastThirtyDayPeriodThresholdForm.form(date)
+            Ok(views.html.pages.past_thirty_day_period_threshold(threshold.pastOverThresholdThirtyDays.fold(form)(form.fill), currentThreshold))
           }
         }
   }
 
-  def expectationOverSubmit: Action[AnyContent] = isAuthenticatedWithProfile {
+  def pastThirtyDaysSubmit: Action[AnyContent] = isAuthenticatedWithProfile {
     implicit request => implicit profile =>
       hasIncorpDate { date =>
-        ExpectationThresholdForm.form(date).bindFromRequest().fold(
+        PastThirtyDayPeriodThresholdForm.form(date).bindFromRequest().fold(
           badForm =>
             for {
               currentThreshold   <- thresholdService.fetchCurrentVatThreshold
             } yield {
-              BadRequest(views.html.pages.expectation_over_threshold(badForm, currentThreshold))
+              BadRequest(views.html.pages.past_thirty_day_period_threshold(badForm, currentThreshold))
             },
-          data => thresholdService.saveExpectationOverThreshold(data) map {
-            _ => Redirect(controllers.routes.ThresholdSummaryController.show())
+          data => thresholdService.saveOverThresholdPastThirtyDays(data) map {
+            _ => Redirect(controllers.routes.ThresholdController.goneOverTwelveShow())
           }
         )
       }
+  }
+
+  def overThresholdThirtyShow: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request => implicit profile =>
+      for {
+        threshold <- thresholdService.getThreshold
+        vatThreshold <- thresholdService.fetchCurrentVatThreshold
+      } yield {
+        Ok(
+          profile.incorporationDate match {
+            case Some(_) =>
+              val form = OverThresholdThirtyDaysForm.form(vatThreshold)
+              views.html.pages.over_threshold_thirty(threshold.overThresholdThirtyDays.fold(form)(tv => form.fill(tv.selection)), vatThreshold)
+            case None       =>
+              val form = OverThresholdThirtyDaysPreIncForm.form(vatThreshold)
+              views.html.pages.over_threshold_thirty_preincorp(threshold.overThresholdThirtyDaysPreIncorp.fold(form)(tt => form.fill(tt)), vatThreshold)
+          }
+        )
+      }
+  }
+
+  private def incorpDateToRedirectLocation(incorpDate : Option[LocalDate], threshold : Threshold) : Result = incorpDate match {
+    case Some(id) if id.isBefore(LocalDate.now().minusYears(1)) => Redirect(routes.ThresholdController.pastThirtyDaysShow())
+    case _ =>
+      (
+        threshold.overThresholdOccuredTwelveMonth.exists(_.selection),
+        threshold.overThresholdThirtyDays.exists(_.selection),
+        threshold.overThresholdThirtyDaysPreIncorp.contains(true)
+      ) match {
+        case (false, false, false) => Redirect(controllers.routes.VoluntaryRegistrationController.show())
+        case _                     => Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
+      }
+  }
+
+  def overThresholdThirtySubmit: Action[AnyContent] = isAuthenticatedWithProfile {
+    implicit request =>
+      implicit profile =>
+        thresholdService.fetchCurrentVatThreshold.flatMap { threshold =>
+          val (form, badRequest, saveMethod) = profile.incorporationDate match {
+            case Some(_) => (
+              OverThresholdThirtyDaysForm.form(threshold),
+              (badForm : Form[Boolean]) => views.html.pages.over_threshold_thirty(badForm, threshold),
+              thresholdService.saveOverThresholdThirtyDays _
+            )
+            case _       =>  (
+              OverThresholdThirtyDaysPreIncForm.form(threshold),
+              (badForm : Form[Boolean]) => views.html.pages.over_threshold_thirty_preincorp(badForm, threshold),
+              thresholdService.saveOverThresholdThirtyDaysPreIncorp _
+            )
+          }
+          form.bindFromRequest().fold(
+            badForm => Future.successful(BadRequest(badRequest(badForm))),
+            data => saveMethod(data) map {
+              th => incorpDateToRedirectLocation(profile.incorporationDate, th)
+            }
+          )
+        }
   }
 }

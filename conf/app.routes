@@ -32,20 +32,25 @@ POST        /apply-exception-exemption                        controllers.Eligib
 GET         /apply-for-any                                    controllers.EligibilityController.showCompanyWillDoAnyOf
 POST        /apply-for-any                                    controllers.EligibilityController.submitCompanyWillDoAnyOf
 
-## TAXABLE TURNOVER PAGE
-GET         /make-more-taxable-sales                          controllers.TaxableTurnoverController.show
-POST        /make-more-taxable-sales                          controllers.TaxableTurnoverController.submit
+## Post incorp threshold question 1
+GET         /gone-over-threshold                              controllers.ThresholdController.goneOverTwelveShow
+POST        /gone-over-threshold                              controllers.ThresholdController.goneOverTwelveSubmit
 
-## Post incorp threshold question 1expectationOverShow
-GET         /vat-taxable-turnover-gone-over                   controllers.ThresholdController.goneOverShow
-POST        /vat-taxable-turnover-gone-over                   controllers.ThresholdController.goneOverSubmit
+## Post incorp threshold question 2
+GET         /gone-over-threshold-period                       controllers.ThresholdController.pastThirtyDaysShow
+POST        /gone-over-threshold-period                       controllers.ThresholdController.pastThirtyDaysSubmit
 
-#Post incorp threshold question 2
-GET        /go-over-threshold-period                           controllers.ThresholdController.expectationOverShow
-POST       /go-over-threshold-period                           controllers.ThresholdController.expectationOverSubmit
+## Post incorp threshold question 3
+GET         /make-more-taxable-sales                          controllers.ThresholdController.overThresholdThirtyShow
+POST        /make-more-taxable-sales                          controllers.ThresholdController.overThresholdThirtySubmit
+
+## Post incorp threshold question 4
+GET         /made-more-taxable-sales                          controllers.ThresholdController.goneOverSinceIncorpShow
+POST        /made-more-taxable-sales                          controllers.ThresholdController.goneOverSinceIncorpSubmit
+
 ## Threshold summary
-GET         /check-confirm-threshold                            controllers.ThresholdSummaryController.show
-POST        /check-confirm-threshold                            controllers.ThresholdSummaryController.submit
+GET         /check-confirm-threshold                          controllers.ThresholdSummaryController.show
+POST        /check-confirm-threshold                          controllers.ThresholdSummaryController.submit
 
 ## VOLUNTARY REGISTRATION PAGE
 GET         /register-voluntarily                             controllers.VoluntaryRegistrationController.show
@@ -60,5 +65,5 @@ GET         /applies-company                                  controllers.Volunt
 POST        /applies-company                                  controllers.VoluntaryRegistrationReasonController.submit
 
 ## ELIGIBILITY SUMMARY PAGE
-GET         /check-confirm-eligibility                          controllers.EligibilitySummaryController.show
-POST        /check-confirm-eligibility                          controllers.EligibilitySummaryController.submit
+GET         /check-confirm-eligibility                        controllers.EligibilitySummaryController.show
+POST        /check-confirm-eligibility                        controllers.EligibilitySummaryController.submit

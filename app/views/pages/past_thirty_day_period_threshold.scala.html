@@ -15,8 +15,8 @@
  *@
 
 @import java.time.format.DateTimeFormatter
-@import models.view.ExpectationOverThresholdView
-@(expectationThresholdForm: Form[ExpectationOverThresholdView], currentVatThreshold: String)(implicit request: Request[_], messages: Messages)
+@import models.view.ThresholdView
+@(expectationThresholdForm: Form[ThresholdView], currentVatThreshold: String)(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.errorSummary
 @import views.html.helpers.templates.{vatInput, vatInputRadioGroup}
@@ -33,13 +33,18 @@
 
     <header class="page-header">
         <h1 class="form-title heading-xlarge" id="pageHeading">
-        @messages("pages.thresholdQuestion2.heading")
+            @messages("pages.thresholdQuestion2.heading")
         </h1>
     </header>
+
     <p>@messages("pages.thresholdQuestion2.p1")</p>
     <p>@messages("pages.thresholdQuestion2.p2")</p>
-   <li>@messages("pages.thresholdQuestion2.bullet1")</li>
-   <li>@messages("pages.thresholdQuestion2.bullet2", currentVatThreshold)</li>
+
+    <ul class="list list-bullet">
+        <li>@messages("pages.thresholdQuestion2.bullet1")</li>
+        <li>@messages("pages.thresholdQuestion2.bullet2", currentVatThreshold)</li>
+    </ul>
+
     <p>@messages("pages.thresholdQuestion2.p3")
         @newWindowLink("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies", messages("pages.thresholdQuestion2.p3.1"))</p>
 
@@ -55,7 +60,7 @@
         </details>
     </div>
 
-    @govHelpers.form(action = controllers.routes.ThresholdController.expectationOverSubmit()) {
+    @govHelpers.form(action = controllers.routes.ThresholdController.pastThirtyDaysSubmit()) {
         <div class="form-group" data-hidden="hidden">
             <fieldset class="inline">
                 @defining(DateTimeFormatter
@@ -63,7 +68,7 @@
                         .withLocale(java.util.Locale.UK)) { formatter =>
 
                     @vatInputRadioGroup(
-                        expectationThresholdForm("expectationOverThresholdRadio"),
+                        expectationThresholdForm("pastThirtyDayPeriodRadio"),
                         Seq(
                             "true" -> Messages("app.common.yes"),
                             "false" -> Messages("app.common.no")
@@ -80,7 +85,7 @@
                     <p class="form-hint">@messages("pages.thresholdQuestion2.form.example", s"${DateTime.now.dayOfMonth.get}", s"${DateTime.now.monthOfYear.get}", s"${DateTime.now.year.get}")</p>
 
 
-                    @defining(expectationThresholdForm("expectationOverThreshold").errors.nonEmpty) { errorPresent =>
+                    @defining(expectationThresholdForm("pastThirtyDayPeriod").errors.nonEmpty) { errorPresent =>
                         <div class="form-date @if(errorPresent) { form-group-error }">
 
                             <fieldset id="expectation-over-threshold">
@@ -99,7 +104,7 @@
                                 </label>
 
                                 @vatInput(
-                                    expectationThresholdForm("expectationOverThreshold.day"),
+                                    expectationThresholdForm("pastThirtyDayPeriod.day"),
                                     '_divClass -> "form-group",
                                     '_inputClass -> "form-control",
                                     '_maxlength -> 2,
@@ -108,7 +113,7 @@
                                 )
 
                                 @vatInput(
-                                    expectationThresholdForm("expectationOverThreshold.month"),
+                                    expectationThresholdForm("pastThirtyDayPeriod.month"),
                                     '_divClass -> "form-group",
                                     '_inputClass -> "form-control",
                                     '_maxlength -> 4,
@@ -117,7 +122,7 @@
                                 )
 
                                 @vatInput(
-                                    expectationThresholdForm("expectationOverThreshold.year"),
+                                    expectationThresholdForm("pastThirtyDayPeriod.year"),
                                     '_divClass -> "form-group",
                                     '_inputClass -> "form-control",
                                     '_maxlength -> 4,

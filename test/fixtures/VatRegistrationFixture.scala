@@ -25,36 +25,39 @@ import models.view._
 trait VatRegistrationFixture {
   //Test variables
   val testRegId = "VAT123456"
-  val testDate = Some(LocalDate.of(2017, 3, 21))
+  val testDate = LocalDate.of(2017, 3, 21)
+  val optTestDate = Some(testDate)
 
   //Api models
   val validThresholdPreIncorp = Threshold(
-    taxableTurnover = Some(false),
+    overThresholdThirtyDaysPreIncorp = Some(false),
     voluntaryRegistration = Some(true),
     voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.SELLS),
-    overThreshold = None,
-    expectationOverThreshold = None
+    overThresholdThirtyDays = None,
+    pastOverThresholdThirtyDays = None
   )
   val validThresholdPostIncorp = Threshold(
-    taxableTurnover = None,
+    overThresholdThirtyDaysPreIncorp = None,
     voluntaryRegistration = Some(true),
     voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.SELLS),
-    overThreshold = Some(OverThresholdView(selection = false, None)),
-    expectationOverThreshold = Some(ExpectationOverThresholdView(selection = false, None))
+    overThresholdThirtyDays = Some(ThresholdView(selection = false, None)),
+    pastOverThresholdThirtyDays = Some(ThresholdView(selection = false, None)),
+    overThresholdOccuredTwelveMonth = Some(ThresholdView(selection = false, None))
   )
   val validThresholdPostIncorp2 = Threshold(
-    taxableTurnover = None,
+    overThresholdThirtyDaysPreIncorp = None,
     voluntaryRegistration = Some(true),
     voluntaryRegistrationReason = Some(VoluntaryRegistrationReasonForm.SELLS),
-    overThreshold = Some(OverThresholdView(selection = true, testDate)),
-    expectationOverThreshold = Some(ExpectationOverThresholdView(selection = true, testDate))
+    overThresholdThirtyDays = Some(ThresholdView(selection = true, optTestDate)),
+    pastOverThresholdThirtyDays = Some(ThresholdView(selection = true, optTestDate)),
+    overThresholdOccuredTwelveMonth = Some(ThresholdView(selection = true, optTestDate))
   )
   val emptyThreshold = Threshold(None, None, None, None, None)
 
   val validEligibility = Eligibility(Some(true),Some(false),Some(false),Some(false),Some(false),Some(false))
 
   // View Models
-  val validOverThresholdView = OverThresholdView(false,None)
+  val validThresholdView = ThresholdView(false,None)
 
   val testIncorporationInfo = IncorporationInfo(
     IncorpSubscription(

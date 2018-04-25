@@ -43,7 +43,6 @@ class BindingModule extends AbstractModule {
     bind(classOf[EligibilityController]).to(classOf[EligibilityControllerImpl]).asEagerSingleton()
     bind(classOf[EligibilitySummaryController]).to(classOf[EligibilitySummaryControllerImpl]).asEagerSingleton()
     bind(classOf[SessionController]).to(classOf[SessionControllerImpl]).asEagerSingleton()
-    bind(classOf[TaxableTurnoverController]).to(classOf[TaxableTurnoverControllerImpl]).asEagerSingleton()
     bind(classOf[ThresholdController]).to(classOf[ThresholdControllerImpl]).asEagerSingleton()
     bind(classOf[ThresholdSummaryController]).to(classOf[ThresholdSummaryControllerImpl]).asEagerSingleton()
     bind(classOf[VoluntaryRegistrationController]).to(classOf[VoluntaryRegistrationControllerImpl]).asEagerSingleton()

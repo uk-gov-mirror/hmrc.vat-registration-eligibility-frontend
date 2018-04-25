@@ -57,9 +57,9 @@ pages.serviceCriteriaFailure.applyingForAnyOf.p1.1       = register using form V
 pages.serviceCriteriaFailure.applyingForAnyOf.p2         = If the company is applying for the Annual Accounting Scheme,
 pages.serviceCriteriaFailure.applyingForAnyOf.p2.1       = register using another HMRC service.
 
-pages.serviceCriteriaFailure.applyingForVatExemption.p1    = If the company is applying for a VAT registration exception, you’ll need to
+pages.serviceCriteriaFailure.applyingForVatExemption.p1    = If the company is applying for a VAT registration exception, you''ll need to
 pages.serviceCriteriaFailure.applyingForVatExemption.p1.1  = write to HMRC
-pages.serviceCriteriaFailure.applyingForVatExemption.p1.2  = with evidence showing why you believe the company’s VAT-taxable turnover won’t go over the registration threshold of £{0} in the next 12 months.
+pages.serviceCriteriaFailure.applyingForVatExemption.p1.2  = with evidence showing why you believe the company''s VAT-taxable turnover won''t go over the registration threshold of £{0} in the next 12 months.
 pages.serviceCriteriaFailure.applyingForVatExemption.p2    = If the company is applying for a VAT registration exemption, you can register the company for VAT using
 pages.serviceCriteriaFailure.applyingForVatExemption.p2.1  = another HMRC service.
 
@@ -113,7 +113,7 @@ pages.eligibility.applyingForVatExemption.title             = Will the company a
 pages.eligibility.applyingForVatExemption.heading           = Will the company apply for a VAT registration exception or exemption?
 pages.eligibility.applyingForVatExemption.p1                = The company can get a registration exception if both the following apply:
 pages.eligibility.applyingForVatExemption.bullet1           = its VAT-taxable sales over a 12-month period went over the VAT threshold (currently £{0})
-pages.eligibility.applyingForVatExemption.bullet2           = it has evidence that its VAT-taxable sales for the next 12 months won’t go over the threshold
+pages.eligibility.applyingForVatExemption.bullet2           = it has evidence that its VAT-taxable sales for the next 12 months won''t go over the threshold
 pages.eligibility.applyingForVatExemption.p2                = The company can get a registration exemption if it sells mainly or only zero-rated goods or services.
 pages.eligibility.applyingForVatExemption.panel.title       = Examples of zero-rated goods or services
 pages.eligibility.applyingForVatExemption.panel.p1          = Zero-rated goods and services are VAT-taxable but the VAT rate on them is 0%.
@@ -121,7 +121,7 @@ pages.eligibility.applyingForVatExemption.panel.p2          = They include:
 pages.eligibility.applyingForVatExemption.panel.bullet1     = most food and drink (but not things like alcoholic drinks, confectionery, crisps and savoury snacks, hot food, sports drinks, hot takeaways, ice cream, soft drinks and mineral water)
 pages.eligibility.applyingForVatExemption.panel.bullet2     = books and newspapers
 pages.eligibility.applyingForVatExemption.panel.bullet3     = printing services for brochures, leaflets or pamphlets
-pages.eligibility.applyingForVatExemption.panel.bullet4     = children’s clothes and shoes
+pages.eligibility.applyingForVatExemption.panel.bullet4     = children''s clothes and shoes
 pages.eligibility.applyingForVatExemption.panel.bullet5     = most goods you export to non-EU countries
 pages.eligibility.applyingForVatExemption.panel.p3          = Find out about
 pages.eligibility.applyingForVatExemption.panel.p3.1        = VAT rates on different goods and services.
@@ -138,7 +138,7 @@ pages.voluntary.registration.title                            = The company does
 pages.voluntary.registration.heading                          = The company doesn''t have to register for VAT
 pages.voluntary.registration.para1                            = You can still choose to register it voluntarily. If you do, the company may be able to reclaim VAT on business-related purchases.
 pages.voluntary.registration.heading2                         = Do you want to register it voluntarily?
-pages.voluntary.registration.reason.panels.neither.para       = If none of these apply you won’t be able to register voluntarily for VAT.
+pages.voluntary.registration.reason.panels.neither.para       = If none of these apply you won''t be able to register voluntarily for VAT.
 validation.voluntary.registration.missing                     = Tell us if you want to register voluntarily for VAT
 
 ## Chose No To Voluntary Registration Page
@@ -156,21 +156,17 @@ pages.voluntary.registration.reason.radio.intendsToSell       = It intends to se
 pages.voluntary.registration.reason.radio.neither             = Neither of these
 validation.voluntary.registration.reason.missing              = Tell us why you intend to register voluntarily for VAT
 
-## Taxable Turnover Page
-pages.taxable.turnover.title                            = Over the next 30 days, do you think the company will make more than £{0} in VAT-taxable sales?
-pages.taxable.turnover.heading                          = Over the next 30 days, do you think the company will make more than £{0} in VAT-taxable sales?
-pages.taxable.turnover.p1                               = £{0} is the current VAT-registration threshold. It''s the amount of VAT-taxable sales the company can make before it has to register for VAT.
-pages.taxable.turnover.p2                               = We want to know if you think it will go over the threshold - even if it doesn''t.
-pages.taxable.turnover.panel.title                      = Show me an example
-pages.taxable.turnover.panel.para                       = You''re expecting new orders that will push the company''s VAT-taxable sales for the next 30 days over £{0}. You must answer ''yes'', even if the company''s VAT-taxable sales for the 30-day period don''t end up going over the threshold.
-validation.taxable.turnover.missing                     = Tell us if over the next 30 days, you think the company will make more than £{0} in VAT-taxable sales
-
 ## Post Incorp Threshold Questions
 ## Over Threshold
-pages.thresholdQuestion1.title                            = In any 12-month period has your company gone over the VAT registration threshold?
-pages.thresholdQuestion1.heading                          = Since {0} has your company''s VAT taxable turnover gone over £{1}?
-pages.thresholdQuestion1.p1                               = £{0} is the VAT registration threshold for the current financial year.
-pages.thresholdQuestion1.panel.heading                    = When did this first happen?
+pages.thresholdQuestion1.title                            = In any 12-month period has the company gone over the VAT-registration threshold?
+pages.thresholdQuestion1.heading                          = In any 12-month period has the company gone over the VAT-registration threshold?
+pages.thresholdQuestion1.p1                               = The current VAT registration threshold is £{0}. If the company''s 12-month VAT-taxable sales went above this at any point since {1}, answer yes.
+pages.thresholdQuestion1.p2                               = Recent thresholds include:
+pages.thresholdQuestion1.bullet1                          = 1 April 2016 to 31 March 2017: £83,000
+pages.thresholdQuestion1.bullet2                          = 1 April 2017 to present: £{0}
+pages.thresholdQuestion1.p3                               = Before this, use these
+pages.thresholdQuestion1.p3.1                             = previous VAT registration thresholds
+pages.thresholdQuestion1.panel.heading                    = When did the company first go over the threshold?
 pages.thresholdQuestion1.panel.hint                       = For example, 02 2017
 pages.thresholdQuestion1.month                            = Month
 pages.thresholdQuestion1.year                             = Year
@@ -180,7 +176,7 @@ validation.overThreshold.selection.missing                = Tell us if since {0}
 validation.overThreshold.date.range.above                 = This date must be before the current month
 validation.overThreshold.date.range.below                 = Enter a date which is on or after the date the company was incorporated
 
-# Question 2
+# Question 2 Threshold
 pages.thresholdQuestion2.heading                          = In the past, have you ever thought the company''s VAT-taxable sales would go over the threshold in a 30-day period?
 pages.thresholdQuestion2.p1                               = Again, we want to know if you ever thought it would go over - even if it didn''t.
 pages.thresholdQuestion2.p2                               = VAT-registration thresholds change every year. Recent ones include:
@@ -194,21 +190,43 @@ pages.thresholdQuestion2.example.content.pt1              = Use the one that app
 pages.thresholdQuestion2.day                              = Day
 pages.thresholdQuestion2.month                            = Month
 pages.thresholdQuestion2.year                             = Year
-#validation messages Q2
-validation.expectationOverThreshold.date.invalid          = Enter a valid date
-validation.expectationOverThreshold.date.missing          = Enter a date for when you first thought it would
-validation.expectationOverThreshold.date.range.below      = Enter a date that''s on or after the date the company was set up
-validation.expectationOverThreshold.date.range.above      = Enter a date that''s in the past
-validation.expectationOverThreshold.selection.missing     = Tell us if In the past, you ever thought the company''s VAT-taxable sales would go over the threshold in a 30-day period
 pages.thresholdQuestion2.panel.heading                    = When did you first think that the company would go over the threshold?
+#validation messages Q2
+validation.pastThirtyDayPeriod.date.invalid               = Enter a valid date
+validation.pastThirtyDayPeriod.date.missing               = Enter a date for when you first thought it would
+validation.pastThirtyDayPeriod.date.range.below           = Enter a date that''s on or after the date the company was set up
+validation.pastThirtyDayPeriod.date.range.above           = Enter a date that''s in the past
+validation.pastThirtyDayPeriod.selection.missing          = Tell us if In the past, you ever thought the company''s VAT-taxable sales would go over the threshold in a 30-day period
+
+## Question 3 Threshold Pre Incorp
+pages.thresholdQuestion3.title                            = Do you expect the company to make VAT taxable sales of more than £{0} in the 30 days after it''s registered with Companies House?
+pages.thresholdQuestion3.heading                          = Do you expect the company to make VAT taxable sales of more than £{0} in the 30 days after it''s registered with Companies House?
+pages.thresholdQuestion3.p1                               = You must register immediately if you expect the company''s VAT taxable sales to be over £{0} in the 30 days after it''s registered with Companies House.
+validation.thresholdQuestion3.missing                     = Tell us if you think the company will make more than £{0} in the 30 days after it''s registered with Companies House
+
+## Question 3 Threshold Post Incorp
+pages.thresholdQuestion3Post.title                        = Over the next 30 days, do you think the company will make more than £{0} in VAT-taxable sales?
+pages.thresholdQuestion3Post.heading                      = Over the next 30 days, do you think the company will make more than £{0} in VAT-taxable sales?
+pages.thresholdQuestion3Post.p1                           = £{0} is the current VAT-registration threshold. It''s the amount of VAT-taxable sales the company can make before it has to register for VAT.
+pages.thresholdQuestion3Post.p2                           = We want to know if you think it will go over the threshold - even if it doesn''t.
+pages.thresholdQuestion3Post.panel.title                  = Show me an example
+pages.thresholdQuestion3Post.panel.para                   = You''re expecting new orders that will push the company''s VAT-taxable sales for the next 30 days over £{0}. You must answer ''yes'', even if the company''s VAT-taxable sales for the 30-day period don''t end up going over the threshold.
+validation.thresholdQuestion3Post.missing                 = Tell us if over the next 30 days, you think the company will make more than £{0} in VAT-taxable sales
+
+## Question 4 Threshold
+pages.thresholdQuestion4.title                            = Since {0}, has the company made more than £{1} in VAT-taxable sales?
+pages.thresholdQuestion4.heading                          = Since {0}, has the company made more than £{1} in VAT-taxable sales?
+pages.thresholdQuestion4.p1                               = {0} is the date the company was set up.
+validation.thresholdQuestion4.missing                     = Tell us if since {0}, the company has made more than £{1} in VAT-taxable sales
 
 ## Threshold Summary Page
 pages.thresholdSummary.title                              = Check and confirm your answers
 pages.thresholdSummary.heading                            = Check and confirm your answers
-pages.summary.threshold.overThresholdSelection            = Since {0} has the company''s VAT taxable turnover gone over £{1}?
-pages.summary.threshold.expectationOverThresholdSelection = Thought turnover would go over VAT registration in a single 30-day period
-pages.summary.threshold.overThresholdDate                 = Month turnover went over £{1}
-pages.summary.threshold.expectationOverThresholdDate      = Date you first thought sales would go over threshold
+pages.summary.threshold.overThresholdThirtySelection      = Over the next 30 days, do you think the company will make more than £{1} in VAT-taxable sales?
+pages.summary.threshold.expectationOverThresholdSelection = In the past, have you ever thought the company''s VAT-taxable sales would go over the threshold in a 30-day period?
+pages.summary.threshold.expectationOverThresholdDate      = Date you first thought sales would go over threshold in a 30-day period
+pages.summary.threshold.overThresholdSelection            = In any 12-month period has the company gone over the VAT-registration threshold?
+pages.summary.threshold.overThresholdDate                 = Month turnover went over the VAT-registration threshold
 
 ## Summary page
 pages.summary.title                                       = Check and confirm your answers

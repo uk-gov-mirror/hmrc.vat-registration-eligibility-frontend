@@ -455,21 +455,31 @@ trait StubUtils {
       builder
     }
 
-    def withProfileAndIncorpDate(currentState: Option[String] = None, nextState: Option[String] = None) = buildProfile(true, currentState, nextState)
-    def withProfile(currentState: Option[String] = None, nextState: Option[String] = None) = buildProfile(false, currentState, nextState)
+    def withProfileAndIncorpDate(currentState: Option[String] = None, nextState: Option[String] = None) =
+      buildProfile(Some("2016-08-05"), currentState, nextState)
 
-    private def buildProfile(withIncorporationDate: Boolean, currentState: Option[String], nextState: Option[String]) = {
-      val incorporationDate = Json.parse("""{"incorporationDate": "2016-08-05"}""").as[JsObject]
+    def withProfile(currentState: Option[String] = None, nextState: Option[String] = None) =
+      buildProfile(None, currentState, nextState)
+
+    def withProfileWithinYearIncorp(currentState: Option[String] = None, nextState: Option[String] = None) =
+      buildProfile(Some(LocalDate.now().minusMonths(6).toString), currentState, nextState)
+
+    private def buildProfile(withIncorporationDate: Option[String], currentState: Option[String], nextState: Option[String]) = {
       val js = Json.parse(s"""
-        |{
-        | "companyName" : "testCompanyName",
-        | "registrationID" : "1",
-        | "transactionID" : "000-434-1",
-        | "vatRegistrationStatus" : "${VatRegStatus.draft}"
-        |}
+                             |{
+                             | "companyName" : "testCompanyName",
+                             | "registrationID" : "1",
+                             | "transactionID" : "000-434-1",
+                             | "vatRegistrationStatus" : "${VatRegStatus.draft}"
+                             |}
         """.stripMargin).as[JsObject]
 
-      val currentProfile = if(withIncorporationDate) js.deepMerge(incorporationDate) else js
+      val currentProfile = withIncorporationDate match {
+        case Some(date) =>
+          val incorporationDate = Json.parse(s"""{"incorporationDate": "$date"}""").as[JsObject]
+          js.deepMerge(incorporationDate)
+        case None => js
+      }
 
       (currentState, nextState) match {
         case (None, None) => hasKeyStoreValue(CacheKeys.CurrentProfile, currentProfile.toString)

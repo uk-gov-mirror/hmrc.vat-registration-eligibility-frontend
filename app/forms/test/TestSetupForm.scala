@@ -27,13 +27,17 @@ object TestSetupForm {
     "taxableTurnoverChoice" -> optional(boolean),
     "voluntaryChoice" -> optional(boolean),
     "voluntaryRegistrationReason" -> optional(text),
-    "overThresholdSelection" -> optional(boolean),
-    "overThresholdMonth" -> optional(text),
-    "overThresholdYear" -> optional(text),
-    "expectationOverThresholdSelection" -> optional(boolean),
-    "expectationOverThresholdDay" -> optional(text),
-    "expectationOverThresholdMonth" -> optional(text),
-    "expectationOverThresholdYear" -> optional(text)
+    "overThresholdTwelveSelection" -> optional(boolean),
+    "overThresholdTwelveMonth" -> optional(text),
+    "overThresholdTwelveYear" -> optional(text),
+    "pastOverThresholdThirtySelection" -> optional(boolean),
+    "pastOverThresholdThirtyDay" -> optional(text),
+    "pastOverThresholdThirtyMonth" -> optional(text),
+    "pastOverThresholdThirtyYear" -> optional(text),
+    "overThresholdThirtySelection" -> optional(boolean),
+    "overThresholdThirtyDay" -> optional(text),
+    "overThresholdThirtyMonth" -> optional(text),
+    "overThresholdThirtyYear" -> optional(text)
   )(ThresholdTestSetup.apply)(ThresholdTestSetup.unapply)
 
   val eligibilityTestSetupMapping = mapping(
