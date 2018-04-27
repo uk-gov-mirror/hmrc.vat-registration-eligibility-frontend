@@ -31,6 +31,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import utils.InternalExceptions.LockedStatus
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -87,6 +88,12 @@ class VatRegistrationServiceSpec extends PlaySpec with BeforeAndAfter with Mocki
         .thenReturn(Future(VatRegStatus.draft))
 
       service.getStatus("regId") returns VatRegStatus.draft
+    }
+
+    "return a LockedStatus exception if the status is locked" in new Setup {
+      when(mockRegConnector.getStatus(any())(any())) thenReturn Future.successful(VatRegStatus.locked)
+
+      intercept[LockedStatus](await(service.getStatus("regId")))
     }
 
     "return an Exception if fail to get the status" in new Setup {

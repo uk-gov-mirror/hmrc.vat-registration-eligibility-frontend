@@ -30,7 +30,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.InternalExceptions.VatFootprintNotFound
+import utils.InternalExceptions.{InvalidStatus, VatFootprintNotFound}
 import utils.RegistrationWhitelist
 
 import scala.concurrent.Future
@@ -92,6 +92,7 @@ trait VatRegistrationConnector extends RegistrationWhitelist {
       case e: NotFoundException =>
         logResponse(e, "getStatus")
         throw new VatFootprintNotFound(s"[CurrentProfileService] [getRegIdAndStatus] Could not find a vat footprint for regId: $regId")
+      case e: JsResultException => throw new InvalidStatus(s"[VatRegistrationConnector] [getStatus] Invalid status for eligibility")
       case e: Exception => throw logResponse(e, "getStatus")
     }
   }

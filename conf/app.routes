@@ -16,6 +16,9 @@ GET         /post-sign-in                                     controllers.callba
 ## START VAT
 GET         /start-vat                                        controllers.callbacks.SignInOutController.startVat
 
+## RETRY SUBMISSION
+GET         /retry-submission                                 controllers.callbacks.SignInOutController.retrySubmission
+
 ## SERVICE CRITERIA QUESTIONS
 GET         /cant-register                                    controllers.EligibilityController.ineligible()
 

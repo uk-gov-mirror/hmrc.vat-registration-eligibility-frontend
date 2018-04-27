@@ -25,7 +25,7 @@ import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import utils.InternalExceptions.{BRDocumentNotFound, VatFootprintNotFound}
+import utils.InternalExceptions.{BRDocumentNotFound, InvalidStatus, LockedStatus, VatFootprintNotFound}
 import utils.SessionProfile
 
 import scala.concurrent.Future
@@ -51,13 +51,15 @@ class VatRegistrationControllerSpec extends ControllerSpec with GuiceOneAppPerTe
     }
 
     def callAuthenticatedWithProfile = isAuthenticatedWithProfile {
-      _ => profile =>
-        Future.successful(Ok(s"ALL GOOD with profile: ${profile.registrationId}"))
+      _ =>
+        profile =>
+          Future.successful(Ok(s"ALL GOOD with profile: ${profile.registrationId}"))
     }
 
     def callAuthenticatedWithProfileButError = isAuthenticatedWithProfile {
-      _ => profile =>
-        Future.failed(new Exception(s"Something wrong for profile: ${profile.registrationId}"))
+      _ =>
+        profile =>
+          Future.failed(new Exception(s"Something wrong for profile: ${profile.registrationId}"))
     }
   }
 
@@ -121,6 +123,24 @@ class VatRegistrationControllerSpec extends ControllerSpec with GuiceOneAppPerTe
       val result = TestController.callAuthenticatedWithProfile(FakeRequest())
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some("http://localhost:9025/gg/sign-in?accountType=organisation&continue=http%3A%2F%2Flocalhost%3A9894%2Fcheck-if-you-can-register-for-vat%2Fpost-sign-in&origin=vat-registration-eligibility-frontend")
+    }
+
+    "return 303 to retry a submission if the document status is locked" in {
+      mockAuthenticated()
+      mockWithCurrentProfileException(new LockedStatus(""))
+
+      val result = TestController.callAuthenticatedWithProfile(FakeRequest())
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some("/check-if-you-can-register-for-vat/retry-submission")
+    }
+
+    "return 303 to go straight to dashboard if the submission is neither locked or draft" in {
+      mockAuthenticated()
+      mockWithCurrentProfileException(new InvalidStatus(""))
+
+      val result = TestController.callAuthenticatedWithProfile(FakeRequest())
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some("/check-if-you-can-register-for-vat/post-sign-in")
     }
 
     "redirect to startVat route" when {

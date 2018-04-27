@@ -62,6 +62,11 @@ trait ControllerSpec extends PlaySpec with MockitoSugar with AuthMock with AuthB
     when(mockCurrentProfileService.getCurrentProfile()(any()))
       .thenReturn(Future.successful(currentProfile))
   }
+
+  def mockWithCurrentProfileException(except: Throwable): OngoingStubbing[Future[CurrentProfile]] = {
+    when(mockCurrentProfileService.getCurrentProfile()(any()))
+      .thenReturn(Future.failed(except))
+  }
 }
 
 trait MockMessages {

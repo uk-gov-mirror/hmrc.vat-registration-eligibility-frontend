@@ -41,8 +41,8 @@ trait CurrentProfileService {
   val vatRegistrationService: VatRegistrationService
 
   def getCurrentProfile()(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
-    keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey) flatMap {
-      _.fold(buildCurrentProfile)(profile => Future.successful(profile))
+    keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey) flatMap { profile =>
+      profile.fold(buildCurrentProfile)(profile => Future.successful(profile))
     }
   }
 

@@ -20,5 +20,7 @@ object InternalExceptions {
 
   class VatFootprintNotFound(msg: String) extends Exception(msg)
   class BRDocumentNotFound(msg: String) extends Exception(msg)
+  class InvalidStatus(msg: String) extends Exception(msg)
+  class LockedStatus(msg: String) extends Exception(msg)
 
 }
