@@ -33,6 +33,7 @@ class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
       override val compRegFEQuestionnaire: String = "/questionnaire"
       override val vatRegFEURL: String = "testUrl"
       override val vatRegFEBeforeYouRegister: String = "/test-before-you-register"
+      override val vatRegFERetry: String = "/test-retry"
 
       val authConnector = mockAuthClientConnector
       val messagesApi: MessagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
@@ -78,6 +79,23 @@ class SignInOutControllerSpec extends ControllerSpec with GuiceOneAppPerTest {
       callAuthenticated(controller.startVat()) { result =>
         status(result) mustBe 303
         redirectLocation(result) mustBe Some(s"${controller.vatRegFEURL}${controller.vatRegFEBeforeYouRegister}")
+      }
+    }
+  }
+
+  "retrySubmission" must {
+
+    "return 303 for an unauthorised user" in new Setup {
+      mockNoActiveSession()
+
+      val result: Future[Result] = controller.retrySubmission()(FakeRequest())
+      status(result) mustBe 303
+    }
+
+    "redirect to the vat before you register page" in new Setup {
+      callAuthenticated(controller.retrySubmission()) { result =>
+        status(result) mustBe 303
+        redirectLocation(result) mustBe Some(s"${controller.vatRegFEURL}${controller.vatRegFERetry}")
       }
     }
   }

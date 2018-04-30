@@ -28,6 +28,7 @@ import models._
 import models.external.IncorporationInfo
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import utils.InternalExceptions.LockedStatus
 
 import scala.concurrent.Future
 
@@ -55,6 +56,9 @@ trait VatRegistrationService extends FutureInstances {
   }
 
   def getStatus(regId: String)(implicit hc: HeaderCarrier): Future[VatRegStatus.Value] = {
-    vatRegConnector.getStatus(regId)
+    vatRegConnector.getStatus(regId) map {
+      case VatRegStatus.locked => throw new LockedStatus(s"[VatRegistrationService] [getStatus] Status is locked")
+      case status              => status
+    }
   }
 }
