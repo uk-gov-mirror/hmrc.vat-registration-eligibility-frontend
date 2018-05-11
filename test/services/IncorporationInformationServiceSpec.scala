@@ -16,6 +16,8 @@
 
 package services
 
+import java.time.LocalDate
+
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import helpers.FutureAssertions
 import mocks.VatMocks
@@ -24,7 +26,6 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsResultException, Json}
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -50,6 +51,17 @@ class IncorporationInformationServiceSpec extends PlaySpec with MockitoSugar wit
       when(mockIIConnector.getCompanyName(any(), any())(any())).thenReturn(Future(Json.obj("foo" -> 12)))
 
       a[JsResultException] mustBe thrownBy(await(service.getCompanyName("regId", "txId")))
+    }
+  }
+
+  "getIncorpDate" must {
+    "return an incorp date" in new Setup {
+      when(mockIIConnector.getIncorpUpdate(any(), any())(any()))
+        .thenReturn(Future.successful(Some(
+          Json.obj("incorporationDate" -> LocalDate.of(2018, 5, 11))
+        )))
+
+      service.getIncorpDate("regId", "txID") returns Some(LocalDate.of(2018, 5, 11))
     }
   }
 }

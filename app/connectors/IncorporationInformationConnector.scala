@@ -19,8 +19,8 @@ package connectors
 import javax.inject.Inject
 
 import config.WSHttp
-import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
@@ -48,4 +48,13 @@ trait IncorporationInformationConnector extends RegistrationWhitelist {
         throw e
     }
   }(returnDefaultCompanyName)
+
+  def getIncorpUpdate(regId : String, transID : String)(implicit hc : HeaderCarrier) : Future[Option[JsValue]] = {
+    ifRegIdNotWhitelisted[Option[JsValue]](regId) {
+      http.GET[HttpResponse](s"$incorpInfoUrl$incorpInfoUri/$transID/incorporation-update").map(res => res.status match {
+        case 200  => Some(res.json)
+        case 204  => None
+      })
+    }(_ => Some(Json.obj()))
+  }
 }

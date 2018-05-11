@@ -60,8 +60,7 @@ trait CurrentProfileService {
       (regId, status)       <- getRegIdAndStatus
       companyProfile        <- compRegConnector.getCompanyRegistrationDetails(regId)
       companyName           <- incorpInfoService.getCompanyName(regId, companyProfile.transactionId)
-      incorpInfo            <- vatRegistrationService.getIncorporationInfo(regId, companyProfile.transactionId)
-      incorpDate            =  if(incorpInfo.isDefined) incorpInfo.get.statusEvent.incorporationDate else None
+      incorpDate            <-  incorpInfoService.getIncorpDate(regId, companyProfile.transactionId)
       profile               =  CurrentProfile(
         companyName           = companyName,
         registrationId        = regId,
