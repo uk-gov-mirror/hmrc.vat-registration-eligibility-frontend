@@ -16,6 +16,7 @@
 
 package services
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
@@ -33,5 +34,12 @@ trait IncorporationInformationService {
 
   def getCompanyName(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[String] = {
     incorpInfoConnector.getCompanyName(regId, txId) map(_.\("company_name").as[String])
+  }
+
+  def getIncorpDate(regId: String, txId: String)(implicit headerCarrier: HeaderCarrier): Future[Option[LocalDate]] = {
+    incorpInfoConnector.getIncorpUpdate(regId, txId) map {
+      case Some(json) => (json \ "incorporationDate").asOpt[LocalDate]
+      case _          => None
+    }
   }
 }

@@ -93,8 +93,8 @@ class CurrentProfileServiceSpec extends PlaySpec with MockitoSugar with VatMocks
         when(mockVatRegistrationService.getStatus(any())(any[HeaderCarrier]()))
           .thenReturn(Future.successful(VatRegStatus.draft))
 
-        when(mockVatRegistrationService.getIncorporationInfo(any(), any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(Some(testIncorporationInfo)))
+        when(mockIncorpInfoService.getIncorpDate(any(), any())(any[HeaderCarrier]()))
+          .thenReturn(Future.successful(testIncorporationInfo.statusEvent.incorporationDate))
 
         when(mockKeystoreConnector.cache[CurrentProfile](any(), any())(any(), any()))
           .thenReturn(Future.successful(CacheMap("", Map())))

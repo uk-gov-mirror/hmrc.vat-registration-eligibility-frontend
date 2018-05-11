@@ -23,7 +23,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 
 import scala.concurrent.Future
 
@@ -66,5 +66,21 @@ class IncorporationInformationConnectorSpec extends PlaySpec with MockitoSugar w
     }
   }
 
+  "getIncorpUpdate" should {
+    "succeed" when {
+      "when fetching an incorp update" in new Setup {
+        mockHttpGET[HttpResponse](connector.incorpInfoUrl, HttpResponse(200, Some(Json.obj("x" -> "y"))))
 
+        val response: Option[JsValue] = await(connector.getIncorpUpdate("99", "transID"))
+        (response.get \ "x").as[String] mustBe "y"
+      }
+
+      "when fetching an incorp update that does not exist" in new Setup {
+        mockHttpGET[HttpResponse](connector.incorpInfoUrl, HttpResponse(204))
+
+        val response: Option[JsValue] = await(connector.getIncorpUpdate("99", "transID"))
+        response.isDefined mustBe false
+      }
+    }
+  }
 }
