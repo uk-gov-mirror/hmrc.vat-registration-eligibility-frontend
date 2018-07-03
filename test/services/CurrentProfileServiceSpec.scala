@@ -18,89 +18,58 @@ package services
 
 import java.time.LocalDate
 
-import common.enums.VatRegStatus
-import connectors.BusinessRegistrationConnector
-import fixtures.VatRegistrationFixture
-import helpers.FutureAssertions
-import mocks.VatMocks
+import base.CommonSpecBase
+import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, DataCacheConnector}
 import models.CurrentProfile
-import models.external.{BusinessProfile, CompanyRegistrationProfile}
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.Format
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import org.mockito.Matchers
+import org.mockito.Mockito._
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 
 import scala.concurrent.Future
 
-class CurrentProfileServiceSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout
-                                with FutureAssertions with VatRegistrationFixture {
-  val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
+class CurrentProfileServiceSpec extends CommonSpecBase {
 
-  val testService = new CurrentProfileService {
-    override val keystoreConnector = mockKeystoreConnector
-    override val businessRegistrationConnector = mockBusinessRegistrationConnector
-    override val compRegConnector = mockCompanyRegConnector
-    override val incorpInfoService = mockIncorpInfoService
-    override val vatRegistrationService = mockVatRegistrationService
+  class Setup {
+    val service = new CurrentProfileService {
+      override val dataCacheConnector: DataCacheConnector = mockDataCacheConnector
+      override val incorporationInformationService: IncorporationInformationService = mockIIService
+      override val businessRegistrationConnector: BusinessRegistrationConnector = mockBusRegConnector
+      override val companyRegistrationConnector: CompanyRegistrationConnector = mockCompanyRegConnector
+    }
   }
 
-  val now = LocalDate.now()
+  val regID   = "registrationID"
+  val txID    = "transactionID"
+  val testIntId = "internalId"
 
-  val testCompanyName = "testCompanyName"
-  val regId = "12345"
-  val txId = "000-12345"
+  "buildCurrentProfile" should {
+    "build a profile" when {
+      "it hasn't been built" in new Setup {
+        when(mockDataCacheConnector.getEntry[CurrentProfile](Matchers.any(), Matchers.any())(Matchers.any()))
+            .thenReturn(Future.successful(None))
+        when(mockIIService.getIncorpDate(Matchers.any())(Matchers.any()))
+            .thenReturn(Future.successful(None))
+        when(mockBusRegConnector.getBusinessRegistrationId(Matchers.any()))
+            .thenReturn(Future.successful(regID))
+        when(mockCompanyRegConnector.getTransactionId(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(txID))
+        when(mockDataCacheConnector.save[CurrentProfile](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(CacheMap("test", Map("test" -> Json.obj()))))
 
-  def testCurrentProfile(incorpDate: Option[LocalDate] = Some(now)) = CurrentProfile(
-    companyName           = testCompanyName,
-    registrationId        = regId,
-    transactionId         = txId,
-    vatRegistrationStatus = VatRegStatus.draft,
-    incorporationDate     = incorpDate
-  )
-
-  "getCurrentProfile" should {
-    implicit val hc = HeaderCarrier()
-
-    "return a CurrentProfile" when {
-      "fetched from Keystore" in {
-        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](any())(any[HeaderCarrier](), any[Format[CurrentProfile]]()))
-          .thenReturn(Future.successful(Some(testCurrentProfile())))
-
-        val result = await(testService.getCurrentProfile())
-        result mustBe testCurrentProfile()
+        await(service.fetchOrBuildCurrentProfile(testIntId)) mustBe CurrentProfile(regID, txID, None)
       }
 
-      "build and store in Keystore" in {
-        val businessProfile = BusinessProfile(regId, "EN")
-        val compRegDetails = CompanyRegistrationProfile("accepted", txId)
+      "it has been built" in new Setup {
+        private val profile = CurrentProfile(regID, txID, Some(LocalDate.now()))
 
-        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](any())(any[HeaderCarrier](), any[Format[CurrentProfile]]()))
-          .thenReturn(Future.successful(None))
+        when(mockIIService.getIncorpDate(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(Some(LocalDate.now())))
 
-        when(mockBusinessRegistrationConnector.retrieveBusinessProfile(any[HeaderCarrier](), any[HttpReads[BusinessProfile]]()))
-          .thenReturn(Future.successful(businessProfile))
+        when(mockDataCacheConnector.getEntry[CurrentProfile](Matchers.any(), Matchers.any())(Matchers.any()))
+            .thenReturn(Future.successful(Some(profile)))
 
-        when(mockCompanyRegConnector.getCompanyRegistrationDetails(any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(compRegDetails))
-
-        when(mockIncorpInfoService.getCompanyName(any(), any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(testCompanyName))
-
-        when(mockVatRegistrationService.getStatus(any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(VatRegStatus.draft))
-
-        when(mockIncorpInfoService.getIncorpDate(any(), any())(any[HeaderCarrier]()))
-          .thenReturn(Future.successful(testIncorporationInfo.statusEvent.incorporationDate))
-
-        when(mockKeystoreConnector.cache[CurrentProfile](any(), any())(any(), any()))
-          .thenReturn(Future.successful(CacheMap("", Map())))
-
-        val result = await(testService.getCurrentProfile())
-        result mustBe testCurrentProfile(testIncorporationInfo.statusEvent.incorporationDate)
+        await(service.fetchOrBuildCurrentProfile(testIntId)) mustBe profile
       }
     }
   }

@@ -16,104 +16,57 @@
 
 package connectors
 
-import mocks.VatMocks
-import models.external.CompanyRegistrationProfile
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.{JsObject, Json}
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.VREFEFeatureSwitches
-import org.mockito.Mockito.when
-import scala.concurrent.Future
+import base.ConnectorSpecBase
+import config.WSHttp
+import play.api.libs.json.{JsResultException, Json}
+import uk.gov.hmrc.http.CoreGet
 
-class CompanyRegistrationConnectorSpec extends UnitSpec with MockitoSugar with VatMocks {
+class CompanyRegistrationConnectorSpec extends ConnectorSpecBase {
+  val regId = "test-regId"
+  val compRegFakeUrl = "testUrl"
+  val compRegStubbedFakeUrl = "stubbedTestUrl"
 
-  val testUrl = "testUrl"
-  val testUri = "testUri"
-  val mockFeatureSwitch = mock[VREFEFeatureSwitches]
-
-  implicit val hc = HeaderCarrier()
-
-  class Setup(stubbed: Boolean) {
+  class Setup(val crStubbed: Boolean = true) {
     val connector = new CompanyRegistrationConnector {
-      override val companyRegistrationUri = testUri
-      override val companyRegistrationUrl = testUrl
-      override lazy val stubUri = testUri
-      override lazy val stubUrl = testUrl
-      override val http = mockWSHttp
-      override def useCompanyRegistration = stubbed
-      override val featureSwitch = mockFeatureSwitch
-      override lazy val config = mockAppConfig
+      override val http: CoreGet with WSHttp      = mockWSHttp
+      override val companyRegistrationUrl: String = compRegFakeUrl
+      override val useStub: Boolean               = crStubbed
+      override val stubUrl: String                = compRegStubbedFakeUrl
     }
-      when(mockAppConfig.whitelistedRegIds).thenReturn(Seq("foo"))
   }
 
-  val status = "submitted"
-  val transactionId = "submitted"
+  val stubbedFullUrl    = s"$compRegStubbedFakeUrl/incorporation-frontend-stubs/$regId/corporation-tax-registration"
+  val nonStubbedFullUrl = s"$compRegFakeUrl/company-registration/corporation-tax-registration/$regId/corporation-tax-registration"
 
-  val profileJson =
-    Json.parse(
-      s"""
-        |{
-        |    "registration-id" : "testRegId",
-        |    "status" : "$status",
-        |    "confirmationReferences" : {
-        |       "acknowledgement-reference" : "BRCT-0123456789",
-        |       "transaction-id" : "$transactionId"
-        |    }
-        |}
-      """.stripMargin).as[JsObject]
+  val compRegResponse = Json.parse(
+    """
+      | {
+      |   "confirmationReferences" : {
+      |     "transaction-id" : "foo"
+      |   }
+      | }
+    """.stripMargin)
 
-  val profileJsonMin =
-    Json.parse(
-      s"""
-        |{
-        |    "registration-id" : "testRegId",
-        |    "status" : "$status"
-        |}
-      """.stripMargin).as[JsObject]
+  "Calling getTransactionId" must {
+    "return a transaction id using stubbed url" in new Setup {
+      mockGet(stubbedFullUrl, compRegResponse)
 
-  "getCompanyRegistrationDetails" should {
-    "return a CompanyProfile" in new Setup(false) {
-      mockHttpGET[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
-
-      val result = await(connector.getCompanyRegistrationDetails("testRegId"))
-      result shouldBe CompanyRegistrationProfile(status, transactionId)
+      await(connector.getTransactionId(regId)) mustBe "foo"
     }
+    "return a transaction id using non stubbed url" in new Setup(false) {
+      mockGet(nonStubbedFullUrl, compRegResponse)
 
-    "throw a bad request exception" in new Setup(false) {
-      mockHttpGET[JsObject](connector.companyRegistrationUri, Future.failed(new BadRequestException("tstException")))
-
-      intercept[BadRequestException](await(connector.getCompanyRegistrationDetails("testRegId")))
+      await(connector.getTransactionId(regId)) mustBe "foo"
     }
+    "return an exception if success response from CR but no transaction id in json" in new Setup {
+      mockGet(stubbedFullUrl, Json.obj())
 
-    "throw any other exception" in new Setup(false) {
-      mockHttpGET[JsObject](connector.companyRegistrationUri, Future.failed(new RuntimeException))
-
-      intercept[RuntimeException](await(connector.getCompanyRegistrationDetails("testRegId")))
+      intercept[JsResultException](await(connector.getTransactionId(regId)))
     }
+    "return an exception if non 2xx response is returned from CR" in new Setup {
+      mockFailedGet(stubbedFullUrl, new Exception("foo"))
 
-    "be stubbed" when {
-      "returning a CompanyProfile" in new Setup(false) {
-        mockHttpGET[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
-
-        val result = await(connector.getCompanyRegistrationDetails("testRegId"))
-        result shouldBe CompanyRegistrationProfile(status, transactionId)
-      }
-
-      "throwing a bad request exception" in new Setup(false) {
-        mockHttpGET[JsObject](connector.companyRegistrationUri, Future.failed(new BadRequestException("tstException")))
-
-        intercept[BadRequestException](await(connector.getCompanyRegistrationDetails("testRegId")))
-      }
-
-      "throwing any other exception" in new Setup(false) {
-        mockHttpGET[JsObject](connector.companyRegistrationUri, Future.failed(new RuntimeException))
-
-        intercept[RuntimeException](await(connector.getCompanyRegistrationDetails("testRegId")))
-      }
+      intercept[Exception](await(connector.getTransactionId(regId)))
     }
   }
 }

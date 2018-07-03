@@ -18,50 +18,182 @@ package services
 
 import java.time.LocalDate
 
-import connectors.{IncorporationInformationConnector, KeystoreConnector}
-import helpers.FutureAssertions
-import mocks.VatMocks
-import org.mockito.ArgumentMatchers.any
+import base.{CommonSpecBase, VATEligiblityMocks}
+import connectors.{DataCacheConnector, IncorporationInformationConnector}
+import models.{Name, Officer}
+import org.mockito.Matchers
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.{JsResultException, Json}
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.libs.json.Json
+import utils.{BooleanFeatureSwitch, VATFeatureSwitch}
 
 import scala.concurrent.Future
 
-class IncorporationInformationServiceSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAssertions {
+class IncorporationInformationServiceSpec extends CommonSpecBase with VATEligiblityMocks {
+
   class Setup {
     val service = new IncorporationInformationService {
-      override val incorpInfoConnector: IncorporationInformationConnector = mockIIConnector
-      override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
+      override val iiConnector: IncorporationInformationConnector = mockIIConnector
+      override val dataCacheConnector: DataCacheConnector = mockDataCacheConnector
+      override val featureSwitches: VATFeatureSwitch = mockVATFeatureSwitch
     }
   }
 
-  implicit val hc = HeaderCarrier()
+  val testDate = Some(LocalDate.of(2010, 10, 10))
+
+  val tstFilteredOfficer = Seq(
+    Officer(Name(Some("first"), Some("middle"), "last", Some("Mr")), "director", None, None)
+  )
+
+  val validCOHODetails = Json.parse(
+    s"""
+       |{
+       |  "company_name":"MyTestCompany",
+       |  "registered_office_address":{
+       |    "premises":"1",
+       |    "address_line_1":"test street",
+       |    "locality":"Testford",
+       |    "country":"UK",
+       |    "postal_code":"TE2 2ST"
+       |  }
+       |}
+        """.stripMargin)
+
+  val invalidCOHODetails = Json.parse(
+    s"""
+       |{
+       |  "company_name":true,
+       |  "registered_office_address":{
+       |    "premises":"1",
+       |    "address_line_1":"test street",
+       |    "locality":"Testford",
+       |    "country":"UK",
+       |    "postal_code":"TE2 2ST"
+       |  }
+       |}
+        """.stripMargin)
+
+  val tstOfficerListJson = Json.parse(
+    """
+      |{
+      |  "officers": [
+      |    {
+      |      "name_elements" : {
+      |        "forename" : "test1",
+      |        "other_forenames" : "test11",
+      |        "surname" : "testa",
+      |        "title" : "Mr"
+      |      },
+      |      "officer_role" : "cic-manager"
+      |    }, {
+      |      "name" : "test",
+      |      "name_elements" : {
+      |        "forename" : "test2",
+      |        "other_forenames" : "test22",
+      |        "surname" : "testb",
+      |        "title" : "Mr"
+      |      },
+      |      "officer_role" : "corporate-director"
+      |    }, {
+      |      "name" : "test",
+      |      "name_elements" : {
+      |        "forename" : "first",
+      |        "other_forenames" : "middle",
+      |        "surname" : "last",
+      |        "title" : "Mr"
+      |      },
+      |      "officer_role" : "director"
+      |    }
+      |  ]
+      |}""".stripMargin)
+
+  val tstOfficerListNoDirectorJson = Json.parse(
+    """
+      |{
+      |  "officers": [
+      |    {
+      |      "name_elements" : {
+      |        "forename" : "test1",
+      |        "other_forenames" : "test11",
+      |        "surname" : "testa",
+      |        "title" : "Mr"
+      |      },
+      |      "officer_role" : "cic-manager"
+      |    }
+      |  ]
+      |}""".stripMargin)
+
+  "retrieveIncorporationDate" should {
+    "find an incorp date" when {
+      "it exists in II" in new Setup {
+        when(mockIIConnector.getIncorpData(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(Some(Json.obj("incorporationDate" -> testDate.get))))
+
+        await(service.getIncorpDate("transID")) mustBe testDate
+      }
+    }
+
+    "fail to find an incorp date" when {
+      "it does not exist in II" in new Setup {
+        when(mockIIConnector.getIncorpData(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(None))
+
+        await(service.getIncorpDate("transID")) mustBe None
+      }
+    }
+  }
+
+  val officer = Officer(Name(Some("TestFirst"), None, "TestSurname", None), "Director", None, None)
+  val officerNotDirector = Officer(Name(Some("TestFirst"), None, "TestSurname", None), "not a director", None, None)
+
+  "retrieveOfficers" should {
+    "find officers" when {
+      "return an officer lists with only directors and secretaries" in new Setup {
+        when(mockVATFeatureSwitch.useIiStubbed).thenReturn(BooleanFeatureSwitch("test", false))
+        when(mockIIConnector.getOfficerList(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(tstOfficerListJson))
+
+        await(service.getOfficerList("transID")) mustBe tstFilteredOfficer
+      }
+    }
+
+    "fail to find officers" when {
+      "they are not available in II" in new Setup {
+        when(mockIIConnector.getOfficerList(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.failed(new RuntimeException("some exception")))
+
+        intercept[RuntimeException](await(service.getOfficerList("transID")))
+      }
+      "officer list contains no directors or secretaries" in new Setup {
+        when(mockIIConnector.getOfficerList(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(tstOfficerListNoDirectorJson))
+
+        intercept[RuntimeException](await(service.getOfficerList("transID")))
+      }
+    }
+  }
 
   "getCompanyName" should {
-    "successfully return a company name" in new Setup {
-      when(mockIIConnector.getCompanyName(any(), any())(any())).thenReturn(Future(Json.obj("company_name" -> "TEST NAME")))
+    "return a name" when {
+      "it is present in ii" in new Setup {
+        when(mockIIConnector.getCOHOCompanyDetails(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(validCOHODetails))
 
-      service.getCompanyName("regId", "txId") returns "TEST NAME"
+        await(service.getCompanyName("transID")) mustBe "MyTestCompany"
+      }
     }
+    "throw an exception" when {
+      "data cannot be parsed" in new Setup {
+        when(mockIIConnector.getCOHOCompanyDetails(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(invalidCOHODetails))
 
-    "return an exception if the company_name field is missing" in new Setup {
-      when(mockIIConnector.getCompanyName(any(), any())(any())).thenReturn(Future(Json.obj("foo" -> 12)))
+        intercept[RuntimeException](await(service.getCompanyName("transID")))
+      }
+      "and error occured in the connector" in new Setup {
+        when(mockIIConnector.getCOHOCompanyDetails(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.failed(new RuntimeException("some exception")))
 
-      a[JsResultException] mustBe thrownBy(await(service.getCompanyName("regId", "txId")))
-    }
-  }
-
-  "getIncorpDate" must {
-    "return an incorp date" in new Setup {
-      when(mockIIConnector.getIncorpUpdate(any(), any())(any()))
-        .thenReturn(Future.successful(Some(
-          Json.obj("incorporationDate" -> LocalDate.of(2018, 5, 11))
-        )))
-
-      service.getIncorpDate("regId", "txID") returns Some(LocalDate.of(2018, 5, 11))
+        intercept[RuntimeException](await(service.getCompanyName("transID")))
+      }
     }
   }
 }

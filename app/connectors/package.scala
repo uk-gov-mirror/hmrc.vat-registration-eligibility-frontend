@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-import org.slf4j.{Logger, LoggerFactory}
+import config.Logging
 import play.api.http.Status
 import uk.gov.hmrc.http.{BadRequestException, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
 
-import scala.language.implicitConversions
-
-package object connectors {
-  val logger: Logger = LoggerFactory.getLogger(getClass)
-
+package object connectors extends Logging {
   def logResponse(e: Throwable, func: String): Throwable = {
     e match {
-      case e: NotFoundException   => logger.warn(s"[$func] received NOT FOUND")
-      case e: BadRequestException => logger.warn(s"[$func] received BAD REQUEST")
+      case e: NotFoundException   => logger.warn(s"[$func] received NOT FOUND, msg: ${e.message}")
+      case e: BadRequestException => logger.warn(s"[$func] received BAD REQUEST, msg: ${e.message}")
       case e: Upstream4xxResponse => e.upstreamResponseCode match {
-        case Status.FORBIDDEN => logger.error(s"[$func] received FORBIDDEN")
+        case Status.FORBIDDEN => logger.error(s"[$func] received FORBIDDEN, msg: ${e.message}")
         case _                => logger.error(s"[$func] received Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
       }
       case e: Upstream5xxResponse => logger.error(s"[$func] received Upstream 5xx: ${e.upstreamResponseCode}")
@@ -37,4 +33,3 @@ package object connectors {
     e
   }
 }
-

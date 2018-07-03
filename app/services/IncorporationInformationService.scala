@@ -17,29 +17,59 @@
 package services
 
 import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
 
-import connectors.{IncorporationInformationConnector, KeystoreConnector}
+import connectors.{DataCacheConnector, IncorporationInformationConnector}
+import javax.inject.Inject
+import models.Officer
+import play.api.Logger
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import utils.VATFeatureSwitch
 
 import scala.concurrent.Future
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.http.HeaderCarrier
 
-class IncorporationInformationServiceImpl @Inject()(val keystoreConnector: KeystoreConnector,
-                                                    val incorpInfoConnector: IncorporationInformationConnector) extends IncorporationInformationService
+class IncorporationInformationServiceImpl @Inject()(
+                                                     val iiConnector : IncorporationInformationConnector,
+                                                     val dataCacheConnector: DataCacheConnector,
+                                                     val featureSwitches : VATFeatureSwitch) extends IncorporationInformationService {
+}
 
 trait IncorporationInformationService {
-  val keystoreConnector: KeystoreConnector
-  val incorpInfoConnector: IncorporationInformationConnector
+  val iiConnector : IncorporationInformationConnector
+  val dataCacheConnector: DataCacheConnector
+  val featureSwitches: VATFeatureSwitch
 
-  def getCompanyName(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[String] = {
-    incorpInfoConnector.getCompanyName(regId, txId) map(_.\("company_name").as[String])
-  }
-
-  def getIncorpDate(regId: String, txId: String)(implicit headerCarrier: HeaderCarrier): Future[Option[LocalDate]] = {
-    incorpInfoConnector.getIncorpUpdate(regId, txId) map {
-      case Some(json) => (json \ "incorporationDate").asOpt[LocalDate]
-      case _          => None
+  def getIncorpDate(transactionId: String)(implicit hc: HeaderCarrier) : Future[Option[LocalDate]] =
+    iiConnector.getIncorpData(transactionId) map {jsOpt =>
+      jsOpt map {json =>
+        (json \ "incorporationDate").as[LocalDate]
+      }
     }
+
+  def getCompanyName(transactionId: String)(implicit hc: HeaderCarrier) : Future[String] =
+    iiConnector.getCOHOCompanyDetails(transactionId) map {json =>
+        (json \ "company_name").as[String]
+      }
+
+
+  private def officerArrayName = if (featureSwitches.useIiStubbed.enabled) {
+    "items"
+  } else {
+    "officers"
   }
+
+  def getOfficerList(transactionId: String)(implicit hc: HeaderCarrier) : Future[Seq[Officer]] =
+    iiConnector.getOfficerList(transactionId) map { json =>
+      (json \ officerArrayName).validate[Seq[Officer]](Officer.seqReads)
+        .fold(_ => throw new Exception(s"Couldn't get officer list from JSON for txId: $transactionId"), identity)
+        .filter{
+          officer => officer.resignedOn.isEmpty && (officer.role.equals("director") || officer.role.equals("secretary"))
+        } match {
+          case Nil        => throw new RuntimeException(s"No eligible officer list found for txId: $transactionId")
+          case officers   => officers
+        }
+    } recover {
+      case e => Logger.error(s"[IncorporationInformationService] [getOfficerList] Failed to get officers - ${e.getMessage}")
+        throw e
+    }
 }

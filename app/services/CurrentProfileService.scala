@@ -16,59 +16,40 @@
 
 package services
 
+import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, DataCacheConnector}
 import javax.inject.Inject
-
-import common.enums.CacheKeys.{CurrentProfile => CurrentProfileKey, _}
-import common.enums.VatRegStatus
-import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
 import models.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-class CurrentProfileServiceImpl @Inject()(val keystoreConnector: KeystoreConnector,
-                                      val businessRegistrationConnector: BusinessRegistrationConnector,
-                                      val compRegConnector: CompanyRegistrationConnector,
-                                      val incorpInfoService: IncorporationInformationService,
-                                      val vatRegistrationService: VatRegistrationService) extends CurrentProfileService
+class CurrentProfileServiceImpl @Inject()(
+                                           val dataCacheConnector: DataCacheConnector,
+                                           val incorporationInformationService: IncorporationInformationService,
+                                           val companyRegistrationConnector: CompanyRegistrationConnector,
+                                           val businessRegistrationConnector: BusinessRegistrationConnector) extends CurrentProfileService {
+
+}
 
 trait CurrentProfileService {
-  val keystoreConnector: KeystoreConnector
+  val dataCacheConnector: DataCacheConnector
+  val incorporationInformationService: IncorporationInformationService
+  val companyRegistrationConnector: CompanyRegistrationConnector
   val businessRegistrationConnector: BusinessRegistrationConnector
-  val compRegConnector: CompanyRegistrationConnector
-  val incorpInfoService: IncorporationInformationService
-  val vatRegistrationService: VatRegistrationService
 
-  def getCurrentProfile()(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
-    keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey) flatMap { profile =>
-      profile.fold(buildCurrentProfile)(profile => Future.successful(profile))
+  private def constructCurrentProfile(internalID : String)(implicit headerCarrier: HeaderCarrier): Future[CurrentProfile] = for {
+    regId           <- businessRegistrationConnector.getBusinessRegistrationId
+    transId         <- companyRegistrationConnector.getTransactionId(regId)
+    incorpDate      <- incorporationInformationService.getIncorpDate(transId)
+    currentProfile  = CurrentProfile(regId, transId, incorpDate)
+    _               <- dataCacheConnector.save(internalID, "CurrentProfile", currentProfile)
+  } yield currentProfile
+
+  def fetchOrBuildCurrentProfile(internalID : String)(implicit headerCarrier: HeaderCarrier): Future[CurrentProfile] = {
+    dataCacheConnector.getEntry[CurrentProfile](internalID, "CurrentProfile") flatMap {
+      case Some(currentProfile) => Future.successful(currentProfile)
+      case _                    => constructCurrentProfile(internalID)
     }
-  }
-
-  private[services] def getRegIdAndStatus(implicit hc: HeaderCarrier): Future[(String, VatRegStatus.Value)] = {
-    for {
-      profile <- businessRegistrationConnector.retrieveBusinessProfile
-      status  <- vatRegistrationService.getStatus(profile.registrationID)
-    } yield {
-      (profile.registrationID, status)
-    }
-  }
-
-  private[services] def buildCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
-    for {
-      (regId, status)       <- getRegIdAndStatus
-      companyProfile        <- compRegConnector.getCompanyRegistrationDetails(regId)
-      companyName           <- incorpInfoService.getCompanyName(regId, companyProfile.transactionId)
-      incorpDate            <-  incorpInfoService.getIncorpDate(regId, companyProfile.transactionId)
-      profile               =  CurrentProfile(
-        companyName           = companyName,
-        registrationId        = regId,
-        transactionId         = companyProfile.transactionId,
-        vatRegistrationStatus = status,
-        incorporationDate     = incorpDate
-      )
-      _                     <- keystoreConnector.cache[CurrentProfile](CurrentProfileKey.toString, profile)
-    } yield profile
   }
 }

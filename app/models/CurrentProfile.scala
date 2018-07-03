@@ -18,34 +18,14 @@ package models
 
 import java.time.LocalDate
 
-import common.enums.VatRegStatus
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import play.api.libs.json.Json
 
-import scala.concurrent.Future
-
-case class CurrentProfile(companyName: String,
-                          registrationId: String,
-                          transactionId: String,
-                          vatRegistrationStatus: VatRegStatus.Value,
-                          incorporationDate: Option[LocalDate])
+case class CurrentProfile(
+                         registrationID : String,
+                         transactionID : String,
+                         incorpDate : Option[LocalDate]
+                         )
 
 object CurrentProfile {
-  val reads: Reads[CurrentProfile] = (
-    (__ \ "companyName").read[String] and
-    (__ \ "registrationID").read[String] and
-    (__ \ "transactionID").read[String] and
-    (__ \ "vatRegistrationStatus").read[VatRegStatus.Value] and
-    (__ \ "incorporationDate").readNullable[LocalDate]
-  )(CurrentProfile.apply _)
-
-  val writes: Writes[CurrentProfile] = (
-    (__ \ "companyName").write[String] and
-    (__ \ "registrationID").write[String] and
-    (__ \ "transactionID").write[String] and
-    (__ \ "vatRegistrationStatus").write[VatRegStatus.Value] and
-    (__ \ "incorporationDate").writeNullable[LocalDate]
-  )(unlift(CurrentProfile.unapply))
-
-  implicit val format: Format[CurrentProfile] = Format(reads, writes)
+  implicit val currentProfileJsonFormat = Json.format[CurrentProfile]
 }

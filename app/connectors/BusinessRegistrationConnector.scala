@@ -16,49 +16,28 @@
 
 package connectors
 
-import javax.inject.Inject
-
 import config.WSHttp
-import models.external.BusinessProfile
-import play.api.http.Status.FORBIDDEN
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import javax.inject.Inject
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.InternalExceptions.BRDocumentNotFound
 
 import scala.concurrent.Future
 
-class BusinessRegistrationConnectorImpl @Inject()(val http: WSHttp, config: ServicesConfig) extends BusinessRegistrationConnector {
-  lazy val businessRegUrl = config.baseUrl("business-registration")
+class BusinessRegistrationConnectorImpl @Inject()(val http: WSHttp,
+                                                  val config: ServicesConfig) extends BusinessRegistrationConnector {
+  val businessRegistrationUrl: String = config.baseUrl("business-registration")
 }
 
 trait BusinessRegistrationConnector {
-  val businessRegUrl: String
-
+  val businessRegistrationUrl: String
   val http: WSHttp
 
-  def retrieveBusinessProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
-    http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") recover {
-      case e : NotFoundException =>
-        logResponse(e, "retrieveBusinessProfile", "NotFoundException")
-        throw new BRDocumentNotFound("[CurrentProfileService] [getRegIdAndStatus] Could not find a BR document")
-      case e => throw logResponse(e, "retrieveBusinessProfile", "retrieving business profile")
+  def getBusinessRegistrationId(implicit hc: HeaderCarrier): Future[String] = {
+    http.GET[HttpResponse](s"$businessRegistrationUrl/business-registration/business-tax-registration") map { response =>
+      (response.json \ "registrationID").as[String]
+    } recover {
+      case e => throw logResponse(e, "getBusinessRegistrationId")
     }
-  }
-
-  private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: Option[String] = None): Throwable = {
-    val optRegId = regId.fold("")(id => s" and regId: $id")
-    def log(s: String): Unit = logger.error(s"[BusinessRegistrationConnector] [$f] received $s when $m$optRegId")
-    e match {
-      case e: NotFoundException   => log("NOT FOUND")
-      case e: BadRequestException => log("BAD REQUEST")
-      case e: Upstream4xxResponse => e.upstreamResponseCode match {
-        case FORBIDDEN => log("FORBIDDEN")
-        case _         => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
-      }
-      case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
-      case e: Exception           => log(s"ERROR: ${e.getMessage}")
-    }
-    e
   }
 }

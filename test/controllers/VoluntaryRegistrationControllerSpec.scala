@@ -16,129 +16,81 @@
 
 package controllers
 
-import connectors.S4LConnector
-import fixtures.VatRegistrationFixture
-import helpers.{ControllerSpec, FutureAssertions}
-import models.CurrentProfile
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.scalatestplus.play.guice.GuiceOneAppPerTest
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
-import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import connectors.FakeDataCacheConnector
+import controllers.actions._
+import forms.VoluntaryRegistrationFormProvider
+import identifiers.VoluntaryRegistrationId
+import models.NormalMode
+import play.api.data.Form
+import play.api.libs.json.JsBoolean
+import play.api.test.Helpers._
+import uk.gov.hmrc.http.cache.client.CacheMap
+import utils.FakeNavigator
+import views.html.voluntaryRegistration
 
-import scala.concurrent.Future
+class VoluntaryRegistrationControllerSpec extends ControllerSpecBase {
 
-class VoluntaryRegistrationControllerSpec extends ControllerSpec with GuiceOneAppPerTest with VatRegistrationFixture with FutureAssertions {
+  def onwardRoute = routes.IndexController.onPageLoad()
 
-  class Setup {
-    val testController = new VoluntaryRegistrationController {
-      override val authConnector: AuthConnector = mockAuthClientConnector
-      override val thresholdService = mockThresholdService
-      override val vatRegFrontendService = mockVatRegFrontendService
-      override val currentProfileService = mockCurrentProfileService
-      override val compRegFEURL: String = "testUrl"
-      override val compRegFEURI: String = "/testUri"
-      override val compRegFECompanyRegistrationOverview: String = "/testcompany-registration-overview"
-      override val s4LConnector: S4LConnector = mockS4LConnector
-      override val messagesApi = fakeApplication.injector.instanceOf(classOf[MessagesApi])
+  val formProvider = new VoluntaryRegistrationFormProvider()
+  val form = formProvider()
 
-      override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(currentProfile)
-      }
-    }
-  }
+  def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
+    new VoluntaryRegistrationController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  val fakeRequest = FakeRequest(routes.VoluntaryRegistrationController.show())
+  def viewAsString(form: Form[_] = form) = voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
 
-  s"GET ${routes.VoluntaryRegistrationController.show()}" should {
-    val expectedText = "You can still choose to register it voluntarily. If you do, the company may be able to reclaim VAT on business-related purchases."
+  "VoluntaryRegistration Controller" must {
 
-    "return 200 with HTML not prepopulated when there is no view data" in new Setup {
-      mockGetThreshold(Future.successful(emptyThreshold))
+    "return OK and the correct view for a GET" in {
+      val result = controller().onPageLoad()(fakeRequest)
 
-      callAuthenticated(testController.show()) { res =>
-        res includesText expectedText
-        res passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-false").attr("checked") mustBe ""
-          doc.getElementById("voluntaryRegistrationRadio-true").attr("checked") mustBe ""
-        }
-      }
+      status(result) mustBe OK
+      contentAsString(result) mustBe viewAsString()
     }
 
-    "return 200 with HTML prepopulated to YES when there is view data" in new Setup {
-      mockGetThreshold(Future.successful(emptyThreshold.copy(voluntaryRegistration = Some(true))))
-      callAuthenticated(testController.show) {
-        _ passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-false").attr("checked") mustBe ""
-          doc.getElementById("voluntaryRegistrationRadio-true").attr("checked") mustBe "checked"
-        }
-      }
+    "populate the view correctly on a GET when the question has previously been answered" in {
+      val validData = Map(VoluntaryRegistrationId.toString -> JsBoolean(true))
+      val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
+
+      val result = controller(getRelevantData).onPageLoad()(fakeRequest)
+
+      contentAsString(result) mustBe viewAsString(form.fill(true))
     }
 
-    "return 200 with HTML prepopulated to NO when there is view data" in new Setup {
-      mockGetThreshold(Future.successful(emptyThreshold.copy(voluntaryRegistration = Some(false))))
-      callAuthenticated(testController.show) {
-        _ passJsoupTest { doc =>
-          doc.getElementById("voluntaryRegistrationRadio-false").attr("checked") mustBe "checked"
-          doc.getElementById("voluntaryRegistrationRadio-true").attr("checked") mustBe ""
-        }
-      }
-    }
-  }
+    "redirect to the next page when valid data is submitted" in {
+      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
 
-  s"POST ${routes.VoluntaryRegistrationController.submit()} with Empty data" should {
-    "return 400" in new Setup {
-      submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody()) {
-        result => result isA 400
-      }
-    }
-  }
+      val result = controller().onSubmit()(postRequest)
 
-  s"POST ${routes.VoluntaryRegistrationController.submit()} with Voluntary Registration selected Yes" should {
-    "return 303" in new Setup {
-      mockSaveVoluntaryRegistration(Future.successful(validThresholdPreIncorp))
-      submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "voluntaryRegistrationRadio" -> "true"
-      ))(_ redirectsTo controllers.routes.VoluntaryRegistrationReasonController.show().url)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(onwardRoute.url)
     }
-  }
 
-  "return 200 with HTML when user selects no to voluntary registration" in new Setup {
-    callAuthenticated(testController.showChoseNoToVoluntary) {
-      res => status(res) mustBe 200
-        res passJsoupTest { doc =>
-          doc.getElementById("confirm-and-continue").attr("id") mustBe "confirm-and-continue"
-        }
+    "return a Bad Request and errors when invalid data is submitted" in {
+      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "invalid value"))
+      val boundForm = form.bind(Map("value" -> "invalid value"))
+
+      val result = controller().onSubmit()(postRequest)
+
+      status(result) mustBe BAD_REQUEST
+      contentAsString(result) mustBe viewAsString(boundForm)
     }
-  }
 
-  s"POST ${routes.VoluntaryRegistrationController.submit()} with Voluntary Registration selected No" should {
-    "redirect to the dashboard page" in new Setup {
-      mockSaveVoluntaryRegistration(Future.successful(validThresholdPreIncorp.copy(voluntaryRegistration = Some(false))))
-      submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
-        "voluntaryRegistrationRadio" -> "false"
-      ))(_ redirectsTo controllers.routes.VoluntaryRegistrationController.showChoseNoToVoluntary().url)
+    "redirect to Session Expired for a GET if no existing data is found" in {
+      val result = controller(dontGetAnyData).onPageLoad()(fakeRequest)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
     }
-  }
 
-  s"GET ${controllers.routes.VoluntaryRegistrationController.showClearS4lRedirectDashboard()}" should {
-    "return 303 with clear s4l and redirect to dashboard" in new Setup {
-      mockS4LClear()
-      submitAuthorised(testController.showClearS4lRedirectDashboard(), fakeRequest.withFormUrlEncodedBody()) {
-        _ redirectsTo s"${testController.compRegFEURL}${testController.compRegFEURI}${testController.compRegFECompanyRegistrationOverview}"
-      }
-    }
-  }
+    "redirect to Session Expired for a POST if no existing data is found" in {
+      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
+      val result = controller(dontGetAnyData).onSubmit()(postRequest)
 
-  s"GET ${routes.VoluntaryRegistrationController.showClearS4lRedirectDashboard()} when S4l returns an exception" should {
-    "return exception" in new Setup {
-      when(mockS4LConnector.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.failed(new Upstream5xxResponse("Forbidden", 500, 500)))
-      submitAuthorised(testController.showClearS4lRedirectDashboard(), fakeRequest.withFormUrlEncodedBody(
-      ))(result => intercept[Upstream5xxResponse](await(result)) mustBe  Upstream5xxResponse("Forbidden", 500, 500))
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
     }
   }
 }

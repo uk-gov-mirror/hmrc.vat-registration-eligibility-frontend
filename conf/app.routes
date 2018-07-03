@@ -1,72 +1,69 @@
 # microservice specific routes
 
-GET         /assets/*file                                     controllers.Assets.at(path="/public", file)
+GET        /                                            controllers.IndexController.onPageLoad
 
-#SESSION
-GET         /renew-session                                    controllers.SessionController.renewSession
-GET         /error/destroy-session                            controllers.SessionController.destroySession
-GET         /error/timeout                                    controllers.SessionController.timeoutShow
+GET        /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 
-## SIGN OUT
-GET         /sign-out                                         controllers.callbacks.SignInOutController.signOut
+GET        /language/:lang                              controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
-## POST SIGN IN
-GET         /post-sign-in                                     controllers.callbacks.SignInOutController.postSignIn
+GET        /this-service-has-been-reset                 controllers.SessionExpiredController.onPageLoad
 
-## START VAT
-GET         /start-vat                                        controllers.callbacks.SignInOutController.startVat
+GET        /unauthorised                                controllers.UnauthorisedController.onPageLoad
 
-## RETRY SUBMISSION
-GET         /retry-submission                                 controllers.callbacks.SignInOutController.retrySubmission
+GET        /feedback                                    controllers.FeedbackController.show()
 
-## SERVICE CRITERIA QUESTIONS
-GET         /cant-register                                    controllers.EligibilityController.ineligible()
+GET        /make-more-taxable-sales                     controllers.ThresholdNextThirtyDaysController.onPageLoad()
+POST       /make-more-taxable-sales                     controllers.ThresholdNextThirtyDaysController.onSubmit()
 
-GET         /national-insurance-number                        controllers.EligibilityController.showHaveNino
-POST        /national-insurance-number                        controllers.EligibilityController.submitHaveNino
-GET         /international-business                           controllers.EligibilityController.showDoingBusinessAbroad
-POST        /international-business                           controllers.EligibilityController.submitDoingBusinessAbroad
-GET         /involved-more-business-changing-status           controllers.EligibilityController.showDoAnyApplyToYou
-POST        /involved-more-business-changing-status           controllers.EligibilityController.submitDoAnyApplyToYou
-GET         /agricultural-flat-rate                           controllers.EligibilityController.showApplyingForAnyOf
-POST        /agricultural-flat-rate                           controllers.EligibilityController.submitApplyingForAnyOf
-GET         /apply-exception-exemption                        controllers.EligibilityController.showExemptionCriteria
-POST        /apply-exception-exemption                        controllers.EligibilityController.submitExemptionCriteria
-GET         /apply-for-any                                    controllers.EligibilityController.showCompanyWillDoAnyOf
-POST        /apply-for-any                                    controllers.EligibilityController.submitCompanyWillDoAnyOf
+GET        /gone-over-threshold-period                  controllers.ThresholdPreviousThirtyDaysController.onPageLoad()
+POST       /gone-over-threshold-period                  controllers.ThresholdPreviousThirtyDaysController.onSubmit()
 
-## Post incorp threshold question 1
-GET         /gone-over-threshold                              controllers.ThresholdController.goneOverTwelveShow
-POST        /gone-over-threshold                              controllers.ThresholdController.goneOverTwelveSubmit
+GET        /register-voluntarily                        controllers.VoluntaryRegistrationController.onPageLoad()
+POST       /register-voluntarily                        controllers.VoluntaryRegistrationController.onSubmit()
 
-## Post incorp threshold question 2
-GET         /gone-over-threshold-period                       controllers.ThresholdController.pastThirtyDaysShow
-POST        /gone-over-threshold-period                       controllers.ThresholdController.pastThirtyDaysSubmit
+GET        /chosen-not-to-register                      controllers.ChoseNotToRegisterController.onPageLoad()
+POST       /chosen-not-to-register                      controllers.ChoseNotToRegisterController.onSubmit()
 
-## Post incorp threshold question 3
-GET         /make-more-taxable-sales                          controllers.ThresholdController.overThresholdThirtyShow
-POST        /make-more-taxable-sales                          controllers.ThresholdController.overThresholdThirtySubmit
+GET        /gone-over-threshold                         controllers.ThresholdInTwelveMonthsController.onPageLoad()
+POST       /gone-over-threshold                         controllers.ThresholdInTwelveMonthsController.onSubmit()
 
-## Post incorp threshold question 4
-GET         /made-more-taxable-sales                          controllers.ThresholdController.goneOverSinceIncorpShow
-POST        /made-more-taxable-sales                          controllers.ThresholdController.goneOverSinceIncorpSubmit
+GET        /vat-taxable-turnover                        controllers.TurnoverEstimateController.onPageLoad(mode : Mode = NormalMode)
+POST       /vat-taxable-turnover                        controllers.TurnoverEstimateController.onSubmit(mode : Mode = NormalMode)
+GET        /applicant-name                              controllers.CompletionCapacityController.onPageLoad()
+POST       /applicant-name                              controllers.CompletionCapacityController.onSubmit()
 
-## Threshold summary
-GET         /check-confirm-threshold                          controllers.ThresholdSummaryController.show
-POST        /check-confirm-threshold                          controllers.ThresholdSummaryController.submit
+GET        /filling-in-for                              controllers.CompletionCapacityFillingInForController.onPageLoad()
+POST       /filling-in-for                              controllers.CompletionCapacityFillingInForController.onSubmit()
 
-## VOLUNTARY REGISTRATION PAGE
-GET         /register-voluntarily                             controllers.VoluntaryRegistrationController.show
-POST        /register-voluntarily                             controllers.VoluntaryRegistrationController.submit
+GET        /involved-more-business-changing-status      controllers.InvolvedInOtherBusinessController.onPageLoad()
+POST       /involved-more-business-changing-status      controllers.InvolvedInOtherBusinessController.onSubmit()
 
-## NO TO VOLUNTARY REGISTRATION PAGE
-GET         /chose-not-to-register                            controllers.VoluntaryRegistrationController.showChoseNoToVoluntary
-GET         /chose-not-to-register-confirm                    controllers.VoluntaryRegistrationController.showClearS4lRedirectDashboard
+GET        /cant-register/:inelligibleType              controllers.EligibilityDropoutController.onPageLoad(inelligibleType: String)
+POST       /cant-register                               controllers.EligibilityDropoutController.onSubmit()
 
-## VOLUNTARY REGISTRATION REASON PAGE
-GET         /applies-company                                  controllers.VoluntaryRegistrationReasonController.show
-POST        /applies-company                                  controllers.VoluntaryRegistrationReasonController.submit
+GET        /international-business                      controllers.InternationalActivitiesController.onPageLoad()
+POST       /international-business                      controllers.InternationalActivitiesController.onSubmit()
 
-## ELIGIBILITY SUMMARY PAGE
-GET         /check-confirm-eligibility                        controllers.EligibilitySummaryController.show
-POST        /check-confirm-eligibility                        controllers.EligibilitySummaryController.submit
+GET        /annual-accounting                           controllers.AnnualAccountingSchemeController.onPageLoad()
+POST       /annual-accounting                           controllers.AnnualAccountingSchemeController.onSubmit()
+
+GET        /zero-rated-sales                            controllers.ZeroRatedSalesController.onPageLoad()
+POST       /zero-rated-sales                            controllers.ZeroRatedSalesController.onSubmit()
+
+GET        /vat-exemption                               controllers.VATExemptionController.onPageLoad()
+POST       /vat-exemption                               controllers.VATExemptionController.onSubmit()
+
+GET        /registration-exception                      controllers.VATRegistrationExceptionController.onPageLoad()
+POST       /registration-exception                      controllers.VATRegistrationExceptionController.onSubmit()
+
+GET        /apply-writing                               controllers.ApplyInWritingController.onPageLoad()
+POST       /apply-writing                               controllers.ApplyInWritingController.onSubmit()
+
+GET        /agricultural-flat-rate                      controllers.AgriculturalFlatRateSchemeController.onPageLoad()
+POST       /agricultural-flat-rate                      controllers.AgriculturalFlatRateSchemeController.onSubmit()
+
+GET        /own-racehorses-buy-sell-property            controllers.RacehorsesController.onPageLoad()
+POST       /own-racehorses-buy-sell-property            controllers.RacehorsesController.onSubmit()
+
+GET        /national-insurance-number                   controllers.ApplicantUKNinoController.onPageLoad()
+POST       /national-insurance-number                   controllers.ApplicantUKNinoController.onSubmit()

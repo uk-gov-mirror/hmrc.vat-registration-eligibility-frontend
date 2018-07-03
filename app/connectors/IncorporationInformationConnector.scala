@@ -16,45 +16,66 @@
 
 package connectors
 
+import config.{FrontendAppConfig, WSHttp}
 import javax.inject.Inject
-
-import config.WSHttp
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import play.api.Logger
+import play.api.libs.json.JsValue
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.RegistrationWhitelist
+import utils.VATFeatureSwitch
 
 import scala.concurrent.Future
 
-class IncorporationInformationConnectorImpl @Inject()(val http: WSHttp, config: ServicesConfig) extends IncorporationInformationConnector {
-  val incorpInfoUrl = config.baseUrl("incorporation-information")
-  val incorpInfoUri = config.getConfString("incorporation-information.uri", "")
+class IncorporationInformationConnectorImpl @Inject()(val http : WSHttp,
+                                                      val servicesConfig: FrontendAppConfig,
+                                                      val featureSwitch: VATFeatureSwitch) extends IncorporationInformationConnector {
+  override val incorpInfoUrl: String = servicesConfig.baseUrl("incorporation-information")
+  override val stubUrl: String = servicesConfig.baseUrl("incorporation-frontend-stub")
+  override val incorpInfoUri: String =
+    servicesConfig.getConfString("incorporation-information.uri", throw new RuntimeException("expected incorporation-information.uri in config but none found"))
 }
 
-trait IncorporationInformationConnector extends RegistrationWhitelist {
-  val incorpInfoUrl: String
-  val incorpInfoUri: String
+trait IncorporationInformationConnector {
+  val http: CoreGet with WSHttp
+  val incorpInfoUrl : String
+  val incorpInfoUri : String
+  val stubUrl       : String
+  val featureSwitch: VATFeatureSwitch
 
-  val http: WSHttp
-
-  def getCompanyName(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[JsValue] = ifRegIdNotWhitelisted(regId){
-    http.GET[JsValue](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile") recover {
-      case notFound: NotFoundException =>
-        logger.error(s"[getCompanyName] - Could not find company name for regId $regId (txId: $transactionId)")
-        throw notFound
-      case e =>
-        logger.error(s"[getCompanyName] - There was a problem getting company for regId $regId (txId: $transactionId)", e)
+  def getIncorpData(transactionId: String)(implicit hc: HeaderCarrier): Future[Option[JsValue]] = {
+    http.GET[HttpResponse](s"$incorpInfoUrl$incorpInfoUri/$transactionId/incorporation-update").map {
+      response =>
+        if (response.status == 200) Some(response.json) else None
+    } recover {
+      case e => Logger.error(s"[IncorporationInformationConnector][getIncorpData] an error occurred for txId: $transactionId with exception: ${e.getMessage}")
         throw e
     }
-  }(returnDefaultCompanyName)
+  }
 
-  def getIncorpUpdate(regId : String, transID : String)(implicit hc : HeaderCarrier) : Future[Option[JsValue]] = {
-    ifRegIdNotWhitelisted[Option[JsValue]](regId) {
-      http.GET[HttpResponse](s"$incorpInfoUrl$incorpInfoUri/$transID/incorporation-update").map(res => res.status match {
-        case 200  => Some(res.json)
-        case 204  => None
-      })
-    }(_ => Some(Json.obj()))
+  def getCOHOCompanyDetails(transactionId: String)(implicit hc: HeaderCarrier): Future[JsValue] =
+    http.GET[HttpResponse](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile").map(_.json) recover {
+    case e : NotFoundException => Logger.error(s"[IncorporationInformationConnector][getCOHOCompanyDetails] no company details found for txId: $transactionId")
+      throw e
+    case e => Logger.error(s"[IncorporationInformationConnector][getCOHOCompanyDetails] an error occurred for txId: $transactionId with exception: ${e.getMessage}")
+      throw e
+  }
+
+
+  def getOfficerList(transactionId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
+    val iiUrl = {
+      if (featureSwitch.useIiStubbed.enabled) {
+        s"$stubUrl/incorporation-frontend-stubs"
+      } else {
+        s"$incorpInfoUrl$incorpInfoUri"
+      }
+    }
+
+    http.GET[HttpResponse](s"$iiUrl/$transactionId/officer-list") map ( _.json
+      ) recover {
+      case e : NotFoundException => Logger.error(s"[IncorporationInformationConnector][getOfficerList] no officer list found for txId: $transactionId")
+        throw e
+      case e => Logger.error(s"[IncorporationInformationConnector][getOfficerList] an error occurred for txId: $transactionId with exception: ${e.getMessage}")
+        throw e
+    }
   }
 }

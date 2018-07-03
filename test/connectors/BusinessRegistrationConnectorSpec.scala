@@ -16,86 +16,61 @@
 
 package connectors
 
-import mocks.VatMocks
-import models.external.BusinessProfile
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
-import utils.InternalExceptions.BRDocumentNotFound
+import base.ConnectorSpecBase
+import config.WSHttp
+import play.api.http.Status.OK
+import play.api.libs.json.{JsResultException, Json}
+import uk.gov.hmrc.http.{CoreGet, NotFoundException}
 
-import scala.concurrent.Future
+class BusinessRegistrationConnectorSpec extends ConnectorSpecBase {
+  val regId = "test-regId"
+  val fakeUrl = "testUrl"
 
-class BusinessRegistrationConnectorSpec extends PlaySpec with MockitoSugar with VatMocks with FutureAwaits with DefaultAwaitTimeout {
-  implicit val hc = HeaderCarrier()
-
-  trait Setup {
+  "Calling getBusinessRegistrationId" must {
     val connector = new BusinessRegistrationConnector {
-      override val businessRegUrl = "testBusinessRegUrl"
-      override val http = mockWSHttp
-    }
-  }
-
-  val validBusinessRegistrationResponse = BusinessProfile(
-    "12345",
-    "ENG"
-  )
-
-  "retrieveCurrentProfile" should {
-    "return a a CurrentProfile response if one is found in business registration micro-service" in new Setup {
-      mockHttpGET[BusinessProfile]("testUrl", validBusinessRegistrationResponse)
-
-      await(connector.retrieveBusinessProfile) mustBe validBusinessRegistrationResponse
+      override val businessRegistrationUrl: String = fakeUrl
+      override val http: CoreGet with WSHttp = mockWSHttp
     }
 
-    "return a Not Found response when a CurrentProfile record can not be found" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
-        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new NotFoundException("not found")))
+    "return a registration id" in {
+      val json = Json.parse(
+        s"""
+           |{
+           |  "registrationID": "$regId"
+           |}
+         """.stripMargin)
 
-      intercept[BRDocumentNotFound](await(connector.retrieveBusinessProfile))
+      mockGet(s"$fakeUrl/business-registration/business-tax-registration", OK, Some(json))
+
+      await(connector.getBusinessRegistrationId) mustBe regId
+      verifyGetCalled("testUrl/business-registration/business-tax-registration")
     }
 
-    "return a Bad Request response when a bad request is send while getting CurrentProfile " in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
-        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new BadRequestException("Bad request")))
+    "return none" when {
+      "the json is incorrect" in {
+        val jsonIncorrect = Json.parse(
+          s"""
+             |{
+             |  "wrongKey": "$regId"
+             |}
+         """.stripMargin)
 
-      intercept[BadRequestException](await(connector.retrieveBusinessProfile))
-    }
+        mockGet(s"$fakeUrl/business-registration/business-tax-registration", OK, Some(jsonIncorrect))
 
-    "return a Forbidden response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
-        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new Upstream4xxResponse("Forbidden", 403, 403)))
-
-      intercept[Upstream4xxResponse](await(connector.retrieveBusinessProfile))
-    }
-
-    "return a 4xx response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
-        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new Upstream4xxResponse("Forbidden", 405, 405)))
-
-      intercept[Upstream4xxResponse](await(connector.retrieveBusinessProfile))
-    }
-
-    "return a 5xx response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
-        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.failed(new Upstream5xxResponse("Forbidden", 500, 500)))
-
-      intercept[Upstream5xxResponse](await(connector.retrieveBusinessProfile))
+        a[JsResultException] mustBe thrownBy(await(connector.getBusinessRegistrationId))
+        verifyGetCalled("testUrl/business-registration/business-tax-registration")
       }
+      "it is not found" in {
+        mockFailedGet(s"$fakeUrl/business-registration/business-tax-registration", new NotFoundException("not found"))
 
-    "return an Exception response when an unspecified error has occurred" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))
-        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new RuntimeException("Runtime Exception")))
-
-      intercept[RuntimeException](await(connector.retrieveBusinessProfile))
+        a[NotFoundException] mustBe thrownBy(await(connector.getBusinessRegistrationId))
+        verifyGetCalled("testUrl/business-registration/business-tax-registration")
+      }
+      "there is an error" in {
+        mockFailedGet(s"$fakeUrl/business-registration/business-tax-registration", new Exception("some error"))
+        an[Exception] mustBe thrownBy (await(connector.getBusinessRegistrationId))
+        verifyGetCalled("testUrl/business-registration/business-tax-registration")
+      }
     }
   }
 }

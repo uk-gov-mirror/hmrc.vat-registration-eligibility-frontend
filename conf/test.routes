@@ -1,7 +1,2 @@
-
-GET         /s4l-teardown                      controllers.test.TestCacheController.tearDownS4L
-
-GET         /test-setup                        controllers.test.TestSetupController.show()
-POST        /test-setup                        controllers.test.TestSetupController.submit()
-
-GET         /setup-threshold                   controllers.test.TestSetupController.addThresholdToBackend(reason: Option[String], overTwelveDate: Option[String], pastThirtyDate: Option[String], overThirtyDate: Option[String])
+GET         /feature-flag/:featureName/:featureState        controllers.test.FeatureSwitchController.switcher(featureName: String, featureState: String)
+GET         /feature-flag/                                  controllers.test.FeatureSwitchController.show

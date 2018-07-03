@@ -16,71 +16,49 @@
 
 package controllers
 
+import config.FrontendAppConfig
+import connectors.DataCacheConnector
+import controllers.actions._
+import forms.VoluntaryRegistrationFormProvider
+import identifiers.VoluntaryRegistrationId
 import javax.inject.Inject
-
-import config.AuthClientConnector
-import connectors.S4LConnector
-import forms.VoluntaryRegistrationForm
-import play.api.i18n.MessagesApi
-import play.api.mvc._
-import services.{CurrentProfileService, ThresholdService, VatRegFrontendService}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
-import utils.SessionProfile
+import models.NormalMode
+import play.api.data.Form
+import play.api.i18n.{I18nSupport, MessagesApi}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.{Navigator, UserAnswers}
+import views.html.voluntaryRegistration
 
 import scala.concurrent.Future
 
-class VoluntaryRegistrationControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                                    val authConnector: AuthClientConnector,
-                                                    val currentProfileService: CurrentProfileService,
-                                                    val vatRegFrontendService: VatRegFrontendService,
-                                                    val thresholdService: ThresholdService,
-                                                    val s4LConnector : S4LConnector,
-                                                    config: ServicesConfig) extends VoluntaryRegistrationController{
-  lazy val compRegFEURL = config.getConfString("company-registration-frontend.www.url", "")
-  lazy val compRegFEURI = config.getConfString("company-registration-frontend.www.uri", "")
-  lazy val compRegFECompanyRegistrationOverview = config.getConfString("company-registration-frontend.www.company-registration-overview", "")}
+class VoluntaryRegistrationController @Inject()(appConfig: FrontendAppConfig,
+                                         override val messagesApi: MessagesApi,
+                                         dataCacheConnector: DataCacheConnector,
+                                         navigator: Navigator,
+                                         identify: CacheIdentifierAction,
+                                         getData: DataRetrievalAction,
+                                         requireData: DataRequiredAction,
+                                         formProvider: VoluntaryRegistrationFormProvider) extends FrontendController with I18nSupport {
 
+  val form: Form[Boolean] = formProvider()
 
-trait VoluntaryRegistrationController extends VatRegistrationController with SessionProfile {
-  val compRegFEURL: String
-  val compRegFEURI: String
-  val compRegFECompanyRegistrationOverview: String
-  val thresholdService: ThresholdService
-  val vatRegFrontendService: VatRegFrontendService
-  val s4LConnector : S4LConnector
-
-  val form = VoluntaryRegistrationForm.form
-
-  def show: Action[AnyContent] = isAuthenticatedWithProfile {
-    implicit request => implicit profile =>
-      thresholdService.getThreshold map { threshold =>
-        Ok(views.html.pages.voluntary_registration(threshold.voluntaryRegistration.fold(form)(form.fill)))
+  def onPageLoad() = (identify andThen getData andThen requireData) {
+    implicit request =>
+      val preparedForm = request.userAnswers.voluntaryRegistration match {
+        case None => form
+        case Some(value) => form.fill(value)
       }
+      Ok(voluntaryRegistration(appConfig, preparedForm, NormalMode))
   }
 
-  def submit: Action[AnyContent] = isAuthenticatedWithProfile {
-    implicit request => implicit profile =>
+  def onSubmit() = (identify andThen getData andThen requireData).async {
+    implicit request =>
       form.bindFromRequest().fold(
-        badForm => Future.successful(BadRequest(views.html.pages.voluntary_registration(badForm))),
-        voluntary    => thresholdService.saveVoluntaryRegistration(voluntary) map { _ =>
-          if (voluntary) {
-            Redirect(controllers.routes.VoluntaryRegistrationReasonController.show())
-          } else {
-            Redirect(controllers.routes.VoluntaryRegistrationController.showChoseNoToVoluntary())
-          }
-        }
+        (formWithErrors: Form[_]) =>
+          Future.successful(BadRequest(voluntaryRegistration(appConfig, formWithErrors, NormalMode))),
+        (value) =>
+          dataCacheConnector.save[Boolean](request.internalId, VoluntaryRegistrationId.toString, value).map(cacheMap =>
+            Redirect(navigator.nextPage(VoluntaryRegistrationId, NormalMode)(new UserAnswers(cacheMap))))
       )
   }
-
-  def showChoseNoToVoluntary: Action[AnyContent] = isAuthenticatedWithProfile {
-    implicit request => implicit profile =>
-        Future.successful(Ok(views.html.pages.chose_no_to_voluntary_registration()))
-    }
-
-
-  def showClearS4lRedirectDashboard: Action[AnyContent] = isAuthenticatedWithProfile {
-    implicit request => implicit profile =>
-      s4LConnector.clear(profile.registrationId).map(_ => Redirect(s"$compRegFEURL$compRegFEURI$compRegFECompanyRegistrationOverview"))
-  }
 }
-
