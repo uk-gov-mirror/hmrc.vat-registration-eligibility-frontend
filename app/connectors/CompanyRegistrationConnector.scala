@@ -30,7 +30,7 @@ class CompanyRegistrationConnectorImpl @Inject()(val http: WSHttp,
                                                  val config: ServicesConfig,
                                                  val featureSwitch: VATFeatureSwitch) extends CompanyRegistrationConnector {
   val companyRegistrationUrl: String = config.baseUrl("company-registration")
-  val stubUrl: String = config.baseUrl("incorporation-frontend-stub")
+  val stubUrl: String = config.baseUrl("incorporation-frontend-stubs")
   def useStub: Boolean = featureSwitch.useCrStubbed.enabled
 }
 

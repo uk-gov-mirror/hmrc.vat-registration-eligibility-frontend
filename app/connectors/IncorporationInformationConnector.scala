@@ -30,7 +30,7 @@ class IncorporationInformationConnectorImpl @Inject()(val http : WSHttp,
                                                       val servicesConfig: FrontendAppConfig,
                                                       val featureSwitch: VATFeatureSwitch) extends IncorporationInformationConnector {
   override val incorpInfoUrl: String = servicesConfig.baseUrl("incorporation-information")
-  override val stubUrl: String = servicesConfig.baseUrl("incorporation-frontend-stub")
+  override val stubUrl: String = servicesConfig.baseUrl("incorporation-frontend-stubs")
   override val incorpInfoUri: String =
     servicesConfig.getConfString("incorporation-information.uri", throw new RuntimeException("expected incorporation-information.uri in config but none found"))
 }
