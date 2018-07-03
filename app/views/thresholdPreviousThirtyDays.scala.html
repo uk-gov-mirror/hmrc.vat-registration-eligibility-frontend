@@ -1,0 +1,80 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.FrontendAppConfig
+@import uk.gov.hmrc.play.views.html._
+@import controllers.routes._
+@import models.Mode
+@import utils.FormHelpers
+
+@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+
+@hiddenYesContent = {
+    <div class="additional-option-block panel panel-border-narrow">
+        <h2 class="heading-small">@messages("thresholdPreviousThirtyDays.heading2")</h2>
+        @components.input_date(
+            id = "thresholdPreviousThirtyDaysDate",
+            label = messages("thresholdPreviousThirtyDays.heading2"),
+            errorKey = form.error("thresholdPreviousThirtyDaysDate").map(error => error.message).getOrElse(""),
+            dayErrorKey = "",
+            monthErrorKey = "",
+            yearErrorKey = "",
+            valueDay = form("thresholdPreviousThirtyDaysDate.day").value,
+            valueMonth = form("thresholdPreviousThirtyDaysDate.month").value,
+            valueYear = form("thresholdPreviousThirtyDaysDate.year").value,
+            hint = Some(messages("thresholdPreviousThirtyDays.dateHint")),
+            errorArgs = form.error("thresholdPreviousThirtyDaysDate").map(error => error.args).getOrElse(Seq())
+        )
+    </div>
+}
+
+@main_template(
+    title = messages("thresholdPreviousThirtyDays.title"),
+    appConfig = appConfig,
+    bodyClasses = None) {
+
+    @helpers.form(action = ThresholdPreviousThirtyDaysController.onSubmit(), 'autoComplete -> "off") {
+
+        @components.back_link()
+
+        @components.error_summary(form.errors)
+
+        @components.heading("thresholdPreviousThirtyDays.heading")
+
+        @components.text("thresholdPreviousThirtyDays.text")
+
+        @components.text_with_bullets("thresholdPreviousThirtyDays.text1",Seq("thresholdPreviousThirtyDays.bullet1", "thresholdPreviousThirtyDays.bullet2"))
+
+        @components.text_with_link("thresholdPreviousThirtyDays.beforeLinkText","thresholdPreviousThirtyDays.linkText",appConfig.VATNotice700_1supplementURL, Some("."))
+
+
+
+        @components.vertical_input_radio(
+            field = form("thresholdPreviousThirtyDaysSelection"),
+            radioOptions = Seq(
+                "true" -> messages("site.yes"),
+                "false" -> messages("site.no")
+            ),
+            radioAdditionalInfo = Map("true" -> hiddenYesContent),
+            '_labelAfter -> true,
+            '_labelClass -> "block-label",
+            '_legend -> messages("thresholdPreviousThirtyDays.heading"),
+            '_legendClass -> "visually-hidden"
+        )
+
+        @components.submit_button()
+    }
+}

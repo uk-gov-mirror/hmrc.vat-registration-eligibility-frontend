@@ -1,0 +1,67 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.FrontendAppConfig
+@import uk.gov.hmrc.play.views.html.helpers.{form}
+
+@(appConfig: FrontendAppConfig)(implicit request: Request[_], messages: Messages)
+
+@main_template(
+    title = messages("eligibilityDropout.title"),
+    appConfig = appConfig,
+    bodyClasses = None) {
+
+    @components.back_link()
+
+    @components.heading("eligibilityDropout.heading")
+
+    @components.text("eligibilityDropout.text")
+
+    @components.heading2("eligibility.international.trading", "heading-medium")
+
+    @components.text_with_link(
+        "eligibility.international.trading.text",
+        "eligibility.international.trading.link",
+        appConfig.VAT1FormURL,
+        Some(".")
+    )
+
+    @components.heading2("eligibility.international.special", "heading-medium")
+
+    <p>@Messages("eligibility.international.special.text")</p>
+    <ul class="list list-bullet">
+        <li>
+            @Messages("eligibility.international.special.bullet1")
+            <a href=@appConfig.VAT1BFormURL target="_blank"> @Messages("eligibility.international.special.link1")</a>
+        </li>
+        <li>
+            @components.text_with_link(
+                "eligibility.international.special.bullet2",
+                "eligibility.international.special.link2",
+                appConfig.VAT1CFormURL
+            )
+        </li>
+    </ul>
+
+    @components.text_with_bullets(
+        "eligibility.international.useOther.text",
+        Seq("eligibility.international.useOther.bullet1","eligibility.international.useOther.bullet2")
+    )
+
+    <a href=@appConfig.otrsUrl target="_blank">
+        @Messages("eligibility.international.useOther.link")
+    </a>
+}
