@@ -27,15 +27,16 @@
 
 <div class="form-group">
     <fieldset class="form-group@if(field.hasErrors){-error}" id="@{field.id}">
-        <legend>
-            <span class="bold-small @if(legendClass.nonEmpty){@{legendClass.get}}">@legend</span>
-            @if(hint.nonEmpty){
-                <span class="form-hint">@{hint.get}</span>
-            }
-            @field.errors.map { error =>
-                <span class="error-notification" id="error-message-@{field.id}-input">@messages(error.message, error.args: _*)</span>
-            }
+        <legend class="@if(legendClass.nonEmpty){@{legendClass.get}}">
+            <span class="bold-small">@legend</span>
         </legend>
+
+        @if(hint.nonEmpty){
+            <span class="form-hint">@{hint.get}</span>
+        }
+        @field.errors.map { error =>
+            <span class="error-notification" id="error-message-@{field.id}-input">@messages(error.message, error.args: _*)</span>
+        }
 
         @for(input <- inputs) {
             <div class="multiple-choice">
