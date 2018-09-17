@@ -18,4 +18,5 @@ package identifiers
 
 case object ThresholdNextThirtyDaysId extends Identifier {
   override def toString: String = "thresholdNextThirtyDays"
+
 }

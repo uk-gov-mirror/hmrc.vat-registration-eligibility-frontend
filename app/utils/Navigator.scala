@@ -20,6 +20,7 @@ import controllers.routes
 import identifiers._
 import javax.inject.{Inject, Singleton}
 import models.{ConditionalDateFormElement, ConditionalNinoFormElement, Mode}
+import play.api.Logger
 import play.api.libs.json.Reads
 import play.api.mvc.Call
 import utils.DefaultImplicitJsonReads.{BooleanReads, StringReads}
@@ -27,28 +28,31 @@ import utils.DefaultImplicitJsonReads.{BooleanReads, StringReads}
 @Singleton
 class Navigator @Inject()() {
 
-  private[utils] def pageIdToPageLoad(pageId: Identifier): Call = pageId match {
-    case ThresholdNextThirtyDaysId => routes.ThresholdNextThirtyDaysController.onPageLoad()
-    case ThresholdPreviousThirtyDaysId => routes.ThresholdPreviousThirtyDaysController.onPageLoad()
-    case VoluntaryRegistrationId => routes.VoluntaryRegistrationController.onPageLoad()
-    case ChoseNotToRegisterId => routes.ChoseNotToRegisterController.onPageLoad()
-    case ThresholdInTwelveMonthsId => routes.ThresholdInTwelveMonthsController.onPageLoad()
-    case TurnoverEstimateId => routes.TurnoverEstimateController.onPageLoad()
-    case CompletionCapacityId => routes.CompletionCapacityController.onPageLoad()
-    case CompletionCapacityFillingInForId => routes.CompletionCapacityFillingInForController.onPageLoad()
-    case InvolvedInOtherBusinessId => routes.InvolvedInOtherBusinessController.onPageLoad()
-    case InternationalActivitiesId => routes.InternationalActivitiesController.onPageLoad()
-    case AnnualAccountingSchemeId => routes.AnnualAccountingSchemeController.onPageLoad()
-    case ZeroRatedSalesId => routes.ZeroRatedSalesController.onPageLoad()
-    case VATExemptionId => routes.VATExemptionController.onPageLoad()
-    case VATRegistrationExceptionId => routes.VATRegistrationExceptionController.onPageLoad()
-    case ApplyInWritingId => routes.ApplyInWritingController.onPageLoad()
-    case EligibilityDropoutId(mode) => routes.EligibilityDropoutController.onPageLoad(mode)
-    case AgriculturalFlatRateSchemeId => routes.AgriculturalFlatRateSchemeController.onPageLoad()
-    case RacehorsesId => routes.RacehorsesController.onPageLoad()
-    case ApplicantUKNinoId => routes.ApplicantUKNinoController.onPageLoad()
-    case _ => throw new RuntimeException(s"[Navigator] [pageIdToPageLoad] Could not load page for pageId: $pageId")
-  }
+   def pageIdToPageLoad(pageId: Identifier): Call = pageId match {
+     case ThresholdNextThirtyDaysId         => routes.ThresholdNextThirtyDaysController.onPageLoad()
+     case ThresholdPreviousThirtyDaysId     => routes.ThresholdPreviousThirtyDaysController.onPageLoad()
+     case VoluntaryRegistrationId           => routes.VoluntaryRegistrationController.onPageLoad()
+     case ChoseNotToRegisterId              => routes.ChoseNotToRegisterController.onPageLoad()
+     case ThresholdInTwelveMonthsId         => routes.ThresholdInTwelveMonthsController.onPageLoad()
+     case TurnoverEstimateId                => routes.TurnoverEstimateController.onPageLoad()
+     case CompletionCapacityId              => routes.CompletionCapacityController.onPageLoad()
+     case CompletionCapacityFillingInForId  => routes.CompletionCapacityFillingInForController.onPageLoad()
+     case InvolvedInOtherBusinessId         => routes.InvolvedInOtherBusinessController.onPageLoad()
+     case InternationalActivitiesId         => routes.InternationalActivitiesController.onPageLoad()
+     case AnnualAccountingSchemeId          => routes.AnnualAccountingSchemeController.onPageLoad()
+     case ZeroRatedSalesId                  => routes.ZeroRatedSalesController.onPageLoad()
+     case VATExemptionId                    => routes.VATExemptionController.onPageLoad()
+     case VATRegistrationExceptionId        => routes.VATRegistrationExceptionController.onPageLoad()
+     case ApplyInWritingId                  => routes.ApplyInWritingController.onPageLoad()
+     case EligibilityDropoutId(mode)        => routes.EligibilityDropoutController.onPageLoad(mode)
+     case AgriculturalFlatRateSchemeId      => routes.AgriculturalFlatRateSchemeController.onPageLoad()
+     case RacehorsesId                      => routes.RacehorsesController.onPageLoad()
+     case ApplicantUKNinoId                 => routes.ApplicantUKNinoController.onPageLoad()
+     case page => {
+       Logger.info(s"${page.toString} does not exist navigating to start of the journey")
+       routes.ThresholdNextThirtyDaysController.onPageLoad()
+     }
+   }
 
   private[utils] def nextOn[T](condition: T, fromPage: Identifier, onSuccessPage: Identifier, onFailPage: Identifier)
                               (implicit reads: Reads[T]): (Identifier, UserAnswers => Call) ={

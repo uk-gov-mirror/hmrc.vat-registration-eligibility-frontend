@@ -17,13 +17,20 @@
 package controllers
 
 import play.api.test.Helpers._
+import utils.FakeNavigator
 
 class IndexControllerSpec extends ControllerSpecBase {
 
+  class Setup {
+    val controller = new IndexController(frontendAppConfig, messagesApi, new FakeNavigator(desiredRoute = routes.ApplicantUKNinoController.onPageLoad()))
+  }
   "Index Controller" must {
-    "return 200 for a GET" in {
-      val result = new IndexController(frontendAppConfig, messagesApi).onPageLoad()(fakeRequest)
+    "return 200 for a GET" in new Setup {
+      val result = controller.onPageLoad()(fakeRequest)
       redirectLocation(result) mustBe Some(routes.ThresholdNextThirtyDaysController.onPageLoad().url)
+    }
+    "navigateToPage with a page id takes user to page in navigator" in new Setup {
+      val result = controller.navigateToPageId("foo")(fakeRequest)
     }
   }
 }

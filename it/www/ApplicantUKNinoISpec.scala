@@ -70,22 +70,20 @@ class ApplicantUKNinoISpec extends IntegrationSpecBase with AuthHelper with Sess
 
         stubPatch("/vatreg/testRegId/eligibility-data", 200, """{}""", """
          |{"sections":[
-         | {"title":"Threshold","data":[
+         | {"title":"VAT-taxable sales","data":[
          |   {"questionId":"thresholdNextThirtyDays","question":"In the next 30 days alone, does the business expect to make more than £85,000 in VAT-taxable sales?","answer":"No","answerValue":false},
          |   {"questionId":"thresholdPreviousThirtyDays-value","question":"Has the business ever expected to go over the VAT-registration threshold in a single 30-day period?","answer":"No","answerValue":false},
          |   {"questionId":"thresholdInTwelveMonths-value","question":"In any 12-month period has the business gone over the VAT-registration threshold?","answer":"No","answerValue":false},
-         |   {"questionId":"voluntaryRegistration","question":"Do you want to register the business for VAT voluntarily?","answer":"Yes","answerValue":true}
-         | ]},
-         | {"title":"Turnover Estimates","data":[
-         |   {"questionId":"turnoverEstimate-value","question":"What do you think the business's VAT-taxable turnover will be for the next 12 months?","answer":"More than £10,000","answerValue":"tenthousand"},
+         |   {"questionId":"voluntaryRegistration","question":"Do you want to register the business for VAT voluntarily?","answer":"Yes","answerValue":true},
+         |      {"questionId":"turnoverEstimate-value","question":"What do you think the business's VAT-taxable turnover will be for the next 12 months?","answer":"More than £10,000","answerValue":"tenthousand"},
          |   {"questionId":"turnoverEstimate-optionalData","question":"Give an estimate rounded to the nearest £10,000","answer":"£11,000","answerValue":11000}
          | ]},
-         | {"title":"Lodging Officer","data":[
+         | {"title":"Who is doing the application?","data":[
          |  {"questionId":"completionCapacity","question":"Are you test1 testa?","answer":"Yes","answerValue": {
          |    "name":{"forename":"test1","otherForenames":"test11","surname":"testa","title":"Mr"},"role":"director"}
          |  }
          | ]},
-         | {"title":"Eligibility","data":[
+         | {"title":"Special situations","data":[
          |   {"questionId":"internationalActivities","question":"Will the business be doing any of the following international activities over the next 12 months?","answer":"No","answerValue":false},
          |   {"questionId":"involvedInOtherBusiness","question":"Have you been involved with another business or taken over a VAT-registered business?","answer":"No","answerValue":false},
          |   {"questionId":"annualAccountingScheme","question":"Is the business applying for the Annual Accounting Scheme?","answer":"No","answerValue":false},
@@ -142,24 +140,22 @@ class ApplicantUKNinoISpec extends IntegrationSpecBase with AuthHelper with Sess
 
         stubPatch("/vatreg/testRegId/eligibility-data", 200, """{}""", s"""
            |{"sections":[
-           | {"title":"Threshold","data":[
+           | {"title":"VAT-taxable sales","data":[
            |   {"questionId":"thresholdNextThirtyDays","question":"In the next 30 days alone, does the business expect to make more than £85,000 in VAT-taxable sales?","answer":"No","answerValue":false},
            |   {"questionId":"thresholdPreviousThirtyDays-value","question":"Has the business ever expected to go over the VAT-registration threshold in a single 30-day period?","answer":"Yes","answerValue":true},
            |   {"questionId":"thresholdPreviousThirtyDays-optionalData","question":"When did the business first expect to go over the threshold?","answer":"15 October 2015","answerValue":"2015-10-15"},
            |   {"questionId":"thresholdInTwelveMonths-value","question":"In any 12-month period has the business gone over the VAT-registration threshold?","answer":"Yes","answerValue":true},
-           |   {"questionId":"thresholdInTwelveMonths-optionalData","question":"When did the business first go over the threshold?","answer":"10 October 2010","answerValue":"2010-10-10"}
-           | ]},
-           | {"title":"Turnover Estimates","data":[
+           |   {"questionId":"thresholdInTwelveMonths-optionalData","question":"When did the business first go over the threshold?","answer":"10 October 2010","answerValue":"2010-10-10"},
            |   {"questionId":"turnoverEstimate-value","question":"What do you think the business's VAT-taxable turnover will be for the next 12 months?","answer":"More than £10,000","answerValue":"tenthousand"},
            |   {"questionId":"turnoverEstimate-optionalData","question":"Give an estimate rounded to the nearest £10,000","answer":"£999,999,999,999,999","answerValue":999999999999999}
            | ]},
-           | {"title":"Lodging Officer","data":[
+           | {"title":"Who is doing the application?","data":[
            |  {"questionId":"completionCapacity","question":"Which of the following people are you?","answer":"None of these","answerValue": "noneOfThese"},
            |  {"questionId":"completionCapacityFillingInFor","question":"Which company officer are you doing this application for?","answer":"test1 testa","answerValue": {
            |    "name":{"forename":"test1","otherForenames":"test11","surname":"testa","title":"Mr"},"role":"director"}
            |  }
            | ]},
-           | {"title":"Eligibility","data":[
+           | {"title":"Special situations","data":[
            |   {"questionId":"internationalActivities","question":"Will the business be doing any of the following international activities over the next 12 months?","answer":"No","answerValue":false},
            |   {"questionId":"involvedInOtherBusiness","question":"Have you been involved with another business or taken over a VAT-registered business?","answer":"No","answerValue":false},
            |   {"questionId":"annualAccountingScheme","question":"Is the business applying for the Annual Accounting Scheme?","answer":"No","answerValue":false},
