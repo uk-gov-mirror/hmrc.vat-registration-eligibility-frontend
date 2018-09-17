@@ -39,23 +39,20 @@ object PageIdBinding {
       .flatMap(_ => userAnswers.vatExemption.orElse(throw new Exception("Vat Exemption Not Answered")))
 
     Map(
-      "Threshold" ->
+      "VAT-taxable sales" ->
         Seq(
           (ThresholdNextThirtyDaysId, userAnswers.thresholdNextThirtyDays.orElse(throw new Exception("Threshold Next Thirty Days Not Answered"))),
           (ThresholdPreviousThirtyDaysId, userAnswers.thresholdPreviousThirtyDays.orElse(throw new Exception("Threshold Previous Thirty Days Not Answered"))),
           (ThresholdInTwelveMonthsId, userAnswers.thresholdInTwelveMonths.orElse(throw new Exception("Threshold In Twelve Months Not Answered"))),
-          (VoluntaryRegistrationId, validateVoluntaryReason)
-        ),
-      "Turnover Estimates" ->
-        Seq(
+          (VoluntaryRegistrationId, validateVoluntaryReason),
           (TurnoverEstimateId, userAnswers.turnoverEstimate.orElse(throw new Exception("Turnover Estimates Not Answered")))
         ),
-      "Lodging Officer" ->
+      "Who is doing the application?" ->
         Seq(
           (CompletionCapacityId, userAnswers.completionCapacity.orElse(throw new Exception("Completion Capacity Not Answered"))),
           (CompletionCapacityFillingInForId, validateCompletionCapacityFillingInFor)
         ),
-      "Eligibility" ->
+      "Special situations" ->
         Seq(
           (InternationalActivitiesId, userAnswers.internationalActivities.orElse(throw new Exception("International Activities Not Answered"))),
           (InvolvedInOtherBusinessId, userAnswers.involvedInOtherBusiness.orElse(throw new Exception("Involved In Other Business Not Answered"))),
@@ -69,6 +66,4 @@ object PageIdBinding {
         )
     )
   }
-
-
 }

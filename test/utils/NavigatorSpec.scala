@@ -49,11 +49,10 @@ class NavigatorSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "throw a run time exception" when {
+    "redirect to the start of the VAT EL Flow" when {
       "given an invalid ID" in {
-        sealed class FakeID extends Identifier
-
-        intercept[RuntimeException](navigator.pageIdToPageLoad(new FakeID))
+        val fakeId = new Identifier { override def toString :String = "fudge" }
+        navigator.pageIdToPageLoad(fakeId).url mustBe routes.ThresholdNextThirtyDaysController.onPageLoad().url
       }
     }
   }
@@ -67,27 +66,4 @@ class NavigatorSpec extends SpecBase with MockitoSugar {
       }
     }
   }
-
-//  "nextOnFalse" should {
-//    "return an ID and function to the next page" when {
-//      "given a start page id and end page id when the answer provided is false" in {
-//        val res = navigator.nextOnFalse(TooManyDirectorsId, OrdinarySharesId)
-//        val userAnswers = new UserAnswers(CacheMap("id", Map(TooManyDirectorsId.toString -> JsBoolean(false))))
-//
-//        res._1 mustBe TooManyDirectorsId
-//        res._2(userAnswers) mustBe routes.OrdinarySharesController.onPageLoad(NormalMode)
-//      }
-//
-  //    }
-//
-//    "return an ID and function to the ineligible" when {
-//      "given a start page id and end page id when the answer provided is true" in {
-//        val res = navigator.nextOnFalse(TooManyDirectorsId, OrdinarySharesId)
-//        val userAnswers = new UserAnswers(CacheMap("id", Map(TooManyDirectorsId.toString -> JsBoolean(true))))
-//
-//        res._1 mustBe TooManyDirectorsId
-//        res._2(userAnswers) mustBe routes.IneligibleController.onPageLoad(TooManyDirectorsId.toString)
-//      }
-//    }
-//  }
 }
