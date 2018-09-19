@@ -32,10 +32,12 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
       val record2 = CacheMap("2",Map("foo" -> Json.obj("" -> "")))
       await(newMongoInstance.upsert(record1)) mustBe true
       await(newMongoInstance.upsert(record2)) mustBe true
+      await(newMongoInstance.count) mustBe 2
       await(newMongoInstance.dropCollectionIndexTemp) mustBe true
       await(newMongoInstance.collection.indexesManager.list()).map(_.name.getOrElse("")).contains("userAnswersExpiry") mustBe false
       await(newMongoInstance.createIndex(newMongoInstance.fieldName, newMongoInstance.createdIndexName,129)) mustBe true
       await(newMongoInstance.collection.indexesManager.list()).map(_.name.getOrElse("")).contains("userAnswersExpiry") mustBe true
+      await(newMongoInstance.count) mustBe 2
     }
   }
 }
