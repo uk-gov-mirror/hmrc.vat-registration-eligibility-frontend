@@ -51,9 +51,9 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
   val expireAfterSeconds = "expireAfterSeconds"
   val timeToLiveInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds").get
 
-  createIndex(fieldName, createdIndexName, timeToLiveInSeconds)
+  dropCollectionIndexTemp.map(_ => createIndex(fieldName, createdIndexName, timeToLiveInSeconds))
 
-  private def createIndex(field: String, indexName: String, ttl: Int): Future[Boolean] = {
+  private[repositories] def createIndex(field: String, indexName: String, ttl: Int): Future[Boolean] = {
     collection.indexesManager.ensure(Index(Seq((field, IndexType.Ascending)), Some(indexName),
       options = BSONDocument(expireAfterSeconds -> ttl))) map {
       result => {
@@ -64,6 +64,18 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
       case e => Logger.error("Failed to set TTL index", e)
         false
     }
+  }
+
+  def dropCollectionIndexTemp = collection.indexesManager.drop(createdIndexName).map{ res =>
+      Logger.warn(s"[$createdIndexName dropped successfully finding a count of $res before dropping this index")
+    true
+  }.recoverWith{
+    case e =>
+      Future.successful {
+        Logger.warn(s"[$expireAfterSeconds did not drop as expected] and threw an exception with message ${e.getMessage}")
+        false
+      }
+
   }
 
   def upsert(cm: CacheMap): Future[Boolean] = {

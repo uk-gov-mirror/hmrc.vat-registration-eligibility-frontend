@@ -43,6 +43,7 @@ trait MicroService {
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
+    .settings(integrationTestSettings())
     .settings(
       scalacOptions ++= Seq("-feature"), //TODO: "-Xfatal-warnings" cause deprecated warnings to fail, what alternatives are there?
       libraryDependencies ++= appDependencies,
@@ -50,7 +51,6 @@ trait MicroService {
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
     )
     .configs(IntegrationTest)
-    .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
       .settings(resolvers ++= Seq(
         Resolver.bintrayRepo("hmrc", "releases"),
         Resolver.jcenterRepo,
