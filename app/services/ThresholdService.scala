@@ -109,7 +109,7 @@ trait ThresholdService extends I18nSupport {
   }
   def returnHelpText1Previous(enum: ThresholdDateResult)(implicit r:DataRequest[_]): Html = {
     enum match {
-      case limitedIncorpedEqualOrAfter20170401()    => Html("")
+      case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo())   => Html("")
       case limitedIncorpedTaxYear2016to2017()       => views.html.components.text_with_bullets("thresholdPreviousThirtyDays.text",Seq("thresholdPreviousThirtyDays.bullet1", "thresholdPreviousThirtyDays.bullet2"))
       case limitedIncorpedTaxYear2015to2016()       => views.html.components.text_with_bullets("thresholdPreviousThirtyDays.text",Seq("thresholdPreviousThirtyDays.bullet1", "thresholdPreviousThirtyDays.bullet2", "thresholdPreviousThirtyDays.bullet3"))
       case _                                        => HtmlFormat.fill(collection.immutable.Seq(
