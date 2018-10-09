@@ -17,7 +17,7 @@
 package utils
 
 import controllers.routes
-import identifiers._
+import identifiers.{Identifier, _}
 import javax.inject.{Inject, Singleton}
 import models.{ConditionalDateFormElement, ConditionalNinoFormElement, Mode}
 import play.api.Logger
@@ -73,6 +73,20 @@ class Navigator @Inject()() {
       }
     }
   }
+  private def lastThresholdQuestion(fromPage: Identifier, twelveMonthsTrue: Identifier, twelveMonthsFalse: Identifier):
+  (Identifier, UserAnswers => Call) = {
+  fromPage -> { userAns =>
+    if(ThresholdHelper.q1DefinedAndTrue(userAns)) {
+      pageIdToPageLoad(twelveMonthsTrue)
+    } else {
+      if(ThresholdHelper.taxableTurnoverCheck(userAns)) {
+        pageIdToPageLoad(twelveMonthsFalse)
+      } else {
+        pageIdToPageLoad(VoluntaryRegistrationId)
+      }
+    }
+   }
+  }
 
   private[utils] def nextOnNino(fromPage: Identifier, onSuccessPage: Identifier, onFailPage: Identifier):
   (Identifier, UserAnswers => Call) ={
@@ -83,25 +97,14 @@ class Navigator @Inject()() {
       }
     }
   }
-
-  private[utils] def navigateFromThresholdInTwelveMonths: (Identifier, UserAnswers => Call) = {
-    ThresholdInTwelveMonthsId -> { answers =>
-      (answers.thresholdNextThirtyDays, answers.thresholdPreviousThirtyDays, answers.thresholdInTwelveMonths) match {
-        case (Some(true), _, _) | (_ , Some(ConditionalDateFormElement(true, _)), _) | (_, _, Some(ConditionalDateFormElement(true, _))) =>
-          pageIdToPageLoad(TurnoverEstimateId)
-        case _ => pageIdToPageLoad(VoluntaryRegistrationId)
-      }
-    }
-  }
-
   private[utils] def toNextPage(fromPage: Identifier, toPage: Identifier): (Identifier, UserAnswers => Call) = fromPage -> {
     _ => pageIdToPageLoad(toPage)
   }
 
   private val routeMap: Map[Identifier, UserAnswers => Call] = Map(
-    nextOn(false, ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId, ThresholdPreviousThirtyDaysId),
-    toNextPage(ThresholdPreviousThirtyDaysId, ThresholdInTwelveMonthsId),
-    navigateFromThresholdInTwelveMonths,
+    nextOnConditionalFormElement(false, ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId),
+    ThresholdNextThirtyDaysId -> {_ => pageIdToPageLoad(ThresholdPreviousThirtyDaysId)},
+    lastThresholdQuestion(ThresholdPreviousThirtyDaysId, VATRegistrationExceptionId, TurnoverEstimateId),
     nextOn(true, VoluntaryRegistrationId, TurnoverEstimateId, ChoseNotToRegisterId),
     toNextPage(TurnoverEstimateId, CompletionCapacityId),
     nextOn("noneOfThese", CompletionCapacityId, CompletionCapacityFillingInForId, InvolvedInOtherBusinessId),
@@ -109,9 +112,9 @@ class Navigator @Inject()() {
     nextOn(false, InvolvedInOtherBusinessId, InternationalActivitiesId, EligibilityDropoutId(InvolvedInOtherBusinessId.toString)),
     nextOn(false, InternationalActivitiesId, AnnualAccountingSchemeId, EligibilityDropoutId(InternationalActivitiesId.toString)),
     nextOn(false, AnnualAccountingSchemeId, ZeroRatedSalesId, EligibilityDropoutId(AnnualAccountingSchemeId.toString)),
-    nextOn(true, ZeroRatedSalesId, VATExemptionId, VATRegistrationExceptionId),
-    nextOn(false, VATExemptionId, VATRegistrationExceptionId, ApplyInWritingId),
-    nextOn(false, VATRegistrationExceptionId, AgriculturalFlatRateSchemeId, EligibilityDropoutId(VATRegistrationExceptionId.toString)),
+    nextOn(true, ZeroRatedSalesId, VATExemptionId, AgriculturalFlatRateSchemeId),
+    nextOn(false, VATExemptionId, AgriculturalFlatRateSchemeId, ApplyInWritingId),
+    nextOn(false, VATRegistrationExceptionId, TurnoverEstimateId, EligibilityDropoutId(VATRegistrationExceptionId.toString)),
     nextOn(false, AgriculturalFlatRateSchemeId, RacehorsesId, EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)),
     nextOn(false, RacehorsesId, ApplicantUKNinoId, EligibilityDropoutId(RacehorsesId.toString)),
     toNextPage(ApplicantUKNinoId, EligibilityDropoutId(ApplicantUKNinoId.toString))

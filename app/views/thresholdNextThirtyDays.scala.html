@@ -19,8 +19,9 @@
 @import controllers.routes._
 @import models.Mode
 @import utils.FormHelpers
+@import models.requests.DataRequest
 
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
     title = messages("thresholdNextThirtyDays.title"),
@@ -33,9 +34,10 @@
 
         @components.error_summary(form.errors)
 
-        @components.heading("thresholdNextThirtyDays.heading")
+        <h1 class="heading-large" id="main-heading">@messages("thresholdNextThirtyDays.heading",request.currentProfile.companyName)</h1>
+        <p id="help-text">@messages("thresholdNextThirtyDays.text",request.currentProfile.companyName)</p>
 
-        @components.text("thresholdNextThirtyDays.text")
+
 
         @components.vertical_input_radio(
             field = form("value"),
@@ -46,7 +48,7 @@
             radioAdditionalInfo = Map(),
             '_labelAfter -> true,
             '_labelClass -> "block-label",
-            '_legend -> messages("thresholdNextThirtyDays.heading"),
+            '_legend -> messages("thresholdNextThirtyDays.heading", request.currentProfile.companyName),
             '_legendClass -> "visually-hidden"
         )
 

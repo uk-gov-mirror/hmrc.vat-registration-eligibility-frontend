@@ -19,8 +19,10 @@
 @import controllers.routes._
 @import models.Mode
 @import utils.FormHelpers
+@import models.requests.DataRequest
 
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+
+@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
     title = messages("agriculturalFlatRateScheme.title"),
@@ -33,7 +35,7 @@
 
         @components.error_summary(form.errors)
 
-        @components.heading("agriculturalFlatRateScheme.heading")
+        <h1 class="heading-large" id="main-heading">@messages.apply("agriculturalFlatRateScheme.heading", request.currentProfile.companyName)</h1>
 
         @components.text("agriculturalFlatRateScheme.text")
 
@@ -48,7 +50,7 @@
         radioAdditionalInfo = Map(),
         '_labelAfter -> true,
         '_labelClass -> "block-label",
-        '_legend -> messages("agriculturalFlatRateScheme.heading"),
+        '_legend -> messages("agriculturalFlatRateScheme.heading", request.currentProfile.companyName),
         '_legendClass -> "visually-hidden"
         )
 

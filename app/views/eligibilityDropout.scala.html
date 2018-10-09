@@ -15,9 +15,10 @@
  *@
 
 @import config.FrontendAppConfig
+@import models.requests.CacheIdentifierRequest
 @import uk.gov.hmrc.play.views.html.helpers.{form}
 
-@(appConfig: FrontendAppConfig, default: Boolean = true)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig, default: Boolean = true)(implicit request: CacheIdentifierRequest[_], messages: Messages)
 
 @main_template(
     title = messages("eligibilityDropout.title"),
@@ -26,13 +27,11 @@
 
     @components.back_link()
 
-    @components.heading("eligibilityDropout.heading")
+<h1 class="heading-large" id="main-heading">@messages("eligibilityDropout.heading",request.currentProfile.companyName)</h1>
 
     @if(!default){
         <p>@messages(s"eligibilityDropout.ApplicantUKNinoId.variant")</p>
     }
-
-    @components.text("eligibilityDropout.text")
 
     @form(action = controllers.routes.EligibilityDropoutController.onSubmit()) {
         @components.button_link("site.use_other_service", appConfig.otrsUrl)

@@ -24,14 +24,15 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.zeroRatedSales
 
 class ZeroRatedSalesViewSpec extends YesNoViewBehaviours {
+  override val extraParamForLegend: String = "Test Company"
 
   val messageKeyPrefix = "zeroRatedSales"
 
   val form = new ZeroRatedSalesFormProvider()()
 
-  def createView = () => zeroRatedSales(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => zeroRatedSales(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => zeroRatedSales(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => zeroRatedSales(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "ZeroRatedSales view" must {
 

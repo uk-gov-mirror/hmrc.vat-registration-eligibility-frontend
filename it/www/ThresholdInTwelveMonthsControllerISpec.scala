@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
-import identifiers.{ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId, VoluntaryRegistrationId}
+import identifiers.{ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, VATRegistrationExceptionId, VoluntaryRegistrationId}
 import models.ConditionalDateFormElement
 import org.jsoup.Jsoup
 import play.api.test.FakeApplication
@@ -15,7 +15,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
   val selectionFieldName = s"${ThresholdInTwelveMonthsId}Selection"
   val dateFieldName = s"${ThresholdInTwelveMonthsId}Date"
   val internalId = "testInternalId"
-  val pageHeading = "In any 12-month period has the business gone over the VAT-registration threshold?"
+  val pageHeading = "In any 12-month period has Test Company gone over the VAT-registration threshold?"
   val dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
   override implicit lazy val app = FakeApplication(additionalConfiguration = fakeConfig())
@@ -27,6 +27,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
@@ -44,9 +45,10 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
-        cacheSessionData(internalId, s"$ThresholdInTwelveMonthsId", ConditionalDateFormElement(true, Some(LocalDate.of(2017,12,1))))
+        cacheSessionData[ConditionalDateFormElement](internalId, s"$ThresholdInTwelveMonthsId", ConditionalDateFormElement(true, Some(LocalDate.of(2017,12,1))))
 
         val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
         val response = await(request)
@@ -65,6 +67,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
           stubSuccessfulRegIdGet()
           stubSuccessfulTxIdGet()
           stubUnsuccessfulIncorpDataGet(status = 204)
+          stubSuccessfulCompanyNameGet()
           stubAudits()
           val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
           val response = await(request)
@@ -85,6 +88,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet(date = incorpDate)
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
 
@@ -100,20 +104,22 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         val document = Jsoup.parse(response.body)
         document.getElementById("main-heading").text() mustBe pageHeading
         document.getElementById("error-summary-heading").text() mustBe "This page has errors"
-        document.getElementsByAttributeValue("href",s"#$dateFieldName").text() mustBe s"Enter a date that’s after the date the business was set up: ${incorpDate.format(dateTimeFormatter)}"
+        document.getElementsByAttributeValue("href",s"#$dateFieldName").text() mustBe s"Enter a date that's after the date the business was set up: ${incorpDate.format(dateTimeFormatter)}"
       }
     }
-    s"redirect to ${controllers.routes.TurnoverEstimateController.onPageLoad().url}" when {
-      "yes and a valid date is submitted when previous questions answered" in {
+    s"redirect to ${controllers.routes.ThresholdPreviousThirtyDaysController.onPageLoad().url}" when {
+      "yes and a valid date is given and should drop ThresholdNextThirtyDaysId data if present but not exception" in {
         stubSuccessfulLogin()
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet(date = incorpDate)
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
-        cacheSessionData(internalId, ThresholdNextThirtyDaysId.toString, false)
-        cacheSessionData(internalId, ThresholdPreviousThirtyDaysId.toString, ConditionalDateFormElement(false, None))
-        cacheSessionData(internalId, VoluntaryRegistrationId.toString, true)
+        cacheSessionData[Boolean](internalId, ThresholdNextThirtyDaysId.toString, false)
+        verifySessionCacheData[ConditionalDateFormElement](internalId, ThresholdInTwelveMonthsId.toString, Option.empty[ConditionalDateFormElement])
+        cacheSessionData[Boolean](internalId, VoluntaryRegistrationId.toString, true)
+        cacheSessionData(internalId, VATRegistrationExceptionId.toString, true)
 
         val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
           .post(Map(
@@ -124,21 +130,26 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
 
         val response = await(request)
         response.status mustBe 303
-        response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.TurnoverEstimateController.onPageLoad().url)
+        response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdPreviousThirtyDaysController.onPageLoad().url)
         verifySessionCacheData(internalId, VoluntaryRegistrationId.toString, Option.empty[Boolean])
+        verifySessionCacheData[ConditionalDateFormElement](internalId, ThresholdInTwelveMonthsId.toString,
+          Some(ConditionalDateFormElement(true, Some(LocalDate.of(dateAfterIncorp.getYear, dateAfterIncorp.getMonthValue,1)))))
+        verifySessionCacheData(internalId, ThresholdNextThirtyDaysId.toString, Option.empty[Boolean])
+        verifySessionCacheData(internalId, VATRegistrationExceptionId.toString, Some(true))
       }
     }
-    s"redirect to ${controllers.routes.VoluntaryRegistrationController.onPageLoad().url}" when {
-      "no is submitted when previous questions answered with no" in {
+    s"redirect to ${controllers.routes.ThresholdNextThirtyDaysController.onPageLoad().url}" when {
+      "no is submitted should not drop ThresholdNextThirtyDaysId or voluntary but drop exception" in {
         stubSuccessfulLogin()
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet(date = incorpDate)
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
-        cacheSessionData(internalId, ThresholdNextThirtyDaysId.toString, false)
-        cacheSessionData(internalId, ThresholdPreviousThirtyDaysId.toString, ConditionalDateFormElement(false, None))
         cacheSessionData(internalId, VoluntaryRegistrationId.toString, true)
+        cacheSessionData(internalId,  ThresholdNextThirtyDaysId.toString, false)
+        cacheSessionData(internalId, VATRegistrationExceptionId.toString, true)
 
         val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
           .post(Map(
@@ -147,10 +158,12 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
 
         val response = await(request)
         response.status mustBe 303
-        response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VoluntaryRegistrationController.onPageLoad().url)
+        response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdNextThirtyDaysController.onPageLoad().url)
         verifySessionCacheData(internalId, VoluntaryRegistrationId.toString, Some(true))
+        verifySessionCacheData(internalId, ThresholdNextThirtyDaysId.toString, Some(false))
+        verifySessionCacheData[ConditionalDateFormElement](internalId, ThresholdInTwelveMonthsId.toString, Some(ConditionalDateFormElement(false, None)))
+        verifySessionCacheData(internalId, VATRegistrationExceptionId.toString, Option.empty[Boolean])
       }
     }
   }
-
 }

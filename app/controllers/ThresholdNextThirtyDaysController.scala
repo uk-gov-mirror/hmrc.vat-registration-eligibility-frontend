@@ -58,10 +58,13 @@ class ThresholdNextThirtyDaysController @Inject()(appConfig: FrontendAppConfig,
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(thresholdNextThirtyDays(appConfig, formWithErrors, NormalMode))),
-        (formValue) => for {
-          cacheMap  <-  dataCacheConnector.save[Boolean](request.internalId, ThresholdNextThirtyDaysId.toString, formValue)
-          _         <- thresholdService.removeVoluntaryRegistration(formValue)
-        } yield Redirect(navigator.nextPage(ThresholdNextThirtyDaysId, NormalMode)(new UserAnswers(cacheMap)))
-      )
+        (formValue) =>
+          dataCacheConnector.save[Boolean](request.internalId, ThresholdNextThirtyDaysId.toString, formValue).flatMap{cacheMap =>
+          if(formValue) {
+            thresholdService.removeVoluntaryRegistration
+          } else {
+            Future.successful(cacheMap)
+          }
+        }.map(cMap => Redirect(navigator.nextPage(ThresholdNextThirtyDaysId, NormalMode)(new UserAnswers(cMap)))))
   }
 }

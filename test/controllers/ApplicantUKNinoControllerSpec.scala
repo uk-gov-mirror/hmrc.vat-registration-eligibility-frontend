@@ -95,7 +95,7 @@ class ApplicantUKNinoControllerSpec extends ControllerSpecBase with VATEligiblit
         ("applicantUKNinoEntry", "AB123456A")
       )
 
-      when(mockVRService.submitEligibility(Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockVRService.submitEligibility(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Json.obj()))
 
       val result = controller().onSubmit()(postRequest)
@@ -104,7 +104,7 @@ class ApplicantUKNinoControllerSpec extends ControllerSpecBase with VATEligiblit
 
       redirectLocation(result) mustBe Some(frontendUrl)
 
-      verify(mockVRService, times(1)).submitEligibility(Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any())
+      verify(mockVRService, times(1)).submitEligibility(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
     }
 
     "redirect to the next navigator page when valid data is submitted when answer is false" in {
@@ -121,7 +121,7 @@ class ApplicantUKNinoControllerSpec extends ControllerSpecBase with VATEligiblit
 
       redirectLocation(result) mustBe Some(onwardRouteNo.url)
 
-      verify(mockVRService, times(0)).submitEligibility(Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any())
+      verify(mockVRService, times(0)).submitEligibility(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {

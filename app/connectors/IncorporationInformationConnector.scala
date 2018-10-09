@@ -60,7 +60,6 @@ trait IncorporationInformationConnector {
       throw e
   }
 
-
   def getOfficerList(transactionId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
     val iiUrl = {
       if (featureSwitch.useIiStubbed.enabled) {

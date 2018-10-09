@@ -27,7 +27,7 @@ class ChoseNotToRegisterControllerSpec extends ControllerSpecBase {
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new ChoseNotToRegisterController(frontendAppConfig, messagesApi, FakeCacheIdentifierAction)
 
-  def viewAsString() = choseNotToRegister(frontendAppConfig)(fakeRequest, messages).toString
+  def viewAsString() = choseNotToRegister(frontendAppConfig)(fakeCacheDataRequestIncorped, messages).toString
 
   val questionaireUrl = s"${frontendAppConfig.companyRegUrl}${frontendAppConfig.companyRegUri}${frontendAppConfig.exitSurveyUri}"
 

@@ -11,6 +11,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
   val internalId = "testInternalId"
   val singleOfficer = """
       |{
+      |  "company_name" : "Test Company",
       |  "officers": [
       |    {
       |      "name_elements" : {
@@ -34,6 +35,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
 
   val multipleOfficers = """
        |{
+       |  "company_name" : "Test Company",
        |  "officers": [
        |    {
        |      "name_elements" : {
@@ -64,6 +66,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, singleOfficer)
@@ -84,6 +87,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, multipleOfficers)
@@ -94,7 +98,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
 
         val document = Jsoup.parse(result.body)
 
-        document.getElementById("main-heading").text() mustBe "Which of the following people are you?"
+        document.getElementById("main-heading").text() mustBe "Which company officer are you?"
         document.getElementsByAttributeValue("for", "completionCapacity-noneOfThese").text() mustBe "None of these"
         document.getElementsByAttributeValue("for", "completionCapacity-Mrtest1test11testadirector").text() mustBe "test1 testa"
         document.getElementsByAttributeValue("for", "completionCapacity-Mrtest2test22testbsecretary").text() mustBe "test2 testb"
@@ -109,6 +113,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, singleOfficer)
@@ -131,6 +136,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, multipleOfficers)
@@ -155,6 +161,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         cacheSessionData(internalId, CompletionCapacityFillingInForId.toString, "MrNewDirector")
@@ -176,6 +183,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         cacheSessionData(internalId, CompletionCapacityFillingInForId.toString, "MrNewDirector")
@@ -198,6 +206,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         cacheSessionData(internalId, CompletionCapacityFillingInForId.toString, "MrNewDirector")
@@ -219,6 +228,7 @@ class CompletionCapacityControllerISpec extends IntegrationSpecBase with AuthHel
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, multipleOfficers)

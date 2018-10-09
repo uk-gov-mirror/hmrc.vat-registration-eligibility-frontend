@@ -43,12 +43,12 @@ class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
     new ThresholdNextThirtyDaysController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, mockThresholdService, formProvider)
 
-  def viewAsString(form: Form[_] = form) = thresholdNextThirtyDays(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = thresholdNextThirtyDays(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
 
   "ThresholdNextThirtyDays Controller" must {
-
+    when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
     "return OK and the correct view for a GET" in {
-      val result = controller().onPageLoad()(fakeRequest)
+      val result = controller().onPageLoad()(fakeDataRequestIncorped)
 
       status(result) mustBe OK
       contentAsString(result) mustBe viewAsString()
@@ -58,20 +58,20 @@ class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
       val validData = Map(ThresholdNextThirtyDaysId.toString -> JsBoolean(true))
       val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
 
-      val result = controller(getRelevantData).onPageLoad()(fakeRequest)
+      val result = controller(getRelevantData).onPageLoad()(fakeDataRequestIncorped)
 
       contentAsString(result) mustBe viewAsString(form.fill(true))
     }
 
     "redirect to the next page when valid data is submitted" in {
-      when(mockThresholdService.removeVoluntaryRegistration(any())(any())) thenReturn Future.successful(true)
+      when(mockThresholdService.removeVoluntaryRegistration(any())) thenReturn Future.successful(emptyCacheMap)
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
 
       val result = controller().onSubmit()(postRequest)
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(onwardRoute.url)
-      verify(mockThresholdService, times(1)).removeVoluntaryRegistration(any())(any())
+      verify(mockThresholdService, times(1)).removeVoluntaryRegistration(any())
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {

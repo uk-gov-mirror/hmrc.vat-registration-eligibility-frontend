@@ -42,7 +42,8 @@ trait CurrentProfileService {
     regId           <- businessRegistrationConnector.getBusinessRegistrationId
     transId         <- companyRegistrationConnector.getTransactionId(regId)
     incorpDate      <- incorporationInformationService.getIncorpDate(transId)
-    currentProfile  = CurrentProfile(regId, transId, incorpDate)
+    companyName     <- incorporationInformationService.getCompanyName(transId)
+    currentProfile  = CurrentProfile(regId, transId, incorpDate, companyName)
     _               <- dataCacheConnector.save(internalID, "CurrentProfile", currentProfile)
   } yield currentProfile
 

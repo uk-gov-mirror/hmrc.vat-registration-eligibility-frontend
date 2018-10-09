@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.{CoreGet, CorePost, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class VatRegistrationConnectorSpec extends ConnectorSpecBase {
-  val regId = "test-regId"
+  override val regId = "test-regId"
   val fakeUrl = "testUrl"
   val fakeUri = "testUri"
 

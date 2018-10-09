@@ -23,7 +23,8 @@ import play.api.libs.json.Json
 case class CurrentProfile(
                          registrationID : String,
                          transactionID : String,
-                         incorpDate : Option[LocalDate]
+                         incorpDate : Option[LocalDate],
+                         companyName : String
                          )
 
 object CurrentProfile {

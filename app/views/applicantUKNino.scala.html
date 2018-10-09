@@ -23,8 +23,8 @@
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode, officerName: Option[String])(implicit request: Request[_], messages: Messages)
 @hiddenYesContent = {
 <div class="additional-option-block panel panel-border-narrow">
-    <h2 class="heading-small">@messages("applicantUKNino.heading2")</h2>
-    <p>@messages("applicantUKNino.text")</p>
+    <h2 class="heading-small">@officerName.fold(messages("applicantUKNino.heading2"))(x => messages("applicantUKNino.heading2onBehalfOf", x))</h2>
+    <p>@officerName.fold(messages("applicantUKNino.text"))(x => messages("applicantUKNino.textonBehalfOf", x))</p>
     @components.input_text(
     field =  form("applicantUKNinoEntry"),
     label = messages("applicantUKNino.heading2"),

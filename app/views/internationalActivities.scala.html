@@ -19,8 +19,9 @@
 @import controllers.routes._
 @import models.Mode
 @import utils.FormHelpers
+@import models.requests.DataRequest
 
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
     title = messages("internationalActivities.title"),
@@ -33,9 +34,11 @@
 
         @components.error_summary(form.errors)
 
-        @components.heading("internationalActivities.heading")
+        <h1 class="heading-large" id="main-heading">@messages("internationalActivities.heading", request.currentProfile.companyName)</h1>
+        <p id="help-text">@messages("internationalActivities.bulletText",request.currentProfile.companyName)</p>
 
-        @components.text_with_bullets("internationalActivities.bulletText",
+
+        @components.text_with_bullets("",
                                     Seq("internationalActivities.bullet1",
                                         "internationalActivities.bullet2",
                                         "internationalActivities.bullet3",
@@ -51,7 +54,7 @@
         radioAdditionalInfo = Map(),
         '_labelAfter -> true,
         '_labelClass -> "block-label",
-        '_legend -> messages("internationalActivities.heading"),
+        '_legend -> messages("internationalActivities.heading", request.currentProfile.companyName),
         '_legendClass -> "visually-hidden"
         )
 

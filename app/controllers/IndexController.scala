@@ -29,7 +29,7 @@ class IndexController @Inject()(val appConfig: FrontendAppConfig,
                                 navigator: Navigator) extends FrontendController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = Action { implicit request =>
-    Redirect(routes.ThresholdNextThirtyDaysController.onPageLoad())
+    Redirect(routes.ThresholdInTwelveMonthsController.onPageLoad())
   }
   def navigateToPageId(pageId: String) = Action { implicit request =>
     Redirect(navigator.pageIdToPageLoad(new Identifier {override def toString: String = pageId}))

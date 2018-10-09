@@ -77,7 +77,7 @@ class CompletionCapacityController @Inject()(
               def redirectToLocation = Redirect(navigator.nextPage(CompletionCapacityId, NormalMode)(new UserAnswers(cacheMap)))
               value match {
                 case ("noneOfThese" | "no") => Future.successful(redirectToLocation)
-                case _ => dataCacheConnector.remove(request.internalId, CompletionCapacityFillingInForId.toString).map(_ => redirectToLocation)
+                case _ => dataCacheConnector.removeEntry(request.internalId, CompletionCapacityFillingInForId.toString).map(_ => redirectToLocation)
               }
         }
         )

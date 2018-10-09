@@ -19,7 +19,7 @@ package connectors
 import config.{FrontendAppConfig, WSHttp}
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 
 import scala.concurrent.{ExecutionContext, Future}

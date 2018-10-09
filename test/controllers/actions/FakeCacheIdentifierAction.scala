@@ -26,6 +26,6 @@ import scala.concurrent.Future
 
 object FakeCacheIdentifierAction extends CacheIdentifierAction {
   override def invokeBlock[A](request: Request[A], block: (CacheIdentifierRequest[A]) => Future[Result]): Future[Result] =
-    block(CacheIdentifierRequest(request, "id", CurrentProfile("", "", Some(LocalDate.now().minusYears(2)))))
+    block(CacheIdentifierRequest(request, "id", CurrentProfile("", "", Some(LocalDate.now().minusYears(2)),"Test Company")))
 }
 

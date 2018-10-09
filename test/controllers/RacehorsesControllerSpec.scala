@@ -39,7 +39,7 @@ class RacehorsesControllerSpec extends ControllerSpecBase {
     new RacehorsesController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = racehorses(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = racehorses(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
 
   "Racehorses Controller" must {
 

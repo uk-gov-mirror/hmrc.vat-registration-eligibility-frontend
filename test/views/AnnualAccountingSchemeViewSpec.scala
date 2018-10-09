@@ -24,14 +24,15 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.annualAccountingScheme
 
 class AnnualAccountingSchemeViewSpec extends YesNoViewBehaviours {
+  override val extraParamForLegend: String = "Test Company"
 
   val messageKeyPrefix = "annualAccountingScheme"
 
   val form = new AnnualAccountingSchemeFormProvider()()
 
-  def createView = () => annualAccountingScheme(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => annualAccountingScheme(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => annualAccountingScheme(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => annualAccountingScheme(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "AnnualAccountingScheme view" must {
 

@@ -21,25 +21,42 @@ import play.api.data.FormError
 
 class InvolvedInOtherBusinessFormProviderSpec extends BooleanFieldBehaviours {
 
-  val requiredKey = "involvedInOtherBusiness.error.required"
-  val invalidKey = "error.boolean"
+  val requiredKey             = "involvedInOtherBusiness.error.required"
+  val requredKeyActingOnBehalf = "involvedInOtherBusiness.behalfOf.error.required"
+  val invalidKey              = "error.boolean"
 
-  val form = new InvolvedInOtherBusinessFormProvider()()
+  val form = (actingOnBehalf:Option[String]) => new InvolvedInOtherBusinessFormProvider().form(actingOnBehalf)
 
-  ".value" must {
+  ".value NOT ACTING on behalf of" must {
 
     val fieldName = "value"
 
     behave like booleanField(
-      form,
+      form(None),
       fieldName,
       invalidError = FormError(fieldName, invalidKey)
     )
 
     behave like mandatoryField(
-      form,
+      form(None),
       fieldName,
       requiredError = FormError(fieldName, requiredKey)
+    )
+  }
+  ".value ACTING on behalf of" must {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form(Some("foo")),
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form(Some("bar")),
+      fieldName,
+      requiredError = FormError(fieldName, requredKeyActingOnBehalf)
     )
   }
 }

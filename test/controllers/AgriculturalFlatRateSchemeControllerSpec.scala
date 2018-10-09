@@ -39,13 +39,12 @@ class AgriculturalFlatRateSchemeControllerSpec extends ControllerSpecBase {
     new AgriculturalFlatRateSchemeController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = agriculturalFlatRateScheme(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = agriculturalFlatRateScheme(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
 
   "AgriculturalFlatRateScheme Controller" must {
 
     "return OK and the correct view for a GET" in {
       val result = controller().onPageLoad()(fakeRequest)
-
       status(result) mustBe OK
       contentAsString(result) mustBe viewAsString()
     }

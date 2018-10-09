@@ -19,8 +19,9 @@
 @import controllers.routes._
 @import models.Mode
 @import utils.FormHelpers
+@import models.requests.DataRequest
 
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
     title = messages("vatRegistrationException.title"),
@@ -33,11 +34,9 @@
 
         @components.error_summary(form.errors)
 
-        @components.heading("vatRegistrationException.heading")
+        <h1 class="heading-large" id="main-heading">@messages("vatRegistrationException.heading",request.currentProfile.companyName)</h1>
 
-        @components.text_with_bullets("vatRegistrationException.bulletText",Seq("vatRegistrationException.bullet1","vatRegistrationException.bullet2"))
-
-        @components.text("vatRegistrationException.text")
+        <p id="help-text">@messages("vatRegistrationException.text",request.currentProfile.companyName)</p>
 
         @components.vertical_input_radio(
         field = form("value"),
@@ -48,7 +47,7 @@
         radioAdditionalInfo = Map(),
         '_labelAfter -> true,
         '_labelClass -> "block-label",
-        '_legend -> messages("vatRegistrationException.heading"),
+        '_legend -> messages("vatRegistrationException.heading", request.currentProfile.companyName),
         '_legendClass -> "visually-hidden"
         )
 

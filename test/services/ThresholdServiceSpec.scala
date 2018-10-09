@@ -17,44 +17,204 @@
 package services
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-import base.{CommonSpecBase, VATEligiblityMocks}
+import base.{SpecBase, VATEligiblityMocks}
+import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import identifiers.VoluntaryRegistrationId
 import models.CurrentProfile
 import models.requests.DataRequest
-import org.mockito.Matchers._
+import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import play.api.libs.json.JsBoolean
+import play.api.i18n.MessagesApi
+import play.api.libs.json.{JsBoolean, Json}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.UserAnswers
 
 import scala.concurrent.Future
-class ThresholdServiceSpec extends CommonSpecBase with VATEligiblityMocks {
+class ThresholdServiceSpec extends SpecBase with VATEligiblityMocks {
 
   val mockCache = CacheMap("testInternalId", Map(VoluntaryRegistrationId.toString -> JsBoolean(true)))
-  implicit val dr = DataRequest(FakeRequest(), "testInternalId", CurrentProfile("testRegId", "testTxId", Some(LocalDate.now().minusYears(2))), new UserAnswers(mockCache))
 
-  class Setup {
+
+  class Setup(idate:Option[LocalDate] = Some(LocalDate.of(2018,10,4))) {
+      def dr(incorpDate:Option[LocalDate]) = DataRequest(FakeRequest(), "testInternalId", CurrentProfile("testRegId", "testTxId", incorpDate,"Test Company"), new UserAnswers(mockCache))
+   implicit val request = dr(idate)
     val service = new ThresholdService {
       override val dataCacheConnector: DataCacheConnector = mockDataCacheConnector
+      override val appConfig: FrontendAppConfig = frontendAppConfig
+      override  val messagesApi:MessagesApi = app.injector.instanceOf[MessagesApi]
+    }
+
+  }
+  "removeVoluntaryAndNextThirtyDays" should {
+    "Future Successful CacheMap when DataCacheConnector removes both Voluntary and ThresholdNextThirtyDaysId" in new Setup {
+      when(mockDataCacheConnector.removeEntry(any(), any())) thenReturn Future.successful(CacheMap("1", Map("bar" -> Json.obj("" -> ""))))
+      await(service.removeVoluntaryAndNextThirtyDays) mustBe CacheMap("1", Map("bar" -> Json.obj("" -> "")))
+      verify(mockDataCacheConnector, times(2)).removeEntry(any(), any())
+    }
+    "throw an exception when datacacheconnector returns an exception" in new Setup {
+      when(mockDataCacheConnector.removeEntry(any(),any())) thenReturn Future.failed(new Exception())
+      intercept[Exception](await(service.removeVoluntaryAndNextThirtyDays))
+      verify(mockDataCacheConnector, times(1)).removeEntry(any(),any())
     }
   }
+
   "removeVoluntaryRegistration" should {
-    "call dataCacheConnector and remove VoluntaryRegistrationId when boolean is true" in new Setup {
-      when(mockDataCacheConnector.remove(any(),any())) thenReturn Future.successful(true)
-      await(service.removeVoluntaryRegistration(true)) mustBe true
-      verify(mockDataCacheConnector, times(1)).remove(any(),any())
-    }
-    "don't call dataCacheConnector and return false when false is passed in" in new Setup {
-      await(service.removeVoluntaryRegistration(false)) mustBe false
-      verify(mockDataCacheConnector, times(0)).remove(any(),any())
+    "call dataCacheConnector and remove VoluntaryRegistrationId when" in new Setup {
+      when(mockDataCacheConnector.removeEntry(any(),any())) thenReturn Future.successful(CacheMap("1", Map("foo" -> Json.obj("" -> ""))))
+      await(service.removeVoluntaryRegistration) mustBe CacheMap("1", Map("foo" -> Json.obj("" -> "")))
+      verify(mockDataCacheConnector, times(1)).removeEntry(any(),any())
     }
     "throw exception if dataCache throws an exception" in new Setup {
-      when(mockDataCacheConnector.remove(any(),any())) thenReturn Future.failed(new Exception("foo bar"))
-      intercept[Exception](await(service.removeVoluntaryRegistration(true)))
-      verify(mockDataCacheConnector, times(1)).remove(any(),any())
+      when(mockDataCacheConnector.removeEntry(any(),any())) thenReturn Future.failed(new Exception("foo bar"))
+      intercept[Exception](await(service.removeVoluntaryRegistration))
+      verify(mockDataCacheConnector, times(1)).removeEntry(any(),any())
+    }
+  }
+  "removeException" should {
+    "call dataCacheConnector and remove VATRegistrationException" in new Setup {
+      when(mockDataCacheConnector.removeEntry(any(),any())) thenReturn Future.successful(CacheMap("1", Map("foo" -> Json.obj("" -> ""))))
+      await(service.removeException) mustBe CacheMap("1", Map("foo" -> Json.obj("" -> "")))
+      verify(mockDataCacheConnector, times(1)).removeEntry(any(),any())
+    }
+    "throw exception if dataCache throws an exception" in new Setup {
+      when(mockDataCacheConnector.removeEntry(any(),any())) thenReturn Future.failed(new Exception("foo bar"))
+      intercept[Exception](await(service.removeException))
+      verify(mockDataCacheConnector, times(1)).removeEntry(any(),any())
+    }
+  }
+  "returnThresholdDateResult" should {
+    "return less than 12 months heading text when incorpDate is less than 12 months" in new Setup(Some(LocalDate.now())) {
+      service.returnThresholdDateResult(service.returnHeadingTwelveMonths) mustBe s"Since ${LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM YYYY"))}, has Test Company made more than £85,000 in VAT-taxable sales?"
+    }
+
+    "return more than or equal to 12 months heading text when incorpDate is more than 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(13))) {
+      service.returnThresholdDateResult(service.returnHeadingTwelveMonths) mustBe s"In any 12-month period has Test Company gone over the VAT-registration threshold?"
+    }
+
+    "return more than or equal to 12 months heading text when incorpDate is exactly 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(12))) {
+      service.returnThresholdDateResult(service.returnHeadingTwelveMonths) mustBe s"In any 12-month period has Test Company gone over the VAT-registration threshold?"
+    }
+
+    "always return heading2 text when any incorpDate is used" in new Setup(Some(LocalDate.now())) {
+      service.returnThresholdDateResult(service.returnHeadingForTwelveMonthsDateEntry) mustBe s"What month did Test Company first go over the threshold?"
+    }
+
+    "always return not incorped helptext1 text when no incorpDate is used" in new Setup(None) {
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+        "£85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales sole traders can make before they have to register for VAT.") mustBe true
+    }
+
+    "always return less than 12 months helptext1 text when incorp date is less than 12 months ago" in new Setup(Some(LocalDate.now())) {
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+        s"${LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM YYYY"))} is the date Test Company was set up.") mustBe true
+    }
+
+    "always return less than 12 months helptext1 text when incorp date is 1 day under 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(12).plusDays(1))) {
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+        s"${LocalDate.now().minusMonths(12).plusDays(1).format(DateTimeFormatter.ofPattern("dd MMMM YYYY"))} is the date Test Company was set up.") mustBe true
+    }
+
+    "always return morethan or equal 12 months helptext1 text when incorp date is exactly 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(12))) {
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+        s"£85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales Test Company can make before it has to register for VAT.") mustBe true
+    }
+
+    "always return morethan or equal 12 months helptext1 text when incorp date is over 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(12).minusDays(1))) {
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+        s"£85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales Test Company can make before it has to register for VAT.") mustBe true
+    }
+
+    "always return not incorped HelpText2 text when no incorp date is given" in new Setup(None) {
+      val res = service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body
+        res.contains(
+        "Test Company") mustBe true
+        res.contains("VAT-taxable sales went over any of the following") mustBe true
+        res.contains("£85,000 between 1 April 2017 and today") mustBe true
+        res.contains("£83,000 between 1 April 2016 and 31 March 2017") mustBe true
+        res.contains("£82,000 between 1 April 2015 and 31 March 2016") mustBe true
+        res.contains("Before this,") mustBe true
+        res.contains("use these previous VAT registration thresholds (opens in a new window or tab)") mustBe true
+       res.contains("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies") mustBe true
+    }
+    "always return test when incorp date < 2015 tax year" in new Setup(Some(LocalDate.of(2014,1,1))) {
+      val res = service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body
+      res.contains(
+        "Test Company") mustBe true
+      res.contains("VAT-taxable sales went over any of the following") mustBe true
+      res.contains("£85,000 between 1 April 2017 and today") mustBe true
+      res.contains("£83,000 between 1 April 2016 and 31 March 2017") mustBe true
+      res.contains("£82,000 between 1 April 2015 and 31 March 2016") mustBe true
+      res.contains("Before this,") mustBe true
+      res.contains("use these previous VAT registration thresholds (opens in a new window or tab)") mustBe true
+      res.contains("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies") mustBe true
+    }
+    "always return no html when Incorp date < 12 months ago" in new Setup(Some(LocalDate.now.minusMonths(1))) {
+      service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body mustBe ""
+    }
+    "always return over85k threshold when incorpDate limitedIncorpedEqualOrAfter20170401" in new Setup(Some(LocalDate.of(2017,5,1))) {
+     val res =  service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body
+       res.contains("VAT-taxable sales went over £85,000 between 1 April 2017 and today") mustBe true
+        res.contains("Test Company") mustBe true
+        res.contains("£85,000 between 1 April 2017 and today") mustBe true
+       res.contains("£83,000 between 1 April 2016 and 31 March 2017") mustBe false
+      res.contains("£82,000 between 1 April 2015 and 31 March 2016") mustBe false
+    }
+    "always return anyoverthresholds for limitedIncorpedTaxYear2015to2016" in new Setup(Some(LocalDate.of(2015,6,4))) {
+      val res = service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body
+        res.contains("Test Company") mustBe true
+        res.contains("VAT-taxable sales went over any of the following") mustBe true
+      res.contains("£85,000 between 1 April 2017 and today") mustBe true
+      res.contains("£83,000 between 1 April 2016 and 31 March 2017") mustBe true
+      res.contains("£82,000 between 1 April 2015 and 31 March 2016") mustBe true
+    }
+    "returnHelpText1Previous should return blank for limitedIncorpedEqualOrAfter20170401" in new Setup(Some(LocalDate.of(2017,4,2))) {
+    }
+    "returnHelpText1Previous should return limitedIncorpedTaxYear2016to2017 for companies incorped between 2016 and 2017" in new Setup(Some(LocalDate.of(2016,4,6))) {
+      val res = service.returnThresholdDateResult(service.returnHelpText1Previous).body
+      res.contains("VAT-registration thresholds can change. Recent ones include:") mustBe true
+      res.contains("1 April 2017 to present: £85,000") mustBe true
+      res.contains("1 April 2016 to 31 March 2017: £83,000") mustBe true
+    }
+    "returnHelpText1Previous should return limitedIncorpedTaxYear2015to2016 for companies incorped between 2015 and 2016" in new Setup(Some(LocalDate.of(2015,4,6))) {
+      val res = service.returnThresholdDateResult(service.returnHelpText1Previous).body
+      res.contains("VAT-registration thresholds can change. Recent ones include:") mustBe true
+      res.contains("1 April 2017 to present: £85,000") mustBe true
+      res.contains("1 April 2016 to 31 March 2017: £83,000") mustBe true
+      res.contains("1 April 2015 and 31 March 2016: £82,000") mustBe true
+
+    }
+    "returnHelpText1Previous should return default text for none incorporated companies" in new Setup(None) {
+      val res = service.returnThresholdDateResult(service.returnHelpText1Previous).body
+      res.contains("VAT-registration thresholds can change. Recent ones include:") mustBe true
+      res.contains("1 April 2017 to present: £85,000") mustBe true
+      res.contains("1 April 2016 to 31 March 2017: £83,000") mustBe true
+      res.contains("1 April 2015 and 31 March 2016: £82,000") mustBe true
+      res.contains("Before this, use these") mustBe true
+      res.contains("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies") mustBe true
+      res.contains("previous VAT registration thresholds (opens in a new window or tab)") mustBe true
+    }
+    "returnHelpText1Previous should return default text for companies incorped < 2015" in new Setup(Some(LocalDate.of(2013,1,1))) {
+      val res = service.returnThresholdDateResult(service.returnHelpText1Previous).body
+      res.contains("VAT-registration thresholds can change. Recent ones include:") mustBe true
+      res.contains("1 April 2017 to present: £85,000") mustBe true
+      res.contains("1 April 2016 to 31 March 2017: £83,000") mustBe true
+      res.contains("1 April 2015 and 31 March 2016: £82,000") mustBe true
+      res.contains("Before this, use these") mustBe true
+      res.contains("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies") mustBe true
+      res.contains("previous VAT registration thresholds (opens in a new window or tab)") mustBe true
+    }
+    "returnHeadingPrevious should return limitedIncorpedEqualOrAfter20170401 text" in new Setup(Some(LocalDate.of(2017,4,1))) {
+      service.returnThresholdDateResult(service.returnHeadingPrevious) mustBe "Has Test Company ever expected to make more than £85,000 in VAT-taxable sales in a single 30-day period?"
+    }
+    "returnHeadingPrevious should return normal heading for unincorped company" in new Setup(None) {
+      service.returnThresholdDateResult(service.returnHeadingPrevious) mustBe "Has Test Company ever expected to go over the VAT-registration threshold in a single 30-day period?"
+    }
+    "returnHeadingPrevious should return normal heading for company incorped < 20170401" in new Setup(Some(LocalDate.of(2017,3,31))) {
+      service.returnThresholdDateResult(service.returnHeadingPrevious) mustBe "Has Test Company ever expected to go over the VAT-registration threshold in a single 30-day period?"
     }
   }
 }

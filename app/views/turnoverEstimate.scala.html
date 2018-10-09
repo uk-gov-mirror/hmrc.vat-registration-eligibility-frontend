@@ -19,8 +19,9 @@
 @import controllers.routes._
 @import models.TurnoverEstimate
 @import models.Mode
+@import models.requests.DataRequest
 
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @hiddenContent = {
     <div class="additional-option-block panel panel-border-narrow">
@@ -43,13 +44,11 @@
 
         @components.error_summary(form.errors)
 
-        @components.heading("turnoverEstimate.heading")
+        <h1 class="heading-large" id="main-heading">@messages("turnoverEstimate.heading",request.currentProfile.companyName)</h1>
 
-        @components.text_with_bullets("turnoverEstimate.text",Seq("turnoverEstimate.bullet1", "turnoverEstimate.bullet2", "turnoverEstimate.bullet3"))
+        @components.text("turnoverEstimate.text")
 
-        @components.text("turnoverEstimate.text2")
-
-        @components.text_with_link("turnoverEstimate.beforeLinkText","turnoverEstimate.linkText",appConfig.VATNotice700_1supplementURL, Some("."))
+        @components.text_with_link("turnoverEstimate.beforeLinkText","turnoverEstimate.linkText",appConfig.VATRateDifferentGoodsURL, Some("."))
 
         @components.vertical_input_radio(
             field = form("turnoverEstimateSelection"),

@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import forms.ZeroRatedSalesFormProvider
-import identifiers.{VATExemptionId, ZeroRatedSalesId}
+import identifiers.{AgriculturalFlatRateSchemeId, VATExemptionId, ZeroRatedSalesId}
 import javax.inject.Inject
 import models.NormalMode
 import play.api.data.Form
@@ -59,8 +59,9 @@ class ZeroRatedSalesController @Inject()(appConfig: FrontendAppConfig,
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, ZeroRatedSalesId.toString, value).flatMap {
             cacheMap =>
-              def toRedirectLocation = Redirect(navigator.nextPage(ZeroRatedSalesId, NormalMode)(new UserAnswers(cacheMap)))
-              if(value) Future.successful(toRedirectLocation) else dataCacheConnector.remove(cacheMap.id, VATExemptionId.toString).map(_ => toRedirectLocation)
+              val removeStaleData = (b:Boolean) => if(b) AgriculturalFlatRateSchemeId else VATExemptionId
+               dataCacheConnector.removeEntry(cacheMap.id, removeStaleData(value).toString).map(_ =>
+                 Redirect(navigator.nextPage(ZeroRatedSalesId, NormalMode)(new UserAnswers(cacheMap))))
           }
       )
   }

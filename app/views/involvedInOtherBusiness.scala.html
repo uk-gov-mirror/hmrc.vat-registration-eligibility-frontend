@@ -20,7 +20,7 @@
 @import models.Mode
 @import utils.FormHelpers
 
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode, actingOnBehalfOfficer: Option[String])(implicit request: Request[_], messages: Messages)
 
 @main_template(
     title = messages("involvedInOtherBusiness.title"),
@@ -33,16 +33,18 @@
 
         @components.error_summary(form.errors)
 
-        @components.heading("involvedInOtherBusiness.heading")
+        @components.heading(actingOnBehalfOfficer.fold(messages("involvedInOtherBusiness.heading"))(x => messages("involvedInOtherBusiness.heading.onBehalfOf", x)))
 
         @components.text("involvedInOtherBusiness.text")
-        <ul class="list list-bullet">
-        <li>@Messages("involvedInOtherBusiness.bullet1")</li>
-        <li>@Messages("involvedInOtherBusiness.bullet2")</li>
-        <li>@Messages("involvedInOtherBusiness.beforeText") <a href=@appConfig.VATSetUpVATGroup target=_blank"> @Messages("involvedInOtherBusiness.linkText")</a>.</li>
-        <li>@Messages("involvedInOtherBusiness.bullet4")</li>
-        <li>@Messages("involvedInOtherBusiness.bullet5")</li>
-        </ul>
+        @defining(if(actingOnBehalfOfficer.isDefined) ".behalfOf" else "") { behalf =>
+
+       @{ <ul class="list list-bullet">
+        <li id="involveBullet1">{Messages(s"involvedInOtherBusiness$behalf.bullet1")}</li>
+        <li id="involveBullet2">{Messages(s"involvedInOtherBusiness$behalf.bullet2")}</li>
+        <li id="involveBullet3">{Messages("involvedInOtherBusiness.beforeText")}<a href={appConfig.VATSetUpVATGroup} target="_blank"> {Messages("involvedInOtherBusiness.linkText")}</a>.</li>
+        <li id="involveBullet4">{Messages(s"involvedInOtherBusiness$behalf.bullet4")}</li>
+        <li id="involveBullet5">{Messages(s"involvedInOtherBusiness$behalf.bullet5")}</li>
+        </ul> }
 
         @components.vertical_input_radio(
             field = form("value"),
@@ -53,10 +55,10 @@
         radioAdditionalInfo = Map(),
             '_labelAfter -> true,
             '_labelClass -> "block-label",
-            '_legend -> messages("involvedInOtherBusiness.heading"),
+            '_legend -> messages(s"involvedInOtherBusiness.heading$behalf", actingOnBehalfOfficer.getOrElse("")),
             '_legendClass -> "visually-hidden"
         )
-
         @components.submit_button()
+        }
     }
 }
