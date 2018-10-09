@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package views
+package utils
 
-import views.behaviours.ViewBehaviours
-import views.html.choseNotToRegister
+import models.ConditionalDateFormElement
 
-class ChoseNotToRegisterViewSpec extends ViewBehaviours {
+object ThresholdHelper {
+  val q1DefinedAndTrue = (userAns: UserAnswers) => userAns.thresholdInTwelveMonths.collect{case ConditionalDateFormElement(true,_) => true}.isDefined
 
-  val messageKeyPrefix = "choseNotToRegister"
-
-  def createView = () => choseNotToRegister(frontendAppConfig)(fakeCacheDataRequestIncorped, messages)
-
-  "ChoseNotToRegister view" must {
-    behave like normalPage(createView, messageKeyPrefix)
+  val taxableTurnoverCheck = (userAns: UserAnswers) => {
+    (userAns.thresholdNextThirtyDays, userAns.thresholdPreviousThirtyDays) match {
+      case (Some(true), Some(_)) | (Some(_), Some(ConditionalDateFormElement(true, _))) => true
+      case _ => false
+    }
   }
 }

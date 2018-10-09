@@ -42,6 +42,7 @@ class CurrentProfileServiceSpec extends CommonSpecBase {
   val regID   = "registrationID"
   val txID    = "transactionID"
   val testIntId = "internalId"
+  val testCompanyName = "Test Company"
 
   "buildCurrentProfile" should {
     "build a profile" when {
@@ -50,6 +51,8 @@ class CurrentProfileServiceSpec extends CommonSpecBase {
             .thenReturn(Future.successful(None))
         when(mockIIService.getIncorpDate(Matchers.any())(Matchers.any()))
             .thenReturn(Future.successful(None))
+        when(mockIIService.getCompanyName(Matchers.any())(Matchers.any()))
+            .thenReturn(Future.successful(testCompanyName))
         when(mockBusRegConnector.getBusinessRegistrationId(Matchers.any()))
             .thenReturn(Future.successful(regID))
         when(mockCompanyRegConnector.getTransactionId(Matchers.any())(Matchers.any()))
@@ -57,14 +60,17 @@ class CurrentProfileServiceSpec extends CommonSpecBase {
         when(mockDataCacheConnector.save[CurrentProfile](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any()))
           .thenReturn(Future.successful(CacheMap("test", Map("test" -> Json.obj()))))
 
-        await(service.fetchOrBuildCurrentProfile(testIntId)) mustBe CurrentProfile(regID, txID, None)
+        await(service.fetchOrBuildCurrentProfile(testIntId)) mustBe CurrentProfile(regID, txID, None, testCompanyName)
       }
 
       "it has been built" in new Setup {
-        private val profile = CurrentProfile(regID, txID, Some(LocalDate.now()))
+        private val profile = CurrentProfile(regID, txID, Some(LocalDate.now()),testCompanyName)
 
         when(mockIIService.getIncorpDate(Matchers.any())(Matchers.any()))
           .thenReturn(Future.successful(Some(LocalDate.now())))
+
+        when(mockIIService.getCompanyName(Matchers.any())(Matchers.any()))
+          .thenReturn(Future.successful(testCompanyName))
 
         when(mockDataCacheConnector.getEntry[CurrentProfile](Matchers.any(), Matchers.any())(Matchers.any()))
             .thenReturn(Future.successful(Some(profile)))

@@ -28,8 +28,8 @@ import utils.{BooleanFeatureSwitch, VATFeatureSwitch}
 
 class IncorporationInformationConnectorSpec extends ConnectorSpecBase {
 
-  val txId      = "someTxId"
-  val companyName = "MyTestCompany"
+  override val txId = "someTxId"
+  val companyName   = "MyTestCompany"
 
   class Setup {
     val fakeUrl = "testUrl"

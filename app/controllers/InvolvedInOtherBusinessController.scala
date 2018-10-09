@@ -23,8 +23,10 @@ import forms.InvolvedInOtherBusinessFormProvider
 import identifiers.InvolvedInOtherBusinessId
 import javax.inject.Inject
 import models.NormalMode
+import models.requests.DataRequest
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
+import services.IncorporationInformationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.involvedInOtherBusiness
@@ -32,33 +34,42 @@ import views.html.involvedInOtherBusiness
 import scala.concurrent.Future
 
 class InvolvedInOtherBusinessController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: InvolvedInOtherBusinessFormProvider) extends FrontendController with I18nSupport {
+                                                  override val messagesApi: MessagesApi,
+                                                  dataCacheConnector: DataCacheConnector,
+                                                  navigator: Navigator,
+                                                  identify: CacheIdentifierAction,
+                                                  getData: DataRetrievalAction,
+                                                  requireData: DataRequiredAction,
+                                                  formProvider: InvolvedInOtherBusinessFormProvider,
+                                                  iiService: IncorporationInformationService) extends FrontendController with I18nSupport {
 
-  val form: Form[Boolean] = formProvider()
 
-  def onPageLoad() = (identify andThen getData andThen requireData) {
+  private def retrieveFillingInForName(implicit request: DataRequest[_]): Future[Option[String]] =
+    iiService.getOfficerList(request.currentProfile.transactionID).map { officers =>
+      request.userAnswers.completionCapacityFillingInFor.flatMap(id => officers.find(_.generateId == id).map(_.shortName))
+    }
+
+  def onPageLoad() = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val preparedForm = request.userAnswers.involvedInOtherBusiness match {
-        case None => form
-        case Some(value) => form.fill(value)
+      retrieveFillingInForName.map { shortName =>
+        val preparedForm = request.userAnswers.involvedInOtherBusiness match {
+          case None => formProvider.form(shortName)
+          case Some(value) => formProvider.form(shortName).fill(value)
+        }
+        Ok(involvedInOtherBusiness(appConfig, preparedForm, NormalMode, shortName))
       }
-      Ok(involvedInOtherBusiness(appConfig, preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
-      form.bindFromRequest().fold(
-        (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(involvedInOtherBusiness(appConfig, formWithErrors, NormalMode))),
-        (value) =>
-          dataCacheConnector.save[Boolean](request.internalId, InvolvedInOtherBusinessId.toString, value).map(cacheMap =>
-            Redirect(navigator.nextPage(InvolvedInOtherBusinessId, NormalMode)(new UserAnswers(cacheMap))))
-      )
+      retrieveFillingInForName.flatMap { shortName =>
+        formProvider.form(shortName).bindFromRequest().fold(
+          (formWithErrors: Form[_]) =>
+            Future.successful(BadRequest(involvedInOtherBusiness(appConfig, formWithErrors, NormalMode, shortName))),
+          (value) =>
+            dataCacheConnector.save[Boolean](request.internalId, InvolvedInOtherBusinessId.toString, value).map(cacheMap =>
+              Redirect(navigator.nextPage(InvolvedInOtherBusinessId, NormalMode)(new UserAnswers(cacheMap))))
+        )
+      }
   }
 }

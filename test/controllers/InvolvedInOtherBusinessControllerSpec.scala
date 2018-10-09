@@ -19,31 +19,40 @@ package controllers
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.InvolvedInOtherBusinessFormProvider
-import identifiers.InvolvedInOtherBusinessId
-import models.NormalMode
+import identifiers.{CompletionCapacityFillingInForId, InvolvedInOtherBusinessId}
+import models.{Name, NormalMode, Officer}
+import org.mockito.Matchers._
+import org.mockito.Mockito._
 import play.api.data.Form
-import play.api.libs.json.JsBoolean
+import play.api.libs.json.{JsBoolean, JsString}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
 import views.html.involvedInOtherBusiness
+
+import scala.concurrent.Future
 
 class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
   val formProvider = new InvolvedInOtherBusinessFormProvider()
-  val form = formProvider()
+  val form = formProvider.form()
+
+  val officersList: Seq[Officer] = Seq(
+    Officer(Name(Some("First"), Some("Middle"), "Last",Some("Mrs")),"director", None, Some("some-url")),
+    Officer(Name(Some("Second"), None, "VeryLast",Some("Mr")), "secretary", None, Some("some-url"))
+  )
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new InvolvedInOtherBusinessController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+      dataRetrievalAction, new DataRequiredActionImpl, formProvider, mockIIService)
 
-  def viewAsString(form: Form[_] = form) = involvedInOtherBusiness(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form, officer: Option[String] = None) = involvedInOtherBusiness(frontendAppConfig, form, NormalMode, officer)(fakeRequest, messages).toString
 
   "InvolvedInOtherBusiness Controller" must {
-
     "return OK and the correct view for a GET" in {
+      when(mockIIService.getOfficerList(any())(any())).thenReturn(Future.successful(Seq.empty))
       val result = controller().onPageLoad()(fakeRequest)
 
       status(result) mustBe OK
@@ -51,15 +60,18 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
     }
 
     "populate the view correctly on a GET when the question has previously been answered" in {
-      val validData = Map(InvolvedInOtherBusinessId.toString -> JsBoolean(true))
+      when(mockIIService.getOfficerList(any())(any())).thenReturn(Future.successful(officersList))
+      val validData = Map(InvolvedInOtherBusinessId.toString -> JsBoolean(true),
+        CompletionCapacityFillingInForId.toString -> JsString(officersList.head.generateId))
       val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
 
       val result = controller(getRelevantData).onPageLoad()(fakeRequest)
 
-      contentAsString(result) mustBe viewAsString(form.fill(true))
+      contentAsString(result) mustBe viewAsString(form.fill(true), Some("First Last"))
     }
 
     "redirect to the next page when valid data is submitted" in {
+      when(mockIIService.getOfficerList(any())(any())).thenReturn(Future.successful(Seq.empty))
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
 
       val result = controller().onSubmit()(postRequest)
@@ -68,7 +80,8 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
       redirectLocation(result) mustBe Some(onwardRoute.url)
     }
 
-    "return a Bad Request and errors when invalid data is submitted" in {
+    "return a Bad Request and errors when invalid data is submitted passing the officer name back into view and not acting on behalf of" in {
+      when(mockIIService.getOfficerList(any())(any())).thenReturn(Future.successful(Seq.empty))
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "invalid value"))
       val boundForm = form.bind(Map("value" -> "invalid value"))
 
@@ -77,8 +90,21 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
       status(result) mustBe BAD_REQUEST
       contentAsString(result) mustBe viewAsString(boundForm)
     }
+    "return a Bad Request and errors when invalid data is submitted passing the officer name back into view and acting on half of" in {
+      when(mockIIService.getOfficerList(any())(any())).thenReturn(Future.successful(officersList))
+      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "invalid value"))
+      val boundForm = form.bind(Map("value" -> "invalid value"))
+      val validData = Map(InvolvedInOtherBusinessId.toString -> JsBoolean(true),
+        CompletionCapacityFillingInForId.toString -> JsString(officersList.head.generateId))
+      val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
+      val result = controller(getRelevantData).onSubmit()(postRequest)
+
+      status(result) mustBe BAD_REQUEST
+      contentAsString(result) mustBe viewAsString(boundForm, Some("First Last"))
+    }
 
     "redirect to Session Expired for a GET if no existing data is found" in {
+      when(mockIIService.getOfficerList(any())(any())).thenReturn(Future.successful(Seq.empty))
       val result = controller(dontGetAnyData).onPageLoad()(fakeRequest)
 
       status(result) mustBe SEE_OTHER
@@ -86,6 +112,7 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to Session Expired for a POST if no existing data is found" in {
+      when(mockIIService.getOfficerList(any())(any())).thenReturn(Future.successful(Seq.empty))
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
       val result = controller(dontGetAnyData).onSubmit()(postRequest)
 

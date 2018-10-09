@@ -1,11 +1,11 @@
 package www
 
-import helpers.{AuthHelper, IntegrationSpecBase}
+import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
 import org.jsoup.Jsoup
 import play.api.test.FakeApplication
 import play.mvc.Http.HeaderNames
 
-class CompletionCapacityFillingInForISpec extends IntegrationSpecBase with AuthHelper {
+class CompletionCapacityFillingInForISpec extends IntegrationSpecBase with AuthHelper with SessionStub{
 
   val singleOfficer = """
                         |{
@@ -62,6 +62,7 @@ class CompletionCapacityFillingInForISpec extends IntegrationSpecBase with AuthH
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, singleOfficer)
@@ -81,6 +82,7 @@ class CompletionCapacityFillingInForISpec extends IntegrationSpecBase with AuthH
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, multipleOfficers)
@@ -105,6 +107,7 @@ class CompletionCapacityFillingInForISpec extends IntegrationSpecBase with AuthH
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, multipleOfficers)
@@ -128,6 +131,7 @@ class CompletionCapacityFillingInForISpec extends IntegrationSpecBase with AuthH
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, singleOfficer)
@@ -145,6 +149,7 @@ class CompletionCapacityFillingInForISpec extends IntegrationSpecBase with AuthH
         stubSuccessfulRegIdGet()
         stubSuccessfulTxIdGet()
         stubSuccessfulIncorpDataGet()
+        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         stubGet("/incorporation-information/testTxId/officer-list", 200, multipleOfficers)

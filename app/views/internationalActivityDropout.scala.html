@@ -15,9 +15,10 @@
  *@
 
 @import config.FrontendAppConfig
+@import models.requests.CacheIdentifierRequest
 @import uk.gov.hmrc.play.views.html.helpers.{form}
 
-@(appConfig: FrontendAppConfig)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig)(implicit request: CacheIdentifierRequest[_], messages: Messages)
 
 @main_template(
     title = messages("eligibilityDropout.title"),
@@ -26,42 +27,38 @@
 
     @components.back_link()
 
-    @components.heading("eligibilityDropout.heading")
+    <h1 class="heading-large" id="main-heading">@messages("eligibilityDropout.heading",request.currentProfile.companyName)</h1>
 
-    @components.text("eligibilityDropout.text")
-
-    @components.heading2("eligibility.international.trading", "heading-medium")
-
-    @components.text_with_link(
-        "eligibility.international.trading.text",
-        "eligibility.international.trading.link",
-        appConfig.VAT1FormURL,
-        Some(".")
-    )
-
-    @components.heading2("eligibility.international.special", "heading-medium")
-
-    <p>@Messages("eligibility.international.special.text")</p>
+    <p>@Messages("eligibility.international.special.text",request.currentProfile.companyName)</p>
     <ul class="list list-bullet">
         <li>
-            @Messages("eligibility.international.special.bullet1")
-            <a href=@appConfig.VAT1BFormURL target="_blank"> @Messages("eligibility.international.special.link1")</a>
+            @components.text_with_link(
+                "eligibility.international.bullet0",
+                "eligibility.international.link",
+                appConfig.VAT1FormURL
+            )
         </li>
         <li>
             @components.text_with_link(
-                "eligibility.international.special.bullet2",
-                "eligibility.international.special.link2",
-                appConfig.VAT1CFormURL
+                "eligibility.international.bullet1",
+                "eligibility.international.link1",
+                appConfig.VAT1BFormURL
+            )
+        </li>
+        <li>
+            @components.text_with_link(
+            "eligibility.international.bullet2",
+            "eligibility.international.link2",
+            appConfig.VAT1CFormURL
+            )
+        </li>
+        <li>
+            @components.text_with_link(
+            "eligibility.international.bullet3",
+            "eligibility.international.link3",
+            appConfig.otrsUrl
             )
         </li>
     </ul>
 
-    @components.text_with_bullets(
-        "eligibility.international.useOther.text",
-        Seq("eligibility.international.useOther.bullet1","eligibility.international.useOther.bullet2")
-    )
-
-    <a href=@appConfig.otrsUrl target="_blank">
-        @Messages("eligibility.international.useOther.link")
-    </a>
 }

@@ -19,15 +19,18 @@
 @import controllers.routes._
 @import models.Mode
 @import utils.FormHelpers
+@import models.requests.DataRequest
+@import utils.VATDateHelper
+@import services.ThresholdService
 
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages)
 
 @hiddenYesContent = {
     <div class="additional-option-block panel panel-border-narrow">
-        <h2 class="heading-small">@messages("thresholdPreviousThirtyDays.heading2")</h2>
+        <h2 class="heading-small">@messages("thresholdPreviousThirtyDays.heading2",request.currentProfile.companyName)</h2>
         @components.input_date(
             id = "thresholdPreviousThirtyDaysDate",
-            label = messages("thresholdPreviousThirtyDays.heading2"),
+            label = messages("thresholdPreviousThirtyDays.heading2", request.currentProfile.companyName),
             errorKey = form.error("thresholdPreviousThirtyDaysDate").map(error => error.message).getOrElse(""),
             dayErrorKey = "",
             monthErrorKey = "",
@@ -41,6 +44,10 @@
     </div>
 }
 
+@displayHeading = @{ <h1 class="heading-large" id="main-heading">{thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious)}</h1>}
+
+@displayHelpText = @{thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1Previous)}
+
 @main_template(
     title = messages("thresholdPreviousThirtyDays.title"),
     appConfig = appConfig,
@@ -52,15 +59,9 @@
 
         @components.error_summary(form.errors)
 
-        @components.heading("thresholdPreviousThirtyDays.heading")
+        @displayHeading
 
-        @components.text("thresholdPreviousThirtyDays.text")
-
-        @components.text_with_bullets("thresholdPreviousThirtyDays.text1",Seq("thresholdPreviousThirtyDays.bullet1", "thresholdPreviousThirtyDays.bullet2"))
-
-        @components.text_with_link("thresholdPreviousThirtyDays.beforeLinkText","thresholdPreviousThirtyDays.linkText",appConfig.VATNotice700_1supplementURL, Some("."))
-
-
+        @displayHelpText
 
         @components.vertical_input_radio(
             field = form("thresholdPreviousThirtyDaysSelection"),
@@ -71,7 +72,7 @@
             radioAdditionalInfo = Map("true" -> hiddenYesContent),
             '_labelAfter -> true,
             '_labelClass -> "block-label",
-            '_legend -> messages("thresholdPreviousThirtyDays.heading"),
+            '_legend -> thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious),
             '_legendClass -> "visually-hidden"
         )
 

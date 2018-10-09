@@ -24,14 +24,15 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.racehorses
 
 class RacehorsesViewSpec extends YesNoViewBehaviours {
+  override val extraParamForLegend: String = "Test Company"
 
   val messageKeyPrefix = "racehorses"
 
   val form = new RacehorsesFormProvider()()
 
-  def createView = () => racehorses(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => racehorses(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => racehorses(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => racehorses(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "Racehorses view" must {
 

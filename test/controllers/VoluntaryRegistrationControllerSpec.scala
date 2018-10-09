@@ -39,7 +39,7 @@ class VoluntaryRegistrationControllerSpec extends ControllerSpecBase {
     new VoluntaryRegistrationController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
 
   "VoluntaryRegistration Controller" must {
 

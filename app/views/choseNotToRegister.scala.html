@@ -16,8 +16,9 @@
 
 @import config.FrontendAppConfig
 @import uk.gov.hmrc.play.views.html.helpers.{form}
+@import models.requests.CacheIdentifierRequest
 
-@(appConfig: FrontendAppConfig)(implicit request: Request[_], messages: Messages)
+@(appConfig: FrontendAppConfig)(implicit request: CacheIdentifierRequest[_], messages: Messages)
 
 @main_template(
     title = messages("choseNotToRegister.title"),
@@ -26,7 +27,7 @@
 
     @components.back_link()
 
-    @components.heading("choseNotToRegister.heading")
+    <h1 class="heading-large" id="main-heading">@messages("choseNotToRegister.heading",request.currentProfile.companyName)</h1>
 
     @form(action = controllers.routes.ChoseNotToRegisterController.onSubmit()) {
         @components.button("site.finish", "submit")

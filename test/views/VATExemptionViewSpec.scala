@@ -24,14 +24,15 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.vatExemption
 
 class VATExemptionViewSpec extends YesNoViewBehaviours {
+  override val extraParamForLegend: String = "Test Company"
 
   val messageKeyPrefix = "vatExemption"
 
   val form = new VATExemptionFormProvider()()
 
-  def createView = () => vatExemption(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => vatExemption(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => vatExemption(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => vatExemption(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "VATExemption view" must {
 

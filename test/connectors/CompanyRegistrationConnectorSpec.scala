@@ -22,7 +22,7 @@ import play.api.libs.json.{JsResultException, Json}
 import uk.gov.hmrc.http.CoreGet
 
 class CompanyRegistrationConnectorSpec extends ConnectorSpecBase {
-  val regId = "test-regId"
+  override val regId = "test-regId"
   val compRegFakeUrl = "testUrl"
   val compRegStubbedFakeUrl = "stubbedTestUrl"
 

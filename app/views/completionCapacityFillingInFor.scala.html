@@ -42,17 +42,17 @@
             legendClass = Some("visually-hidden"),
             inputs = officers
         )
-
-        @components.submit_button()
-        <p></p>
-        <div class="form-group">
-            <details>
-                <summary><span class="summary">@Messages("completionCapacityFillingInFor.dropDownTitle")</span></summary>
-                <div class="panel panel-border-narrow">
-                    @components.text_with_link("completionCapacityFillingInFor.beforeLinkText", "completionCapacityFillingInFor.linkText", appConfig.VATFileChanges, Some(Messages("completionCapacityFillingInFor.afterLinkText")))
-                    <p>@Messages("completionCapacityFillingInFor.dropDownText")</p>
-                </div>
-            </details>
+<p></p>
+<div class="form-group">
+    <details>
+        <summary><span class="summary">@Messages("completionCapacityFillingInFor.dropDownTitle")</span></summary>
+        <div class="panel panel-border-narrow">
+            @components.text_with_link("completionCapacityFillingInFor.beforeLinkText", "completionCapacityFillingInFor.linkText", appConfig.VATFileChanges, Some(Messages("completionCapacityFillingInFor.afterLinkText")))
+            <p>@Messages("completionCapacityFillingInFor.dropDownText")</p>
         </div>
+    </details>
+</div>
+        @components.submit_button()
+
     }
 }

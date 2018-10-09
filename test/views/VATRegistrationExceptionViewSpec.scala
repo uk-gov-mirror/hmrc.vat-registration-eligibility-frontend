@@ -24,14 +24,14 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.vatRegistrationException
 
 class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
-
+  override val extraParamForLegend: String = "Test Company"
   val messageKeyPrefix = "vatRegistrationException"
 
   val form = new VATRegistrationExceptionFormProvider()()
 
-  def createView = () => vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "VATRegistrationException view" must {
 

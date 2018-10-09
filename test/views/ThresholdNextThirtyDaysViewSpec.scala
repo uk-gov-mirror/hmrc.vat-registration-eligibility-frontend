@@ -24,14 +24,15 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.thresholdNextThirtyDays
 
 class ThresholdNextThirtyDaysViewSpec extends YesNoViewBehaviours {
+  override val extraParamForLegend: String = "Test Company"
 
   val messageKeyPrefix = "thresholdNextThirtyDays"
 
   val form = new ThresholdNextThirtyDaysFormProvider()()
 
-  def createView = () => thresholdNextThirtyDays(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => thresholdNextThirtyDays(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => thresholdNextThirtyDays(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => thresholdNextThirtyDays(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "ThresholdNextThirtyDays view" must {
 

@@ -39,7 +39,7 @@ class InternationalActivitiesControllerSpec extends ControllerSpecBase {
     new InternationalActivitiesController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = internationalActivities(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = internationalActivities(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
 
   "InternationalActivities Controller" must {
 

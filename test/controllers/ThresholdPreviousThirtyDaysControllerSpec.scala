@@ -39,19 +39,19 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
   def onwardRoute = routes.IndexController.onPageLoad()
 
   val formProvider = new ThresholdPreviousThirtyDaysFormProvider()
-  val form = formProvider(LocalDate.now().minusYears(2))
+  val form = formProvider(LocalDate.of(2018,9,28).minusYears(2))
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new ThresholdPreviousThirtyDaysController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, mockThresholdService, formProvider)
 
-  def viewAsString(form: Form[_] = form) = thresholdPreviousThirtyDays(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = thresholdPreviousThirtyDays(frontendAppConfig, form, NormalMode, mockThresholdService)(fakeDataRequest, messages).toString
+
 
   "ThresholdPreviousThirtyDays Controller" must {
 
     "return OK and the correct view for a GET" in {
       val result = controller().onPageLoad()(fakeRequest)
-
       status(result) mustBe OK
       contentAsString(result) mustBe viewAsString()
     }
@@ -65,8 +65,8 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
       contentAsString(result) mustBe viewAsString(form.fill(ConditionalDateFormElement(true, Some(LocalDate.now))))
     }
 
-    "redirect to the next page when valid data is submitted" in {
-      when(mockThresholdService.removeVoluntaryRegistration(any())(any())) thenReturn Future.successful(true)
+    "redirect to the next page when valid data is submitted with value of true with a date" in {
+      when(mockThresholdService.removeVoluntaryRegistration(any())) thenReturn Future.successful(emptyCacheMap)
       val postRequest = fakeRequest.withFormUrlEncodedBody("thresholdPreviousThirtyDaysSelection" -> "true",
         "thresholdPreviousThirtyDaysDate.year" -> LocalDate.now().getYear.toString,
         "thresholdPreviousThirtyDaysDate.month" -> LocalDate.now().getMonthValue.toString,
@@ -77,13 +77,21 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(onwardRoute.url)
-      verify(mockThresholdService, times(1)).removeVoluntaryRegistration(any())(any())
+      verify(mockThresholdService, times(1)).removeVoluntaryRegistration(any())
+    }
+    "redirect to the next page when valid data is submitted with value of false" in {
+      val postRequest = fakeRequest.withFormUrlEncodedBody("thresholdPreviousThirtyDaysSelection" -> "false")
+
+      val result = controller().onSubmit()(postRequest)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(onwardRoute.url)
+      verify(mockThresholdService, times(0)).removeVoluntaryRegistration(any())
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "invalid value"))
       val boundForm = form.bind(Map("value" -> "invalid value"))
-
       val result = controller().onSubmit()(postRequest)
 
       status(result) mustBe BAD_REQUEST

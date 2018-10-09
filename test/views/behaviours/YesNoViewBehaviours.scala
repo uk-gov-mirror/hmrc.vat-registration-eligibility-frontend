@@ -20,6 +20,7 @@ import play.api.data.Form
 import play.twirl.api.HtmlFormat
 
 trait YesNoViewBehaviours extends QuestionViewBehaviours[Boolean] {
+  val extraParamForLegend:String = ""
 
   def yesNoPage(createView: (Form[Boolean]) => HtmlFormat.Appendable,
                 messageKeyPrefix: String,
@@ -30,7 +31,7 @@ trait YesNoViewBehaviours extends QuestionViewBehaviours[Boolean] {
         "contain a legend for the question" in {
           val doc = asDocument(createView(form))
           val legends = doc.getElementsByTag("legend")
-          legends.first.text mustBe messages(s"$messageKeyPrefix.heading")
+          legends.first.text mustBe messages(s"$messageKeyPrefix.heading", extraParamForLegend)
         }
 
         "contain an input for the value" in {

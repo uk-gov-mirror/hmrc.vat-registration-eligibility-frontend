@@ -39,7 +39,7 @@ class VATRegistrationExceptionControllerSpec extends ControllerSpecBase {
     new VATRegistrationExceptionController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
 
   "VATRegistrationException Controller" must {
 

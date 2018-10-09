@@ -24,14 +24,15 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.internationalActivities
 
 class InternationalActivitiesViewSpec extends YesNoViewBehaviours {
+  override val extraParamForLegend: String = "Test Company"
 
   val messageKeyPrefix = "internationalActivities"
 
   val form = new InternationalActivitiesFormProvider()()
 
-  def createView = () => internationalActivities(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => internationalActivities(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => internationalActivities(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => internationalActivities(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "InternationalActivities view" must {
 

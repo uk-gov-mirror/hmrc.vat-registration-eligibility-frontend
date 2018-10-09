@@ -16,7 +16,7 @@
 
 package utils
 
-import identifiers._
+import identifiers.{ThresholdInTwelveMonthsId, _}
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsBoolean, JsString, JsValue, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -24,11 +24,11 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import scala.collection.immutable.ListMap
 
 class PageIdBindingSpec extends PlaySpec {
-  ListMap[String, JsValue](
+  val fullListMapHappyPathTwelveMonthsFalse:ListMap[String,JsValue] = ListMap[String, JsValue](
     "" -> JsString(""),
+    s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
     s"$ThresholdNextThirtyDaysId" -> JsBoolean(true),
     s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
-    s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
     s"$VoluntaryRegistrationId" -> JsBoolean(true),
     s"$TurnoverEstimateId" -> Json.obj("selection" -> JsString("oneandtenthousand")),
     s"$CompletionCapacityId" -> JsString("noneOfThese"),
@@ -36,7 +36,7 @@ class PageIdBindingSpec extends PlaySpec {
     s"$InternationalActivitiesId" -> JsBoolean(false),
     s"$InvolvedInOtherBusinessId" -> JsBoolean(false),
     s"$AnnualAccountingSchemeId" -> JsBoolean(false),
-    s"$ZeroRatedSalesId" -> JsBoolean(true),
+    s"$VoluntaryRegistrationId" -> JsBoolean(true),
     s"$VATExemptionId" -> JsBoolean(false),
     s"$VATRegistrationExceptionId" -> JsBoolean(false),
     s"$AgriculturalFlatRateSchemeId" -> JsBoolean(false),
@@ -45,11 +45,106 @@ class PageIdBindingSpec extends PlaySpec {
       "value" -> JsBoolean(true),
       "optionalData" -> JsString("nino-fake-not-real")
     )
-  ).foldLeft(Map[String, JsValue]()) {
+  )
+  fullListMapHappyPathTwelveMonthsFalse.foldLeft(Map[String, JsValue]()) {
     case (mockedReturn, currentItem) =>
       s"an exception should be experienced when only pages before ${currentItem._1} have been filled" in {
         intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("testId", mockedReturn)))
       }
       mockedReturn + currentItem
+  }
+  val listMapWithoutFieldsToBeTested = fullListMapHappyPathTwelveMonthsFalse.filterNot{ s =>
+    s._1 match {
+      case x if x == ThresholdInTwelveMonthsId.toString || x == ThresholdNextThirtyDaysId.toString ||
+           x == ThresholdPreviousThirtyDaysId.toString || x == VoluntaryRegistrationId.toString ||
+           x == VATExemptionId.toString || x == ZeroRatedSalesId.toString || x == VATRegistrationExceptionId.toString => true
+      case _ => false
+    }
+  }
+
+  "no exception should be thrown when a cacheMap containing ThresholdTwelveMonths == true, ThresholdNextThirty doesn't exist" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested)))
+  }
+  "exception should be thrown when a cacheMap containing ThresholdTwelveMonths == true, ThresholdNextThirty does exist" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
+      s"$ThresholdNextThirtyDaysId" -> JsBoolean(true),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
+  }
+  "exception should be thrown when a cacheMap containing zero rated sales == false, Vat exemption exists" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(false),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
+  }
+  "no exception should be thrown when a cacheMap containing zero rated sales == false, Vat exemption does not exist" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$ZeroRatedSalesId" -> JsBoolean(false),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested)))
+  }
+  "throw new exception if voluntary flag does not exist when all 3 threshold q's are no" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$ThresholdNextThirtyDaysId" -> JsBoolean(false),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true)
+    )
+    intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
+  }
+  "throw exception if all 3 threshold q's exist, one answer == true, voluntary flag exists" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
+      s"$ThresholdNextThirtyDaysId" -> JsBoolean(false),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VoluntaryRegistrationId" -> JsBoolean(true),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
+  }
+  "throw exception if ThresholdTwelveMonths == false, Exception Exists" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$ThresholdNextThirtyDaysId" -> JsBoolean(false),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VoluntaryRegistrationId" -> JsBoolean(true),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
+  }
+  "no exception if ThresholdTwelveMonths == false, Exception does not exist" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$ThresholdNextThirtyDaysId" -> JsBoolean(false),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VoluntaryRegistrationId" -> JsBoolean(true),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true)
+    )
+    PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested)))
   }
 }

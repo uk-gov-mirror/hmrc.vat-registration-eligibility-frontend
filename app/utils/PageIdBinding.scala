@@ -16,54 +16,85 @@
 
 package utils
 
-import identifiers._
+import identifiers.{Identifier, _}
 import models.ConditionalDateFormElement
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 object PageIdBinding {
   def sectionBindings(map: CacheMap) : Map[String, Seq[(Identifier, Option[Any])]] = {
-    val userAnswers = new UserAnswers(map)
 
-    def validateVoluntaryReason = (userAnswers.thresholdNextThirtyDays, userAnswers.thresholdPreviousThirtyDays, userAnswers.thresholdInTwelveMonths) match {
-      case (Some(false), Some(ConditionalDateFormElement(false, _)), Some(ConditionalDateFormElement(false, _))) =>
-        userAnswers.voluntaryRegistration.orElse(throw new Exception("Voluntary Registration Not Answered"))
-      case _ => None
+    val userAnswers = new UserAnswers(map)
+    val elemMiss      = (e:Identifier) => throw new NoSuchElementException(s"Element missing - $e")
+    val illegalState  = (e:Identifier) => throw new IllegalStateException(s"Illegal state of elem - $e")
+    val twelveMonthsValue = userAnswers.thresholdInTwelveMonths.getOrElse(elemMiss(ThresholdInTwelveMonthsId)).value
+    val completionCapacityNoneOfThese = userAnswers.completionCapacity.getOrElse(elemMiss(CompletionCapacityId)) == "noneOfThese"
+
+    def ThresholdSectionValidationAndConstruction: PartialFunction[(Identifier, Option[Any]),(Identifier, Option[Any])] = {
+      case e@(ThresholdNextThirtyDaysId,  Some(_)) => if (twelveMonthsValue) {
+        illegalState(e._1)
+      } else {e}
+      case e@(ThresholdNextThirtyDaysId, None) if !twelveMonthsValue => elemMiss(e._1)
+      case e@(VATRegistrationExceptionId, Some(_)) => if(!twelveMonthsValue) {
+        illegalState(e._1)
+      } else {e}
+      case e@(VATRegistrationExceptionId,None) if(twelveMonthsValue) => illegalState(e._1)
+      case e@(VoluntaryRegistrationId, Some(_)) =>  if(!validateVoluntaryReason){
+        illegalState(e._1)
+      } else {e}
+      case e@(VoluntaryRegistrationId, None) if(validateVoluntaryReason) => elemMiss(e._1)
+      case e if(e._1 != ThresholdNextThirtyDaysId && e._1 != VATRegistrationExceptionId && e._1 != VoluntaryRegistrationId) => (e._1,e._2.orElse(elemMiss(e._1)))
     }
 
-    def validateCompletionCapacityFillingInFor = userAnswers.completionCapacity
-      .filter(_ == "noneOfThese")
-      .flatMap(_ => userAnswers.completionCapacityFillingInFor.orElse(throw new Exception("Completion Capacity Filling In For Not Answered")))
+    def CompletionCapacityValidateAndConstruction: PartialFunction[(Identifier, Option[Any]),(Identifier, Option[Any])] = {
+      case e@(CompletionCapacityFillingInForId, Some(_)) => {
+        if(completionCapacityNoneOfThese) {
+          e
+        } else {illegalState(e._1)}
+      }
+      case e@(CompletionCapacityFillingInForId, None) if(completionCapacityNoneOfThese)  => elemMiss(e._1)
+      case e@(CompletionCapacityId,_) => (e._1,e._2.orElse(elemMiss(e._1)))
+      }
 
-    def validateVatExemption = userAnswers.zeroRatedSales
-      .filter(identity)
-      .flatMap(_ => userAnswers.vatExemption.orElse(throw new Exception("Vat Exemption Not Answered")))
+    def SpecialSituationsValidateAndConstruction: PartialFunction[(Identifier, Option[Any]),(Identifier, Option[Any])] = {
+      case e@(VATExemptionId,Some(_)) =>
+        if(userAnswers.zeroRatedSales.contains(false)) {
+          illegalState(e._1)
+        } else {e}
+      case e@(VATExemptionId,None) if(!userAnswers.zeroRatedSales.contains(false)) => elemMiss(e._1)
+      case e if(e._1 != VATExemptionId) => (e._1,e._2.orElse(elemMiss(e._1)))
+    }
+
+      def validateVoluntaryReason:Boolean = (userAnswers.thresholdNextThirtyDays, userAnswers.thresholdPreviousThirtyDays, userAnswers.thresholdInTwelveMonths) match {
+        case (Some(false), Some(ConditionalDateFormElement(false, _)), Some(ConditionalDateFormElement(false, _))) => true
+        case _ => false
+      }
 
     Map(
       "VAT-taxable sales" ->
         Seq(
-          (ThresholdNextThirtyDaysId, userAnswers.thresholdNextThirtyDays.orElse(throw new Exception("Threshold Next Thirty Days Not Answered"))),
-          (ThresholdPreviousThirtyDaysId, userAnswers.thresholdPreviousThirtyDays.orElse(throw new Exception("Threshold Previous Thirty Days Not Answered"))),
-          (ThresholdInTwelveMonthsId, userAnswers.thresholdInTwelveMonths.orElse(throw new Exception("Threshold In Twelve Months Not Answered"))),
-          (VoluntaryRegistrationId, validateVoluntaryReason),
-          (TurnoverEstimateId, userAnswers.turnoverEstimate.orElse(throw new Exception("Turnover Estimates Not Answered")))
-        ),
+          (ThresholdInTwelveMonthsId, userAnswers.thresholdInTwelveMonths),
+          (ThresholdNextThirtyDaysId, userAnswers.thresholdNextThirtyDays),
+          (ThresholdPreviousThirtyDaysId, userAnswers.thresholdPreviousThirtyDays),
+          (VATRegistrationExceptionId, userAnswers.vatRegistrationException),
+          (VoluntaryRegistrationId, userAnswers.voluntaryRegistration),
+          (TurnoverEstimateId, userAnswers.turnoverEstimate)
+        ).collect(ThresholdSectionValidationAndConstruction),
       "Who is doing the application?" ->
         Seq(
-          (CompletionCapacityId, userAnswers.completionCapacity.orElse(throw new Exception("Completion Capacity Not Answered"))),
-          (CompletionCapacityFillingInForId, validateCompletionCapacityFillingInFor)
-        ),
+          (CompletionCapacityId, userAnswers.completionCapacity),
+          (CompletionCapacityFillingInForId, userAnswers.completionCapacityFillingInFor)
+        ).collect(CompletionCapacityValidateAndConstruction),
       "Special situations" ->
         Seq(
-          (InternationalActivitiesId, userAnswers.internationalActivities.orElse(throw new Exception("International Activities Not Answered"))),
-          (InvolvedInOtherBusinessId, userAnswers.involvedInOtherBusiness.orElse(throw new Exception("Involved In Other Business Not Answered"))),
-          (AnnualAccountingSchemeId, userAnswers.annualAccountingScheme.orElse(throw new Exception("Annual Accounting Scheme Not Answered"))),
-          (ZeroRatedSalesId, userAnswers.zeroRatedSales.orElse(throw new Exception("Zero Rated Sales Not Answered"))),
-          (VATExemptionId, validateVatExemption),
-          (VATRegistrationExceptionId, userAnswers.vatRegistrationException.orElse(throw new Exception("Vat Registration Exception Not Answered"))),
-          (AgriculturalFlatRateSchemeId, userAnswers.agriculturalFlatRateScheme.orElse(throw new Exception("Agricultural Flat Rate Scheme Not Answered"))),
-          (RacehorsesId, userAnswers.racehorses.orElse(throw new Exception("Racehorses Not Answered"))),
-          (ApplicantUKNinoId, userAnswers.applicantUKNino.orElse(throw new Exception("Applicant UK Nino Not Answered")))
-        )
+          (InternationalActivitiesId, userAnswers.internationalActivities),
+          (InvolvedInOtherBusinessId, userAnswers.involvedInOtherBusiness),
+          (AnnualAccountingSchemeId, userAnswers.annualAccountingScheme),
+          (ZeroRatedSalesId, userAnswers.zeroRatedSales),
+          (VATExemptionId, userAnswers.vatExemption),
+          (AgriculturalFlatRateSchemeId, userAnswers.agriculturalFlatRateScheme),
+          (RacehorsesId, userAnswers.racehorses),
+          (ApplicantUKNinoId, userAnswers.applicantUKNino)
+        ).collect(SpecialSituationsValidateAndConstruction)
     )
   }
 }

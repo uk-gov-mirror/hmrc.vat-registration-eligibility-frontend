@@ -24,14 +24,15 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.agriculturalFlatRateScheme
 
 class AgriculturalFlatRateSchemeViewSpec extends YesNoViewBehaviours {
+  override val extraParamForLegend: String = "Test Company"
 
   val messageKeyPrefix = "agriculturalFlatRateScheme"
 
   val form = new AgriculturalFlatRateSchemeFormProvider()()
 
-  def createView = () => agriculturalFlatRateScheme(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => agriculturalFlatRateScheme(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => agriculturalFlatRateScheme(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => agriculturalFlatRateScheme(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "AgriculturalFlatRateScheme view" must {
 

@@ -57,18 +57,17 @@ class ThresholdInTwelveMonthsController @Inject()(appConfig: FrontendAppConfig,
           case None => formProvider(incorpDate)
           case Some(value) => formProvider(incorpDate).fill(value)
         }
-        Ok(thresholdInTwelveMonths(appConfig, preparedForm, NormalMode))
+        Ok(thresholdInTwelveMonths(appConfig, preparedForm, NormalMode, thresholdService))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
         formProvider(incorpDate).bindFromRequest().fold(
           (formWithErrors: Form[_]) =>
-            Future.successful(BadRequest(thresholdInTwelveMonths(appConfig, formWithErrors, NormalMode))),
-          (formValue) => for {
-            cacheMap  <-  dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue)
-            _         <-  thresholdService.removeVoluntaryRegistration(formValue.value)
-          } yield Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cacheMap)))
-        )
+            Future.successful(BadRequest(thresholdInTwelveMonths(appConfig, formWithErrors, NormalMode,thresholdService))),
+          (formValue) => dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap{cacheMap =>
+            if(formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException}.map(cMap =>
+            Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cMap)))
+        ))
   }
 }

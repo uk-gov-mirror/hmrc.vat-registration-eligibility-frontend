@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.applicantUKNino
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ApplicantUKNinoController @Inject()(appConfig: FrontendAppConfig,
                                           override val messagesApi: MessagesApi,
@@ -43,7 +43,6 @@ class ApplicantUKNinoController @Inject()(appConfig: FrontendAppConfig,
                                           formProvider: ApplicantUKNinoFormProvider,
                                           vatRegistrationService: VatRegistrationService) extends FrontendController with I18nSupport {
   val frontendUrl       = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
-//  val form: Form[ConditionalNinoFormElement] = formProvider()
 
   def onPageLoad() = (identify andThen getData andThen requireData).async {
     implicit request =>
@@ -66,7 +65,7 @@ class ApplicantUKNinoController @Inject()(appConfig: FrontendAppConfig,
             Future.successful(BadRequest(applicantUKNino(appConfig, formWithErrors, NormalMode, shortName))),
           (value) => dataCacheConnector.save[ConditionalNinoFormElement](request.internalId, ApplicantUKNinoId.toString, value).flatMap { cacheMap =>
             if (value.value) {
-              vatRegistrationService.submitEligibility(request.internalId, request.currentProfile.registrationID, request.currentProfile.transactionID)
+              vatRegistrationService.submitEligibility(request.internalId)(hc, implicitly[ExecutionContext], request)
                 .map(_ => Redirect(frontendUrl))
             } else {
               Future.successful(Redirect(navigator.nextPage(ApplicantUKNinoId, NormalMode)(new UserAnswers(cacheMap))))

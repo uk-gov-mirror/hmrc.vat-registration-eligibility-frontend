@@ -24,14 +24,15 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.voluntaryRegistration
 
 class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
+  override val extraParamForLegend: String = "Test Company"
 
   val messageKeyPrefix = "voluntaryRegistration"
 
   val form = new VoluntaryRegistrationFormProvider()()
 
-  def createView = () => voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createView = () => voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
-  def createViewUsingForm = (form: Form[_]) => voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeRequest, messages)
+  def createViewUsingForm = (form: Form[_]) => voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
 
   "VoluntaryRegistration view" must {
 

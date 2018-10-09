@@ -75,7 +75,15 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
         Logger.warn(s"[$expireAfterSeconds did not drop as expected] and threw an exception with message ${e.getMessage}")
         false
       }
+  }
 
+  def removeEntry(id: String, key: String): Future[CacheMap] = {
+    val selector = BSONDocument("id" -> id)
+    val update = BSONDocument("$unset" -> BSONDocument(s"data.$key" -> 1))
+
+    collection.findAndModify(selector, collection.updateModifier(update,true,false)).map {
+      res => res.value.map(_.as[CacheMap]).getOrElse(throw new Exception(s"[removeEntry] Attempted to remove $key but document did not exist"))
+    }
   }
 
   def upsert(cm: CacheMap): Future[Boolean] = {

@@ -25,8 +25,6 @@ import scala.concurrent.Future
 object FakeDataCacheConnector extends DataCacheConnector {
   override def save[A](cacheId: String, key: String, value: A)(implicit fmt: Format[A]): Future[CacheMap] = Future(CacheMap(cacheId, Map()))
 
-  override def remove(cacheId: String, key: String): Future[Boolean] = Future(true)
-
   override def fetch(cacheId: String): Future[Option[CacheMap]] = Future(Some(CacheMap(cacheId, Map())))
 
   override def getEntry[A](cacheId: String, key: String)(implicit fmt: Format[A]): Future[Option[A]] = ???
@@ -36,4 +34,6 @@ object FakeDataCacheConnector extends DataCacheConnector {
   override def removeFromCollection[A](cacheId: String, collectionKey: String, item: A)(implicit fmt: Format[A]): Future[CacheMap] = Future(CacheMap(cacheId, Map()))
 
   override def replaceInCollection[A](cacheId: String, collectionKey: String, index: Int, item: A)(implicit fmt: Format[A]): Future[CacheMap] = Future(CacheMap(cacheId, Map()))
+
+  override def removeEntry(cacheId: String, key: String): Future[CacheMap] = Future(CacheMap(cacheId, Map()))
 }

@@ -76,7 +76,7 @@ trait AuthHelper extends SessionCookieBaker {
       ).willReturn(ok("""{"confirmationReferences":{"transaction-id" : "testTxId"}}""")))
   }
 
-  def stubSuccessfulIncorpDataGet(txId: String = "testTxId", date: LocalDate = LocalDate.now().minusYears(2)): Unit = {
+  def stubSuccessfulIncorpDataGet(txId: String = "testTxId", date: LocalDate = LocalDate.of(2018,10,4).minusYears(2)): Unit = {
     stubFor(
       get(
         urlMatching(s"/incorporation-information/$txId/incorporation-update")
@@ -87,6 +87,13 @@ trait AuthHelper extends SessionCookieBaker {
       get(
         urlMatching(s"/incorporation-information/$txId/incorporation-update")
       ).willReturn(aResponse().withStatus(status).withBody("{}")))
+  }
+
+  def stubSuccessfulCompanyNameGet(txId: String = "testTxId", companyName: String = "Test Company") : Unit = {
+    stubFor(
+      get(
+        urlMatching(s"/incorporation-information/$txId/company-profile")
+      ).willReturn(ok(s"""{"company_name":"$companyName"}""")))
   }
 }
 

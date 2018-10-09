@@ -17,6 +17,7 @@
 package controllers
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatterBuilder
 
 import connectors.FakeDataCacheConnector
 import controllers.actions._
@@ -46,10 +47,10 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
     new ThresholdInTwelveMonthsController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, mockThresholdService, formProvider)
 
-  def viewAsString(form: Form[_] = form) = thresholdInTwelveMonths(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = thresholdInTwelveMonths(frontendAppConfig, form, NormalMode, mockThresholdService)(fakeDataRequestIncorpedOver12m, messages).toString
 
   "ThresholdInTwelveMonths Controller" must {
-
+    when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
     "return OK and the correct view for a GET" in {
 
       val result = controller().onPageLoad()(fakeRequest)
@@ -69,7 +70,7 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to the next page when valid data is submitted and also remove Voluntary registration because answer to question is true" in {
-      when(mockThresholdService.removeVoluntaryRegistration(any())(any())) thenReturn Future.successful(true)
+      when(mockThresholdService.removeVoluntaryAndNextThirtyDays(any())) thenReturn Future.successful(emptyCacheMap)
 
       val postRequest = fakeRequest.withFormUrlEncodedBody("thresholdInTwelveMonthsSelection" -> "true",
         "thresholdInTwelveMonthsDate.year" -> LocalDate.now().getYear.toString,
@@ -79,7 +80,7 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
       val result = controller().onSubmit()(postRequest)
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(onwardRoute.url)
-      verify(mockThresholdService, times(1)).removeVoluntaryRegistration(any())(any())
+      verify(mockThresholdService, times(1)).removeVoluntaryAndNextThirtyDays(any())
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {
@@ -90,7 +91,7 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
 
       status(result) mustBe BAD_REQUEST
       contentAsString(result) mustBe viewAsString(boundForm)
-      verify(mockThresholdService, times(0)).removeVoluntaryRegistration(any())(any())
+      verify(mockThresholdService, times(0)).removeVoluntaryAndNextThirtyDays(any())
     }
 
     "redirect to Session Expired for a GET if no existing data is found" in {

@@ -22,8 +22,10 @@ import play.api.data.Form
 
 class InvolvedInOtherBusinessFormProvider @Inject() extends FormErrorHelper with Mappings {
 
-  def apply(): Form[Boolean] =
+  def form(actingOnBehalfOf: Option[String] = None): Form[Boolean] = {
+    val key = actingOnBehalfOf.fold("involvedInOtherBusiness.error.required")(_ => "involvedInOtherBusiness.behalfOf.error.required")
     Form(
-      "value" -> boolean("involvedInOtherBusiness.error.required")
+      "value" -> boolean(key)
     )
+  }
 }

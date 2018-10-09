@@ -47,7 +47,8 @@ trait WiremockHelper {
 
   def resetWiremock() = WireMock.reset()
 
-  def buildClient(path: String) = ws.url(s"http://localhost:$port/check-if-you-can-register-for-vat$path").withFollowRedirects(false)
+  def buildClient(path: String) =
+    ws.url(s"http://localhost:$port/check-if-you-can-register-for-vat${path.replace("/check-if-you-can-register-for-vat","")}").withFollowRedirects(false)
 
   def listAllStubs = listAllStubMappings
 
