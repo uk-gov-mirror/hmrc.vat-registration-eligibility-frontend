@@ -139,7 +139,7 @@ thresholdNextThirtyDays.checkYourAnswersLabel   = thresholdNextThirtyDays
 thresholdNextThirtyDays.error.required          = Tell us if the business expects to make more than £85,000 in VAT-taxable sales over the next 30 days
 thresholdNextThirtyDays.text                    = For example, {0} is expecting orders - or has signed a contract - that will generate VAT-taxable sales of £85,000 or more in the next 30 days.
 
-thresholdPreviousThirtyDays.title                   = Has the business ever expected to go over the VAT-registration threshold in a single 30-day period?
+thresholdPreviousThirtyDays.title                   = Over VAT-registration threshold in a 30-day period
 thresholdPreviousThirtyDays.heading                 = Has {0} ever expected to go over the VAT-registration threshold in a single 30-day period?
 thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17 = Has {0} ever expected to make more than £85,000 in VAT-taxable sales in a single 30-day period?
 thresholdPreviousThirtyDays.checkYourAnswersLabel   = thresholdPreviousThirtyDays
