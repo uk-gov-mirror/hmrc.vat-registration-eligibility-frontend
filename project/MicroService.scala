@@ -8,6 +8,10 @@ import net.ground5hark.sbt.concat.Import._
 import com.typesafe.sbt.uglify.Import._
 import com.typesafe.sbt.digest.Import._
 import play.sbt.routes.RoutesKeys
+import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
+import uk.gov.hmrc.SbtAutoBuildPlugin
+import uk.gov.hmrc.versioning.SbtGitVersioning
+import uk.gov.hmrc.SbtArtifactory
 
 trait MicroService {
 
@@ -28,7 +32,7 @@ trait MicroService {
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
   lazy val microservice = Project(appName, file("."))
-    .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins : _*)
+    .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins : _*)
     .settings(playSettings : _*)
     .settings(RoutesKeys.routesImport ++= Seq("models._"))
     .settings(
@@ -43,6 +47,7 @@ trait MicroService {
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
+    .settings(majorVersion := 0)
     .settings(integrationTestSettings())
     .settings(
       scalacOptions ++= Seq("-feature"), //TODO: "-Xfatal-warnings" cause deprecated warnings to fail, what alternatives are there?

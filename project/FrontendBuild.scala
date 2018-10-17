@@ -15,7 +15,7 @@ private object AppDependencies {
   private val logbackJsonLoggerVersion = "3.1.0"
   private val govukTemplateVersion = "5.22.0"
   private val playUiVersion = "7.22.0"
-  private val hmrcTestVersion = "3.1.0"
+  private val hmrcTestVersion = "3.2.0"
   private val scalaTestVersion = "3.0.4"
   private val scalaTestPlusPlayVersion = "2.0.1"
   private val pegdownVersion = "1.6.0"
@@ -24,14 +24,14 @@ private object AppDependencies {
   private val playReactivemongoVersion = "6.2.0"
   private val playConditionalFormMappingVersion = "0.2.0"
   private val playLanguageVersion = "3.4.0"
-  private val bootstrapVersion = "3.9.0"
+  private val bootstrapVersion = "3.10.0"
   private val scalacheckVersion = "1.13.4"
   private val jsoupVersion = "1.11.2"
   private val scoverageVersion = "1.3.1"
   private val wireMockVersion = "2.6.0"
   private val reactivemongoTestVersion = "3.1.0"
   private val playWhitelistVersion     = "2.0.0"
-  private val frontendBootstrapVersion = "10.5.0"
+  private val frontendBootstrapVersion = "10.6.0"
 
   val compile = Seq(
     ws,
