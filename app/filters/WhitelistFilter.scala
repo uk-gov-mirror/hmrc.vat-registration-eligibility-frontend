@@ -16,13 +16,13 @@
 
 package filters
 
+import akka.stream.Materializer
 import config.FrontendAppConfig
 import javax.inject.Inject
 import play.api.mvc.Call
-import uk.gov.hmrc.play.frontend.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter
 
-class WhitelistFilter @Inject()(val config: FrontendAppConfig) extends AkamaiWhitelistFilter with MicroserviceFilterSupport {
+class WhitelistFilter @Inject()(val config: FrontendAppConfig, override val mat: Materializer) extends AkamaiWhitelistFilter {
   override def whitelist: Seq[String]   = config.whitelist
   override def excludedPaths: Seq[Call] = config.whitelistExcluded map(Call("GET", _))
   override def destination: Call        = Call("GET", "https://www.tax.service.gov.uk/outage-register-for-vat")

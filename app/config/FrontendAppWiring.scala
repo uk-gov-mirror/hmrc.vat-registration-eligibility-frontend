@@ -16,6 +16,7 @@
 
 package config
 
+import com.typesafe.config.{Config, ConfigFactory}
 import javax.inject.Inject
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.Environment
@@ -43,6 +44,8 @@ class Http @Inject()(config: FrontendAppConfig, frontendAuditConnector: Frontend
   override val auditConnector = frontendAuditConnector
   override def appName = config.getString("appName")
   override val hooks   = Seq(AuditingHook)
+
+  override def configuration: Option[Config] = Option(config.runModeConfiguration.underlying)
 }
 
 trait Logging {
