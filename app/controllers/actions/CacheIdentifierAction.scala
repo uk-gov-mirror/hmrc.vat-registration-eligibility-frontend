@@ -69,7 +69,7 @@ class SessionActionImpl @Inject()(config: FrontendAppConfig)
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     hc.sessionId match {
-      case Some(session) => block(CacheIdentifierRequest(request, session.value, CurrentProfile("", "", None, "")))
+      case Some(session) => block(CacheIdentifierRequest(request, session.value, CurrentProfile("")))
       case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
     }
   }

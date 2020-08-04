@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, DataCacheConnector}
+import connectors.{DataCacheConnector, VatRegistrationConnector}
 import javax.inject.Inject
 import models.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
@@ -24,26 +24,17 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-class CurrentProfileServiceImpl @Inject()(
-                                           val dataCacheConnector: DataCacheConnector,
-                                           val incorporationInformationService: IncorporationInformationService,
-                                           val companyRegistrationConnector: CompanyRegistrationConnector,
-                                           val businessRegistrationConnector: BusinessRegistrationConnector) extends CurrentProfileService {
+class CurrentProfileServiceImpl @Inject()(val dataCacheConnector: DataCacheConnector, val vatRegistrationConnector: VatRegistrationConnector) extends CurrentProfileService {
 
 }
 
 trait CurrentProfileService {
   val dataCacheConnector: DataCacheConnector
-  val incorporationInformationService: IncorporationInformationService
-  val companyRegistrationConnector: CompanyRegistrationConnector
-  val businessRegistrationConnector: BusinessRegistrationConnector
+  val vatRegistrationConnector: VatRegistrationConnector
 
   private def constructCurrentProfile(internalID : String)(implicit headerCarrier: HeaderCarrier): Future[CurrentProfile] = for {
-    regId           <- businessRegistrationConnector.getBusinessRegistrationId
-    transId         <- companyRegistrationConnector.getTransactionId(regId)
-    incorpDate      <- incorporationInformationService.getIncorpDate(transId)
-    companyName     <- incorporationInformationService.getCompanyName(transId)
-    currentProfile  = CurrentProfile(regId, transId, incorpDate, companyName)
+    regId           <- vatRegistrationConnector.getRegistrationId()
+    currentProfile  = CurrentProfile(regId)
     _               <- dataCacheConnector.save(internalID, "CurrentProfile", currentProfile)
   } yield currentProfile
 

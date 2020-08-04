@@ -21,6 +21,7 @@
 @import utils.FormHelpers
 @import models.requests.DataRequest
 
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
@@ -34,8 +35,8 @@
 
         @components.error_summary(form.errors)
 
-        <h1 class="heading-large" id="main-heading">@messages("thresholdNextThirtyDays.heading",request.currentProfile.companyName)</h1>
-        <p id="help-text">@messages("thresholdNextThirtyDays.text",request.currentProfile.companyName)</p>
+        <h1 class="heading-large" id="main-heading">@messages("thresholdNextThirtyDays.heading",DeprecatedConstants.fakeCompanyName)</h1>
+        <p id="help-text">@messages("thresholdNextThirtyDays.text",DeprecatedConstants.fakeCompanyName)</p>
 
 
 
@@ -48,7 +49,7 @@
             radioAdditionalInfo = Map(),
             '_labelAfter -> true,
             '_labelClass -> "block-label",
-            '_legend -> messages("thresholdNextThirtyDays.heading", request.currentProfile.companyName),
+            '_legend -> messages("thresholdNextThirtyDays.heading", DeprecatedConstants.fakeCompanyName),
             '_legendClass -> "visually-hidden"
         )
 

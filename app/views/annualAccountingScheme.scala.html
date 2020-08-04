@@ -21,7 +21,7 @@
 @import utils.FormHelpers
 @import models.requests.DataRequest
 
-
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
@@ -35,7 +35,7 @@
 
         @components.error_summary(form.errors)
 
-        <h1 class="heading-large" id="main-heading">@messages("annualAccountingScheme.heading",request.currentProfile.companyName)</h1>
+        <h1 class="heading-large" id="main-heading">@messages("annualAccountingScheme.heading",DeprecatedConstants.fakeCompanyName)</h1>
 
         @components.text("annualAccountingScheme.text")
 
@@ -58,7 +58,7 @@
         radioAdditionalInfo = Map(),
         '_labelAfter -> true,
         '_labelClass -> "block-label",
-        '_legend -> messages("annualAccountingScheme.heading", request.currentProfile.companyName),
+        '_legend -> messages("annualAccountingScheme.heading", DeprecatedConstants.fakeCompanyName),
         '_legendClass -> "visually-hidden"
         )
 

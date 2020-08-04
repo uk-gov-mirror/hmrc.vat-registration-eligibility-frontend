@@ -21,6 +21,7 @@ import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsBoolean, JsString, JsValue, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
+import scala.collection.immutable
 import scala.collection.immutable.ListMap
 
 class PageIdBindingSpec extends PlaySpec {
@@ -31,8 +32,6 @@ class PageIdBindingSpec extends PlaySpec {
     s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
     s"$VoluntaryRegistrationId" -> JsBoolean(true),
     s"$TurnoverEstimateId" -> Json.obj("selection" -> JsString("oneandtenthousand")),
-    s"$CompletionCapacityId" -> JsString("noneOfThese"),
-    s"$CompletionCapacityFillingInForId" -> JsString("wellMr"),
     s"$InternationalActivitiesId" -> JsBoolean(false),
     s"$InvolvedInOtherBusinessId" -> JsBoolean(false),
     s"$AnnualAccountingSchemeId" -> JsBoolean(false),
@@ -40,11 +39,7 @@ class PageIdBindingSpec extends PlaySpec {
     s"$VATExemptionId" -> JsBoolean(false),
     s"$VATRegistrationExceptionId" -> JsBoolean(false),
     s"$AgriculturalFlatRateSchemeId" -> JsBoolean(false),
-    s"$RacehorsesId" -> JsBoolean(false),
-    s"$ApplicantUKNinoId" -> Json.obj(
-      "value" -> JsBoolean(true),
-      "optionalData" -> JsString("nino-fake-not-real")
-    )
+    s"$RacehorsesId" -> JsBoolean(false)
   )
   fullListMapHappyPathTwelveMonthsFalse.foldLeft(Map[String, JsValue]()) {
     case (mockedReturn, currentItem) =>

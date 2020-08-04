@@ -18,6 +18,7 @@
 @import models.requests.CacheIdentifierRequest
 @import uk.gov.hmrc.play.views.html.helpers.{form}
 
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig)(implicit request: CacheIdentifierRequest[_], messages: Messages)
 
 @main_template(
@@ -27,9 +28,9 @@
 
     @components.back_link()
 
-    <h1 class="heading-large" id="main-heading">@messages("eligibilityDropout.heading",request.currentProfile.companyName)</h1>
+    <h1 class="heading-large" id="main-heading">@messages("eligibilityDropout.heading",DeprecatedConstants.fakeCompanyName)</h1>
 
-    <p>@messages("eligibility.agriculture.text", request.currentProfile.companyName) <a href="@{appConfig.VAT98FormURL}">@messages("eligibility.agriculture.link")</a>.</p>
+    <p>@messages("eligibility.agriculture.text", DeprecatedConstants.fakeCompanyName) <a href="@{appConfig.VAT98FormURL}">@messages("eligibility.agriculture.link")</a>.</p>
 
 
 }

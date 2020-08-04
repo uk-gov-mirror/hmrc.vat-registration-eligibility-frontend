@@ -27,7 +27,6 @@ object PageIdBinding {
     val elemMiss      = (e:Identifier) => throw new NoSuchElementException(s"Element missing - $e")
     val illegalState  = (e:Identifier) => throw new IllegalStateException(s"Illegal state of elem - $e")
     val twelveMonthsValue = userAnswers.thresholdInTwelveMonths.getOrElse(elemMiss(ThresholdInTwelveMonthsId)).value
-    val completionCapacityNoneOfThese = userAnswers.completionCapacity.getOrElse(elemMiss(CompletionCapacityId)) == "noneOfThese"
 
     def ThresholdSectionValidationAndConstruction: PartialFunction[(Identifier, Option[Any]),(Identifier, Option[Any])] = {
       case e@(ThresholdNextThirtyDaysId,  Some(_)) => if (twelveMonthsValue) {
@@ -44,16 +43,6 @@ object PageIdBinding {
       case e@(VoluntaryRegistrationId, None) if(validateVoluntaryReason) => elemMiss(e._1)
       case e if(e._1 != ThresholdNextThirtyDaysId && e._1 != VATRegistrationExceptionId && e._1 != VoluntaryRegistrationId) => (e._1,e._2.orElse(elemMiss(e._1)))
     }
-
-    def CompletionCapacityValidateAndConstruction: PartialFunction[(Identifier, Option[Any]),(Identifier, Option[Any])] = {
-      case e@(CompletionCapacityFillingInForId, Some(_)) => {
-        if(completionCapacityNoneOfThese) {
-          e
-        } else {illegalState(e._1)}
-      }
-      case e@(CompletionCapacityFillingInForId, None) if(completionCapacityNoneOfThese)  => elemMiss(e._1)
-      case e@(CompletionCapacityId,_) => (e._1,e._2.orElse(elemMiss(e._1)))
-      }
 
     def SpecialSituationsValidateAndConstruction: PartialFunction[(Identifier, Option[Any]),(Identifier, Option[Any])] = {
       case e@(VATExemptionId,Some(_)) =>
@@ -79,11 +68,6 @@ object PageIdBinding {
           (VoluntaryRegistrationId, userAnswers.voluntaryRegistration),
           (TurnoverEstimateId, userAnswers.turnoverEstimate)
         ).collect(ThresholdSectionValidationAndConstruction),
-      "Who is doing the application?" ->
-        Seq(
-          (CompletionCapacityId, userAnswers.completionCapacity),
-          (CompletionCapacityFillingInForId, userAnswers.completionCapacityFillingInFor)
-        ).collect(CompletionCapacityValidateAndConstruction),
       "Special situations" ->
         Seq(
           (InternationalActivitiesId, userAnswers.internationalActivities),
@@ -92,8 +76,7 @@ object PageIdBinding {
           (ZeroRatedSalesId, userAnswers.zeroRatedSales),
           (VATExemptionId, userAnswers.vatExemption),
           (AgriculturalFlatRateSchemeId, userAnswers.agriculturalFlatRateScheme),
-          (RacehorsesId, userAnswers.racehorses),
-          (ApplicantUKNinoId, userAnswers.applicantUKNino)
+          (RacehorsesId, userAnswers.racehorses)
         ).collect(SpecialSituationsValidateAndConstruction)
     )
   }

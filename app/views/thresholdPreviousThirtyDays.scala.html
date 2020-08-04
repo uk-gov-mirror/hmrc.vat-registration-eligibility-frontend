@@ -23,14 +23,15 @@
 @import utils.VATDateHelper
 @import services.ThresholdService
 
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages)
 
 @hiddenYesContent = {
     <div class="additional-option-block panel panel-border-narrow">
-        <h2 class="heading-small">@messages("thresholdPreviousThirtyDays.heading2",request.currentProfile.companyName)</h2>
+        <h2 class="heading-small">@messages("thresholdPreviousThirtyDays.heading2",DeprecatedConstants.fakeCompanyName)</h2>
         @components.input_date(
             id = "thresholdPreviousThirtyDaysDate",
-            label = messages("thresholdPreviousThirtyDays.heading2", request.currentProfile.companyName),
+            label = messages("thresholdPreviousThirtyDays.heading2", DeprecatedConstants.fakeCompanyName),
             errorKey = form.error("thresholdPreviousThirtyDaysDate").map(error => error.message).getOrElse(""),
             dayErrorKey = "",
             monthErrorKey = "",

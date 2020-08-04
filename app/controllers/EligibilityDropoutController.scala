@@ -32,7 +32,7 @@ class EligibilityDropoutController @Inject()(appConfig: FrontendAppConfig,
   def onPageLoad(mode: String) = identify {
     implicit request =>
       mode match {
-        case ApplicantUKNinoId.toString => Ok(eligibilityDropout(appConfig, default = false))
+        case RacehorsesId.toString => Ok(eligibilityDropout(appConfig, default = false))
         case InternationalActivitiesId.toString => Ok(internationalActivityDropout(appConfig))
         case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout(appConfig))
         case _ => Ok(eligibilityDropout(appConfig))

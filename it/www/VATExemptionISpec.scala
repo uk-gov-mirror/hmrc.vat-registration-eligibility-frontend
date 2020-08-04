@@ -10,9 +10,6 @@ class VATExemptionISpec extends IntegrationSpecBase with AuthHelper with Session
     s"redirect the user to ${controllers.routes.ApplyInWritingController.onPageLoad()} page when answer is true" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
-      stubSuccessfulTxIdGet()
-      stubSuccessfulIncorpDataGet()
-      stubSuccessfulCompanyNameGet()
       stubAudits()
 
       val request = buildClient("/vat-exemption").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
@@ -27,9 +24,6 @@ class VATExemptionISpec extends IntegrationSpecBase with AuthHelper with Session
     s"redirect the user to ${controllers.routes.AgriculturalFlatRateSchemeController.onPageLoad()} when answer is false" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
-      stubSuccessfulTxIdGet()
-      stubSuccessfulIncorpDataGet()
-      stubSuccessfulCompanyNameGet()
       stubAudits()
 
       val request = buildClient("/vat-exemption").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
