@@ -16,16 +16,9 @@
 
 package models
 
-import java.time.LocalDate
-
 import play.api.libs.json.Json
 
-case class CurrentProfile(
-                         registrationID : String,
-                         transactionID : String,
-                         incorpDate : Option[LocalDate],
-                         companyName : String
-                         )
+case class CurrentProfile(registrationID: String)
 
 object CurrentProfile {
   implicit val currentProfileJsonFormat = Json.format[CurrentProfile]

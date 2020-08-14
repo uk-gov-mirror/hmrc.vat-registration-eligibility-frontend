@@ -25,6 +25,7 @@
 @import java.time.format.DateTimeFormatter
 @import services.ThresholdService
 
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages)
 
 @hiddenYesContent = {
@@ -75,7 +76,7 @@
         <details>
           <summary><span class="summary">@Messages("thresholdInTwelveMonths.dropdownText")</span></summary>
           <div class="panel panel-border-narrow">
-             <p>@Messages("thresholdInTwelveMonths.disclosureText", request.currentProfile.companyName)</p>
+             <p>@Messages("thresholdInTwelveMonths.disclosureText", DeprecatedConstants.fakeCompanyName)</p>
 
             @components.text_with_link("thresholdInTwelveMonths.beforeLinkText", "thresholdInTwelveMonths.linkText", appConfig.VATRateDifferentGoodsURL, Some("."))
           </div>

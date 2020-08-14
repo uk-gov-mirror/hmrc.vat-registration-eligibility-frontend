@@ -35,8 +35,6 @@ class Navigator @Inject()() {
      case ChoseNotToRegisterId              => routes.ChoseNotToRegisterController.onPageLoad()
      case ThresholdInTwelveMonthsId         => routes.ThresholdInTwelveMonthsController.onPageLoad()
      case TurnoverEstimateId                => routes.TurnoverEstimateController.onPageLoad()
-     case CompletionCapacityId              => routes.CompletionCapacityController.onPageLoad()
-     case CompletionCapacityFillingInForId  => routes.CompletionCapacityFillingInForController.onPageLoad()
      case InvolvedInOtherBusinessId         => routes.InvolvedInOtherBusinessController.onPageLoad()
      case InternationalActivitiesId         => routes.InternationalActivitiesController.onPageLoad()
      case AnnualAccountingSchemeId          => routes.AnnualAccountingSchemeController.onPageLoad()
@@ -47,7 +45,6 @@ class Navigator @Inject()() {
      case EligibilityDropoutId(mode)        => routes.EligibilityDropoutController.onPageLoad(mode)
      case AgriculturalFlatRateSchemeId      => routes.AgriculturalFlatRateSchemeController.onPageLoad()
      case RacehorsesId                      => routes.RacehorsesController.onPageLoad()
-     case ApplicantUKNinoId                 => routes.ApplicantUKNinoController.onPageLoad()
      case page => {
        Logger.info(s"${page.toString} does not exist navigating to start of the journey")
        routes.ThresholdNextThirtyDaysController.onPageLoad()
@@ -88,15 +85,6 @@ class Navigator @Inject()() {
    }
   }
 
-  private[utils] def nextOnNino(fromPage: Identifier, onSuccessPage: Identifier, onFailPage: Identifier):
-  (Identifier, UserAnswers => Call) ={
-    fromPage -> {
-      _.applicantUKNino match {
-        case Some(ConditionalNinoFormElement(true, _)) => pageIdToPageLoad(onSuccessPage)
-        case _ => pageIdToPageLoad(onFailPage)
-      }
-    }
-  }
   private[utils] def toNextPage(fromPage: Identifier, toPage: Identifier): (Identifier, UserAnswers => Call) = fromPage -> {
     _ => pageIdToPageLoad(toPage)
   }
@@ -106,9 +94,7 @@ class Navigator @Inject()() {
     ThresholdNextThirtyDaysId -> {_ => pageIdToPageLoad(ThresholdPreviousThirtyDaysId)},
     lastThresholdQuestion(ThresholdPreviousThirtyDaysId, VATRegistrationExceptionId, TurnoverEstimateId),
     nextOn(true, VoluntaryRegistrationId, TurnoverEstimateId, ChoseNotToRegisterId),
-    toNextPage(TurnoverEstimateId, CompletionCapacityId),
-    nextOn("noneOfThese", CompletionCapacityId, CompletionCapacityFillingInForId, InvolvedInOtherBusinessId),
-    toNextPage(CompletionCapacityFillingInForId, InvolvedInOtherBusinessId),
+    toNextPage(TurnoverEstimateId, InvolvedInOtherBusinessId),
     nextOn(false, InvolvedInOtherBusinessId, InternationalActivitiesId, EligibilityDropoutId(InvolvedInOtherBusinessId.toString)),
     nextOn(false, InternationalActivitiesId, AnnualAccountingSchemeId, EligibilityDropoutId(InternationalActivitiesId.toString)),
     nextOn(false, AnnualAccountingSchemeId, ZeroRatedSalesId, EligibilityDropoutId(AnnualAccountingSchemeId.toString)),
@@ -116,8 +102,7 @@ class Navigator @Inject()() {
     nextOn(false, VATExemptionId, AgriculturalFlatRateSchemeId, ApplyInWritingId),
     nextOn(false, VATRegistrationExceptionId, TurnoverEstimateId, EligibilityDropoutId(VATRegistrationExceptionId.toString)),
     nextOn(false, AgriculturalFlatRateSchemeId, RacehorsesId, EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)),
-    nextOn(false, RacehorsesId, ApplicantUKNinoId, EligibilityDropoutId(RacehorsesId.toString)),
-    toNextPage(ApplicantUKNinoId, EligibilityDropoutId(ApplicantUKNinoId.toString))
+    toNextPage(RacehorsesId, EligibilityDropoutId(RacehorsesId.toString))
   )
 
   def nextPage(id: Identifier, mode: Mode): UserAnswers => Call =

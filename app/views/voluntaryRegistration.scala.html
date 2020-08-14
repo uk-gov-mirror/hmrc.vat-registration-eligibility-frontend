@@ -21,6 +21,7 @@
 @import utils.FormHelpers
 @import models.requests.DataRequest
 
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
@@ -34,13 +35,13 @@
 
         @components.error_summary(form.errors)
 
-        <h1 class="heading-large" id="main-heading">@messages("voluntaryRegistration.heading",request.currentProfile.companyName)</h1>
+        <h1 class="heading-large" id="main-heading">@messages("voluntaryRegistration.heading", DeprecatedConstants.fakeCompanyName)</h1>
 
 
-        <p id="help-text">@messages("voluntaryRegistration.text1",request.currentProfile.companyName)</p>
+        <p id="help-text">@messages("voluntaryRegistration.text1",DeprecatedConstants.fakeCompanyName)</p>
         @components.text_with_bullets("",Seq("voluntaryRegistration.bullet1","voluntaryRegistration.bullet2","voluntaryRegistration.bullet3"))
 
-        <h2 class="heading-medium" id="main-heading">@messages("voluntaryRegistration.heading2",request.currentProfile.companyName)</h2>
+        <h2 class="heading-medium" id="main-heading">@messages("voluntaryRegistration.heading2", DeprecatedConstants.fakeCompanyName)</h2>
         <div class="panel panel-border-wide">
             <p>@messages("voluntaryRegistration.text2")</p>
         </div>
@@ -54,7 +55,7 @@
         radioAdditionalInfo = Map(),
         '_labelAfter -> true,
         '_labelClass -> "block-label",
-        '_legend -> messages("voluntaryRegistration.heading", request.currentProfile.companyName),
+        '_legend -> messages("voluntaryRegistration.heading", DeprecatedConstants.fakeCompanyName),
         '_legendClass -> "visually-hidden"
         )
 

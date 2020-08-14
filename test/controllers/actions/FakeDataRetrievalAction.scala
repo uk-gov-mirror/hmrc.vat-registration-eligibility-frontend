@@ -16,8 +16,6 @@
 
 package controllers.actions
 
-import java.time.LocalDate
-
 import models.CurrentProfile
 import models.requests.{CacheIdentifierRequest, OptionalDataRequest}
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -28,7 +26,7 @@ import scala.concurrent.Future
 
 class FakeDataRetrievalAction(cacheMapToReturn: Option[CacheMap]) extends DataRetrievalAction {
   override protected def transform[A](request: CacheIdentifierRequest[A]): Future[OptionalDataRequest[A]] = cacheMapToReturn match {
-    case None => Future(OptionalDataRequest(request.request, request.cacheId, CurrentProfile("", "", Some(LocalDate.now().minusYears(2)),""), None))
-    case Some(cacheMap)=> Future(OptionalDataRequest(request.request, request.cacheId, CurrentProfile("", "", Some(LocalDate.now().minusYears(2)),"Test Company"), Some(new UserAnswers(cacheMap))))
+    case None => Future(OptionalDataRequest(request.request, request.cacheId, CurrentProfile(""), None))
+    case Some(cacheMap)=> Future(OptionalDataRequest(request.request, request.cacheId, CurrentProfile(""), Some(new UserAnswers(cacheMap))))
   }
 }

@@ -21,7 +21,7 @@
 @import utils.FormHelpers
 @import models.requests.DataRequest
 
-
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
@@ -35,9 +35,9 @@
 
         @components.error_summary(form.errors)
 
-        <h1 class="heading-large" id="main-heading">@messages("vatExemption.heading",request.currentProfile.companyName)</h1>
+        <h1 class="heading-large" id="main-heading">@messages("vatExemption.heading",DeprecatedConstants.fakeCompanyName)</h1>
 
-        <p id="help-text">@messages("vatExemption.text",request.currentProfile.companyName)</p>
+        <p id="help-text">@messages("vatExemption.text",DeprecatedConstants.fakeCompanyName)</p>
 
         @components.vertical_input_radio(
         field = form("value"),
@@ -48,7 +48,7 @@
         radioAdditionalInfo = Map(),
         '_labelAfter -> true,
         '_labelClass -> "block-label",
-        '_legend -> messages("vatExemption.heading", request.currentProfile.companyName),
+        '_legend -> messages("vatExemption.heading", DeprecatedConstants.fakeCompanyName),
         '_legendClass -> "visually-hidden"
         )
 

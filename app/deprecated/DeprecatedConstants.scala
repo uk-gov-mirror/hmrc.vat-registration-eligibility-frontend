@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package identifiers
+package deprecated
 
-case object CompletionCapacityId extends Identifier {
-  override def toString: String = "completionCapacity"
+import java.time.{LocalDate, Month}
+
+object DeprecatedConstants {
+  @Deprecated
+  val fakeCompanyName: String = "FAKECOMPANY Ltd."
+
+  @Deprecated
+  val fakeIncorpDate: LocalDate = LocalDate.of(2020, Month.JANUARY, 1)
+
+  @Deprecated
+  val fakeIncorpDateMessage: String = "[INCORP_DATE_REMOVED]"
+
+  @Deprecated
+  val fakeOfficerName: String = "[OFFICER_NAME_REMOVED]"
 }

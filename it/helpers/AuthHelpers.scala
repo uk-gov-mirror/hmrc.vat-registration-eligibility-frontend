@@ -62,38 +62,11 @@ trait AuthHelper extends SessionCookieBaker {
     )
   }
 
-  def stubSuccessfulRegIdGet(): Unit ={
+  def stubSuccessfulRegIdGet(): Unit = {
     stubFor(
       get(
-        urlMatching("/business-registration/business-tax-registration")
-      ).willReturn(ok("""{"registrationID":"testRegId"}""")))
-  }
-
-  def stubSuccessfulTxIdGet(regId: String = "testRegId"): Unit ={
-    stubFor(
-      get(
-        urlMatching(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration")
-      ).willReturn(ok("""{"confirmationReferences":{"transaction-id" : "testTxId"}}""")))
-  }
-
-  def stubSuccessfulIncorpDataGet(txId: String = "testTxId", date: LocalDate = LocalDate.of(2018,10,4).minusYears(2)): Unit = {
-    stubFor(
-      get(
-        urlMatching(s"/incorporation-information/$txId/incorporation-update")
-      ).willReturn(ok(s"""{"incorporationDate":"$date"}""")))
-  }
-  def stubUnsuccessfulIncorpDataGet(txId: String = "testTxId", status: Int): Unit = {
-    stubFor(
-      get(
-        urlMatching(s"/incorporation-information/$txId/incorporation-update")
-      ).willReturn(aResponse().withStatus(status).withBody("{}")))
-  }
-
-  def stubSuccessfulCompanyNameGet(txId: String = "testTxId", companyName: String = "Test Company") : Unit = {
-    stubFor(
-      get(
-        urlMatching(s"/incorporation-information/$txId/company-profile")
-      ).willReturn(ok(s"""{"company_name":"$companyName"}""")))
+        urlMatching("/vatreg/scheme")
+      ).willReturn(ok("""{"registrationId":"testRegId"}""")))
   }
 }
 

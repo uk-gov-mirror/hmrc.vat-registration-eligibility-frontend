@@ -10,9 +10,6 @@ class VATRegistrationExceptionISpec extends IntegrationSpecBase with AuthHelper 
     "redirect to dropout if answer is yes" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
-      stubSuccessfulTxIdGet()
-      stubSuccessfulIncorpDataGet()
-      stubSuccessfulCompanyNameGet()
       stubAudits()
 
       val request = buildClient("/registration-exception").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
@@ -26,9 +23,6 @@ class VATRegistrationExceptionISpec extends IntegrationSpecBase with AuthHelper 
     s"redirect to ${controllers.routes.TurnoverEstimateController.onPageLoad()} if answer is false" in {
         stubSuccessfulLogin()
         stubSuccessfulRegIdGet()
-        stubSuccessfulTxIdGet()
-        stubSuccessfulIncorpDataGet()
-        stubSuccessfulCompanyNameGet()
         stubAudits()
 
         val request = buildClient("/registration-exception").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")

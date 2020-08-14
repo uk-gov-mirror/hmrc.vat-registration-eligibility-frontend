@@ -19,14 +19,14 @@ package controllers
 import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
+import deprecated.DeprecatedConstants
 import forms.InvolvedInOtherBusinessFormProvider
 import identifiers.InvolvedInOtherBusinessId
 import javax.inject.Inject
-import models.NormalMode
 import models.requests.DataRequest
+import models.{NormalMode, Officer}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import services.IncorporationInformationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.involvedInOtherBusiness
@@ -40,36 +40,33 @@ class InvolvedInOtherBusinessController @Inject()(appConfig: FrontendAppConfig,
                                                   identify: CacheIdentifierAction,
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
-                                                  formProvider: InvolvedInOtherBusinessFormProvider,
-                                                  iiService: IncorporationInformationService) extends FrontendController with I18nSupport {
+                                                  formProvider: InvolvedInOtherBusinessFormProvider) extends FrontendController with I18nSupport {
 
 
-  private def retrieveFillingInForName(implicit request: DataRequest[_]): Future[Option[String]] =
-    iiService.getOfficerList(request.currentProfile.transactionID).map { officers =>
-      request.userAnswers.completionCapacityFillingInFor.flatMap(id => officers.find(_.generateId == id).map(_.shortName))
-    }
+  //TODO - determine if this is needed as officers won't apply to most entity types
+  private def retrieveFillingInForName(implicit request: DataRequest[_]): Option[String] = Some(DeprecatedConstants.fakeOfficerName)
+
 
   def onPageLoad() = (identify andThen getData andThen requireData).async {
     implicit request =>
-      retrieveFillingInForName.map { shortName =>
-        val preparedForm = request.userAnswers.involvedInOtherBusiness match {
-          case None => formProvider.form(shortName)
-          case Some(value) => formProvider.form(shortName).fill(value)
-        }
-        Ok(involvedInOtherBusiness(appConfig, preparedForm, NormalMode, shortName))
+      val shortName = retrieveFillingInForName
+      val preparedForm = request.userAnswers.involvedInOtherBusiness match {
+        case None => formProvider.form(shortName)
+        case Some(value) => formProvider.form(shortName).fill(value)
       }
+      Future.successful(Ok(involvedInOtherBusiness(appConfig, preparedForm, NormalMode, None)))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
-      retrieveFillingInForName.flatMap { shortName =>
-        formProvider.form(shortName).bindFromRequest().fold(
-          (formWithErrors: Form[_]) =>
-            Future.successful(BadRequest(involvedInOtherBusiness(appConfig, formWithErrors, NormalMode, shortName))),
-          (value) =>
-            dataCacheConnector.save[Boolean](request.internalId, InvolvedInOtherBusinessId.toString, value).map(cacheMap =>
-              Redirect(navigator.nextPage(InvolvedInOtherBusinessId, NormalMode)(new UserAnswers(cacheMap))))
-        )
-      }
+      val shortName = retrieveFillingInForName
+      formProvider.form(shortName).bindFromRequest().fold(
+        (formWithErrors: Form[_]) =>
+          Future.successful(BadRequest(involvedInOtherBusiness(appConfig, formWithErrors, NormalMode, None))),
+        (value) =>
+          dataCacheConnector.save[Boolean](request.internalId, InvolvedInOtherBusinessId.toString, value).map(cacheMap =>
+            Redirect(navigator.nextPage(InvolvedInOtherBusinessId, NormalMode)(new UserAnswers(cacheMap))))
+      )
+
   }
 }

@@ -23,10 +23,10 @@ import uk.gov.hmrc.time.DateTimeUtils
 import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
+import deprecated.DeprecatedConstants
 import forms.ThresholdPreviousThirtyDaysFormProvider
 import identifiers.ThresholdPreviousThirtyDaysId
 import javax.inject.Inject
-
 import models.requests.DataRequest
 import models.{ConditionalDateFormElement, NormalMode}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
@@ -34,7 +34,7 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.ThresholdService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import utils.{Navigator, UserAnswers, VATDateHelper, ThresholdHelper}
+import utils.{Navigator, ThresholdHelper, UserAnswers, VATDateHelper}
 import views.html.thresholdPreviousThirtyDays
 
 import scala.concurrent.Future
@@ -49,11 +49,7 @@ class ThresholdPreviousThirtyDaysController @Inject()(appConfig: FrontendAppConf
                                          thresholdService: ThresholdService,
                                          formProvider: ThresholdPreviousThirtyDaysFormProvider) extends FrontendController with I18nSupport {
 
-  def incorpDate(implicit request: DataRequest[_]): LocalDate = request.currentProfile.incorpDate.getOrElse(
-    throw new RuntimeException(
-      s"Trying to access post incorp page with no incorp date for txId ${request.currentProfile.transactionID} and regId ${request.currentProfile.registrationID}"
-    )
-  )
+  def incorpDate(implicit request: DataRequest[_]): LocalDate = DeprecatedConstants.fakeIncorpDate
 
   def onPageLoad() = (identify andThen getData andThen requireData) {
     implicit request =>

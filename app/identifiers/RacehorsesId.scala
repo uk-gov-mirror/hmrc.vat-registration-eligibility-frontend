@@ -17,5 +17,5 @@
 package identifiers
 
 case object RacehorsesId extends Identifier {
-  override def toString: String = "racehorses"
+  override val toString: String = "racehorses"
 }

@@ -21,6 +21,7 @@ import java.time.LocalDate
 import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
+import deprecated.DeprecatedConstants
 import forms.ThresholdInTwelveMonthsFormProvider
 import identifiers.ThresholdInTwelveMonthsId
 import javax.inject.Inject
@@ -45,11 +46,7 @@ class ThresholdInTwelveMonthsController @Inject()(appConfig: FrontendAppConfig,
                                          thresholdService: ThresholdService,
                                          formProvider: ThresholdInTwelveMonthsFormProvider) extends FrontendController with I18nSupport {
 
-  def incorpDate(implicit request: DataRequest[_]): LocalDate = request.currentProfile.incorpDate.getOrElse(
-    throw new RuntimeException(
-      s"Trying to access post incorp page with no incorp date for txId ${request.currentProfile.transactionID} and regId ${request.currentProfile.registrationID}"
-    )
-  )
+  def incorpDate(implicit request: DataRequest[_]): LocalDate = DeprecatedConstants.fakeIncorpDate
 
   def onPageLoad() = (identify andThen getData andThen requireData) {
     implicit request =>

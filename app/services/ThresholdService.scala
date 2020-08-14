@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter
 
 import config.FrontendAppConfig
 import connectors.DataCacheConnector
+import deprecated.DeprecatedConstants
 import identifiers.{ThresholdNextThirtyDaysId, VATRegistrationExceptionId, VoluntaryRegistrationId}
 import javax.inject.Inject
 import models.requests.DataRequest
@@ -41,8 +42,8 @@ trait ThresholdService extends I18nSupport {
   val appConfig: FrontendAppConfig
 
 
-      def removeVoluntaryAndNextThirtyDays(implicit request: DataRequest[_]):Future[CacheMap] = {
-        dataCacheConnector.removeEntry(request.internalId, VoluntaryRegistrationId.toString).flatMap{
+  def removeVoluntaryAndNextThirtyDays(implicit request: DataRequest[_]): Future[CacheMap] = {
+    dataCacheConnector.removeEntry(request.internalId, VoluntaryRegistrationId.toString).flatMap {
       _ => dataCacheConnector.removeEntry(request.internalId, ThresholdNextThirtyDaysId.toString)
     }
   }
@@ -65,37 +66,37 @@ trait ThresholdService extends I18nSupport {
 
   def returnHeadingTwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_]): String = {
     enum match {
-      case notIncorped() => messagesApi("threshold.headingNotIncorp", r.currentProfile.companyName)
-      case limitedIncorpedLessThan12MonthsAgo() => messagesApi("thresholdInTwelveMonths.headingIncorpLess12m", r.currentProfile.incorpDate.get.format(DateTimeFormatter.ofPattern("dd MMMM YYYY")), r.currentProfile.companyName)
-      case _ => messagesApi("thresholdInTwelveMonths.headingIncorpMore12m",r.currentProfile.companyName)
+      case notIncorped() => messagesApi("threshold.headingNotIncorp", DeprecatedConstants.fakeCompanyName)
+      case limitedIncorpedLessThan12MonthsAgo() => messagesApi("thresholdInTwelveMonths.headingIncorpLess12m", DeprecatedConstants.fakeIncorpDateMessage, DeprecatedConstants.fakeCompanyName)
+      case _ => messagesApi("thresholdInTwelveMonths.headingIncorpMore12m", DeprecatedConstants.fakeCompanyName)
     }
   }
   def returnHeadingForTwelveMonthsDateEntry(enum: ThresholdDateResult)(implicit r: DataRequest[_]): String = {
     enum match {
-      case _ => messagesApi("thresholdInTwelveMonths.heading2", r.currentProfile.companyName)
+      case _ => messagesApi("thresholdInTwelveMonths.heading2", DeprecatedConstants.fakeCompanyName)
     }
   }
 
   def returnHelpText1TwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_]): Html = {
     enum match {
       case notIncorped() => views.html.components.text("thresholdInTwelveMonths.firstHelpTextNotIncorp")
-      case limitedIncorpedLessThan12MonthsAgo() => views.html.components.text_with_multiple_variables("thresholdInTwelveMonths.firstHelpTextIncorpLess12m",r.currentProfile.incorpDate.get.format(DateTimeFormatter.ofPattern("dd MMMM YYYY")), r.currentProfile.companyName)
-      case _ => views.html.components.text_with_variables("thresholdInTwelveMonths.firstHelpTextIncorpMore12m",r.currentProfile.companyName)
+      case limitedIncorpedLessThan12MonthsAgo() => views.html.components.text_with_multiple_variables("thresholdInTwelveMonths.firstHelpTextIncorpLess12m", DeprecatedConstants.fakeIncorpDateMessage, DeprecatedConstants.fakeCompanyName)
+      case _ => views.html.components.text_with_variables("thresholdInTwelveMonths.firstHelpTextIncorpMore12m", DeprecatedConstants.fakeCompanyName)
     }
   }
 
   def returnHelpText2TwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_]): Html = {
     enum match {
       case limitedIncorpedLessThan12MonthsAgo() => Html("")
-      case limitedIncorpedEqualOrAfter20170401() => views.html.components.text_with_variables("thresholdInTwelveMonths.over85kThreshold", r.currentProfile.companyName)
+      case limitedIncorpedEqualOrAfter20170401() => views.html.components.text_with_variables("thresholdInTwelveMonths.over85kThreshold", DeprecatedConstants.fakeCompanyName)
       case limitedIncorpedTaxYear2016to2017() => HtmlFormat.fill(
-        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overEitherOtherThresholds", r.currentProfile.companyName),
+        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overEitherOtherThresholds", DeprecatedConstants.fakeCompanyName),
           views.html.components.text_with_bullets("", Seq("thresholdInTwelveMonths.bullet1", "thresholdInTwelveMonths.bullet2"))))
       case limitedIncorpedTaxYear2015to2016() => HtmlFormat.fill(
-        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overAnyOtherThresholds", r.currentProfile.companyName),
+        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overAnyOtherThresholds", DeprecatedConstants.fakeCompanyName),
           views.html.components.text_with_bullets("", Seq("thresholdInTwelveMonths.bullet1", "thresholdInTwelveMonths.bullet2", "thresholdInTwelveMonths.bullet3"))))
       case _ => HtmlFormat.fill(
-        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overAnyOtherThresholds", r.currentProfile.companyName),
+        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overAnyOtherThresholds", DeprecatedConstants.fakeCompanyName),
           views.html.components.text_with_bullets("", Seq("thresholdInTwelveMonths.bullet1", "thresholdInTwelveMonths.bullet2", "thresholdInTwelveMonths.bullet3")),
           views.html.components.text_with_link("thresholdInTwelveMonths.beforeLinkText2", "thresholdInTwelveMonths.linkText2", appConfig.VATNotice700_1supplementURL, Some("."))))
     }
@@ -103,8 +104,8 @@ trait ThresholdService extends I18nSupport {
 
   def returnHeadingPrevious(enum: ThresholdDateResult)(implicit r:DataRequest[_]): String = {
     enum match {
-      case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo())  => messagesApi("thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17", r.currentProfile.companyName)
-      case _                                      => messagesApi("thresholdPreviousThirtyDays.heading", r.currentProfile.companyName)
+      case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo())  => messagesApi("thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17", DeprecatedConstants.fakeCompanyName)
+      case _                                      => messagesApi("thresholdPreviousThirtyDays.heading", DeprecatedConstants.fakeCompanyName)
     }
   }
   def returnHelpText1Previous(enum: ThresholdDateResult)(implicit r:DataRequest[_]): Html = {
@@ -121,8 +122,8 @@ trait ThresholdService extends I18nSupport {
   }
 
   def returnThresholdDateResult[T](f: ThresholdDateResult => T)(implicit request: DataRequest[_]): T = {
-    val res = request.currentProfile.incorpDate match {
-      case None                                                       => notIncorped()
+    val res = Option(DeprecatedConstants.fakeIncorpDate) match { //TODO - Option to allow the match to compile, but will never hit the none route
+      case None                                                       => notIncorped() //TODO - Is this needed still?
       case Some(d) if VATDateHelper.lessThan12Months(d)               => limitedIncorpedLessThan12MonthsAgo()
       case Some(d) if VATDateHelper.dateEqualOrAfter201741(d)         => limitedIncorpedEqualOrAfter20170401()
       case Some(d) if VATDateHelper.dateBefore201741After2016331(d)   => limitedIncorpedTaxYear2016to2017()

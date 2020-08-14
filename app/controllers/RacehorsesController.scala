@@ -25,20 +25,23 @@ import javax.inject.Inject
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
+import services.VatRegistrationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.racehorses
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RacehorsesController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: RacehorsesFormProvider) extends FrontendController with I18nSupport {
+                                     override val messagesApi: MessagesApi,
+                                     dataCacheConnector: DataCacheConnector,
+                                     navigator: Navigator,
+                                     identify: CacheIdentifierAction,
+                                     getData: DataRetrievalAction,
+                                     requireData: DataRequiredAction,
+                                     formProvider: RacehorsesFormProvider,
+                                     vatRegistrationService: VatRegistrationService) extends FrontendController with I18nSupport {
+  val frontendUrl       = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
 
   val form: Form[Boolean] = formProvider()
 
@@ -57,8 +60,10 @@ class RacehorsesController @Inject()(appConfig: FrontendAppConfig,
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(racehorses(appConfig, formWithErrors, NormalMode))),
         (value) =>
-          dataCacheConnector.save[Boolean](request.internalId, RacehorsesId.toString, value).map(cacheMap =>
-            Redirect(navigator.nextPage(RacehorsesId, NormalMode)(new UserAnswers(cacheMap))))
+          dataCacheConnector.save[Boolean](request.internalId, RacehorsesId.toString, value).flatMap(_ =>
+            vatRegistrationService.submitEligibility(request.internalId)(hc, implicitly[ExecutionContext], request)
+              .map(_ => Redirect(frontendUrl))
+          )
       )
   }
 }

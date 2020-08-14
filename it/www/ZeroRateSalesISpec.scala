@@ -14,9 +14,6 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
     "navigate to Agriculture when false and no data exists in Exemption" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
-      stubSuccessfulTxIdGet()
-      stubSuccessfulIncorpDataGet()
-      stubSuccessfulCompanyNameGet()
       stubAudits()
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
@@ -31,9 +28,6 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
     "navigate to Agriculture when false and data exists for Exemption" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
-      stubSuccessfulTxIdGet()
-      stubSuccessfulCompanyNameGet()
-      stubSuccessfulIncorpDataGet()
       stubAudits()
       cacheSessionData(internalId, VATExemptionId.toString, true)
 
@@ -51,9 +45,6 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
     "navigate to VAT Exemption when true and no Agriculture data" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
-      stubSuccessfulTxIdGet()
-      stubSuccessfulCompanyNameGet()
-      stubSuccessfulIncorpDataGet()
       stubAudits()
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
@@ -69,9 +60,6 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
     "navigate to VAT Exemption when true and Agriculture data exists" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
-      stubSuccessfulTxIdGet()
-      stubSuccessfulCompanyNameGet()
-      stubSuccessfulIncorpDataGet()
       stubAudits()
       cacheSessionData(internalId, AgriculturalFlatRateSchemeId.toString, true)
 

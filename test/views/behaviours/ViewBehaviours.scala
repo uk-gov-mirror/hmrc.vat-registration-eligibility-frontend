@@ -16,6 +16,7 @@
 
 package views.behaviours
 
+import deprecated.DeprecatedConstants
 import play.twirl.api.HtmlFormat
 import views.ViewSpecBase
 
@@ -41,7 +42,7 @@ trait ViewBehaviours extends ViewSpecBase {
 
         "display the correct page heading" in {
           val doc = asDocument(view())
-          assertPageTitleEqualsMessage(doc, s"$messageKeyPrefix.heading", "Test Company")
+          assertPageTitleEqualsMessage(doc, s"$messageKeyPrefix.heading", DeprecatedConstants.fakeCompanyName)
         }
 
         "display the correct guidance" in {

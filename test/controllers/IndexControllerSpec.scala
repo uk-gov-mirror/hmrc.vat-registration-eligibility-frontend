@@ -22,7 +22,7 @@ import utils.FakeNavigator
 class IndexControllerSpec extends ControllerSpecBase {
 
   class Setup {
-    val controller = new IndexController(frontendAppConfig, messagesApi, new FakeNavigator(desiredRoute = routes.ApplicantUKNinoController.onPageLoad()))
+    val controller = new IndexController(frontendAppConfig, messagesApi, new FakeNavigator(desiredRoute = routes.ThresholdInTwelveMonthsController.onPageLoad()))
   }
   "Index Controller" must {
     "return 200 for a GET" in new Setup {
