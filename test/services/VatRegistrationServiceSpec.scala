@@ -109,7 +109,6 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
       s"$TurnoverEstimateId" -> Json.obj("selection" -> JsString("oneandtenthousand")),
       s"$InternationalActivitiesId" -> JsBoolean(false),
       s"$InvolvedInOtherBusinessId" -> JsBoolean(false),
-      s"$AnnualAccountingSchemeId" -> JsBoolean(false),
       s"$VoluntaryRegistrationId" -> JsBoolean(true),
       s"$VATExemptionId" -> JsBoolean(false),
       s"$ZeroRatedSalesId" -> JsBoolean(true),
@@ -131,13 +130,12 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
           | {"title":"Special situations",
           | "data":[{"questionId":"internationalActivities","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"involvedInOtherBusiness","question":"mocked message","answer":"mocked message","answerValue":false},
-          | {"questionId":"annualAccountingScheme","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"zeroRatedSales","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"vatExemption","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"agriculturalFlatRateScheme","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"racehorses","question":"mocked message","answer":"mocked message","answerValue":false}
           |]}]}
-      |""".stripMargin)
+          |""".stripMargin)
     }
   }
 }
