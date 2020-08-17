@@ -41,9 +41,6 @@ POST       /cant-register                               controllers.EligibilityD
 GET        /international-business                      controllers.InternationalActivitiesController.onPageLoad()
 POST       /international-business                      controllers.InternationalActivitiesController.onSubmit()
 
-GET        /annual-accounting                           controllers.AnnualAccountingSchemeController.onPageLoad()
-POST       /annual-accounting                           controllers.AnnualAccountingSchemeController.onSubmit()
-
 GET        /zero-rated-sales                            controllers.ZeroRatedSalesController.onPageLoad()
 POST       /zero-rated-sales                            controllers.ZeroRatedSalesController.onSubmit()
 

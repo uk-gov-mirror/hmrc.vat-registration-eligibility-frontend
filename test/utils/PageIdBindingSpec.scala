@@ -25,7 +25,7 @@ import scala.collection.immutable
 import scala.collection.immutable.ListMap
 
 class PageIdBindingSpec extends PlaySpec {
-  val fullListMapHappyPathTwelveMonthsFalse:ListMap[String,JsValue] = ListMap[String, JsValue](
+  val fullListMapHappyPathTwelveMonthsFalse: ListMap[String, JsValue] = ListMap[String, JsValue](
     "" -> JsString(""),
     s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
     s"$ThresholdNextThirtyDaysId" -> JsBoolean(true),
@@ -34,7 +34,6 @@ class PageIdBindingSpec extends PlaySpec {
     s"$TurnoverEstimateId" -> Json.obj("selection" -> JsString("oneandtenthousand")),
     s"$InternationalActivitiesId" -> JsBoolean(false),
     s"$InvolvedInOtherBusinessId" -> JsBoolean(false),
-    s"$AnnualAccountingSchemeId" -> JsBoolean(false),
     s"$VoluntaryRegistrationId" -> JsBoolean(true),
     s"$VATExemptionId" -> JsBoolean(false),
     s"$VATRegistrationExceptionId" -> JsBoolean(false),
@@ -48,11 +47,11 @@ class PageIdBindingSpec extends PlaySpec {
       }
       mockedReturn + currentItem
   }
-  val listMapWithoutFieldsToBeTested = fullListMapHappyPathTwelveMonthsFalse.filterNot{ s =>
+  val listMapWithoutFieldsToBeTested = fullListMapHappyPathTwelveMonthsFalse.filterNot { s =>
     s._1 match {
       case x if x == ThresholdInTwelveMonthsId.toString || x == ThresholdNextThirtyDaysId.toString ||
-           x == ThresholdPreviousThirtyDaysId.toString || x == VoluntaryRegistrationId.toString ||
-           x == VATExemptionId.toString || x == ZeroRatedSalesId.toString || x == VATRegistrationExceptionId.toString => true
+        x == ThresholdPreviousThirtyDaysId.toString || x == VoluntaryRegistrationId.toString ||
+        x == VATExemptionId.toString || x == ZeroRatedSalesId.toString || x == VATRegistrationExceptionId.toString => true
       case _ => false
     }
   }
