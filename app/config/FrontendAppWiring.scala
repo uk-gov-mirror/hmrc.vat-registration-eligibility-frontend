@@ -16,6 +16,7 @@
 
 package config
 
+import akka.actor.ActorSystem
 import com.typesafe.config.{Config, ConfigFactory}
 import javax.inject.Inject
 import org.slf4j.{Logger, LoggerFactory}
@@ -40,7 +41,7 @@ trait WSHttp extends
   HttpPost with WSPost with
   HttpDelete with WSDelete with Hooks
 
-class Http @Inject()(config: FrontendAppConfig, frontendAuditConnector: FrontendAuditConnector) extends WSHttp {
+class Http @Inject()(config: FrontendAppConfig, frontendAuditConnector: FrontendAuditConnector, val actorSystem: ActorSystem) extends WSHttp {
   override val auditConnector = frontendAuditConnector
   override def appName = config.getString("appName")
   override val hooks   = Seq(AuditingHook)

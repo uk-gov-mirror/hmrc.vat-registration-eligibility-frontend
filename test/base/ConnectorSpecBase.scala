@@ -47,7 +47,7 @@ trait ConnectorSpecBase extends CommonSpecBase with MockitoSugar {
   }
 
   def mockPatch[T](url: String, status: Int, body: Option[JsValue] = None) = {
-    when(mockWSHttp.PATCH[T, HttpResponse](Matchers.eq(url), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
+    when(mockWSHttp.PATCH[T, HttpResponse](Matchers.eq(url), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(HttpResponse(status, body)))
   }
 
@@ -65,6 +65,6 @@ trait ConnectorSpecBase extends CommonSpecBase with MockitoSugar {
   }
 
   def verifyPatchCalled[T, O](url: String, count: Int = 1) = {
-    verify(mockWSHttp, times(count)).PATCH[Option[T], O](Matchers.eq(url), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())
+    verify(mockWSHttp, times(count)).PATCH[Option[T], O](Matchers.eq(url), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())
   }
 }
