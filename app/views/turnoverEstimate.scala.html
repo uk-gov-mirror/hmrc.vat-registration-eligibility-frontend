@@ -21,6 +21,7 @@
 @import models.Mode
 @import models.requests.DataRequest
 
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @hiddenContent = {
@@ -44,7 +45,7 @@
 
         @components.error_summary(form.errors)
 
-        <h1 class="heading-large" id="main-heading">@messages("turnoverEstimate.heading",request.currentProfile.companyName)</h1>
+        <h1 class="heading-large" id="main-heading">@messages("turnoverEstimate.heading",DeprecatedConstants.fakeCompanyName)</h1>
 
         @components.text("turnoverEstimate.text")
 

@@ -51,7 +51,9 @@ class NavigatorSpec extends SpecBase with MockitoSugar {
 
     "redirect to the start of the VAT EL Flow" when {
       "given an invalid ID" in {
-        val fakeId = new Identifier { override def toString :String = "fudge" }
+        val fakeId = new Identifier {
+          override def toString: String = "fudge"
+        }
         navigator.pageIdToPageLoad(fakeId).url mustBe routes.ThresholdNextThirtyDaysController.onPageLoad().url
       }
     }
@@ -60,8 +62,8 @@ class NavigatorSpec extends SpecBase with MockitoSugar {
   "next on" should {
     "return and id and call" when {
       "true is passed in" in {
-        val data = new UserAnswers(CacheMap("some-id", Map(AnnualAccountingSchemeId.toString -> JsBoolean(true))))
-        val result  = navigator.nextOn(true, AnnualAccountingSchemeId, AgriculturalFlatRateSchemeId, EligibilityDropoutId("mode"))
+        val data = new UserAnswers(CacheMap("some-id", Map(ZeroRatedSalesId.toString -> JsBoolean(true))))
+        val result = navigator.nextOn(true, ZeroRatedSalesId, AgriculturalFlatRateSchemeId, EligibilityDropoutId("mode"))
         result._2(data) mustBe controllers.routes.AgriculturalFlatRateSchemeController.onPageLoad()
       }
     }

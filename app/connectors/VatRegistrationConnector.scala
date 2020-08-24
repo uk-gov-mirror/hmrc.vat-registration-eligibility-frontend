@@ -19,12 +19,12 @@ package connectors
 import config.{FrontendAppConfig, WSHttp}
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import uk.gov.hmrc.http._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class VatRegistrationConnectorImpl @Inject()(val http : WSHttp,
+class VatRegistrationConnectorImpl @Inject()(val http: WSHttp,
                                              val servicesConfig: FrontendAppConfig) extends VatRegistrationConnector {
   override val vatRegistrationUrl: String = servicesConfig.baseUrl("vat-registration")
   override val vatRegistrationUri: String =
@@ -32,11 +32,19 @@ class VatRegistrationConnectorImpl @Inject()(val http : WSHttp,
 }
 
 trait VatRegistrationConnector {
-  val http : CoreGet with CorePost with WSHttp
-  val vatRegistrationUrl : String
-  val vatRegistrationUri : String
+  val http: CoreGet with CorePost with WSHttp
+  val vatRegistrationUrl: String
+  val vatRegistrationUri: String
 
-  def saveEligibility(regId: String, eligibility : JsValue)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[JsValue] = {
+  def getRegistrationId()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[String] = {
+    http.GET[JsObject](s"$vatRegistrationUrl$vatRegistrationUri/scheme").recover {
+      case e => throw logResponse(e, "createNewRegistration")
+    }.map {
+      json => (json \ "registrationId").as[String]
+    }
+  }
+
+  def saveEligibility(regId: String, eligibility: JsValue)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[JsValue] = {
     http.PATCH[JsValue, HttpResponse](s"$vatRegistrationUrl$vatRegistrationUri/$regId/eligibility-data", eligibility).map(_.json) recover {
       case e: NotFoundException => Logger.error(s"[VatRegistrationConnector][saveEligibility] No vat registration found for regId: $regId")
         throw e

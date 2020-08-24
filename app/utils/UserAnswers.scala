@@ -22,8 +22,6 @@ import play.api.libs.json.{JsValue, Reads}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
-  def applicantUKNino: Option[ConditionalNinoFormElement] = cacheMap.getEntry[ConditionalNinoFormElement](ApplicantUKNinoId.toString)
-
   def racehorses: Option[Boolean] = cacheMap.getEntry[Boolean](RacehorsesId.toString)
 
   def agriculturalFlatRateScheme: Option[Boolean] = cacheMap.getEntry[Boolean](AgriculturalFlatRateSchemeId.toString)
@@ -34,15 +32,9 @@ class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
 
   def zeroRatedSales: Option[Boolean] = cacheMap.getEntry[Boolean](ZeroRatedSalesId.toString)
 
-  def annualAccountingScheme: Option[Boolean] = cacheMap.getEntry[Boolean](AnnualAccountingSchemeId.toString)
-
   def internationalActivities: Option[Boolean] = cacheMap.getEntry[Boolean](InternationalActivitiesId.toString)
 
   def involvedInOtherBusiness: Option[Boolean] = cacheMap.getEntry[Boolean](InvolvedInOtherBusinessId.toString)
-
-  def completionCapacityFillingInFor: Option[String] = cacheMap.getEntry[String](CompletionCapacityFillingInForId.toString)
-
-  def completionCapacity: Option[String] = cacheMap.getEntry[String](CompletionCapacityId.toString)
 
   def turnoverEstimate: Option[TurnoverEstimateFormElement] = cacheMap.getEntry[TurnoverEstimateFormElement](TurnoverEstimateId.toString)
 
@@ -55,6 +47,7 @@ class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
   def thresholdNextThirtyDays: Option[Boolean] = cacheMap.getEntry[Boolean](ThresholdNextThirtyDaysId.toString)
 
   def getAnswer[T](id: Identifier)(implicit reads: Reads[T]): Option[T] = cacheMap.getEntry[T](id.toString)
+
   def getAnswerFromIdString[T](id: String)(implicit reads: Reads[T]): Option[JsValue] = cacheMap.getEntry[JsValue](id)
 
   def getAnswerBoolean(id: Identifier): Option[Boolean] = cacheMap.getEntry[Boolean](id.toString)

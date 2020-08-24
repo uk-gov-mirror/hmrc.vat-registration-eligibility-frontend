@@ -21,30 +21,24 @@ import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsBoolean, JsString, JsValue, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
+import scala.collection.immutable
 import scala.collection.immutable.ListMap
 
 class PageIdBindingSpec extends PlaySpec {
-  val fullListMapHappyPathTwelveMonthsFalse:ListMap[String,JsValue] = ListMap[String, JsValue](
+  val fullListMapHappyPathTwelveMonthsFalse: ListMap[String, JsValue] = ListMap[String, JsValue](
     "" -> JsString(""),
     s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
     s"$ThresholdNextThirtyDaysId" -> JsBoolean(true),
     s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
     s"$VoluntaryRegistrationId" -> JsBoolean(true),
     s"$TurnoverEstimateId" -> Json.obj("selection" -> JsString("oneandtenthousand")),
-    s"$CompletionCapacityId" -> JsString("noneOfThese"),
-    s"$CompletionCapacityFillingInForId" -> JsString("wellMr"),
     s"$InternationalActivitiesId" -> JsBoolean(false),
     s"$InvolvedInOtherBusinessId" -> JsBoolean(false),
-    s"$AnnualAccountingSchemeId" -> JsBoolean(false),
     s"$VoluntaryRegistrationId" -> JsBoolean(true),
     s"$VATExemptionId" -> JsBoolean(false),
     s"$VATRegistrationExceptionId" -> JsBoolean(false),
     s"$AgriculturalFlatRateSchemeId" -> JsBoolean(false),
-    s"$RacehorsesId" -> JsBoolean(false),
-    s"$ApplicantUKNinoId" -> Json.obj(
-      "value" -> JsBoolean(true),
-      "optionalData" -> JsString("nino-fake-not-real")
-    )
+    s"$RacehorsesId" -> JsBoolean(false)
   )
   fullListMapHappyPathTwelveMonthsFalse.foldLeft(Map[String, JsValue]()) {
     case (mockedReturn, currentItem) =>
@@ -53,11 +47,11 @@ class PageIdBindingSpec extends PlaySpec {
       }
       mockedReturn + currentItem
   }
-  val listMapWithoutFieldsToBeTested = fullListMapHappyPathTwelveMonthsFalse.filterNot{ s =>
+  val listMapWithoutFieldsToBeTested = fullListMapHappyPathTwelveMonthsFalse.filterNot { s =>
     s._1 match {
       case x if x == ThresholdInTwelveMonthsId.toString || x == ThresholdNextThirtyDaysId.toString ||
-           x == ThresholdPreviousThirtyDaysId.toString || x == VoluntaryRegistrationId.toString ||
-           x == VATExemptionId.toString || x == ZeroRatedSalesId.toString || x == VATRegistrationExceptionId.toString => true
+        x == ThresholdPreviousThirtyDaysId.toString || x == VoluntaryRegistrationId.toString ||
+        x == VATExemptionId.toString || x == ZeroRatedSalesId.toString || x == VATRegistrationExceptionId.toString => true
       case _ => false
     }
   }

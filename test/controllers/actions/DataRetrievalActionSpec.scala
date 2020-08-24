@@ -34,7 +34,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
     def callTransform[A](request: CacheIdentifierRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
-  val testProfile = CurrentProfile("regId", "txId", None,"Company Name")
+  val testProfile = CurrentProfile("regId")
 
   "Data Retrieval Action" when {
     "there is no data in the cache" must {

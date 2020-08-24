@@ -45,13 +45,9 @@ class Module extends AbstractModule {
     bind(classOf[FeatureSwitchController]).to(classOf[FeatureSwitchControllerImpl]).asEagerSingleton()
 
     //connectors
-    bind(classOf[IncorporationInformationConnector]).to(classOf[IncorporationInformationConnectorImpl]).asEagerSingleton()
-    bind(classOf[BusinessRegistrationConnector]).to(classOf[BusinessRegistrationConnectorImpl]).asEagerSingleton()
-    bind(classOf[CompanyRegistrationConnector]).to(classOf[CompanyRegistrationConnectorImpl]).asEagerSingleton()
     bind(classOf[VatRegistrationConnector]).to(classOf[VatRegistrationConnectorImpl]).asEagerSingleton()
 
     //services
-    bind(classOf[IncorporationInformationService]).to(classOf[IncorporationInformationServiceImpl]).asEagerSingleton()
     bind(classOf[VatRegistrationService]).to(classOf[VatRegistrationServiceImpl]).asEagerSingleton()
     bind(classOf[CurrentProfileService]).to(classOf[CurrentProfileServiceImpl]).asEagerSingleton()
     bind(classOf[ThresholdService]).to(classOf[ThresholdServiceImpl]).asEagerSingleton()

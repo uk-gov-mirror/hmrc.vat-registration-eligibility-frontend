@@ -17,6 +17,7 @@
 package views
 
 import controllers.routes
+import deprecated.DeprecatedConstants
 import forms.ZeroRatedSalesFormProvider
 import models.NormalMode
 import play.api.data.Form
@@ -24,7 +25,7 @@ import views.behaviours.YesNoViewBehaviours
 import views.html.zeroRatedSales
 
 class ZeroRatedSalesViewSpec extends YesNoViewBehaviours {
-  override val extraParamForLegend: String = "Test Company"
+  override val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
 
   val messageKeyPrefix = "zeroRatedSales"
 

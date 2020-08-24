@@ -21,14 +21,21 @@ import controllers.actions._
 import forms.RacehorsesFormProvider
 import identifiers.RacehorsesId
 import models.NormalMode
+import models.requests.DataRequest
+import org.mockito.Matchers
+import org.scalatest.mockito.MockitoSugar
 import play.api.data.Form
-import play.api.libs.json.JsBoolean
+import play.api.libs.json.{JsBoolean, JsValue, Json}
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
 import views.html.racehorses
+import org.mockito.Mockito._
 
-class RacehorsesControllerSpec extends ControllerSpecBase {
+import scala.concurrent.{ExecutionContext, Future}
+
+class RacehorsesControllerSpec extends ControllerSpecBase with MockitoSugar{
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
@@ -37,7 +44,7 @@ class RacehorsesControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new RacehorsesController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+      dataRetrievalAction, new DataRequiredActionImpl, formProvider, mockVRService)
 
   def viewAsString(form: Form[_] = form) = racehorses(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
 
@@ -61,11 +68,13 @@ class RacehorsesControllerSpec extends ControllerSpecBase {
 
     "redirect to the next page when valid data is submitted" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
+      when(mockVRService.submitEligibility(Matchers.any[String])(Matchers.any[HeaderCarrier], Matchers.any[ExecutionContext], Matchers.any[DataRequest[_]]))
+        .thenReturn(Future.successful(Json.obj()))
 
       val result = controller().onSubmit()(postRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      redirectLocation(result) mustBe Some("http://localhost:9895/register-for-vat/changed-name") //TODO - check if this can be retrieved from somewhere
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {

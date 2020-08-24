@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions._
-import identifiers.{AgriculturalFlatRateSchemeId, ApplicantUKNinoId, InternationalActivitiesId}
+import identifiers.{AgriculturalFlatRateSchemeId, InternationalActivitiesId}
 import play.api.test.Helpers._
 import views.html.{agriculturalDropout, eligibilityDropout, internationalActivityDropout}
 
@@ -39,13 +39,6 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase {
 
       status(result) mustBe OK
       contentAsString(result) mustBe viewAsString(default = true)
-    }
-
-    "return OK and the Nino Dropout view for a GET" in {
-      val result = controller().onPageLoad(ApplicantUKNinoId.toString)(fakeRequest)
-
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString(default = false)
     }
 
     "return OK and the International Dropout view for a GET" in {

@@ -21,6 +21,7 @@
 @import utils.FormHelpers
 @import models.requests.DataRequest
 
+@import deprecated.DeprecatedConstants
 @(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
 
 @main_template(
@@ -34,8 +35,8 @@
 
         @components.error_summary(form.errors)
 
-        <h1 class="heading-large" id="main-heading">@messages("racehorses.heading", request.currentProfile.companyName)</h1>
-        <p id="help-text">@messages("racehorses.bulletText",request.currentProfile.companyName)</p>
+        <h1 class="heading-large" id="main-heading">@messages("racehorses.heading", DeprecatedConstants.fakeCompanyName)</h1>
+        <p id="help-text">@messages("racehorses.bulletText",DeprecatedConstants.fakeCompanyName)</p>
 
 
         @components.text_with_bullets("",Seq("racehorses.bullet1","racehorses.bullet2"))
@@ -49,7 +50,7 @@
         radioAdditionalInfo = Map(),
         '_labelAfter -> true,
         '_labelClass -> "block-label",
-        '_legend -> messages("racehorses.heading", request.currentProfile.companyName),
+        '_legend -> messages("racehorses.heading", DeprecatedConstants.fakeCompanyName),
         '_legendClass -> "visually-hidden"
         )
 

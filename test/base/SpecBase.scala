@@ -16,8 +16,6 @@
 
 package base
 
-import java.time.LocalDate
-
 import config.FrontendAppConfig
 import models.CurrentProfile
 import models.requests.{CacheIdentifierRequest, DataRequest}
@@ -37,14 +35,17 @@ trait SpecBase extends CommonSpecBase with GuiceOneAppPerSuite {
   def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   def fakeRequest = FakeRequest("", "")
-  def fakeDataRequestIncorped = new DataRequest(fakeRequest,"1",CurrentProfile("foo","bar",Some(LocalDate.of(2018,9,24)), "Test Company"), new UserAnswers((CacheMap("1",Map()))))
-  def fakeDataRequestIncorpedOver12m = new DataRequest(fakeRequest,"1",CurrentProfile("foo","bar",Some(LocalDate.of(2016,9,24)), "Test Company"), new UserAnswers((CacheMap("1",Map()))))
 
-  def fakeDataRequest = new DataRequest(fakeRequest,"1",CurrentProfile("foo","bar",Some(LocalDate.of(2016,10,1)), "Test Company"), new UserAnswers((CacheMap("1",Map()))))
+  def fakeDataRequestIncorped = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers((CacheMap("1", Map()))))
 
-  def fakeCacheDataRequestIncorped = new CacheIdentifierRequest(fakeRequest,"1",CurrentProfile("foo","bar",Some(LocalDate.of(2018,9,24)), "Test Company"))
+  def fakeDataRequestIncorpedOver12m = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers((CacheMap("1", Map()))))
+
+  def fakeDataRequest = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers(CacheMap("1", Map())))
+
+  def fakeCacheDataRequestIncorped = new CacheIdentifierRequest(fakeRequest, "1", CurrentProfile("foo"))
 
 
   def messages: Messages = messagesApi.preferred(fakeRequest)
+
   def messagesIncorped: Messages = messagesApi.preferred(fakeDataRequestIncorped)
 }
