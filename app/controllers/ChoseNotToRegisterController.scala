@@ -24,13 +24,13 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.choseNotToRegister
 
-class ChoseNotToRegisterController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         identify: CacheIdentifierAction) extends FrontendController with I18nSupport {
+class ChoseNotToRegisterController @Inject()(override val messagesApi: MessagesApi,
+                                             identify: CacheIdentifierAction
+                                            )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad = (identify) {
     implicit request =>
-      Ok(choseNotToRegister(appConfig))
+      Ok(choseNotToRegister())
   }
 
   def onSubmit: Action[AnyContent] = Action { implicit request =>

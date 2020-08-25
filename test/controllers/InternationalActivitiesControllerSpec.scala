@@ -34,12 +34,13 @@ class InternationalActivitiesControllerSpec extends ControllerSpecBase {
 
   val formProvider = new InternationalActivitiesFormProvider()
   val form = formProvider()
+  implicit val appConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new InternationalActivitiesController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new InternationalActivitiesController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = internationalActivities(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
+  def viewAsString(form: Form[_] = form) = internationalActivities(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "InternationalActivities Controller" must {
 

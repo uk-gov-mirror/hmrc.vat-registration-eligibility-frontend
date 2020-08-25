@@ -16,16 +16,17 @@
 
 package views
 
-import views.behaviours.ViewBehaviours
+import views.newbehaviours.ViewBehaviours
 import views.html.applyInWriting
 
 class ApplyInWritingViewSpec extends ViewBehaviours {
 
   val messageKeyPrefix = "applyInWriting"
+  implicit val msgs = messages
 
-  def createView = () => applyInWriting(frontendAppConfig)(fakeRequest, messages)
+  def createView = () => applyInWriting()(fakeRequest, messages, frontendAppConfig)
 
   "ApplyInWriting view" must {
-    behave like normalPage(createView, messageKeyPrefix)
+    behave like normalPage(createView(), messageKeyPrefix)
   }
 }

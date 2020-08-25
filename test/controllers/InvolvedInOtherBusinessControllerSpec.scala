@@ -34,6 +34,7 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
 
   val formProvider = new InvolvedInOtherBusinessFormProvider()
   val form = formProvider.form()
+  implicit val appConfig = frontendAppConfig
 
   val officersList: Seq[Officer] = Seq(
     Officer(Name(Some("First"), Some("Middle"), "Last",Some("Mrs")),"director", None, Some("some-url")),
@@ -41,10 +42,10 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
   )
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new InvolvedInOtherBusinessController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new InvolvedInOtherBusinessController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form, officer: Option[String] = None) = involvedInOtherBusiness(frontendAppConfig, form, NormalMode, officer)(fakeRequest, messages).toString
+  def viewAsString(form: Form[_] = form, officer: Option[String] = None) = involvedInOtherBusiness(form, NormalMode, officer)(fakeRequest, messages, frontendAppConfig).toString
 
   "InvolvedInOtherBusiness Controller" must {
     "return OK and the correct view for a GET" in {

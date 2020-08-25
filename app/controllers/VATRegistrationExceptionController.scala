@@ -31,14 +31,14 @@ import views.html.vatRegistrationException
 
 import scala.concurrent.Future
 
-class VATRegistrationExceptionController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: VATRegistrationExceptionFormProvider) extends FrontendController with I18nSupport {
+class VATRegistrationExceptionController @Inject()(override val messagesApi: MessagesApi,
+                                                   dataCacheConnector: DataCacheConnector,
+                                                   navigator: Navigator,
+                                                   identify: CacheIdentifierAction,
+                                                   getData: DataRetrievalAction,
+                                                   requireData: DataRequiredAction,
+                                                   formProvider: VATRegistrationExceptionFormProvider
+                                                  )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 
@@ -48,14 +48,14 @@ class VATRegistrationExceptionController @Inject()(appConfig: FrontendAppConfig,
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(vatRegistrationException(appConfig, preparedForm, NormalMode))
+      Ok(vatRegistrationException(preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(vatRegistrationException(appConfig, formWithErrors, NormalMode))),
+          Future.successful(BadRequest(vatRegistrationException(formWithErrors, NormalMode))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, VATRegistrationExceptionId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(VATRegistrationExceptionId, NormalMode)(new UserAnswers(cacheMap))))

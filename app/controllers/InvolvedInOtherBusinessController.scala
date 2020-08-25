@@ -33,14 +33,14 @@ import views.html.involvedInOtherBusiness
 
 import scala.concurrent.Future
 
-class InvolvedInOtherBusinessController @Inject()(appConfig: FrontendAppConfig,
-                                                  override val messagesApi: MessagesApi,
+class InvolvedInOtherBusinessController @Inject()(override val messagesApi: MessagesApi,
                                                   dataCacheConnector: DataCacheConnector,
                                                   navigator: Navigator,
                                                   identify: CacheIdentifierAction,
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
-                                                  formProvider: InvolvedInOtherBusinessFormProvider) extends FrontendController with I18nSupport {
+                                                  formProvider: InvolvedInOtherBusinessFormProvider
+                                                 )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
 
   //TODO - determine if this is needed as officers won't apply to most entity types
@@ -54,7 +54,7 @@ class InvolvedInOtherBusinessController @Inject()(appConfig: FrontendAppConfig,
         case None => formProvider.form(shortName)
         case Some(value) => formProvider.form(shortName).fill(value)
       }
-      Future.successful(Ok(involvedInOtherBusiness(appConfig, preparedForm, NormalMode, None)))
+      Future.successful(Ok(involvedInOtherBusiness(preparedForm, NormalMode, None)))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
@@ -62,7 +62,7 @@ class InvolvedInOtherBusinessController @Inject()(appConfig: FrontendAppConfig,
       val shortName = retrieveFillingInForName
       formProvider.form(shortName).bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(involvedInOtherBusiness(appConfig, formWithErrors, NormalMode, None))),
+          Future.successful(BadRequest(involvedInOtherBusiness(formWithErrors, NormalMode, None))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, InvolvedInOtherBusinessId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(InvolvedInOtherBusinessId, NormalMode)(new UserAnswers(cacheMap))))

@@ -31,9 +31,9 @@ class ZeroRatedSalesViewSpec extends YesNoViewBehaviours {
 
   val form = new ZeroRatedSalesFormProvider()()
 
-  def createView = () => zeroRatedSales(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createView = () => zeroRatedSales(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => zeroRatedSales(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createViewUsingForm = (form: Form[_]) => zeroRatedSales(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "ZeroRatedSales view" must {
 

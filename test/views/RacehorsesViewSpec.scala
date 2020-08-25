@@ -31,14 +31,12 @@ class RacehorsesViewSpec extends YesNoViewBehaviours {
 
   val form = new RacehorsesFormProvider()()
 
-  def createView = () => racehorses(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createView = () => racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => racehorses(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createViewUsingForm = (form: Form[_]) => racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "Racehorses view" must {
-
     behave like normalPage(createView, messageKeyPrefix)
-
     behave like yesNoPage(createViewUsingForm, messageKeyPrefix, routes.RacehorsesController.onSubmit().url)
   }
 }

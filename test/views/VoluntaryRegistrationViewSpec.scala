@@ -31,9 +31,9 @@ class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
 
   val form = new VoluntaryRegistrationFormProvider()()
 
-  def createView = () => voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createView = () => voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createViewUsingForm = (form: Form[_]) => voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "VoluntaryRegistration view" must {
 

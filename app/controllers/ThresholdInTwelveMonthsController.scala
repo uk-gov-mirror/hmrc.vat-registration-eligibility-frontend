@@ -36,15 +36,15 @@ import views.html.thresholdInTwelveMonths
 
 import scala.concurrent.Future
 
-class ThresholdInTwelveMonthsController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         thresholdService: ThresholdService,
-                                         formProvider: ThresholdInTwelveMonthsFormProvider) extends FrontendController with I18nSupport {
+class ThresholdInTwelveMonthsController @Inject()(override val messagesApi: MessagesApi,
+                                                  dataCacheConnector: DataCacheConnector,
+                                                  navigator: Navigator,
+                                                  identify: CacheIdentifierAction,
+                                                  getData: DataRetrievalAction,
+                                                  requireData: DataRequiredAction,
+                                                  thresholdService: ThresholdService,
+                                                  formProvider: ThresholdInTwelveMonthsFormProvider
+                                                 )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   def incorpDate(implicit request: DataRequest[_]): LocalDate = DeprecatedConstants.fakeIncorpDate
 
@@ -54,14 +54,14 @@ class ThresholdInTwelveMonthsController @Inject()(appConfig: FrontendAppConfig,
           case None => formProvider(incorpDate)
           case Some(value) => formProvider(incorpDate).fill(value)
         }
-        Ok(thresholdInTwelveMonths(appConfig, preparedForm, NormalMode, thresholdService))
+        Ok(thresholdInTwelveMonths(preparedForm, NormalMode, thresholdService))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
         formProvider(incorpDate).bindFromRequest().fold(
           (formWithErrors: Form[_]) =>
-            Future.successful(BadRequest(thresholdInTwelveMonths(appConfig, formWithErrors, NormalMode,thresholdService))),
+            Future.successful(BadRequest(thresholdInTwelveMonths(formWithErrors, NormalMode,thresholdService))),
           (formValue) => dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap{cacheMap =>
             if(formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException}.map(cMap =>
             Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cMap)))

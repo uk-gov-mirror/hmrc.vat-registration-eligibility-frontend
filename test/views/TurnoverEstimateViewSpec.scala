@@ -28,9 +28,9 @@ class TurnoverEstimateViewSpec extends ViewBehaviours {
 
   val form = new TurnoverEstimateFormProvider()()
 
-  def createView = () => turnoverEstimate(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createView = () => turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => turnoverEstimate(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createViewUsingForm = (form: Form[_]) => turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "TurnoverEstimate view" must {
     behave like normalPage(createView, messageKeyPrefix)

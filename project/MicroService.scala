@@ -8,6 +8,7 @@ import net.ground5hark.sbt.concat.Import._
 import com.typesafe.sbt.uglify.Import._
 import com.typesafe.sbt.digest.Import._
 import play.sbt.routes.RoutesKeys
+import play.twirl.sbt.Import.TwirlKeys
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.versioning.SbtGitVersioning
@@ -54,6 +55,18 @@ trait MicroService {
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
+    )
+    .settings(
+      TwirlKeys.templateImports ++= Seq(
+        "uk.gov.hmrc.govukfrontend.views.html.components._",
+        "uk.gov.hmrc.govukfrontend.views.html.helpers._",
+        "uk.gov.hmrc.govukfrontend.views.html.components._",
+        "uk.gov.hmrc.govukfrontend.views.html.components.implicits._",
+        "uk.gov.hmrc.hmrcfrontend.views.html.components._",
+        "uk.gov.hmrc.hmrcfrontend.views.html.components._",
+        "uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._",
+        "views.ViewUtils._"
+      )
     )
     .configs(IntegrationTest)
       .settings(resolvers ++= Seq(

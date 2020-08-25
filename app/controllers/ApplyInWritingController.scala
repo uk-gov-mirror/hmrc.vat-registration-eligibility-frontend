@@ -24,13 +24,13 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.applyInWriting
 
-class ApplyInWritingController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         identify: CacheIdentifierAction) extends FrontendController with I18nSupport {
+class ApplyInWritingController @Inject()(override val messagesApi: MessagesApi,
+                                         identify: CacheIdentifierAction
+                                        )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad = (identify) {
     implicit request =>
-      Ok(applyInWriting(appConfig))
+      Ok(applyInWriting())
   }
 
   def onSubmit: Action[AnyContent] = Action { implicit request =>

@@ -25,17 +25,16 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.{agriculturalDropout, eligibilityDropout, internationalActivityDropout}
 
-class EligibilityDropoutController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         identify: CacheIdentifierAction) extends FrontendController with I18nSupport {
+class EligibilityDropoutController @Inject()(override val messagesApi: MessagesApi,
+                                             identify: CacheIdentifierAction
+                                            )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad(mode: String) = identify {
     implicit request =>
       mode match {
-        case RacehorsesId.toString => Ok(eligibilityDropout(appConfig, default = false))
         case InternationalActivitiesId.toString => Ok(internationalActivityDropout(appConfig))
-        case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout(appConfig))
-        case _ => Ok(eligibilityDropout(appConfig))
+        case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout())
+        case _ => Ok(eligibilityDropout())
       }
   }
 

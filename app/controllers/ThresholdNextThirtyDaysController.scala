@@ -32,15 +32,15 @@ import views.html.thresholdNextThirtyDays
 
 import scala.concurrent.Future
 
-class ThresholdNextThirtyDaysController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         thresholdService: ThresholdService,
-                                         formProvider: ThresholdNextThirtyDaysFormProvider) extends FrontendController with I18nSupport {
+class ThresholdNextThirtyDaysController @Inject()(override val messagesApi: MessagesApi,
+                                                  dataCacheConnector: DataCacheConnector,
+                                                  navigator: Navigator,
+                                                  identify: CacheIdentifierAction,
+                                                  getData: DataRetrievalAction,
+                                                  requireData: DataRequiredAction,
+                                                  thresholdService: ThresholdService,
+                                                  formProvider: ThresholdNextThirtyDaysFormProvider
+                                                 )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 
@@ -50,14 +50,14 @@ class ThresholdNextThirtyDaysController @Inject()(appConfig: FrontendAppConfig,
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(thresholdNextThirtyDays(appConfig, preparedForm, NormalMode))
+      Ok(thresholdNextThirtyDays(preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(thresholdNextThirtyDays(appConfig, formWithErrors, NormalMode))),
+          Future.successful(BadRequest(thresholdNextThirtyDays(formWithErrors, NormalMode))),
         (formValue) =>
           dataCacheConnector.save[Boolean](request.internalId, ThresholdNextThirtyDaysId.toString, formValue).flatMap{cacheMap =>
           if(formValue) {

@@ -22,12 +22,14 @@ import views.html.choseNotToRegister
 
 class ChoseNotToRegisterControllerSpec extends ControllerSpecBase {
 
+  implicit val appConfig = frontendAppConfig
+
   def onwardRoute = routes.ChoseNotToRegisterController.onPageLoad()
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ChoseNotToRegisterController(frontendAppConfig, messagesApi, FakeCacheIdentifierAction)
+    new ChoseNotToRegisterController(messagesApi, FakeCacheIdentifierAction)
 
-  def viewAsString() = choseNotToRegister(frontendAppConfig)(fakeCacheDataRequestIncorped, messages).toString
+  def viewAsString() = choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
 
   val questionaireUrl = s"${frontendAppConfig.companyRegUrl}${frontendAppConfig.companyRegUri}${frontendAppConfig.exitSurveyUri}"
 

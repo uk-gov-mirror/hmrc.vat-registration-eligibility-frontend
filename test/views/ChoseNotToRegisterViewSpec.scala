@@ -16,16 +16,18 @@
 
 package views
 
-import views.behaviours.ViewBehaviours
+import deprecated.DeprecatedConstants
+import views.newbehaviours.ViewBehaviours
 import views.html.choseNotToRegister
 
 class ChoseNotToRegisterViewSpec extends ViewBehaviours {
 
   val messageKeyPrefix = "choseNotToRegister"
+  implicit val msgs = messages
 
-  def createView = () => choseNotToRegister(frontendAppConfig)(fakeCacheDataRequestIncorped, messages)
+  def createView = () => choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)
 
   "ChoseNotToRegister view" must {
-    behave like normalPage(createView, messageKeyPrefix)
+    behave like normalPage(createView(), messageKeyPrefix, Seq(DeprecatedConstants.fakeCompanyName))
   }
 }

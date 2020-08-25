@@ -17,9 +17,9 @@
 @import config.FrontendAppConfig
 @import models.requests.CacheIdentifierRequest
 @import uk.gov.hmrc.play.views.html.helpers.{form}
-
 @import deprecated.DeprecatedConstants
-@(appConfig: FrontendAppConfig, default: Boolean = true)(implicit request: CacheIdentifierRequest[_], messages: Messages)
+
+@(default: Boolean = true)(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @main_template(
     title = messages("eligibilityDropout.title"),
@@ -28,7 +28,7 @@
 
     @components.back_link()
 
-<h1 class="heading-large" id="main-heading">@messages("eligibilityDropout.heading",DeprecatedConstants.fakeCompanyName)</h1>
+<h1 class="heading-large" id="main-heading">@messages("eligibilityDropout.heading", DeprecatedConstants.fakeCompanyName)</h1>
 
     @if(!default){
         <p>@messages(s"eligibilityDropout.ApplicantUKNinoId.variant")</p>

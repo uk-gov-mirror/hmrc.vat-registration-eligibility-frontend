@@ -22,8 +22,9 @@ import views.html.eligibilityDropout
 class EligibilityDropoutViewSpec extends ViewBehaviours {
 
   val messageKeyPrefix = "eligibilityDropout"
+  implicit val msgs = messages
 
-  def createView = () => eligibilityDropout(frontendAppConfig)(fakeCacheDataRequestIncorped, messages)
+  def createView = () => eligibilityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)
 
   "EligibilityDropout view" must {
     behave like normalPage(createView, messageKeyPrefix)

@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import identifiers.{AgriculturalFlatRateSchemeId, InternationalActivitiesId}
 import play.api.test.Helpers._
@@ -25,12 +26,14 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.EligibilityDropoutController.onPageLoad("")
 
-  def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new EligibilityDropoutController(frontendAppConfig, messagesApi, FakeCacheIdentifierAction)
+  implicit val appConfig = app.injector.instanceOf[FrontendAppConfig]
 
-  def viewAsString(default: Boolean) = eligibilityDropout(frontendAppConfig, default)(fakeCacheDataRequestIncorped, messages).toString
+  def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
+    new EligibilityDropoutController(messagesApi, FakeCacheIdentifierAction)
+
+  def viewAsString(default: Boolean) = eligibilityDropout(default)(fakeCacheDataRequestIncorped, messages, appConfig).toString
   def internationalView() = internationalActivityDropout(frontendAppConfig)(fakeCacheDataRequestIncorped, messages).toString
-  def agricultureView() = agriculturalDropout(frontendAppConfig)(fakeCacheDataRequestIncorped, messages).toString
+  def agricultureView() = agriculturalDropout()(fakeCacheDataRequestIncorped, messages, appConfig).toString
 
   "EligibilityDropout Controller" must {
 

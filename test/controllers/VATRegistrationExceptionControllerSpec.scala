@@ -34,12 +34,13 @@ class VATRegistrationExceptionControllerSpec extends ControllerSpecBase {
 
   val formProvider = new VATRegistrationExceptionFormProvider()
   val form = formProvider()
+  implicit val appConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new VATRegistrationExceptionController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new VATRegistrationExceptionController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
+  def viewAsString(form: Form[_] = form) = vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "VATRegistrationException Controller" must {
 

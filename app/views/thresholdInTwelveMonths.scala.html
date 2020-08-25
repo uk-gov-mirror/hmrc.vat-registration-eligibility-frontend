@@ -26,7 +26,8 @@
 @import services.ThresholdService
 
 @import deprecated.DeprecatedConstants
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages)
+
+@(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @hiddenYesContent = {
 <div class="additional-option-block panel panel-border-narrow">

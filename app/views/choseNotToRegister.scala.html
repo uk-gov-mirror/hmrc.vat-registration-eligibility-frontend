@@ -19,19 +19,17 @@
 @import models.requests.CacheIdentifierRequest
 
 @import deprecated.DeprecatedConstants
-@(appConfig: FrontendAppConfig)(implicit request: CacheIdentifierRequest[_], messages: Messages)
+@import views.html.layouts.layout
+@import views.html.newcomponents._
 
-@main_template(
-    title = messages("choseNotToRegister.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-    @components.back_link()
+@layout(pageTitle = Some(titleNoForm(messages("choseNotToRegister.title"))), backLink = true) {
 
-    <h1 class="heading-large" id="main-heading">@messages("choseNotToRegister.heading",DeprecatedConstants.fakeCompanyName)</h1>
+    @h1(messages("choseNotToRegister.heading", DeprecatedConstants.fakeCompanyName))
 
     @form(action = controllers.routes.ChoseNotToRegisterController.onSubmit()) {
-        @components.button("site.finish", "submit")
+        @button(messages("site.finish"))
     }
 
 }

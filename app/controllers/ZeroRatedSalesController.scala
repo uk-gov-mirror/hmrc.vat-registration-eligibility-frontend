@@ -31,14 +31,14 @@ import views.html.zeroRatedSales
 
 import scala.concurrent.Future
 
-class ZeroRatedSalesController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
+class ZeroRatedSalesController @Inject()(override val messagesApi: MessagesApi,
                                          dataCacheConnector: DataCacheConnector,
                                          navigator: Navigator,
                                          identify: CacheIdentifierAction,
                                          getData: DataRetrievalAction,
                                          requireData: DataRequiredAction,
-                                         formProvider: ZeroRatedSalesFormProvider) extends FrontendController with I18nSupport {
+                                         formProvider: ZeroRatedSalesFormProvider
+                                        )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 
@@ -48,14 +48,14 @@ class ZeroRatedSalesController @Inject()(appConfig: FrontendAppConfig,
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(zeroRatedSales(appConfig, preparedForm, NormalMode))
+      Ok(zeroRatedSales(preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(zeroRatedSales(appConfig, formWithErrors, NormalMode))),
+          Future.successful(BadRequest(zeroRatedSales(formWithErrors, NormalMode))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, ZeroRatedSalesId.toString, value).flatMap {
             cacheMap =>

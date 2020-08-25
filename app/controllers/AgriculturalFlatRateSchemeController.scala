@@ -31,14 +31,14 @@ import views.html.agriculturalFlatRateScheme
 
 import scala.concurrent.Future
 
-class AgriculturalFlatRateSchemeController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: AgriculturalFlatRateSchemeFormProvider) extends FrontendController with I18nSupport {
+class AgriculturalFlatRateSchemeController @Inject()(override val messagesApi: MessagesApi,
+                                                     dataCacheConnector: DataCacheConnector,
+                                                     navigator: Navigator,
+                                                     identify: CacheIdentifierAction,
+                                                     getData: DataRetrievalAction,
+                                                     requireData: DataRequiredAction,
+                                                     formProvider: AgriculturalFlatRateSchemeFormProvider
+                                                    )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 
@@ -48,14 +48,14 @@ class AgriculturalFlatRateSchemeController @Inject()(appConfig: FrontendAppConfi
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(agriculturalFlatRateScheme(appConfig, preparedForm, NormalMode))
+      Ok(agriculturalFlatRateScheme(preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(agriculturalFlatRateScheme(appConfig, formWithErrors, NormalMode))),
+          Future.successful(BadRequest(agriculturalFlatRateScheme(formWithErrors, NormalMode))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, AgriculturalFlatRateSchemeId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(AgriculturalFlatRateSchemeId, NormalMode)(new UserAnswers(cacheMap))))

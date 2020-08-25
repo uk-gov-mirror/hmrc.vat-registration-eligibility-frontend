@@ -29,9 +29,9 @@ class InvolvedInOtherBusinessViewSpec extends YesNoViewBehaviours {
 
   val form = new InvolvedInOtherBusinessFormProvider().form()
 
-  def createView(officer: Option[String] = None) = () => involvedInOtherBusiness(frontendAppConfig, form, NormalMode, officer)(fakeRequest, messages)
+  def createView(officer: Option[String] = None) = () => involvedInOtherBusiness(form, NormalMode, officer)(fakeRequest, messages, frontendAppConfig)
 
-  def createViewUsingForm(officer: Option[String] = None) = (form: Form[_]) => involvedInOtherBusiness(frontendAppConfig, form, NormalMode, officer)(fakeRequest, messages)
+  def createViewUsingForm(officer: Option[String] = None) = (form: Form[_]) => involvedInOtherBusiness(form, NormalMode, officer)(fakeRequest, messages, frontendAppConfig)
 
   "InvolvedInOtherBusiness view with no acting on behalf of officer" must {
     behave like normalPage(createView(), messageKeyPrefix)
@@ -44,14 +44,5 @@ class InvolvedInOtherBusinessViewSpec extends YesNoViewBehaviours {
       doc.getElementById("involveBullet5").text() mustBe "the company has taken over another VAT-registered company that was making a profit"
     }
   }
-  "InvolvedInOtherBusiness view with an officer acting on behalf of" must {
-    "display the right headings and bullets correctly" in {
-    val doc = asDocument(createView(Some("foo bar wizz"))())
-    doc.getElementById("main-heading").text() mustBe "Has foo bar wizz ever been involved with another business or taken over a VAT-registered business?"
-    doc.getElementById("involveBullet1").text() mustBe "over the past 2 years, they have had another self-employed business in the UK or Isle of Man (do not tell us if their only source of self-employed income was from being a landlord)"
-    doc.getElementById("involveBullet5").text() mustBe "the company has taken over another VAT-registered company that was making a profit"
-      val legends = doc.getElementsByTag("legend")
-      legends.first.text mustBe messages(s"$messageKeyPrefix.heading.behalfOf", "foo bar wizz")
-    }
-  }
+
 }

@@ -31,14 +31,14 @@ import views.html.vatExemption
 
 import scala.concurrent.Future
 
-class VATExemptionController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: VATExemptionFormProvider) extends FrontendController with I18nSupport {
+class VATExemptionController @Inject()(override val messagesApi: MessagesApi,
+                                       dataCacheConnector: DataCacheConnector,
+                                       navigator: Navigator,
+                                       identify: CacheIdentifierAction,
+                                       getData: DataRetrievalAction,
+                                       requireData: DataRequiredAction,
+                                       formProvider: VATExemptionFormProvider
+                                      )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 
@@ -48,14 +48,14 @@ class VATExemptionController @Inject()(appConfig: FrontendAppConfig,
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(vatExemption(appConfig, preparedForm, NormalMode))
+      Ok(vatExemption(preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(vatExemption(appConfig, formWithErrors, NormalMode))),
+          Future.successful(BadRequest(vatExemption(formWithErrors, NormalMode))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, VATExemptionId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(VATExemptionId, NormalMode)(new UserAnswers(cacheMap))))

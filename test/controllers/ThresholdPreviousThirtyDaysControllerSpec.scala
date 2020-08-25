@@ -40,12 +40,13 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
 
   val formProvider = new ThresholdPreviousThirtyDaysFormProvider()
   val form = formProvider(LocalDate.of(2018,9,28).minusYears(2))
+  implicit val appConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ThresholdPreviousThirtyDaysController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new ThresholdPreviousThirtyDaysController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, mockThresholdService, formProvider)
 
-  def viewAsString(form: Form[_] = form) = thresholdPreviousThirtyDays(frontendAppConfig, form, NormalMode, mockThresholdService)(fakeDataRequest, messages).toString
+  def viewAsString(form: Form[_] = form) = thresholdPreviousThirtyDays(form, NormalMode, mockThresholdService)(fakeDataRequest, messages, frontendAppConfig).toString
 
 
   "ThresholdPreviousThirtyDays Controller" must {

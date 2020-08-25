@@ -22,7 +22,7 @@
 @import models.requests.DataRequest
 
 @import deprecated.DeprecatedConstants
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
+@(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @main_template(
     title = messages("vatExemption.title"),

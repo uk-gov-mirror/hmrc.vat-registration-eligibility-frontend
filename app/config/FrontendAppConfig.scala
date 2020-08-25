@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 class FrontendAppConfig @Inject()(override val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig {
 
   override protected def mode = environment.mode
+  lazy val host: String = getString("host")
 
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
@@ -77,4 +78,10 @@ class FrontendAppConfig @Inject()(override val runModeConfiguration: Configurati
     "cymraeg" -> Lang("cy"))
 
   def routeToSwitchLanguage = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
+
+  //Footer Links
+  lazy val cookies: String = host + getString("urls.footer.cookies")
+  lazy val privacy: String = host + getString("urls.footer.privacy")
+  lazy val termsConditions: String = host + getString("urls.footer.termsConditions")
+  lazy val govukHelp: String = getString("urls.footer.govukHelp")
 }

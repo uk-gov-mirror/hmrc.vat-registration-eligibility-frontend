@@ -31,15 +31,14 @@ import views.html.turnoverEstimate
 
 import scala.concurrent.Future
 
-class TurnoverEstimateController @Inject()(
-                                        appConfig: FrontendAppConfig,
-                                        override val messagesApi: MessagesApi,
-                                        dataCacheConnector: DataCacheConnector,
-                                        navigator: Navigator,
-                                        identify: CacheIdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        formProvider: TurnoverEstimateFormProvider) extends FrontendController with I18nSupport with Enumerable.Implicits {
+class TurnoverEstimateController @Inject()(override val messagesApi: MessagesApi,
+                                           dataCacheConnector: DataCacheConnector,
+                                           navigator: Navigator,
+                                           identify: CacheIdentifierAction,
+                                           getData: DataRetrievalAction,
+                                           requireData: DataRequiredAction,
+                                           formProvider: TurnoverEstimateFormProvider
+                                          )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport with Enumerable.Implicits {
 
   val form = formProvider()
 
@@ -49,14 +48,14 @@ class TurnoverEstimateController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(turnoverEstimate(appConfig, preparedForm, mode))
+      Ok(turnoverEstimate(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode) = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(turnoverEstimate(appConfig, formWithErrors, mode))),
+          Future.successful(BadRequest(turnoverEstimate(formWithErrors, mode))),
         (value) =>
           dataCacheConnector.save[TurnoverEstimateFormElement](request.internalId, TurnoverEstimateId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(TurnoverEstimateId, mode)(new UserAnswers(cacheMap))))
