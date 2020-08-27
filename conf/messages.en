@@ -194,10 +194,10 @@ vatExemption.heading = Does {0} want to apply for a VAT exemption?
 vatExemption.error.required = Tell us if the company wants to apply for a VAT exemption
 vatExemption.text = {0} may not have to register for VAT if it sells mainly or only zero-rated goods or services.
 
-vatRegistrationException.title = Is the business applying for a VAT registration exception?
-vatRegistrationException.heading = Is {0} applying for a VAT registration ''exception''?
-vatRegistrationException.error.required = Tell us if the company is applying for a VAT registration exception
-vatRegistrationException.text = {0} may not need to register for VAT if it can give evidence that it won''t go over the threshold in the next 12 months. This is called a registration ''exception''.
+vatRegistrationException.title = Is the business applying for a VAT registration ''exception''?
+vatRegistrationException.heading = Is the business applying for a VAT registration ''exception''?
+vatRegistrationException.error.required = Tell us if the business is applying for a VAT registration exception
+vatRegistrationException.text = The business may not need to register for VAT if it can give evidence that it won''t go over the threshold in the next 12 months. This is called a registration ''exception''.
 
 applyInWriting.title = You must apply in writing
 applyInWriting.heading = You must apply in writing

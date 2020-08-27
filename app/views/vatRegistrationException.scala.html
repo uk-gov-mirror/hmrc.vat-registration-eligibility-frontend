@@ -35,9 +35,9 @@
 
         @components.error_summary(form.errors)
 
-        <h1 class="heading-large" id="main-heading">@messages("vatRegistrationException.heading",DeprecatedConstants.fakeCompanyName)</h1>
+        <h1 class="heading-large" id="main-heading">@messages("vatRegistrationException.heading")</h1>
 
-        <p id="help-text">@messages("vatRegistrationException.text",DeprecatedConstants.fakeCompanyName)</p>
+        <p id="help-text">@messages("vatRegistrationException.text")</p>
 
         @components.vertical_input_radio(
         field = form("value"),
@@ -48,7 +48,7 @@
         radioAdditionalInfo = Map(),
         '_labelAfter -> true,
         '_labelClass -> "block-label",
-        '_legend -> messages("vatRegistrationException.heading", DeprecatedConstants.fakeCompanyName),
+        '_legend -> messages("vatRegistrationException.heading"),
         '_legendClass -> "visually-hidden"
         )
 
