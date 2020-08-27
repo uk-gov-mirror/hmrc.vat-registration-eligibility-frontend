@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.AgriculturalFlatRateSchemeFormProvider
@@ -31,15 +32,16 @@ import views.html.agriculturalFlatRateScheme
 class AgriculturalFlatRateSchemeControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
+  implicit val appConfig = app.injector.instanceOf[FrontendAppConfig]
 
   val formProvider = new AgriculturalFlatRateSchemeFormProvider()
   val form = formProvider()
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new AgriculturalFlatRateSchemeController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new AgriculturalFlatRateSchemeController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = agriculturalFlatRateScheme(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
+  def viewAsString(form: Form[_] = form) = agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequestIncorped, messages, appConfig).toString
 
   "AgriculturalFlatRateScheme Controller" must {
 

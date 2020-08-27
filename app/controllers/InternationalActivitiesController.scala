@@ -31,14 +31,14 @@ import views.html.internationalActivities
 
 import scala.concurrent.Future
 
-class InternationalActivitiesController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: InternationalActivitiesFormProvider) extends FrontendController with I18nSupport {
+class InternationalActivitiesController @Inject()(override val messagesApi: MessagesApi,
+                                                  dataCacheConnector: DataCacheConnector,
+                                                  navigator: Navigator,
+                                                  identify: CacheIdentifierAction,
+                                                  getData: DataRetrievalAction,
+                                                  requireData: DataRequiredAction,
+                                                  formProvider: InternationalActivitiesFormProvider
+                                                 )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 
@@ -48,14 +48,14 @@ class InternationalActivitiesController @Inject()(appConfig: FrontendAppConfig,
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(internationalActivities(appConfig, preparedForm, NormalMode))
+      Ok(internationalActivities(preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(internationalActivities(appConfig, formWithErrors, NormalMode))),
+          Future.successful(BadRequest(internationalActivities(formWithErrors, NormalMode))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, InternationalActivitiesId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(InternationalActivitiesId, NormalMode)(new UserAnswers(cacheMap))))

@@ -34,12 +34,13 @@ class VoluntaryRegistrationControllerSpec extends ControllerSpecBase {
 
   val formProvider = new VoluntaryRegistrationFormProvider()
   val form = formProvider()
+  implicit val appConfif = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new VoluntaryRegistrationController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new VoluntaryRegistrationController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = voluntaryRegistration(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
+  def viewAsString(form: Form[_] = form) = voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "VoluntaryRegistration Controller" must {
 

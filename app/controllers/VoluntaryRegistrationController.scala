@@ -31,14 +31,14 @@ import views.html.voluntaryRegistration
 
 import scala.concurrent.Future
 
-class VoluntaryRegistrationController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: VoluntaryRegistrationFormProvider) extends FrontendController with I18nSupport {
+class VoluntaryRegistrationController @Inject()(override val messagesApi: MessagesApi,
+                                                dataCacheConnector: DataCacheConnector,
+                                                navigator: Navigator,
+                                                identify: CacheIdentifierAction,
+                                                getData: DataRetrievalAction,
+                                                requireData: DataRequiredAction,
+                                                formProvider: VoluntaryRegistrationFormProvider
+                                               )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 
@@ -48,14 +48,14 @@ class VoluntaryRegistrationController @Inject()(appConfig: FrontendAppConfig,
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(voluntaryRegistration(appConfig, preparedForm, NormalMode))
+      Ok(voluntaryRegistration(preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(voluntaryRegistration(appConfig, formWithErrors, NormalMode))),
+          Future.successful(BadRequest(voluntaryRegistration(formWithErrors, NormalMode))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, VoluntaryRegistrationId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(VoluntaryRegistrationId, NormalMode)(new UserAnswers(cacheMap))))

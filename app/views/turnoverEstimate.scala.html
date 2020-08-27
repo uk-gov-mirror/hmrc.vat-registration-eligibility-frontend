@@ -22,7 +22,7 @@
 @import models.requests.DataRequest
 
 @import deprecated.DeprecatedConstants
-@(appConfig: FrontendAppConfig, form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages)
+@(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @hiddenContent = {
     <div class="additional-option-block panel panel-border-narrow">

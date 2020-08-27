@@ -32,17 +32,17 @@ import views.html.racehorses
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RacehorsesController @Inject()(appConfig: FrontendAppConfig,
-                                     override val messagesApi: MessagesApi,
+class RacehorsesController @Inject()(override val messagesApi: MessagesApi,
                                      dataCacheConnector: DataCacheConnector,
                                      navigator: Navigator,
                                      identify: CacheIdentifierAction,
                                      getData: DataRetrievalAction,
                                      requireData: DataRequiredAction,
                                      formProvider: RacehorsesFormProvider,
-                                     vatRegistrationService: VatRegistrationService) extends FrontendController with I18nSupport {
-  val frontendUrl       = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
+                                     vatRegistrationService: VatRegistrationService
+                                    )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
+  val frontendUrl = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
   val form: Form[Boolean] = formProvider()
 
   def onPageLoad() = (identify andThen getData andThen requireData) {
@@ -51,14 +51,14 @@ class RacehorsesController @Inject()(appConfig: FrontendAppConfig,
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(racehorses(appConfig, preparedForm, NormalMode))
+      Ok(racehorses(preparedForm, NormalMode))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(racehorses(appConfig, formWithErrors, NormalMode))),
+          Future.successful(BadRequest(racehorses(formWithErrors, NormalMode))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, RacehorsesId.toString, value).flatMap(_ =>
             vatRegistrationService.submitEligibility(request.internalId)(hc, implicitly[ExecutionContext], request)

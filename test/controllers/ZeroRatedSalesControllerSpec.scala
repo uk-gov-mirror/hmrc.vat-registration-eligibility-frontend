@@ -34,12 +34,13 @@ class ZeroRatedSalesControllerSpec extends ControllerSpecBase {
 
   val formProvider = new ZeroRatedSalesFormProvider()
   val form = formProvider()
+  implicit val appConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ZeroRatedSalesController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new ZeroRatedSalesController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = zeroRatedSales(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messagesIncorped).toString
+  def viewAsString(form: Form[_] = form) = zeroRatedSales(form, NormalMode)(fakeDataRequestIncorped, messagesIncorped, frontendAppConfig).toString
 
   "ZeroRatedSales Controller" must {
 

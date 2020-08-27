@@ -30,9 +30,9 @@ class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
 
   val form = new VATRegistrationExceptionFormProvider()()
 
-  def createView = () => vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createView = () => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => vatRegistrationException(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createViewUsingForm = (form: Form[_]) => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "VATRegistrationException view" must {
 

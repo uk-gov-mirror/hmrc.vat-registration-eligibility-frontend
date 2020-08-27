@@ -31,9 +31,9 @@ class VATExemptionViewSpec extends YesNoViewBehaviours {
 
   val form = new VATExemptionFormProvider()()
 
-  def createView = () => vatExemption(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createView = () => vatExemption(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => vatExemption(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createViewUsingForm = (form: Form[_]) => vatExemption(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "VATExemption view" must {
 

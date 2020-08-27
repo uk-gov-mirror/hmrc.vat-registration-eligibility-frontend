@@ -41,12 +41,13 @@ class RacehorsesControllerSpec extends ControllerSpecBase with MockitoSugar{
 
   val formProvider = new RacehorsesFormProvider()
   val form = formProvider()
+  implicit val appConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new RacehorsesController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new RacehorsesController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider, mockVRService)
 
-  def viewAsString(form: Form[_] = form) = racehorses(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
+  def viewAsString(form: Form[_] = form) = racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "Racehorses Controller" must {
 

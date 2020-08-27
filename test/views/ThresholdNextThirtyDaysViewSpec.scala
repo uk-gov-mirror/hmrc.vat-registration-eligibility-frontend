@@ -31,14 +31,12 @@ class ThresholdNextThirtyDaysViewSpec extends YesNoViewBehaviours {
 
   val form = new ThresholdNextThirtyDaysFormProvider()()
 
-  def createView = () => thresholdNextThirtyDays(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createView = () => thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => thresholdNextThirtyDays(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages)
+  def createViewUsingForm = (form: Form[_]) => thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "ThresholdNextThirtyDays view" must {
-
     behave like normalPage(createView, messageKeyPrefix)
-
     behave like yesNoPage(createViewUsingForm, messageKeyPrefix, routes.ThresholdNextThirtyDaysController.onSubmit().url)
   }
 }

@@ -17,21 +17,17 @@
 @import config.FrontendAppConfig
 @import uk.gov.hmrc.play.views.html.helpers.{form}
 
-@(appConfig: FrontendAppConfig)(implicit request: Request[_], messages: Messages)
+@import views.html.layouts.layout
+@import views.html.newcomponents._
 
-@main_template(
-    title = messages("applyInWriting.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@()(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-    @components.back_link()
+@layout(pageTitle = Some(titleNoForm(messages("applyInWriting.title"))), backLink = true) {
 
-    @components.heading("applyInWriting.heading")
+    @h1(messages("applyInWriting.heading"))
 
-    @components.text("applyInWriting.text")
+    @p{ @messages("applyInWriting.text") }
+    @link(appConfig.VAT1FormURL, "site.useFormVAT1")
 
-    @form(action = controllers.routes.ApplyInWritingController.onSubmit()) {
-        @components.button_link("site.useFormVAT1", appConfig.VAT1FormURL)
-    }
 
 }

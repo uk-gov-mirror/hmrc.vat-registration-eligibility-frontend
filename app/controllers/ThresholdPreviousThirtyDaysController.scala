@@ -39,15 +39,15 @@ import views.html.thresholdPreviousThirtyDays
 
 import scala.concurrent.Future
 
-class ThresholdPreviousThirtyDaysController @Inject()(appConfig: FrontendAppConfig,
-                                         override val messagesApi: MessagesApi,
-                                         dataCacheConnector: DataCacheConnector,
-                                         navigator: Navigator,
-                                         identify: CacheIdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         thresholdService: ThresholdService,
-                                         formProvider: ThresholdPreviousThirtyDaysFormProvider) extends FrontendController with I18nSupport {
+class ThresholdPreviousThirtyDaysController @Inject()(override val messagesApi: MessagesApi,
+                                                      dataCacheConnector: DataCacheConnector,
+                                                      navigator: Navigator,
+                                                      identify: CacheIdentifierAction,
+                                                      getData: DataRetrievalAction,
+                                                      requireData: DataRequiredAction,
+                                                      thresholdService: ThresholdService,
+                                                      formProvider: ThresholdPreviousThirtyDaysFormProvider
+                                                     )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   def incorpDate(implicit request: DataRequest[_]): LocalDate = DeprecatedConstants.fakeIncorpDate
 
@@ -57,14 +57,14 @@ class ThresholdPreviousThirtyDaysController @Inject()(appConfig: FrontendAppConf
         case None => formProvider(incorpDate)
         case Some(value) => formProvider(incorpDate).fill(value)
       }
-      Ok(thresholdPreviousThirtyDays(appConfig, preparedForm, NormalMode, thresholdService))
+      Ok(thresholdPreviousThirtyDays(preparedForm, NormalMode, thresholdService))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider(incorpDate).bindFromRequest().fold(
         (formWithErrors: Form[_]) => {
-          Future.successful(BadRequest(thresholdPreviousThirtyDays(appConfig, formWithErrors, NormalMode,thresholdService)))
+          Future.successful(BadRequest(thresholdPreviousThirtyDays(formWithErrors, NormalMode,thresholdService)))
         },
         (formValue) =>
           dataCacheConnector.save[ConditionalDateFormElement](request.internalId,ThresholdPreviousThirtyDaysId.toString, formValue).flatMap{

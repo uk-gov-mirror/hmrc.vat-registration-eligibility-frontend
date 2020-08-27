@@ -34,12 +34,13 @@ class VATExemptionControllerSpec extends ControllerSpecBase {
 
   val formProvider = new VATExemptionFormProvider()
   val form = formProvider()
+  implicit val appConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new VATExemptionController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new VATExemptionController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
-  def viewAsString(form: Form[_] = form) = vatExemption(frontendAppConfig, form, NormalMode)(fakeDataRequestIncorped, messages).toString
+  def viewAsString(form: Form[_] = form) = vatExemption(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "VATExemption Controller" must {
 

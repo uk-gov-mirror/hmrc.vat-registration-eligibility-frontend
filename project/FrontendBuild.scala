@@ -32,6 +32,10 @@ private object AppDependencies {
   private val reactivemongoTestVersion = "3.1.0"
   private val playWhitelistVersion     = "2.0.0"
 
+  private val playGovukFrontendVersion = "0.50.0-play-25"
+  private val playHmrcFrontendVersion = "0.18.0-play-25"
+  private val govukFrontendVersion = "3.7.0"
+
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "play-reactivemongo" % playReactivemongoVersion,
@@ -43,7 +47,10 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-conditional-form-mapping" % playConditionalFormMappingVersion,
     "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapVersion,
     "uk.gov.hmrc" %% "play-language" % playLanguageVersion,
-    "uk.gov.hmrc" %% "play-whitelist-filter" % playWhitelistVersion
+    "uk.gov.hmrc" %% "play-whitelist-filter" % playWhitelistVersion,
+    "uk.gov.hmrc" %% "play-frontend-govuk" % playGovukFrontendVersion,
+    "uk.gov.hmrc" %% "play-frontend-hmrc" % playHmrcFrontendVersion,
+    "org.webjars.npm" % "govuk-frontend" % govukFrontendVersion
   )
 
   trait TestDependencies {

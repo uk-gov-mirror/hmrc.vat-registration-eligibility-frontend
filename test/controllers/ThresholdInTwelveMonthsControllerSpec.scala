@@ -42,12 +42,13 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
 
   val formProvider = new ThresholdInTwelveMonthsFormProvider()
   val form = formProvider(LocalDate.now().minusYears(2))
+  implicit val appConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ThresholdInTwelveMonthsController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new ThresholdInTwelveMonthsController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, new DataRequiredActionImpl, mockThresholdService, formProvider)
 
-  def viewAsString(form: Form[_] = form) = thresholdInTwelveMonths(frontendAppConfig, form, NormalMode, mockThresholdService)(fakeDataRequestIncorpedOver12m, messages).toString
+  def viewAsString(form: Form[_] = form) = thresholdInTwelveMonths(form, NormalMode, mockThresholdService)(fakeDataRequestIncorpedOver12m, messages, frontendAppConfig).toString
 
   "ThresholdInTwelveMonths Controller" must {
     when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
