@@ -32,7 +32,7 @@ class EligibilityDropoutController @Inject()(override val messagesApi: MessagesA
   def onPageLoad(mode: String) = identify {
     implicit request =>
       mode match {
-        case InternationalActivitiesId.toString => Ok(internationalActivityDropout(appConfig))
+        case InternationalActivitiesId.toString => Ok(internationalActivityDropout())
         case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout())
         case _ => Ok(eligibilityDropout())
       }

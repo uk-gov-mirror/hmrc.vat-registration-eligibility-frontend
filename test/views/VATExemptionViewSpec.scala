@@ -21,24 +21,21 @@ import deprecated.DeprecatedConstants
 import forms.VATExemptionFormProvider
 import models.NormalMode
 import play.api.data.Form
-import views.behaviours.YesNoViewBehaviours
+import views.newbehaviours.YesNoViewBehaviours
 import views.html.vatExemption
 
 class VATExemptionViewSpec extends YesNoViewBehaviours {
-  override val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
-
+  val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
   val messageKeyPrefix = "vatExemption"
-
   val form = new VATExemptionFormProvider()()
+  implicit val msgs = messages
 
   def createView = () => vatExemption(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   def createViewUsingForm = (form: Form[_]) => vatExemption(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "VATExemption view" must {
-
-    behave like normalPage(createView, messageKeyPrefix)
-
-    behave like yesNoPage(createViewUsingForm, messageKeyPrefix, routes.VATExemptionController.onSubmit().url)
+    behave like normalPage(createView(), messageKeyPrefix, Seq(DeprecatedConstants.fakeCompanyName))
+    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VATExemptionController.onSubmit().url, headingArgs = Seq(DeprecatedConstants.fakeCompanyName))
   }
 }

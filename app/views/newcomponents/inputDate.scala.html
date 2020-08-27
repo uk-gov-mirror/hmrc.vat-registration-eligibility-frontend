@@ -14,13 +14,13 @@
  * limitations under the License.
  *@
 
-@(
-  form: Form[_],
+@(form: Form[_],
   legendContent: String,
   legendClasses: String = "govuk-fieldset__legend--xl",
   id: String = "date",
   hintText: Option[String] = None,
   legendAsPageHeading: Boolean = true,
+  includeDay: Boolean = true,
   attributesDay: Map[String, String] = Map.empty,
   attributesMonth: Map[String, String] = Map.empty,
   attributesYear: Map[String, String] = Map.empty)(implicit messages: Messages)
@@ -36,15 +36,20 @@
         )
     )),
     id = id,
-    items = Seq(
-        InputItem(
-            id = s"$id.day",
-            classes = s"govuk-input--width-2${if(form(id).hasErrors || form.errors.exists(_.key.isEmpty)) " govuk-input--error" else ""}",
-            name =  s"$id.day",
-            label = Some(messages("date.day")),
-            value = form(s"$id.day").value,
-            attributes = attributesDay
-        ),
+    items = {
+        if (includeDay) {
+            Some(InputItem(
+                id = s"$id.day",
+                classes = s"govuk-input--width-2${if(form(id).hasErrors || form.errors.exists(_.key.isEmpty)) " govuk-input--error" else ""}",
+                name =  s"$id.day",
+                label = Some(messages("date.day")),
+                value = form(s"$id.day").value,
+                attributes = attributesDay
+            ))
+        } else {
+            None
+        }
+    }.toSeq ++ Seq(
         InputItem(
             id = s"$id.month",
             classes = s"govuk-input--width-2${if(form(id).hasErrors || form.errors.exists(_.key.isEmpty)) " govuk-input--error" else ""}",

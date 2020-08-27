@@ -21,24 +21,21 @@ import deprecated.DeprecatedConstants
 import forms.VoluntaryRegistrationFormProvider
 import models.NormalMode
 import play.api.data.Form
-import views.behaviours.YesNoViewBehaviours
+import views.newbehaviours.YesNoViewBehaviours
 import views.html.voluntaryRegistration
 
 class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
-  override val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
-
+  val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
   val messageKeyPrefix = "voluntaryRegistration"
-
   val form = new VoluntaryRegistrationFormProvider()()
+  implicit val msgs = messages
 
   def createView = () => voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   def createViewUsingForm = (form: Form[_]) => voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "VoluntaryRegistration view" must {
-
-    behave like normalPage(createView, messageKeyPrefix)
-
-    behave like yesNoPage(createViewUsingForm, messageKeyPrefix, routes.VoluntaryRegistrationController.onSubmit().url)
+    behave like normalPage(createView(), messageKeyPrefix, Seq(DeprecatedConstants.fakeCompanyName))
+    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VoluntaryRegistrationController.onSubmit().url, headingArgs = Seq(DeprecatedConstants.fakeCompanyName))
   }
 }

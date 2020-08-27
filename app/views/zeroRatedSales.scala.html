@@ -22,51 +22,45 @@
 @import models.requests.DataRequest
 
 @import deprecated.DeprecatedConstants
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@main_template(
-    title = messages("zeroRatedSales.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@layout(pageTitle = Some(title(form, messages("zeroRatedSales.title"))), backLink = true) {
+
+    @errorSummary(form.errors)
+
+    @h1(messages("zeroRatedSales.heading", DeprecatedConstants.fakeCompanyName))
+    @details(messages("zeroRatedSales.dropdownText"), detailsContent)
 
     @helpers.form(action = ZeroRatedSalesController.onSubmit(), 'autoComplete -> "off") {
-
-        @components.back_link()
-
-        @components.error_summary(form.errors)
-
-        <h1 class="heading-large" id="main-heading">@messages("zeroRatedSales.heading", DeprecatedConstants.fakeCompanyName)</h1>
-
-        <div class="form-group">
-            <details>
-                <summary><span class="summary">@Messages("zeroRatedSales.dropdownText")</span></summary>
-                <div class="panel panel-border-narrow">
-                    <p>@Messages("zeroRatedSales.dropdownLine1")</p>
-                    @components.text_with_bullets("zeroRatedSales.dropdownLine2", Seq("zeroRatedSales.bullet1",
-                                                                                  "zeroRatedSales.bullet2",
-                                                                                  "zeroRatedSales.bullet3",
-                                                                                  "zeroRatedSales.bullet4",
-                                                                                  "zeroRatedSales.bullet5"))
-
-                    @components.text_with_link("zeroRatedSales.beforeText", "zeroRatedSales.linkText", appConfig.VATRateDifferentGoodsURL, Some("."))
-                </div>
-            </details>
-        </div>
-
-
-        @components.vertical_input_radio(
-        field = form("value"),
-        radioOptions = Seq(
-        "true" -> messages("site.yes"),
-        "false" -> messages("site.no")
-        ),
-        radioAdditionalInfo = Map(),
-        '_labelAfter -> true,
-        '_labelClass -> "block-label",
-        '_legend -> messages("zeroRatedSales.heading", DeprecatedConstants.fakeCompanyName),
-        '_legendClass -> "visually-hidden"
+        @yesNoRadio(
+            form = form,
+            headingKey = "zeroRatedSales.heading",
+            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
+            isPageHeading = false,
+            classes = "govuk-visually-hidden"
         )
 
-        @components.submit_button()
+        @button(messages("site.save_and_continue"))
+    }
+}
+
+@detailsContent = {
+    @p{ @messages("zeroRatedSales.dropdownLine1") }
+    @p{
+        @messages("zeroRatedSales.dropdownLine2")
+        @bullets(
+            messages("zeroRatedSales.bullet1"),
+            messages("zeroRatedSales.bullet2"),
+            messages("zeroRatedSales.bullet3"),
+            messages("zeroRatedSales.bullet4"),
+            messages("zeroRatedSales.bullet5")
+        )
+    }
+    @p{
+        @messages("zeroRatedSales.beforeText")
+        @link(appConfig.VATRateDifferentGoodsURL, "zeroRatedSales.linkText").
     }
 }

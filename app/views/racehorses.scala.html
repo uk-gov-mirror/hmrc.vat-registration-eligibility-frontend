@@ -22,38 +22,29 @@
 @import models.requests.DataRequest
 
 @import deprecated.DeprecatedConstants
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@main_template(
-    title = messages("racehorses.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@layout(pageTitle = Some(title(form, messages("racehorses.title"))), backLink = true) {
+
+    @errorSummary(form.errors)
+
+    @h1(messages("racehorses.heading", DeprecatedConstants.fakeCompanyName))
+    @p{ @messages("racehorses.bulletText",DeprecatedConstants.fakeCompanyName) }
+    @bullets("racehorses.bullet1","racehorses.bullet2")
 
     @helpers.form(action = RacehorsesController.onSubmit(), 'autoComplete -> "off") {
-
-        @components.back_link()
-
-        @components.error_summary(form.errors)
-
-        <h1 class="heading-large" id="main-heading">@messages("racehorses.heading", DeprecatedConstants.fakeCompanyName)</h1>
-        <p id="help-text">@messages("racehorses.bulletText",DeprecatedConstants.fakeCompanyName)</p>
-
-
-        @components.text_with_bullets("",Seq("racehorses.bullet1","racehorses.bullet2"))
-
-        @components.vertical_input_radio(
-        field = form("value"),
-        radioOptions = Seq(
-        "true" -> messages("site.yes"),
-        "false" -> messages("site.no")
-        ),
-        radioAdditionalInfo = Map(),
-        '_labelAfter -> true,
-        '_labelClass -> "block-label",
-        '_legend -> messages("racehorses.heading", DeprecatedConstants.fakeCompanyName),
-        '_legendClass -> "visually-hidden"
+        @yesNoRadio(
+            form = form,
+            headingKey = "racehorses.heading",
+            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
+            isPageHeading = false,
+            classes = "govuk-visually-hidden"
         )
 
-        @components.submit_button()
+        @button(messages("site.save_and_continue"))
     }
+
 }

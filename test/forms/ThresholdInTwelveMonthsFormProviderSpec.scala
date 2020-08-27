@@ -34,8 +34,8 @@ class ThresholdInTwelveMonthsFormProviderSpec extends BooleanFieldBehaviours{
   val optionalDateForm = new ThresholdInTwelveMonthsFormProvider()(incorpDate)
 
   "bind" should {
-    val selectionFieldName = s"${ThresholdInTwelveMonthsId}Selection"
-    val dateFieldName = s"${ThresholdInTwelveMonthsId}Date"
+    val selectionFieldName = "value"
+    val dateFieldName = "valueDate"
     val dateRequiredKey = "thresholdInTwelveMonths.error.date.required"
     val dateInFutureKey = "thresholdInTwelveMonths.error.date.inFuture"
     val dateBeforeIncorpKey = "thresholdInTwelveMonths.error.date.beforeIncorp"

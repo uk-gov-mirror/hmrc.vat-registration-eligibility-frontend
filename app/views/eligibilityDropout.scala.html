@@ -16,25 +16,20 @@
 
 @import config.FrontendAppConfig
 @import models.requests.CacheIdentifierRequest
-@import uk.gov.hmrc.play.views.html.helpers.{form}
 @import deprecated.DeprecatedConstants
+@import views.html.layouts.layout
+@import views.html.newcomponents._
 
 @(default: Boolean = true)(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@main_template(
-    title = messages("eligibilityDropout.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@layout(pageTitle = Some(titleNoForm(messages("eligibilityDropout.title"))), backLink = true) {
 
-    @components.back_link()
+    @h1(messages("eligibilityDropout.heading", DeprecatedConstants.fakeCompanyName))
 
-<h1 class="heading-large" id="main-heading">@messages("eligibilityDropout.heading", DeprecatedConstants.fakeCompanyName)</h1>
-
-    @if(!default){
-        <p>@messages(s"eligibilityDropout.ApplicantUKNinoId.variant")</p>
+    @if(!default) {
+        @p{ @messages("eligibilityDropout.ApplicantUKNinoId.variant") }
     }
 
-    @form(action = controllers.routes.EligibilityDropoutController.onSubmit()) {
-        @components.button_link("site.use_other_service", appConfig.otrsUrl)
-    }
+    @link(appConfig.otrsUrl, messages("site.use_other_service"))
+
 }

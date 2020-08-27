@@ -24,9 +24,9 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.Navigator
 
-class IndexController @Inject()(val appConfig: FrontendAppConfig,
-                                val messagesApi: MessagesApi,
-                                navigator: Navigator) extends FrontendController with I18nSupport {
+class IndexController @Inject()(val messagesApi: MessagesApi,
+                                navigator: Navigator
+                               )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = Action { implicit request =>
     Redirect(routes.ThresholdInTwelveMonthsController.onPageLoad())
@@ -34,4 +34,5 @@ class IndexController @Inject()(val appConfig: FrontendAppConfig,
   def navigateToPageId(pageId: String) = Action { implicit request =>
     Redirect(navigator.pageIdToPageLoad(new Identifier {override def toString: String = pageId}))
   }
+
 }

@@ -40,7 +40,7 @@ import scala.concurrent.Future
 class ThresholdServiceSpec extends SpecBase with VATEligiblityMocks {
 
   val mockCache = CacheMap("testInternalId", Map(VoluntaryRegistrationId.toString -> JsBoolean(true)))
-
+  implicit val msgs = messages
 
   class Setup(idate:Option[LocalDate] = Some(LocalDate.of(2018,10,4))) {
       def dr(incorpDate:Option[LocalDate]) = DataRequest(FakeRequest(), "testInternalId", CurrentProfile("testRegId"), new UserAnswers(mockCache))
@@ -108,27 +108,27 @@ class ThresholdServiceSpec extends SpecBase with VATEligiblityMocks {
     }
 
     "always return not incorped helptext1 text when no incorpDate is used" in new Setup(None) {
-      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).contains(
         "£85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales sole traders can make before they have to register for VAT.") mustBe true
     }
 
     "always return less than 12 months helptext1 text when incorp date is less than 12 months ago" in new Setup(Some(LocalDate.now())) {
-      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).contains(
         s"$fakeIncorpDateMessage is the date $fakeCompanyName was set up.") mustBe true
     }
 
     "always return less than 12 months helptext1 text when incorp date is 1 day under 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(12).plusDays(1))) {
-      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).contains(
         s"$fakeIncorpDateMessage is the date $fakeCompanyName was set up.") mustBe true
     }
 
     "always return morethan or equal 12 months helptext1 text when incorp date is exactly 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(12))) {
-      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).contains(
         s"£85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales $fakeCompanyName can make before it has to register for VAT.") mustBe true
     }
 
     "always return morethan or equal 12 months helptext1 text when incorp date is over 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(12).minusDays(1))) {
-      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).body.contains(
+      service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).contains(
         s"£85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales $fakeCompanyName can make before it has to register for VAT.") mustBe true
     }
 

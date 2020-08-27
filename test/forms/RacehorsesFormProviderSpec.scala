@@ -27,7 +27,6 @@ class RacehorsesFormProviderSpec extends BooleanFieldBehaviours {
   val form = new RacehorsesFormProvider()()
 
   ".value" must {
-
     val fieldName = "value"
 
     behave like booleanField(

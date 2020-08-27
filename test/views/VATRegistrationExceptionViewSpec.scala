@@ -21,23 +21,21 @@ import deprecated.DeprecatedConstants
 import forms.VATRegistrationExceptionFormProvider
 import models.NormalMode
 import play.api.data.Form
-import views.behaviours.YesNoViewBehaviours
+import views.newbehaviours.YesNoViewBehaviours
 import views.html.vatRegistrationException
 
 class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
-  override val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
+  val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
   val messageKeyPrefix = "vatRegistrationException"
-
   val form = new VATRegistrationExceptionFormProvider()()
+  implicit val msgs = messages
 
   def createView = () => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   def createViewUsingForm = (form: Form[_]) => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "VATRegistrationException view" must {
-
-    behave like normalPage(createView, messageKeyPrefix)
-
-    behave like yesNoPage(createViewUsingForm, messageKeyPrefix, routes.VATRegistrationExceptionController.onSubmit().url)
+    behave like normalPage(createView(), messageKeyPrefix)
+    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VATRegistrationExceptionController.onSubmit().url)
   }
 }

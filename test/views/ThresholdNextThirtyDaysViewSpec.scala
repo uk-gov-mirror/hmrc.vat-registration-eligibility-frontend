@@ -21,22 +21,21 @@ import deprecated.DeprecatedConstants
 import forms.ThresholdNextThirtyDaysFormProvider
 import models.NormalMode
 import play.api.data.Form
-import views.behaviours.YesNoViewBehaviours
+import views.newbehaviours.YesNoViewBehaviours
 import views.html.thresholdNextThirtyDays
 
 class ThresholdNextThirtyDaysViewSpec extends YesNoViewBehaviours {
-  override val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
-
+  val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
   val messageKeyPrefix = "thresholdNextThirtyDays"
-
   val form = new ThresholdNextThirtyDaysFormProvider()()
+  implicit val msgs = messages
 
   def createView = () => thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   def createViewUsingForm = (form: Form[_]) => thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "ThresholdNextThirtyDays view" must {
-    behave like normalPage(createView, messageKeyPrefix)
-    behave like yesNoPage(createViewUsingForm, messageKeyPrefix, routes.ThresholdNextThirtyDaysController.onSubmit().url)
+    behave like normalPage(createView(), messageKeyPrefix, Seq(DeprecatedConstants.fakeCompanyName))
+    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.ThresholdNextThirtyDaysController.onSubmit().url, headingArgs = Seq(DeprecatedConstants.fakeCompanyName))
   }
 }

@@ -22,44 +22,36 @@
 @import models.requests.DataRequest
 
 @import deprecated.DeprecatedConstants
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@main_template(
-    title = messages("internationalActivities.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@layout(pageTitle = Some(title(form, messages("internationalActivities.title"))), backLink = true) {
+
+    @errorSummary(form.errors)
+
+    @h1(messages("internationalActivities.heading", DeprecatedConstants.fakeCompanyName))
+    @p{ @messages("internationalActivities.bulletText",DeprecatedConstants.fakeCompanyName)}
+
+    @bullets(
+        messages("internationalActivities.bullet1"),
+        messages("internationalActivities.bullet2"),
+        messages("internationalActivities.bullet3"),
+        messages("internationalActivities.bullet4"),
+        messages("internationalActivities.bullet5")
+    )
 
     @helpers.form(action = InternationalActivitiesController.onSubmit(), 'autoComplete -> "off") {
-
-        @components.back_link()
-
-        @components.error_summary(form.errors)
-
-        <h1 class="heading-large" id="main-heading">@messages("internationalActivities.heading", DeprecatedConstants.fakeCompanyName)</h1>
-        <p id="help-text">@messages("internationalActivities.bulletText",DeprecatedConstants.fakeCompanyName)</p>
-
-
-        @components.text_with_bullets("",
-                                    Seq("internationalActivities.bullet1",
-                                        "internationalActivities.bullet2",
-                                        "internationalActivities.bullet3",
-                                        "internationalActivities.bullet4",
-                                        "internationalActivities.bullet5"))
-
-        @components.vertical_input_radio(
-        field = form("value"),
-        radioOptions = Seq(
-        "true" -> messages("site.yes"),
-        "false" -> messages("site.no")
-        ),
-        radioAdditionalInfo = Map(),
-        '_labelAfter -> true,
-        '_labelClass -> "block-label",
-        '_legend -> messages("internationalActivities.heading", DeprecatedConstants.fakeCompanyName),
-        '_legendClass -> "visually-hidden"
+        @yesNoRadio(
+            form = form,
+            headingKey = "internationalActivities.heading",
+            isPageHeading = false,
+            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
+            classes = "govuk-visually-hidden"
         )
 
-
-@components.submit_button()
+        @button(messages("site.save_and_continue"))
     }
+
 }

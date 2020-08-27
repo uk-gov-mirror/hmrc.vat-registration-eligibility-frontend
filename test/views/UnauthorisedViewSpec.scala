@@ -16,14 +16,15 @@
 
 package views
 
-import views.behaviours.ViewBehaviours
+import views.newbehaviours.ViewBehaviours
 import views.html.unauthorised
 
 class UnauthorisedViewSpec extends ViewBehaviours {
 
   def view = () => unauthorised()(fakeRequest, messages, frontendAppConfig)
+  implicit val msgs = messages
 
   "Unauthorised view" must {
-    behave like normalPage(view, "unauthorised")
+    behave like normalPage(view(), "unauthorised")
   }
 }

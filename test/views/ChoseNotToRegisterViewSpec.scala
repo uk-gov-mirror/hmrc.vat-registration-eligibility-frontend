@@ -17,6 +17,7 @@
 package views
 
 import deprecated.DeprecatedConstants
+import play.api.i18n.Messages
 import views.newbehaviours.ViewBehaviours
 import views.html.choseNotToRegister
 

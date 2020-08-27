@@ -22,37 +22,28 @@
 @import models.requests.DataRequest
 
 @import deprecated.DeprecatedConstants
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@main_template(
-    title = messages("thresholdNextThirtyDays.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@layout(pageTitle = Some(title(form, messages("thresholdNextThirtyDays.title"))), backLink = true) {
+
+    @errorSummary(form.errors)
+
+    @h1(messages("thresholdNextThirtyDays.heading", DeprecatedConstants.fakeCompanyName))
+    @p{ @messages("thresholdNextThirtyDays.text", DeprecatedConstants.fakeCompanyName) }
 
     @helpers.form(action = ThresholdNextThirtyDaysController.onSubmit(), 'autoComplete -> "off") {
-
-        @components.back_link()
-
-        @components.error_summary(form.errors)
-
-        <h1 class="heading-large" id="main-heading">@messages("thresholdNextThirtyDays.heading",DeprecatedConstants.fakeCompanyName)</h1>
-        <p id="help-text">@messages("thresholdNextThirtyDays.text",DeprecatedConstants.fakeCompanyName)</p>
-
-
-
-        @components.vertical_input_radio(
-            field = form("value"),
-            radioOptions = Seq(
-                "true" -> messages("site.yes"),
-                "false" -> messages("site.no")
-            ),
-            radioAdditionalInfo = Map(),
-            '_labelAfter -> true,
-            '_labelClass -> "block-label",
-            '_legend -> messages("thresholdNextThirtyDays.heading", DeprecatedConstants.fakeCompanyName),
-            '_legendClass -> "visually-hidden"
+        @yesNoRadio(
+            form = form,
+            headingKey = "thresholdNextThirtyDays.heading",
+            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
+            isPageHeading = false,
+            classes = "govuk-visually-hidden"
         )
 
-        @components.submit_button()
+        @button(messages("site.save_and_continue"))
     }
+
 }

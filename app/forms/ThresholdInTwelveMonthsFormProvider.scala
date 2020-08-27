@@ -29,9 +29,9 @@ import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 
 class ThresholdInTwelveMonthsFormProvider @Inject() extends FormErrorHelper with Mappings {
 
-  val thresholdInTwelveMonthsSelection = s"${ThresholdInTwelveMonthsId}Selection"
-  val thresholdInTwelveMonthsDate = s"${ThresholdInTwelveMonthsId}Date"
-  val errorKeyRoot = s"$ThresholdInTwelveMonthsId.error"
+  val thresholdInTwelveMonthsSelection = s"value"
+  val thresholdInTwelveMonthsDate = s"valueDate"
+  val errorKeyRoot = "thresholdInTwelveMonths.error"
   val valueRequiredKey = s"$errorKeyRoot.required"
   val dateRequiredKey = s"$errorKeyRoot.date.required"
   val dateInFutureKey = s"$errorKeyRoot.date.inFuture"

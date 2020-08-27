@@ -32,7 +32,7 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase {
     new EligibilityDropoutController(messagesApi, FakeCacheIdentifierAction)
 
   def viewAsString(default: Boolean) = eligibilityDropout(default)(fakeCacheDataRequestIncorped, messages, appConfig).toString
-  def internationalView() = internationalActivityDropout(frontendAppConfig)(fakeCacheDataRequestIncorped, messages).toString
+  def internationalView() = internationalActivityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
   def agricultureView() = agriculturalDropout()(fakeCacheDataRequestIncorped, messages, appConfig).toString
 
   "EligibilityDropout Controller" must {
