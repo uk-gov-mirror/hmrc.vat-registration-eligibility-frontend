@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package views
+@import config.FrontendAppConfig
 
-import views.newbehaviours.ViewBehaviours
-import views.html.session_expired
+@import views.html.layouts.layout
+@import views.html.newcomponents._
 
-class SessionExpiredViewSpec extends ViewBehaviours {
+@()(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-  def view = () => session_expired()(fakeRequest, messages, frontendAppConfig)
-  implicit val msgs = messages
+@layout(pageTitle = Some(titleNoForm(messages("session_expired.title")))) {
 
-  "Session Expired view" must {
-    behave like normalPage(view(), "session_expired")
-  }
+    @h1(messages("session_expired.heading"))
+    @p{ @messages("session_expired.guidance") }
 
 }
