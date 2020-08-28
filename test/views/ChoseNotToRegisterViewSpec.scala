@@ -16,8 +16,6 @@
 
 package views
 
-import deprecated.DeprecatedConstants
-import play.api.i18n.Messages
 import views.newbehaviours.ViewBehaviours
 import views.html.choseNotToRegister
 
@@ -26,9 +24,15 @@ class ChoseNotToRegisterViewSpec extends ViewBehaviours {
   val messageKeyPrefix = "choseNotToRegister"
   implicit val msgs = messages
 
+  val h1 = "You've chosen not to register the business for VAT"
+  val finishButton = "Finish"
+
   def createView = () => choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)
 
   "ChoseNotToRegister view" must {
-    behave like normalPage(createView(), messageKeyPrefix, Seq(DeprecatedConstants.fakeCompanyName))
+    behave like normalPage(createView(), messageKeyPrefix)
+    behave like pageWithBackLink(createView())
+    behave like pageWithHeading(createView(), h1)
+    behave like pageWithSubmitButton(createView(), finishButton)
   }
 }

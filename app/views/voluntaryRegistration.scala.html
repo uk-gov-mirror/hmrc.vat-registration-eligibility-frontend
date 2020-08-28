@@ -18,10 +18,8 @@
 @import uk.gov.hmrc.play.views.html._
 @import controllers.routes._
 @import models.Mode
-@import utils.FormHelpers
 @import models.requests.DataRequest
 
-@import deprecated.DeprecatedConstants
 @import views.html.layouts.layout
 @import views.html.newcomponents._
 
@@ -31,22 +29,21 @@
 
     @errorSummary(form.errors)
 
-    @h1(messages("voluntaryRegistration.heading", DeprecatedConstants.fakeCompanyName))
-    @p{ @messages("voluntaryRegistration.text1",DeprecatedConstants.fakeCompanyName) }
+    @h1(messages("voluntaryRegistration.heading"))
+    @p{ @messages("voluntaryRegistration.text1") }
     @bullets(
         messages("voluntaryRegistration.bullet1"),
         messages("voluntaryRegistration.bullet2"),
         messages("voluntaryRegistration.bullet3")
     )
 
-    @h2(messages("voluntaryRegistration.heading2", DeprecatedConstants.fakeCompanyName))
+    @h2(messages("voluntaryRegistration.heading2"))
     @panelIndent{ @messages("voluntaryRegistration.text2") }
 
     @helpers.form(action = VoluntaryRegistrationController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "voluntaryRegistration.heading",
-            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
             isPageHeading = false,
             classes = "govuk-visually-hidden"
         )

@@ -17,7 +17,6 @@
 package views
 
 import controllers.routes
-import deprecated.DeprecatedConstants
 import forms.VATRegistrationExceptionFormProvider
 import models.NormalMode
 import play.api.data.Form
@@ -25,7 +24,6 @@ import views.newbehaviours.YesNoViewBehaviours
 import views.html.vatRegistrationException
 
 class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
-  val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
   val messageKeyPrefix = "vatRegistrationException"
   val form = new VATRegistrationExceptionFormProvider()()
   implicit val msgs = messages
