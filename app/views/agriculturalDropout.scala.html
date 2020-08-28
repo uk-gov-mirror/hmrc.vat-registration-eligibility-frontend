@@ -19,16 +19,15 @@
 @import uk.gov.hmrc.play.views.html.helpers.form
 @import views.html.layouts.layout
 @import views.html.newcomponents._
-@import deprecated.DeprecatedConstants
 
 @()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @layout(pageTitle = Some(titleNoForm(messages("eligibilityDropout.title"))), backLink = true) {
 
-    @h1(messages("eligibilityDropout.heading", DeprecatedConstants.fakeCompanyName))
+    @h1(messages("eligibilityDropout.heading"))
 
     @p{
-        @messages("eligibility.agriculture.text", DeprecatedConstants.fakeCompanyName)
+        @messages("eligibility.agriculture.text")
         @link(appConfig.VAT98FormURL, messages("eligibility.agriculture.link"))
     }
 
