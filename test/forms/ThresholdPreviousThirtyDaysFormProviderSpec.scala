@@ -32,7 +32,7 @@ class ThresholdPreviousThirtyDaysFormProviderSpec extends BooleanFieldBehaviours
   val optionalDateForm = new ThresholdPreviousThirtyDaysFormProvider()(incorpDate)
 
   "bind" should {
-    val selectionFieldName = s"thresholdPreviousThirtyDaysSelection"
+    val selectionFieldName = s"value"
     val dateFieldName = s"thresholdPreviousThirtyDaysDate"
     val dateRequiredKey = "thresholdPreviousThirtyDays.error.date.required"
     val dateInFutureKey = "thresholdPreviousThirtyDays.error.date.inFuture"

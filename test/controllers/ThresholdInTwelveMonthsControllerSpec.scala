@@ -53,7 +53,6 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
   "ThresholdInTwelveMonths Controller" must {
     when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
     "return OK and the correct view for a GET" in {
-
       val result = controller().onPageLoad()(fakeRequest)
 
       status(result) mustBe OK
@@ -73,9 +72,9 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
     "redirect to the next page when valid data is submitted and also remove Voluntary registration because answer to question is true" in {
       when(mockThresholdService.removeVoluntaryAndNextThirtyDays(any())) thenReturn Future.successful(emptyCacheMap)
 
-      val postRequest = fakeRequest.withFormUrlEncodedBody("thresholdInTwelveMonthsSelection" -> "true",
-        "thresholdInTwelveMonthsDate.year" -> LocalDate.now().getYear.toString,
-        "thresholdInTwelveMonthsDate.month" -> LocalDate.now().getMonthValue.toString
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true",
+        "valueDate.year" -> LocalDate.now().getYear.toString,
+        "valueDate.month" -> LocalDate.now().getMonthValue.toString
       )
 
       val result = controller().onSubmit()(postRequest)

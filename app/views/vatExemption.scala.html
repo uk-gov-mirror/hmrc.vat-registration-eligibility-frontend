@@ -22,36 +22,28 @@
 @import models.requests.DataRequest
 
 @import deprecated.DeprecatedConstants
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@main_template(
-    title = messages("vatExemption.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@layout(pageTitle = Some(title(form, messages("vatExemption.title"))), backLink = true) {
+
+    @errorSummary(form.errors)
+
+    @h1(messages("vatExemption.heading", DeprecatedConstants.fakeCompanyName))
+    @p{ @messages("vatExemption.text", DeprecatedConstants.fakeCompanyName) }
 
     @helpers.form(action = VATExemptionController.onSubmit(), 'autoComplete -> "off") {
-
-        @components.back_link()
-
-        @components.error_summary(form.errors)
-
-        <h1 class="heading-large" id="main-heading">@messages("vatExemption.heading",DeprecatedConstants.fakeCompanyName)</h1>
-
-        <p id="help-text">@messages("vatExemption.text",DeprecatedConstants.fakeCompanyName)</p>
-
-        @components.vertical_input_radio(
-        field = form("value"),
-        radioOptions = Seq(
-        "true" -> messages("site.yes"),
-        "false" -> messages("site.no")
-        ),
-        radioAdditionalInfo = Map(),
-        '_labelAfter -> true,
-        '_labelClass -> "block-label",
-        '_legend -> messages("vatExemption.heading", DeprecatedConstants.fakeCompanyName),
-        '_legendClass -> "visually-hidden"
+        @yesNoRadio(
+            form = form,
+            headingKey = "vatExemption.heading",
+            isPageHeading = false,
+            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
+            classes = "govuk-visually-hidden"
         )
 
-        @components.submit_button()
+        @button(messages("site.save_and_continue"))
     }
+
 }

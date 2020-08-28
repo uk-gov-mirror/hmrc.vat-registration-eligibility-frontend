@@ -68,7 +68,7 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
 
     "redirect to the next page when valid data is submitted with value of true with a date" in {
       when(mockThresholdService.removeVoluntaryRegistration(any())) thenReturn Future.successful(emptyCacheMap)
-      val postRequest = fakeRequest.withFormUrlEncodedBody("thresholdPreviousThirtyDaysSelection" -> "true",
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true",
         "thresholdPreviousThirtyDaysDate.year" -> LocalDate.now().getYear.toString,
         "thresholdPreviousThirtyDaysDate.month" -> LocalDate.now().getMonthValue.toString,
         "thresholdPreviousThirtyDaysDate.day" -> LocalDate.now().getDayOfMonth.toString
@@ -81,7 +81,7 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
       verify(mockThresholdService, times(1)).removeVoluntaryRegistration(any())
     }
     "redirect to the next page when valid data is submitted with value of false" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody("thresholdPreviousThirtyDaysSelection" -> "false")
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "false")
 
       val result = controller().onSubmit()(postRequest)
 

@@ -27,78 +27,51 @@
 
 @import deprecated.DeprecatedConstants
 
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+
 @(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@hiddenYesContent = {
-<div class="additional-option-block panel panel-border-narrow">
-    <h2 class="heading-small">@{thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry)}</h2>
-    @components.input_date(
-    id = "thresholdInTwelveMonthsDate",
-    label = "",
-    errorKey = form.error("thresholdInTwelveMonthsDate").map(error => error.message).getOrElse(""),
-    dayErrorKey = "",
-    displayDay = false,
-    monthErrorKey = "",
-    yearErrorKey = "",
-    valueYear = form("thresholdInTwelveMonthsDate.year").value,
-    valueMonth = form("thresholdInTwelveMonthsDate.month").value,
-    hint = Some(messages("thresholdInTwelveMonths.dateHint")),
-    errorArgs = form.error("thresholdInTwelveMonthsDate").map(error => error.args).getOrElse(Seq())
-    )
-</div>
-}
+@layout(pageTitle = Some(messages("thresholdInTwelveMonths.title")), backLink = true) {
 
+    @errorSummary(form.errors)
 
-@displayHelpText1 = @{thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1TwelveMonths)}
+    @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths))
+    @p{ @thresholdService.returnThresholdDateResult[String](thresholdService.returnHelpText1TwelveMonths) }
 
-@displayMainHeading = @{
-<h1 class="heading-large" id="main-heading">{thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths)}</h1>
-}
+    @details(messages("thresholdInTwelveMonths.dropdownText"), detailsContent)
 
-@displayHelpText2 = @{thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText2TwelveMonths)}
-
-@main_template(
-    title = messages("thresholdInTwelveMonths.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+    @p{ @thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText2TwelveMonths) }
 
     @helpers.form(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off") {
-
-        @components.back_link()
-
-        @components.error_summary(form.errors)
-
-        @displayMainHeading
-
-        @displayHelpText1
-
-
-    <div class="form-group">
-        <details>
-          <summary><span class="summary">@Messages("thresholdInTwelveMonths.dropdownText")</span></summary>
-          <div class="panel panel-border-narrow">
-             <p>@Messages("thresholdInTwelveMonths.disclosureText", DeprecatedConstants.fakeCompanyName)</p>
-
-            @components.text_with_link("thresholdInTwelveMonths.beforeLinkText", "thresholdInTwelveMonths.linkText", appConfig.VATRateDifferentGoodsURL, Some("."))
-          </div>
-     </details>
-    </div>
-
-        @displayHelpText2
-
-        @components.vertical_input_radio(
-            field = form("thresholdInTwelveMonthsSelection"),
-            radioOptions = Seq(
-                "true" -> messages("site.yes"),
-                "false" -> messages("site.no")
-            ),
-            radioAdditionalInfo = Map("true" -> hiddenYesContent),
-            '_labelAfter -> true,
-            '_labelClass -> "block-label",
-            '_legend -> thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths),
-            '_legendClass -> "visually-hidden"
+        @conditionalYesNoRadio(
+            form = form,
+            headingKey = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths),
+            ifYes = Some(hiddenYesContent),
+            isPageHeading = false,
+            classes = "govuk-visually-hidden"
         )
 
-        @components.submit_button()
+        @button(messages("site.save_and_continue"))
+    }
+
+}
+
+@hiddenYesContent = {
+    @h2(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry))
+    @inputDate(form = form,
+        legendContent = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry),
+        legendClasses = "govuk-heading-small",
+        id = "valueDate",
+        legendAsPageHeading = false,
+        includeDay = false
+    )
+}
+
+@detailsContent = {
+    @p{ @messages("thresholdInTwelveMonths.disclosureText", DeprecatedConstants.fakeCompanyName)}
+    @p {
+        @messages("thresholdInTwelveMonths.beforeLinkText")
+        @link(appConfig.VATRateDifferentGoodsURL, "thresholdInTwelveMonths.linkText").
     }
 }

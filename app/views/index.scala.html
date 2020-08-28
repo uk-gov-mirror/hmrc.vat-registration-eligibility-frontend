@@ -16,14 +16,14 @@
 
 @import config.FrontendAppConfig
 
-@(appConfig: FrontendAppConfig)(implicit request: Request[_], messages: Messages)
+@import views.html.layouts.layout
+@import views.html.newcomponents._
 
-@main_template(
-    title = messages("index.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@()(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-    @components.heading("index.heading")
+@layout(pageTitle = Some(titleNoForm(messages("index.title")))) {
 
-    <p>@messages("index.guidance")</p>
+    @h1("index.heading")
+    @p{ @messages("index.guidance") }
+
 }

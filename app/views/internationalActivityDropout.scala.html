@@ -16,49 +16,34 @@
 
 @import config.FrontendAppConfig
 @import models.requests.CacheIdentifierRequest
-@import uk.gov.hmrc.play.views.html.helpers.{form}
 
 @import deprecated.DeprecatedConstants
-@(appConfig: FrontendAppConfig)(implicit request: CacheIdentifierRequest[_], messages: Messages)
+@import views.html.layouts.layout
+@import views.html.newcomponents._
 
-@main_template(
-    title = messages("eligibilityDropout.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-    @components.back_link()
+@layout(pageTitle = Some(titleNoForm(messages("eligibilityDropout.title"))), backLink = true) {
 
-    <h1 class="heading-large" id="main-heading">@messages("eligibilityDropout.heading",DeprecatedConstants.fakeCompanyName)</h1>
+    @h1(messages("eligibilityDropout.heading",DeprecatedConstants.fakeCompanyName))
+    @p{ @messages("eligibility.international.special.text",DeprecatedConstants.fakeCompanyName) }
 
-    <p>@Messages("eligibility.international.special.text",DeprecatedConstants.fakeCompanyName)</p>
-    <ul class="list list-bullet">
+    <ul class="govuk-list govuk-list--bullet">
         <li>
-            @components.text_with_link(
-                "eligibility.international.bullet0",
-                "eligibility.international.link",
-                appConfig.VAT1FormURL
-            )
+            @messages("eligibility.international.bullet0")
+            @link( appConfig.VAT1FormURL, messages("eligibility.international.link"))
         </li>
         <li>
-            @components.text_with_link(
-                "eligibility.international.bullet1",
-                "eligibility.international.link1",
-                appConfig.VAT1BFormURL
-            )
+            @messages("eligibility.international.bullet1")
+            @link(appConfig.VAT1BFormURL, messages("eligibility.international.link1"))
         </li>
         <li>
-            @components.text_with_link(
-            "eligibility.international.bullet2",
-            "eligibility.international.link2",
-            appConfig.VAT1CFormURL
-            )
+            @messages("eligibility.international.bullet2")
+            @link(appConfig.VAT1CFormURL, messages("eligibility.international.link2"))
         </li>
         <li>
-            @components.text_with_link(
-            "eligibility.international.bullet3",
-            "eligibility.international.link3",
-            appConfig.otrsUrl
-            )
+            @messages("eligibility.international.bullet3")
+            @link(appConfig.otrsUrl, messages("eligibility.international.link3"))
         </li>
     </ul>
 

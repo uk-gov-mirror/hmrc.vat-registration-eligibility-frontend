@@ -24,7 +24,7 @@ import deprecated.DeprecatedConstants
 import identifiers.{ThresholdNextThirtyDaysId, VATRegistrationExceptionId, VoluntaryRegistrationId}
 import javax.inject.Inject
 import models.requests.DataRequest
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.VATDateHelper
@@ -77,11 +77,11 @@ trait ThresholdService extends I18nSupport {
     }
   }
 
-  def returnHelpText1TwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_]): Html = {
+  def returnHelpText1TwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_], messages: Messages): String = {
     enum match {
-      case notIncorped() => views.html.components.text("thresholdInTwelveMonths.firstHelpTextNotIncorp")
-      case limitedIncorpedLessThan12MonthsAgo() => views.html.components.text_with_multiple_variables("thresholdInTwelveMonths.firstHelpTextIncorpLess12m", DeprecatedConstants.fakeIncorpDateMessage, DeprecatedConstants.fakeCompanyName)
-      case _ => views.html.components.text_with_variables("thresholdInTwelveMonths.firstHelpTextIncorpMore12m", DeprecatedConstants.fakeCompanyName)
+      case notIncorped() => messages("thresholdInTwelveMonths.firstHelpTextNotIncorp")
+      case limitedIncorpedLessThan12MonthsAgo() => messages("thresholdInTwelveMonths.firstHelpTextIncorpLess12m", DeprecatedConstants.fakeIncorpDateMessage, DeprecatedConstants.fakeCompanyName)
+      case _ => messages("thresholdInTwelveMonths.firstHelpTextIncorpMore12m", DeprecatedConstants.fakeCompanyName)
     }
   }
 
@@ -111,11 +111,38 @@ trait ThresholdService extends I18nSupport {
   def returnHelpText1Previous(enum: ThresholdDateResult)(implicit r:DataRequest[_]): Html = {
     enum match {
       case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo())   => Html("")
-      case limitedIncorpedTaxYear2016to2017()       => views.html.components.text_with_bullets("thresholdPreviousThirtyDays.text",Seq("thresholdPreviousThirtyDays.bullet1", "thresholdPreviousThirtyDays.bullet2"))
-      case limitedIncorpedTaxYear2015to2016()       => views.html.components.text_with_bullets("thresholdPreviousThirtyDays.text",Seq("thresholdPreviousThirtyDays.bullet1", "thresholdPreviousThirtyDays.bullet2", "thresholdPreviousThirtyDays.bullet3"))
+      case limitedIncorpedTaxYear2016to2017() => HtmlFormat.fill(collection.immutable.Seq(
+        views.html.newcomponents.p{
+          Html(messagesApi("thresholdPreviousThirtyDays.text"))
+          views.html.newcomponents.bullets(
+            messagesApi("thresholdPreviousThirtyDays.bullet1"),
+            messagesApi("thresholdPreviousThirtyDays.bullet2"))
+        }
+      ))
+      case limitedIncorpedTaxYear2015to2016() => HtmlFormat.fill(collection.immutable.Seq(
+        views.html.newcomponents.p{
+          Html(messagesApi("thresholdPreviousThirtyDays.text"))
+          views.html.newcomponents.bullets(
+            messagesApi("thresholdPreviousThirtyDays.bullet1"),
+            messagesApi("thresholdPreviousThirtyDays.bullet2"),
+            messagesApi("thresholdPreviousThirtyDays.bullet3")
+          )
+        }
+      ))
       case _                                        => HtmlFormat.fill(collection.immutable.Seq(
-        views.html.components.text_with_bullets("thresholdPreviousThirtyDays.text",Seq("thresholdPreviousThirtyDays.bullet1", "thresholdPreviousThirtyDays.bullet2", "thresholdPreviousThirtyDays.bullet3")),
-        views.html.components.text_with_link("thresholdPreviousThirtyDays.beforeLinkText","thresholdPreviousThirtyDays.linkText",appConfig.VATNotice700_1supplementURL, Some("."))
+        views.html.newcomponents.p{
+          Html(messagesApi("thresholdPreviousThirtyDays.text"))
+          views.html.newcomponents.bullets(
+            messagesApi("thresholdPreviousThirtyDays.bullet1"),
+            messagesApi("thresholdPreviousThirtyDays.bullet2"),
+            messagesApi("thresholdPreviousThirtyDays.bullet3")
+          )
+        },
+        views.html.newcomponents.p {
+          Html(messagesApi("thresholdPreviousThirtyDays.beforeLinkText"))
+          views.html.newcomponents.link(appConfig.VATNotice700_1supplementURL, messagesApi("thresholdPreviousThirtyDays.linkText"))
+          Html(".")
+        }
       )
      )
     }

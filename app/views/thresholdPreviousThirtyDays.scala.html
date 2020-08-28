@@ -23,59 +23,42 @@
 @import utils.VATDateHelper
 @import services.ThresholdService
 
+@import deprecated.DeprecatedConstants
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+
 @(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@hiddenYesContent = {
-    <div class="additional-option-block panel panel-border-narrow">
-        <h2 class="heading-small">@messages("thresholdPreviousThirtyDays.heading2")</h2>
-        @components.input_date(
-            id = "thresholdPreviousThirtyDaysDate",
-            label = messages("thresholdPreviousThirtyDays.heading2"),
-            errorKey = form.error("thresholdPreviousThirtyDaysDate").map(error => error.message).getOrElse(""),
-            dayErrorKey = "",
-            monthErrorKey = "",
-            yearErrorKey = "",
-            valueDay = form("thresholdPreviousThirtyDaysDate.day").value,
-            valueMonth = form("thresholdPreviousThirtyDaysDate.month").value,
-            valueYear = form("thresholdPreviousThirtyDaysDate.year").value,
-            hint = Some(messages("thresholdPreviousThirtyDays.dateHint")),
-            errorArgs = form.error("thresholdPreviousThirtyDaysDate").map(error => error.args).getOrElse(Seq())
-        )
-    </div>
-}
-
-@displayHeading = @{<h1 class="heading-large" id="main-heading">{thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious)}</h1>}
+@displayHeading = @{ <h1 class="heading-large" id="main-heading">{thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious)}</h1>}
 
 @displayHelpText = @{thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1Previous)}
 
-@main_template(
-    title = messages("thresholdPreviousThirtyDays.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@layout(pageTitle = Some(title(form, messages("thresholdPreviousThirtyDays.title"))), backLink = true) {
+
+    @errorSummary(form.errors)
+
+    @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious))
+    @p{ @thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1Previous) }
 
     @helpers.form(action = ThresholdPreviousThirtyDaysController.onSubmit(), 'autoComplete -> "off") {
-
-        @components.back_link()
-
-        @components.error_summary(form.errors)
-
-        @displayHeading
-
-        @displayHelpText
-
-        @components.vertical_input_radio(
-            field = form("thresholdPreviousThirtyDaysSelection"),
-            radioOptions = Seq(
-                "true" -> messages("site.yes"),
-                "false" -> messages("site.no")
-            ),
-            radioAdditionalInfo = Map("true" -> hiddenYesContent),
-            '_labelAfter -> true,
-            '_labelClass -> "block-label",
-            '_legend -> thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious),
-            '_legendClass -> "visually-hidden"
+        @conditionalYesNoRadio(
+            form = form,
+            headingKey = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious),
+            ifYes = Some(hiddenYesContent),
+            isPageHeading = false,
+            classes = "govuk-visually-hidden"
         )
 
-        @components.submit_button()
+        @button(messages("site.save_and_continue"))
     }
+
+}
+
+@hiddenYesContent = {
+    @inputDate(form = form,
+        legendContent = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry),
+        legendClasses = "govuk-heading-small",
+        id = "thresholdPreviousThirtyDaysDate",
+        legendAsPageHeading = false
+    )
 }

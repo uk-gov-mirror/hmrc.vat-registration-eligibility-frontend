@@ -22,43 +22,35 @@
 @import models.requests.DataRequest
 
 @import deprecated.DeprecatedConstants
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@main_template(
-    title = messages("voluntaryRegistration.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+@layout(pageTitle = Some(title(form, messages("voluntaryRegistration.title"))), backLink = true) {
+
+    @errorSummary(form.errors)
+
+    @h1(messages("voluntaryRegistration.heading", DeprecatedConstants.fakeCompanyName))
+    @p{ @messages("voluntaryRegistration.text1",DeprecatedConstants.fakeCompanyName) }
+    @bullets(
+        messages("voluntaryRegistration.bullet1"),
+        messages("voluntaryRegistration.bullet2"),
+        messages("voluntaryRegistration.bullet3")
+    )
+
+    @h2(messages("voluntaryRegistration.heading2", DeprecatedConstants.fakeCompanyName))
+    @panelIndent{ @messages("voluntaryRegistration.text2") }
 
     @helpers.form(action = VoluntaryRegistrationController.onSubmit(), 'autoComplete -> "off") {
-
-        @components.back_link()
-
-        @components.error_summary(form.errors)
-
-        <h1 class="heading-large" id="main-heading">@messages("voluntaryRegistration.heading", DeprecatedConstants.fakeCompanyName)</h1>
-
-
-        <p id="help-text">@messages("voluntaryRegistration.text1",DeprecatedConstants.fakeCompanyName)</p>
-        @components.text_with_bullets("",Seq("voluntaryRegistration.bullet1","voluntaryRegistration.bullet2","voluntaryRegistration.bullet3"))
-
-        <h2 class="heading-medium" id="main-heading">@messages("voluntaryRegistration.heading2", DeprecatedConstants.fakeCompanyName)</h2>
-        <div class="panel panel-border-wide">
-            <p>@messages("voluntaryRegistration.text2")</p>
-        </div>
-
-        @components.vertical_input_radio(
-        field = form("value"),
-        radioOptions = Seq(
-        "true" -> messages("site.yes"),
-        "false" -> messages("site.no")
-        ),
-        radioAdditionalInfo = Map(),
-        '_labelAfter -> true,
-        '_labelClass -> "block-label",
-        '_legend -> messages("voluntaryRegistration.heading", DeprecatedConstants.fakeCompanyName),
-        '_legendClass -> "visually-hidden"
+        @yesNoRadio(
+            form = form,
+            headingKey = "voluntaryRegistration.heading",
+            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
+            isPageHeading = false,
+            classes = "govuk-visually-hidden"
         )
 
-        @components.submit_button()
+        @button(messages("site.save_and_continue"))
     }
 }

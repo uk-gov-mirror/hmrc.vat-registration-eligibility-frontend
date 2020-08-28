@@ -20,28 +20,28 @@ import controllers.routes
 import forms.InvolvedInOtherBusinessFormProvider
 import models.NormalMode
 import play.api.data.Form
-import views.behaviours.YesNoViewBehaviours
+import views.newbehaviours.YesNoViewBehaviours
 import views.html.involvedInOtherBusiness
 
 class InvolvedInOtherBusinessViewSpec extends YesNoViewBehaviours {
 
   val messageKeyPrefix = "involvedInOtherBusiness"
-
   val form = new InvolvedInOtherBusinessFormProvider().form()
+  implicit val msgs = messages
 
-  def createView(officer: Option[String] = None) = () => involvedInOtherBusiness(form, NormalMode, officer)(fakeRequest, messages, frontendAppConfig)
+  def createView(officer: Option[String] = None) = involvedInOtherBusiness(form, NormalMode, officer)(fakeRequest, messages, frontendAppConfig)
 
   def createViewUsingForm(officer: Option[String] = None) = (form: Form[_]) => involvedInOtherBusiness(form, NormalMode, officer)(fakeRequest, messages, frontendAppConfig)
 
   "InvolvedInOtherBusiness view with no acting on behalf of officer" must {
     behave like normalPage(createView(), messageKeyPrefix)
-    behave like yesNoPage(createViewUsingForm(), messageKeyPrefix, routes.InvolvedInOtherBusinessController.onSubmit().url)
+    behave like yesNoPage(form, createViewUsingForm(), messageKeyPrefix, routes.InvolvedInOtherBusinessController.onSubmit().url)
 
     "display the right headings and bullets correctly" in {
-      val doc = asDocument(createView()())
-      doc.getElementById("main-heading").text() mustBe "Have you been involved with another business or taken over a VAT-registered business?"
-      doc.getElementById("involveBullet1").text() mustBe "over the past 2 years, you have had another self-employed business in the UK or Isle of Man (do not tell us if your only source of self-employed income was from being a landlord)"
-      doc.getElementById("involveBullet5").text() mustBe "the company has taken over another VAT-registered company that was making a profit"
+      val doc = asDocument(createView())
+      doc.select("h1").text() mustBe "Have you been involved with another business or taken over a VAT-registered business?"
+      doc.select("li:nth-of-type(1)").first().text() mustBe "over the past 2 years, you have had another self-employed business in the UK or Isle of Man (do not tell us if your only source of self-employed income was from being a landlord)"
+      doc.select("li:nth-of-type(5)").first().text() mustBe "the company has taken over another VAT-registered company that was making a profit"
     }
   }
 
