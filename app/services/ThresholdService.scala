@@ -88,17 +88,33 @@ trait ThresholdService extends I18nSupport {
   def returnHelpText2TwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_]): Html = {
     enum match {
       case limitedIncorpedLessThan12MonthsAgo() => Html("")
-      case limitedIncorpedEqualOrAfter20170401() => views.html.components.text_with_variables("thresholdInTwelveMonths.over85kThreshold", DeprecatedConstants.fakeCompanyName)
-      case limitedIncorpedTaxYear2016to2017() => HtmlFormat.fill(
-        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overEitherOtherThresholds", DeprecatedConstants.fakeCompanyName),
-          views.html.components.text_with_bullets("", Seq("thresholdInTwelveMonths.bullet1", "thresholdInTwelveMonths.bullet2"))))
-      case limitedIncorpedTaxYear2015to2016() => HtmlFormat.fill(
-        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overAnyOtherThresholds", DeprecatedConstants.fakeCompanyName),
-          views.html.components.text_with_bullets("", Seq("thresholdInTwelveMonths.bullet1", "thresholdInTwelveMonths.bullet2", "thresholdInTwelveMonths.bullet3"))))
-      case _ => HtmlFormat.fill(
-        collection.immutable.Seq(views.html.components.text_with_variables("thresholdInTwelveMonths.overAnyOtherThresholds", DeprecatedConstants.fakeCompanyName),
-          views.html.components.text_with_bullets("", Seq("thresholdInTwelveMonths.bullet1", "thresholdInTwelveMonths.bullet2", "thresholdInTwelveMonths.bullet3")),
-          views.html.components.text_with_link("thresholdInTwelveMonths.beforeLinkText2", "thresholdInTwelveMonths.linkText2", appConfig.VATNotice700_1supplementURL, Some("."))))
+      case limitedIncorpedEqualOrAfter20170401() =>
+        views.html.newcomponents.p{Html(messagesApi("thresholdInTwelveMonths.over85kThreshold", DeprecatedConstants.fakeCompanyName))}
+      case limitedIncorpedTaxYear2016to2017() => HtmlFormat.fill(collection.immutable.Seq(
+        views.html.newcomponents.p{Html(messagesApi("thresholdInTwelveMonths.overEitherOtherThresholds", DeprecatedConstants.fakeCompanyName))},
+        views.html.newcomponents.bullets(messagesApi("thresholdInTwelveMonths.bullet1"), messagesApi("thresholdInTwelveMonths.bullet2"))
+      ))
+      case limitedIncorpedTaxYear2015to2016() => HtmlFormat.fill(collection.immutable.Seq(
+        views.html.newcomponents.p{Html(messagesApi("thresholdInTwelveMonths.overAnyOtherThresholds", DeprecatedConstants.fakeCompanyName))},
+        views.html.newcomponents.bullets(
+          messagesApi("thresholdInTwelveMonths.bullet1"),
+          messagesApi("thresholdInTwelveMonths.bullet2"),
+          messagesApi("thresholdInTwelveMonths.bullet3")
+        )
+      ))
+      case _ => HtmlFormat.fill(collection.immutable.Seq(
+        views.html.newcomponents.p{Html(messagesApi("thresholdInTwelveMonths.overAnyOtherThresholds", DeprecatedConstants.fakeCompanyName))},
+        views.html.newcomponents.bullets(
+          messagesApi("thresholdInTwelveMonths.bullet1"),
+          messagesApi("thresholdInTwelveMonths.bullet2"),
+          messagesApi("thresholdInTwelveMonths.bullet3")
+        ),
+        views.html.newcomponents.p {
+          messagesApi("thresholdInTwelveMonths.beforeLinkText2")
+          views.html.newcomponents.link(appConfig.VATNotice700_1supplementURL, "thresholdInTwelveMonths.linkText2")
+          Html(".")
+        }
+      ))
     }
   }
 
@@ -112,32 +128,27 @@ trait ThresholdService extends I18nSupport {
     enum match {
       case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo())   => Html("")
       case limitedIncorpedTaxYear2016to2017() => HtmlFormat.fill(collection.immutable.Seq(
-        views.html.newcomponents.p{
-          Html(messagesApi("thresholdPreviousThirtyDays.text"))
-          views.html.newcomponents.bullets(
-            messagesApi("thresholdPreviousThirtyDays.bullet1"),
-            messagesApi("thresholdPreviousThirtyDays.bullet2"))
-        }
+        views.html.newcomponents.p{Html(messagesApi("thresholdPreviousThirtyDays.text"))},
+        views.html.newcomponents.bullets(
+          messagesApi("thresholdPreviousThirtyDays.bullet1"),
+          messagesApi("thresholdPreviousThirtyDays.bullet2")
+        )
       ))
       case limitedIncorpedTaxYear2015to2016() => HtmlFormat.fill(collection.immutable.Seq(
-        views.html.newcomponents.p{
-          Html(messagesApi("thresholdPreviousThirtyDays.text"))
-          views.html.newcomponents.bullets(
-            messagesApi("thresholdPreviousThirtyDays.bullet1"),
-            messagesApi("thresholdPreviousThirtyDays.bullet2"),
-            messagesApi("thresholdPreviousThirtyDays.bullet3")
-          )
-        }
+        views.html.newcomponents.p{Html(messagesApi("thresholdPreviousThirtyDays.text"))},
+        views.html.newcomponents.bullets(
+          messagesApi("thresholdPreviousThirtyDays.bullet1"),
+          messagesApi("thresholdPreviousThirtyDays.bullet2"),
+          messagesApi("thresholdPreviousThirtyDays.bullet3")
+        )
       ))
       case _                                        => HtmlFormat.fill(collection.immutable.Seq(
-        views.html.newcomponents.p{
-          Html(messagesApi("thresholdPreviousThirtyDays.text"))
-          views.html.newcomponents.bullets(
-            messagesApi("thresholdPreviousThirtyDays.bullet1"),
-            messagesApi("thresholdPreviousThirtyDays.bullet2"),
-            messagesApi("thresholdPreviousThirtyDays.bullet3")
-          )
-        },
+        views.html.newcomponents.p{Html(messagesApi("thresholdPreviousThirtyDays.text"))},
+        views.html.newcomponents.bullets(
+          messagesApi("thresholdPreviousThirtyDays.bullet1"),
+          messagesApi("thresholdPreviousThirtyDays.bullet2"),
+          messagesApi("thresholdPreviousThirtyDays.bullet3")
+        ),
         views.html.newcomponents.p {
           Html(messagesApi("thresholdPreviousThirtyDays.beforeLinkText"))
           views.html.newcomponents.link(appConfig.VATNotice700_1supplementURL, messagesApi("thresholdPreviousThirtyDays.linkText"))

@@ -14,6 +14,6 @@
  * limitations under the License.
  *@
 
-@(msg: String, classes: String = "govuk-heading-l", optId: Option[String] = None)(implicit messages: Messages)
+@(msg: String, classes: String = "govuk-heading-m", optId: Option[String] = None)(implicit messages: Messages)
 
 <h2 @optId.map(value => s"id=$value") class="@classes">@messages(msg)</h2>
