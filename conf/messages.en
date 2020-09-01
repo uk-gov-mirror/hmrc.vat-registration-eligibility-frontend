@@ -211,9 +211,9 @@ agriculturalFlatRateScheme.beforeLinkText = Find out more about the
 agriculturalFlatRateScheme.linkText = Agricultural Flat Rate Scheme (opens in a new window)
 
 racehorses.title = Will the business be doing any of the following?
-racehorses.heading = Will {0} be doing any of the following?
+racehorses.heading = Will the business be doing any of the following?
 racehorses.error.required = Tell us if the company will doing doing either of these things
-racehorses.bulletText = Tell us if {0} will:
+racehorses.bulletText = Tell us if the business will:
 racehorses.bullet1 = buy, sell or rent out land or property as a business activity (not just to have its own premises)
 racehorses.bullet2 = own one or more racehorses
 

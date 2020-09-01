@@ -21,7 +21,6 @@
 @import utils.FormHelpers
 @import models.requests.DataRequest
 
-@import deprecated.DeprecatedConstants
 @import views.html.layouts.layout
 @import views.html.newcomponents._
 
@@ -31,15 +30,14 @@
 
     @errorSummary(form.errors)
 
-    @h1(messages("racehorses.heading", DeprecatedConstants.fakeCompanyName))
-    @p{ @messages("racehorses.bulletText",DeprecatedConstants.fakeCompanyName) }
+    @h1(messages("racehorses.heading"))
+    @p{ @messages("racehorses.bulletText") }
     @bullets("racehorses.bullet1","racehorses.bullet2")
 
     @helpers.form(action = RacehorsesController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "racehorses.heading",
-            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
             isPageHeading = false,
             classes = "govuk-visually-hidden"
         )
