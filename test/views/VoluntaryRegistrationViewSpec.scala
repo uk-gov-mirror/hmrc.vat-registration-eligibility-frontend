@@ -17,7 +17,6 @@
 package views
 
 import controllers.routes
-import deprecated.DeprecatedConstants
 import forms.VoluntaryRegistrationFormProvider
 import models.NormalMode
 import play.api.data.Form
@@ -25,17 +24,69 @@ import views.newbehaviours.YesNoViewBehaviours
 import views.html.voluntaryRegistration
 
 class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
-  val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
+
   val messageKeyPrefix = "voluntaryRegistration"
   val form = new VoluntaryRegistrationFormProvider()()
   implicit val msgs = messages
+
+  val saveAndContinueButton = "Save and continue"
+  val h1 = "The business doesn't have to register for VAT"
+  val paragraph = "The business can still register voluntarily, if it:"
+  val bullet1 = "has ever sold VAT-taxable goods or services"
+  val bullet2 = "currently sells VAT-taxable goods or services"
+  val bullet3 = "intends to sell VAT-taxable goods or services"
+  val h2 = "Does the business want to register voluntarily?"
+  val indentText = "Only register voluntarily if the company intends to start reporting VAT in the next 3 months."
+
+  object Selectors extends BaseSelectors
+
+  val expectedElements = Seq(
+    Selectors.h1 -> h1,
+    Selectors.p(1) -> paragraph,
+    Selectors.bullet(1) -> bullet1,
+    Selectors.bullet(2) -> bullet2,
+    Selectors.bullet(3) -> bullet3,
+    Selectors.h2(1) -> h2,
+    Selectors.indent -> indentText
+  )
 
   def createView = () => voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   def createViewUsingForm = (form: Form[_]) => voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "VoluntaryRegistration view" must {
-    behave like normalPage(createView(), messageKeyPrefix, Seq(DeprecatedConstants.fakeCompanyName))
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VoluntaryRegistrationController.onSubmit().url, headingArgs = Seq(DeprecatedConstants.fakeCompanyName))
+    behave like normalPage(createView(), messageKeyPrefix)
+    behave like pageWithBackLink(createViewUsingForm(form))
+    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VoluntaryRegistrationController.onSubmit().url)
+    behave like pageWithSubmitButton(createViewUsingForm(form), saveAndContinueButton)
+
+
+    "have the correct heading" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph " in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.p(1)).text() mustBe paragraph
+    }
+
+    "display the bullet text correctly" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.bullet(1)).first().text() mustBe bullet1
+      doc.select(Selectors.bullet(2)).first().text() mustBe bullet2
+      doc.select(Selectors.bullet(3)).first().text() mustBe bullet3
+    }
+
+    "have the correct second heading" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.h2(1)).first().text() mustBe h2
+    }
+
+    "have the correct indent text" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.indent).first().text() mustBe indentText
+    }
   }
+
 }

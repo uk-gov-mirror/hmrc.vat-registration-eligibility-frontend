@@ -81,18 +81,18 @@ thresholdPreviousThirtyDays.error.date.inFuture         = Enter a date that''s i
 thresholdPreviousThirtyDays.error.date.beforeIncorp     = Enter a date that''s after the date the business was set up: {0}
 thresholdPreviousThirtyDays.error.date.invalid          = Enter a valid date
 
-voluntaryRegistration.title                 = Do you want to register the business voluntarily?
-voluntaryRegistration.heading               = {0} doesn''t have to register for VAT
+voluntaryRegistration.title                 = Does the business want to register voluntarily?
+voluntaryRegistration.heading               = The business doesn''t have to register for VAT
 voluntaryRegistration.error.required        = Tell us if you want to register voluntarily for VAT
-voluntaryRegistration.text1                 = {0} can still register voluntarily, if it:
+voluntaryRegistration.text1                 = The business can still register voluntarily, if it:
 voluntaryRegistration.bullet1               = has ever sold VAT-taxable goods or services
 voluntaryRegistration.bullet2               = currently sells VAT-taxable goods or services
 voluntaryRegistration.bullet3               = intends to sell VAT-taxable goods or services
-voluntaryRegistration.heading2              = Does {0} want to register voluntarily?
+voluntaryRegistration.heading2              = Does the business want to register voluntarily?
 voluntaryRegistration.text2                 = Only register voluntarily if the company intends to start reporting VAT in the next 3 months.
 
-choseNotToRegister.title    = You have chosen not to register the business for VAT
-choseNotToRegister.heading  = You have chosen not to register {0} for VAT
+choseNotToRegister.title    = You''ve chosen not to register the business for VAT
+choseNotToRegister.heading  = You''ve chosen not to register the business for VAT
 
 thresholdInTwelveMonths.title                       = Over VAT-registration threshold in a 12-month period?
 thresholdInTwelveMonths.headingIncorpLess12m        = Since {0}, has {1} made more than £85,000 in VAT-taxable sales?
