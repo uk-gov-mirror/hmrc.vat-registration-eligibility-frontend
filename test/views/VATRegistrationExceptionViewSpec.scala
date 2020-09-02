@@ -28,12 +28,35 @@ class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
   val form = new VATRegistrationExceptionFormProvider()()
   implicit val msgs = messages
 
+  val saveAndContinueButton = "Save and continue"
+  val h1 = "Is the business applying for a VAT registration 'exception'?"
+  val paragraph = "The business may not need to register for VAT if it can give evidence that it won't go over the threshold in the next 12 months. This is called a registration 'exception'."
+
+  object Selectors extends BaseSelectors
+
+  val expectedElements = Seq(
+    Selectors.h1 -> h1,
+    Selectors.p(1) -> paragraph
+  )
+
   def createView = () => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   def createViewUsingForm = (form: Form[_]) => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "VATRegistrationException view" must {
     behave like normalPage(createView(), messageKeyPrefix)
+    behave like pageWithBackLink(createViewUsingForm(form))
     behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VATRegistrationExceptionController.onSubmit().url)
+    behave like pageWithSubmitButton(createViewUsingForm(form), saveAndContinueButton)
+
+    "have the correct heading" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph " in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.p(1)).text() mustBe paragraph
+    }
   }
 }

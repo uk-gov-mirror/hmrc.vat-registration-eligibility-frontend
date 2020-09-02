@@ -16,7 +16,6 @@
 
 package views
 
-import deprecated.DeprecatedConstants
 import views.newbehaviours.ViewBehaviours
 import views.html.eligibilityDropout
 
@@ -28,7 +27,8 @@ class EligibilityDropoutViewSpec extends ViewBehaviours {
   def createView = () => eligibilityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)
 
   "EligibilityDropout view" must {
-    behave like normalPage(createView(), messageKeyPrefix, Seq(DeprecatedConstants.fakeCompanyName))
+    behave like normalPage(createView(), messageKeyPrefix)
+    behave like pageWithBackLink(createView())
   }
 
 }
