@@ -22,21 +22,25 @@ import java.time.format.DateTimeFormatter
 import forms.behaviours.BooleanFieldBehaviours
 import models.ConditionalDateFormElement
 import play.api.data.FormError
+import utils.TimeMachine
 
 class ThresholdPreviousThirtyDaysFormProviderSpec extends BooleanFieldBehaviours {
 
-  val requiredKey = "thresholdPreviousThirtyDays.error.required"
+  val testMaxDate: LocalDate = LocalDate.parse("2020-01-01")
 
-  val incorpDate = LocalDate.now().minusYears(2)
-  val dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy")
-  val optionalDateForm = new ThresholdPreviousThirtyDaysFormProvider()(incorpDate)
+  object TestTimeMachine extends TimeMachine {
+    override def today: LocalDate = testMaxDate
+  }
+
+  val requiredKey = "thresholdPreviousThirtyDays.error.required"
+  val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+  val optionalDateForm = new ThresholdPreviousThirtyDaysFormProvider(TestTimeMachine)()
 
   "bind" should {
     val selectionFieldName = s"value"
     val dateFieldName = s"thresholdPreviousThirtyDaysDate"
     val dateRequiredKey = "thresholdPreviousThirtyDays.error.date.required"
     val dateInFutureKey = "thresholdPreviousThirtyDays.error.date.inFuture"
-    val dateBeforeIncorpKey = "thresholdPreviousThirtyDays.error.date.beforeIncorp"
     val dateInvalidKey = "thresholdPreviousThirtyDays.error.date.invalid"
 
     "return errors" when {
@@ -49,7 +53,7 @@ class ThresholdPreviousThirtyDaysFormProviderSpec extends BooleanFieldBehaviours
       }
 
       "yes is selected but an invalid date is provided" in {
-        val date = LocalDate.now().plusMonths(3)
+        val date = testMaxDate.plusMonths(3)
         optionalDateForm.bind(
           Map(
             selectionFieldName -> "true",
@@ -60,7 +64,7 @@ class ThresholdPreviousThirtyDaysFormProviderSpec extends BooleanFieldBehaviours
       }
 
       "yes is selected but a date in the future is provided" in {
-        val date = LocalDate.now().plusMonths(3)
+        val date = testMaxDate.plusMonths(3)
         optionalDateForm.bind(
           Map(
             selectionFieldName -> "true",
@@ -69,22 +73,11 @@ class ThresholdPreviousThirtyDaysFormProviderSpec extends BooleanFieldBehaviours
             s"${dateFieldName}.year" -> s"${date.getYear}")
         ).errors shouldBe Seq(FormError(dateFieldName, dateInFutureKey))
       }
-
-      "yes is selected but a date before incorp is provided" in {
-        val date = incorpDate.minusMonths(3)
-        optionalDateForm.bind(
-          Map(
-            selectionFieldName -> "true",
-            s"${dateFieldName}.day" -> s"${date.getDayOfMonth}",
-            s"${dateFieldName}.month" -> s"${date.getMonthValue}",
-            s"${dateFieldName}.year" -> s"${date.getYear}")
-        ).errors shouldBe Seq(FormError(dateFieldName, dateBeforeIncorpKey, Seq(incorpDate.format(dateFormat))))
-      }
     }
 
-    "return a ConditionalFromElement" when {
+    "return a ConditionalFormElement" when {
       "yes is selected and a month and year is passed in" in {
-        val date = incorpDate.plusMonths(5).withDayOfMonth(1)
+        val date = testMaxDate
         optionalDateForm.bind(
           Map(
             selectionFieldName -> "true",

@@ -32,6 +32,7 @@ import models.{ConditionalDateFormElement, NormalMode}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent}
 import services.ThresholdService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, ThresholdHelper, UserAnswers, VATDateHelper}
@@ -49,20 +50,18 @@ class ThresholdPreviousThirtyDaysController @Inject()(override val messagesApi: 
                                                       formProvider: ThresholdPreviousThirtyDaysFormProvider
                                                      )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
-  def incorpDate(implicit request: DataRequest[_]): LocalDate = DeprecatedConstants.fakeIncorpDate
-
-  def onPageLoad() = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.thresholdPreviousThirtyDays match {
-        case None => formProvider(incorpDate)
-        case Some(value) => formProvider(incorpDate).fill(value)
+        case None => formProvider()
+        case Some(value) => formProvider().fill(value)
       }
       Ok(thresholdPreviousThirtyDays(preparedForm, NormalMode, thresholdService))
   }
 
-  def onSubmit() = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      formProvider(incorpDate).bindFromRequest().fold(
+      formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) => {
           Future.successful(BadRequest(thresholdPreviousThirtyDays(formWithErrors, NormalMode,thresholdService)))
         },

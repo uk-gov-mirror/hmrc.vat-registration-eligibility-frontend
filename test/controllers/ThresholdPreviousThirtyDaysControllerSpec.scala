@@ -18,6 +18,7 @@ package controllers
 
 import java.time.LocalDate
 
+import config.FrontendAppConfig
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.ThresholdPreviousThirtyDaysFormProvider
@@ -27,20 +28,25 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
 import play.api.data.Form
 import play.api.libs.json.Json
+import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.FakeNavigator
+import utils.{FakeNavigator, TimeMachine}
 import views.html.thresholdPreviousThirtyDays
 
 import scala.concurrent.Future
 
 class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
 
-  def onwardRoute = routes.IndexController.onPageLoad()
+  def onwardRoute: Call = routes.IndexController.onPageLoad()
 
-  val formProvider = new ThresholdPreviousThirtyDaysFormProvider()
-  val form = formProvider(LocalDate.of(2018,9,28).minusYears(2))
-  implicit val appConfig = frontendAppConfig
+  object TimeMachine extends TimeMachine {
+    override def today: LocalDate = LocalDate.parse("2020-01-01")
+  }
+
+  val formProvider = new ThresholdPreviousThirtyDaysFormProvider(timeMachine = TimeMachine)
+  val form: Form[ConditionalDateFormElement] = formProvider()
+  implicit val appConfig: FrontendAppConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new ThresholdPreviousThirtyDaysController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
@@ -49,7 +55,7 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
   def viewAsString(form: Form[_] = form) = thresholdPreviousThirtyDays(form, NormalMode, mockThresholdService)(fakeDataRequest, messages, frontendAppConfig).toString
 
 
-  "ThresholdPreviousThirtyDays Controller" must {
+  "ThresholdPreviousThirtyDaysController" must {
 
     "return OK and the correct view for a GET" in {
       val result = controller().onPageLoad()(fakeRequest)
@@ -68,10 +74,11 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
 
     "redirect to the next page when valid data is submitted with value of true with a date" in {
       when(mockThresholdService.removeVoluntaryRegistration(any())) thenReturn Future.successful(emptyCacheMap)
+      val date = LocalDate.parse("2019-01-01")
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true",
-        "thresholdPreviousThirtyDaysDate.year" -> LocalDate.now().getYear.toString,
-        "thresholdPreviousThirtyDaysDate.month" -> LocalDate.now().getMonthValue.toString,
-        "thresholdPreviousThirtyDaysDate.day" -> LocalDate.now().getDayOfMonth.toString
+        "thresholdPreviousThirtyDaysDate.year" -> date.getYear.toString,
+        "thresholdPreviousThirtyDaysDate.month" -> date.getMonthValue.toString,
+        "thresholdPreviousThirtyDaysDate.day" -> date.getDayOfMonth.toString
       )
 
       val result = controller().onSubmit()(postRequest)
