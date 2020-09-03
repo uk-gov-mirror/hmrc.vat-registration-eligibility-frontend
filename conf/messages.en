@@ -176,7 +176,7 @@ internationalActivities.bullet4 = do all of its business outside the UK
 internationalActivities.bullet5 = have its head office outside the UK
 
 zeroRatedSales.title = Does the business sell mainly zero-rated goods or services?
-zeroRatedSales.heading = Does {0} sell mainly zero-rated goods or services?
+zeroRatedSales.heading = Does the business sell mainly zero-rated goods or services?
 zeroRatedSales.error.required = Tell us if the company sells mainly zero-rated goods or services
 zeroRatedSales.dropdownText = Examples of zero-rated goods or services
 zeroRatedSales.dropdownLine1 = Zero-rated goods and services are VAT-taxable but the VAT rate on them is 0%.

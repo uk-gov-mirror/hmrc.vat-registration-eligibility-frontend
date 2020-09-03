@@ -21,7 +21,6 @@
 @import utils.FormHelpers
 @import models.requests.DataRequest
 
-@import deprecated.DeprecatedConstants
 @import views.html.layouts.layout
 @import views.html.newcomponents._
 
@@ -31,14 +30,13 @@
 
     @errorSummary(form.errors)
 
-    @h1(messages("zeroRatedSales.heading", DeprecatedConstants.fakeCompanyName))
+    @h1(messages("zeroRatedSales.heading"))
     @details(messages("zeroRatedSales.dropdownText"), detailsContent)
 
     @helpers.form(action = ZeroRatedSalesController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "zeroRatedSales.heading",
-            headingMessageArgs = Seq(DeprecatedConstants.fakeCompanyName),
             isPageHeading = false,
             classes = "govuk-visually-hidden"
         )

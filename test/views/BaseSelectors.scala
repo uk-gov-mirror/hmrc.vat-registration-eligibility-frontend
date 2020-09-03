@@ -34,5 +34,7 @@ trait BaseSelectors {
   val warning = "main .govuk-warning-text__text"
   val contactHmrc = "#contact-hmrc"
   val button = ".govuk-button"
+  val detailsSummary = ".govuk-details__summary-text"
+  val detailsContent = ".govuk-details__text"
 
 }
