@@ -20,8 +20,9 @@ import controllers.routes
 import forms.VoluntaryRegistrationFormProvider
 import models.NormalMode
 import play.api.data.Form
-import views.newbehaviours.YesNoViewBehaviours
+import play.twirl.api.HtmlFormat
 import views.html.voluntaryRegistration
+import views.newbehaviours.YesNoViewBehaviours
 
 class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
 
@@ -40,19 +41,11 @@ class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  val expectedElements = Seq(
-    Selectors.h1 -> h1,
-    Selectors.p(1) -> paragraph,
-    Selectors.bullet(1) -> bullet1,
-    Selectors.bullet(2) -> bullet2,
-    Selectors.bullet(3) -> bullet3,
-    Selectors.h2(1) -> h2,
-    Selectors.indent -> indentText
-  )
+  def createView: () => HtmlFormat.Appendable =
+    () => voluntaryRegistration(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
 
-  def createView = () => voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
-  def createViewUsingForm = (form: Form[_]) => voluntaryRegistration(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
+    (form: Form[_]) => voluntaryRegistration(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
 
   "VoluntaryRegistration view" must {
     behave like normalPage(createView(), messageKeyPrefix)
