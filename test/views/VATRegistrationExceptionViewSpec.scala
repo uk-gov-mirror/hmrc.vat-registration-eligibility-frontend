@@ -20,8 +20,9 @@ import controllers.routes
 import forms.VATRegistrationExceptionFormProvider
 import models.NormalMode
 import play.api.data.Form
-import views.newbehaviours.YesNoViewBehaviours
+import play.twirl.api.HtmlFormat
 import views.html.vatRegistrationException
+import views.newbehaviours.YesNoViewBehaviours
 
 class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
   val messageKeyPrefix = "vatRegistrationException"
@@ -34,9 +35,11 @@ class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  def createView = () => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+  def createView: () => HtmlFormat.Appendable =
+    () => vatRegistrationException(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
+    (form: Form[_]) => vatRegistrationException(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
 
   "VATRegistrationException view" must {
     behave like normalPage(createView(), messageKeyPrefix)
