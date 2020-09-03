@@ -34,11 +34,6 @@ class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  val expectedElements = Seq(
-    Selectors.h1 -> h1,
-    Selectors.p(1) -> paragraph
-  )
-
   def createView = () => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   def createViewUsingForm = (form: Form[_]) => vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
