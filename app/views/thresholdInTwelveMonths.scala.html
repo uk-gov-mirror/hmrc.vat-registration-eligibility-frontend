@@ -24,9 +24,6 @@
 @import java.time.LocalDate
 @import java.time.format.DateTimeFormatter
 @import services.ThresholdService
-
-@import deprecated.DeprecatedConstants
-
 @import views.html.layouts.layout
 @import views.html.newcomponents._
 
@@ -40,8 +37,6 @@
     @p{ @thresholdService.returnThresholdDateResult[String](thresholdService.returnHelpText1TwelveMonths) }
 
     @details(messages("thresholdInTwelveMonths.dropdownText"), detailsContent)
-
-    @p{ @thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText2TwelveMonths) }
 
     @helpers.form(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off") {
         @conditionalYesNoRadio(
@@ -58,10 +53,9 @@
 }
 
 @hiddenYesContent = {
-    @h2(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry))
     @inputDate(form = form,
         legendContent = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry),
-        legendClasses = "govuk-heading-small",
+        legendClasses = "govuk-!-font-weight-bold",
         id = "valueDate",
         legendAsPageHeading = false,
         includeDay = false
@@ -69,7 +63,7 @@
 }
 
 @detailsContent = {
-    @p{ @messages("thresholdInTwelveMonths.disclosureText", DeprecatedConstants.fakeCompanyName)}
+    @p{ @messages("thresholdInTwelveMonths.disclosureText")}
     @p {
         @messages("thresholdInTwelveMonths.beforeLinkText")
         @link(appConfig.VATRateDifferentGoodsURL, "thresholdInTwelveMonths.linkText").

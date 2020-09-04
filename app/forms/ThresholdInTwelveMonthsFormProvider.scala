@@ -20,14 +20,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import forms.mappings.Mappings
-import identifiers.ThresholdInTwelveMonthsId
 import javax.inject.Inject
 import models.ConditionalDateFormElement
 import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
+import utils.TimeMachine
 
-class ThresholdInTwelveMonthsFormProvider @Inject() extends FormErrorHelper with Mappings {
+class ThresholdInTwelveMonthsFormProvider @Inject()(timeMachine: TimeMachine) extends FormErrorHelper with Mappings {
 
   val thresholdInTwelveMonthsSelection = s"value"
   val thresholdInTwelveMonthsDate = s"valueDate"
@@ -41,7 +41,7 @@ class ThresholdInTwelveMonthsFormProvider @Inject() extends FormErrorHelper with
 
   def now = LocalDate.now()
 
-  def apply(incorpDate: LocalDate): Form[ConditionalDateFormElement]  = Form(
+  def apply(): Form[ConditionalDateFormElement] = Form(
     mapping(
       thresholdInTwelveMonthsSelection -> boolean(valueRequiredKey),
       thresholdInTwelveMonthsDate -> mandatoryIf(isEqual(thresholdInTwelveMonthsSelection, "true"),
@@ -49,12 +49,12 @@ class ThresholdInTwelveMonthsFormProvider @Inject() extends FormErrorHelper with
           "month" -> default(text(), ""),
           "year" -> default(text(), "")
         ).verifying(firstError(
-            nonEmptyPartialDate(dateRequiredKey),
-            validPartialDate(dateInvalidKey))
+          nonEmptyPartialDate(dateRequiredKey),
+          validPartialDate(dateInvalidKey))
         ).transform[LocalDate](
-          {case (month, year) => LocalDate.of(year.toInt, month.toInt, 1)},
+          { case (month, year) => LocalDate.of(year.toInt, month.toInt, 1) },
           date => (date.getMonthValue.toString, date.getYear.toString)
-        ).verifying(withinDateRange(incorpDate.withDayOfMonth(1), now, dateBeforeIncorpKey, dateInFutureKey, minArgs = Seq(dateFormat.format(incorpDate))))
-    ))(ConditionalDateFormElement.apply)(ConditionalDateFormElement.unapply)
+        ).verifying(maxDate(timeMachine.today, dateInFutureKey))
+      ))(ConditionalDateFormElement.apply)(ConditionalDateFormElement.unapply)
   )
 }

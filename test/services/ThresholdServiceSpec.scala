@@ -131,50 +131,6 @@ class ThresholdServiceSpec extends SpecBase with VATEligiblityMocks {
       service.returnThresholdDateResult(service.returnHelpText1TwelveMonths).contains(
         s"£85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales $fakeCompanyName can make before it has to register for VAT.") mustBe true
     }
-
-    "always return not incorped HelpText2 text when no incorp date is given" in new Setup(None) {
-      val res = service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body
-        res.contains(
-        "Test Company") mustBe true
-        res.contains("VAT-taxable sales went over any of the following") mustBe true
-        res.contains("£85,000 between 1 April 2017 and today") mustBe true
-        res.contains("£83,000 between 1 April 2016 and 31 March 2017") mustBe true
-        res.contains("£82,000 between 1 April 2015 and 31 March 2016") mustBe true
-        res.contains("Before this,") mustBe true
-        res.contains("use these previous VAT registration thresholds (opens in a new window or tab)") mustBe true
-       res.contains("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies") mustBe true
-    }
-    "always return test when incorp date < 2015 tax year" in new Setup(Some(LocalDate.of(2014,1,1))) {
-      val res = service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body
-      res.contains(
-        "Test Company") mustBe true
-      res.contains("VAT-taxable sales went over any of the following") mustBe true
-      res.contains("£85,000 between 1 April 2017 and today") mustBe true
-      res.contains("£83,000 between 1 April 2016 and 31 March 2017") mustBe true
-      res.contains("£82,000 between 1 April 2015 and 31 March 2016") mustBe true
-      res.contains("Before this,") mustBe true
-      res.contains("use these previous VAT registration thresholds (opens in a new window or tab)") mustBe true
-      res.contains("https://www.gov.uk/government/publications/vat-notice-7001-should-i-be-registered-for-vat/vat-notice-7001-supplement--2#registration-limits-taxable-supplies") mustBe true
-    }
-    "always return no html when Incorp date < 12 months ago" in new Setup(Some(LocalDate.now.minusMonths(1))) {
-      service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body mustBe ""
-    }
-    "always return over85k threshold when incorpDate limitedIncorpedEqualOrAfter20170401" in new Setup(Some(LocalDate.of(2017,5,1))) {
-     val res =  service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body
-       res.contains("VAT-taxable sales went over £85,000 between 1 April 2017 and today") mustBe true
-        res.contains("Test Company") mustBe true
-        res.contains("£85,000 between 1 April 2017 and today") mustBe true
-       res.contains("£83,000 between 1 April 2016 and 31 March 2017") mustBe false
-      res.contains("£82,000 between 1 April 2015 and 31 March 2016") mustBe false
-    }
-    "always return anyoverthresholds for limitedIncorpedTaxYear2015to2016" in new Setup(Some(LocalDate.of(2015,6,4))) {
-      val res = service.returnThresholdDateResult(service.returnHelpText2TwelveMonths).body
-        res.contains("Test Company") mustBe true
-        res.contains("VAT-taxable sales went over any of the following") mustBe true
-      res.contains("£85,000 between 1 April 2017 and today") mustBe true
-      res.contains("£83,000 between 1 April 2016 and 31 March 2017") mustBe true
-      res.contains("£82,000 between 1 April 2015 and 31 March 2016") mustBe true
-    }
     "returnHelpText1Previous should return blank for limitedIncorpedEqualOrAfter20170401" in new Setup(Some(LocalDate.of(2017,4,2))) {
     }
     "returnHelpText1Previous should return limitedIncorpedTaxYear2016to2017 for companies incorped between 2016 and 2017" in new Setup(Some(LocalDate.of(2016,4,6))) {

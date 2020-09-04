@@ -16,16 +16,12 @@
 
 package controllers
 
-import java.time.LocalDate
-
 import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
-import deprecated.DeprecatedConstants
 import forms.ThresholdInTwelveMonthsFormProvider
 import identifiers.ThresholdInTwelveMonthsId
 import javax.inject.Inject
-import models.requests.DataRequest
 import models.{ConditionalDateFormElement, NormalMode}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -46,25 +42,25 @@ class ThresholdInTwelveMonthsController @Inject()(override val messagesApi: Mess
                                                   formProvider: ThresholdInTwelveMonthsFormProvider
                                                  )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
-  def incorpDate(implicit request: DataRequest[_]): LocalDate = DeprecatedConstants.fakeIncorpDate
 
   def onPageLoad() = (identify andThen getData andThen requireData) {
     implicit request =>
-        val preparedForm = request.userAnswers.thresholdInTwelveMonths match {
-          case None => formProvider(incorpDate)
-          case Some(value) => formProvider(incorpDate).fill(value)
-        }
-        Ok(thresholdInTwelveMonths(preparedForm, NormalMode, thresholdService))
+      val preparedForm = request.userAnswers.thresholdInTwelveMonths match {
+        case None => formProvider()
+        case Some(value) => formProvider().fill(value)
+      }
+      Ok(thresholdInTwelveMonths(preparedForm, NormalMode, thresholdService))
   }
 
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
-        formProvider(incorpDate).bindFromRequest().fold(
-          (formWithErrors: Form[_]) =>
-            Future.successful(BadRequest(thresholdInTwelveMonths(formWithErrors, NormalMode,thresholdService))),
-          (formValue) => dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap{cacheMap =>
-            if(formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException}.map(cMap =>
-            Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cMap)))
+      formProvider().bindFromRequest().fold(
+        (formWithErrors: Form[_]) =>
+          Future.successful(BadRequest(thresholdInTwelveMonths(formWithErrors, NormalMode, thresholdService))),
+        (formValue) => dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap { cacheMap =>
+          if (formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException
+        }.map(cMap =>
+          Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cMap)))
         ))
   }
 }
