@@ -16,8 +16,6 @@
 
 @import config.FrontendAppConfig
 @import models.requests.CacheIdentifierRequest
-
-@import deprecated.DeprecatedConstants
 @import views.html.layouts.layout
 @import views.html.newcomponents._
 
@@ -25,8 +23,8 @@
 
 @layout(pageTitle = Some(titleNoForm(messages("eligibilityDropout.title"))), backLink = true) {
 
-    @h1(messages("eligibilityDropout.heading",DeprecatedConstants.fakeCompanyName))
-    @p{ @messages("eligibility.international.special.text",DeprecatedConstants.fakeCompanyName) }
+    @h1(messages("eligibilityDropout.heading"))
+    @p{ @messages("eligibility.international.special.text") }
 
     <ul class="govuk-list govuk-list--bullet">
         <li>

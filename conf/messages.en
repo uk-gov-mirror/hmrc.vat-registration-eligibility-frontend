@@ -155,7 +155,7 @@ eligibilityDropout.ApplicantUKNinoId.variant    = This is because the person who
 eligibility.agriculture.text = To join the Agricultural Flat Rate Scheme, the business will need to
 eligibility.agriculture.link = register using form VAT98
 
-eligibility.international.special.text = If {0}:
+eligibility.international.special.text = If the business:
 eligibility.international.bullet0 = is exporting goods or services to EU countries -
 eligibility.international.link = register using form VAT1
 eligibility.international.bullet1 = is importing goods or services from EU countries -
@@ -166,9 +166,9 @@ eligibility.international.bullet3 =  does all of its business outside the UK or 
 eligibility.international.link3 = Use the other VAT registration service
 
 internationalActivities.title = Will the business be doing international activities?
-internationalActivities.heading = Will {0} do any of the following international activities over the next 12 months?
-internationalActivities.error.required = Tell us if the company will do any of these international activities over the next 12 months
-internationalActivities.bulletText = Tell us if {0} will:
+internationalActivities.heading = Will the business do any of the following international activities over the next 12 months?
+internationalActivities.error.required = Tell us if the business will do any of these international activities over the next 12 months
+internationalActivities.bulletText = Tell us if the business will:
 internationalActivities.bullet1 = export goods or services to EU countries
 internationalActivities.bullet2 = import goods or services from EU countries
 internationalActivities.bullet3 = sell assets that it bought from a country outside the EU and claimed a VAT refund on
