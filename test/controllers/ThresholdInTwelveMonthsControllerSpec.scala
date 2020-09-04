@@ -17,8 +17,8 @@
 package controllers
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatterBuilder
 
+import config.FrontendAppConfig
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.ThresholdInTwelveMonthsFormProvider
@@ -30,7 +30,7 @@ import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.FakeNavigator
+import utils.{FakeNavigator, TimeMachine}
 import views.html.thresholdInTwelveMonths
 
 import scala.concurrent.Future
@@ -40,9 +40,13 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
-  val formProvider = new ThresholdInTwelveMonthsFormProvider()
-  val form = formProvider(LocalDate.now().minusYears(2))
-  implicit val appConfig = frontendAppConfig
+  object TestTimeMachine extends TimeMachine {
+    override def today: LocalDate = LocalDate.parse("2020-01-01")
+  }
+
+  val formProvider = new ThresholdInTwelveMonthsFormProvider(timeMachine = TestTimeMachine)
+  val form: Form[ConditionalDateFormElement] = formProvider()
+  implicit val appConfig: FrontendAppConfig = frontendAppConfig
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new ThresholdInTwelveMonthsController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
@@ -71,10 +75,10 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
 
     "redirect to the next page when valid data is submitted and also remove Voluntary registration because answer to question is true" in {
       when(mockThresholdService.removeVoluntaryAndNextThirtyDays(any())) thenReturn Future.successful(emptyCacheMap)
-
+      val date = LocalDate.parse("2019-01-01")
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true",
-        "valueDate.year" -> LocalDate.now().getYear.toString,
-        "valueDate.month" -> LocalDate.now().getMonthValue.toString
+        "valueDate.year" -> date.getYear.toString,
+        "valueDate.month" -> date.getMonthValue.toString
       )
 
       val result = controller().onSubmit()(postRequest)

@@ -20,18 +20,21 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import forms.behaviours.BooleanFieldBehaviours
-import identifiers.ThresholdInTwelveMonthsId
 import models.ConditionalDateFormElement
 import play.api.data.FormError
+import utils.TimeMachine
 
-class ThresholdInTwelveMonthsFormProviderSpec extends BooleanFieldBehaviours{
+class ThresholdInTwelveMonthsFormProviderSpec extends BooleanFieldBehaviours {
+
+  val testMaxDate: LocalDate = LocalDate.parse("2020-01-01")
+
+  object TestTimeMachine extends TimeMachine {
+    override def today: LocalDate = testMaxDate
+  }
 
   val requiredKey = "thresholdInTwelveMonths.error.required"
-
-  val incorpDate = LocalDate.now().minusYears(2)
   val dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy")
-
-  val optionalDateForm = new ThresholdInTwelveMonthsFormProvider()(incorpDate)
+  val optionalDateForm = new ThresholdInTwelveMonthsFormProvider(TestTimeMachine)()
 
   "bind" should {
     val selectionFieldName = "value"
@@ -69,21 +72,11 @@ class ThresholdInTwelveMonthsFormProviderSpec extends BooleanFieldBehaviours{
             s"${dateFieldName}.year" -> s"${date.getYear}")
         ).errors shouldBe Seq(FormError(dateFieldName, dateInFutureKey))
       }
-
-      "yes is selected but a date before incorp is provided" in {
-        val date = incorpDate.minusMonths(3)
-        optionalDateForm.bind(
-          Map(
-            selectionFieldName -> "true",
-            s"${dateFieldName}.month" -> s"${date.getMonthValue}",
-            s"${dateFieldName}.year" -> s"${date.getYear}")
-        ).errors shouldBe Seq(FormError(dateFieldName, dateBeforeIncorpKey, Seq(incorpDate.format(dateFormat))))
-      }
     }
 
     "return a ConditionalFromElement" when {
       "yes is selected and a month and year is passed in" in {
-        val date = incorpDate.plusMonths(5).withDayOfMonth(1)
+        val date = testMaxDate
         optionalDateForm.bind(
           Map(
             selectionFieldName -> "true",
@@ -91,10 +84,9 @@ class ThresholdInTwelveMonthsFormProviderSpec extends BooleanFieldBehaviours{
             s"${dateFieldName}.year" -> s"${date.getYear}")
         ).value shouldBe Some(ConditionalDateFormElement(true, Some(date)))
       }
-      "yes is selected and date entered is after incorp date but is valid because both are defaulted to the 1st of the month" in {
-        val incorpDate = LocalDate.of(2018,5,20)
-        val dateEntered = LocalDate.of(2018,5,1)
-        new ThresholdInTwelveMonthsFormProvider()(incorpDate).bind(
+      "yes is selected and date entered is after Test date but is valid because both are defaulted to the 1st of the month" in {
+        val dateEntered = LocalDate.of(2018, 5, 1)
+        new ThresholdInTwelveMonthsFormProvider(TestTimeMachine)().bind(
           Map(
             selectionFieldName -> "true",
             s"${dateFieldName}.month" -> s"${dateEntered.getMonthValue}",
