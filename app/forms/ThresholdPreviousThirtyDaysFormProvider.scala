@@ -26,8 +26,9 @@ import models.ConditionalDateFormElement
 import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
+import utils.TimeMachine
 
-class ThresholdPreviousThirtyDaysFormProvider @Inject() extends FormErrorHelper with Mappings {
+class ThresholdPreviousThirtyDaysFormProvider @Inject()(timeMachine: TimeMachine) extends FormErrorHelper with Mappings {
 
   val thresholdPreviousThirtyDaysSelection = "value"
   val thresholdPreviousThirtyDaysDate = s"${ThresholdPreviousThirtyDaysId}Date"
@@ -35,12 +36,11 @@ class ThresholdPreviousThirtyDaysFormProvider @Inject() extends FormErrorHelper 
   val valueRequiredKey = s"$errorKeyRoot.required"
   val dateRequiredKey = s"$errorKeyRoot.date.required"
   val dateInFutureKey = s"$errorKeyRoot.date.inFuture"
-  val dateBeforeIncorpKey = s"$errorKeyRoot.date.beforeIncorp"
   val dateInvalidKey = s"$errorKeyRoot.date.invalid"
-  val dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+  val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
   def now = LocalDate.now()
 
-  def apply(incorpDate: LocalDate): Form[ConditionalDateFormElement] = Form(
+  def apply(): Form[ConditionalDateFormElement] = Form(
     mapping(
       thresholdPreviousThirtyDaysSelection -> boolean(valueRequiredKey),
       thresholdPreviousThirtyDaysDate -> mandatoryIf(isEqual(thresholdPreviousThirtyDaysSelection, "true"),
@@ -54,7 +54,7 @@ class ThresholdPreviousThirtyDaysFormProvider @Inject() extends FormErrorHelper 
         ).transform[LocalDate](
           {case (day, month, year) => LocalDate.of(year.toInt, month.toInt, day.toInt)},
           date => (date.getDayOfMonth.toString, date.getMonthValue.toString, date.getYear.toString)
-        ).verifying(withinDateRange(incorpDate, now, dateBeforeIncorpKey, dateInFutureKey, minArgs = Seq(dateFormat.format(incorpDate))))
+        ).verifying(maxDate(timeMachine.today, dateInFutureKey))
       ))(ConditionalDateFormElement.apply)(ConditionalDateFormElement.unapply)
     )
 }

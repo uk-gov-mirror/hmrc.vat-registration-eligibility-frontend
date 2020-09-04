@@ -16,6 +16,8 @@
 
 package forms.mappings
 
+import java.time.LocalDate
+
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.data.validation.{Invalid, Valid}
 
@@ -132,6 +134,36 @@ class ConstraintsSpec extends WordSpec with MustMatchers with Constraints {
     "return Invalid for a string longer than the allowed length" in {
       val result = maxLength(10, "error.length")("a" * 11)
       result mustEqual Invalid("error.length", 10)
+    }
+  }
+
+  "maxDate" must {
+
+    val maximumDate = LocalDate.parse("2019-01-01")
+
+    "return Valid for a date before or equal to the maximum" in {
+      val result = maxDate(maximumDate, "error.date")(LocalDate.parse("2019-01-01"))
+      result mustEqual Valid
+    }
+
+    "return Invalid for a date after the maximum" in {
+      val result = maxDate(maximumDate, "thresholdPreviousThirtyDays.error.date.inFuture")(maximumDate.plusDays(1))
+      result mustEqual Invalid("thresholdPreviousThirtyDays.error.date.inFuture")
+    }
+  }
+
+  "minDate" must {
+
+    val minimumDate = LocalDate.parse("2019-01-01")
+
+    "return Valid for a date after or equal to the minimum" in {
+      val result = minDate(minimumDate, "error.date")(LocalDate.parse("2019-01-01"))
+      result mustEqual Valid
+    }
+
+    "return Invalid for a date before the minimum" in {
+      val result = minDate(minimumDate, "thresholdPreviousThirtyDays.error.date.inPast")(minimumDate.minusDays(1))
+      result mustEqual Invalid("thresholdPreviousThirtyDays.error.date.inPast")
     }
   }
 }

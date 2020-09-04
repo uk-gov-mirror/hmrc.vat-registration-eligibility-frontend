@@ -23,15 +23,10 @@
 @import utils.VATDateHelper
 @import services.ThresholdService
 
-@import deprecated.DeprecatedConstants
 @import views.html.layouts.layout
 @import views.html.newcomponents._
 
 @(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
-
-@displayHeading = @{ <h1 class="heading-large" id="main-heading">{thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious)}</h1>}
-
-@displayHelpText = @{thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1Previous)}
 
 @layout(pageTitle = Some(title(form, messages("thresholdPreviousThirtyDays.title"))), backLink = true) {
 
