@@ -16,6 +16,7 @@
 
 package views
 
+import play.twirl.api.HtmlFormat
 import views.newbehaviours.ViewBehaviours
 import views.html.eligibilityDropout
 
@@ -24,7 +25,8 @@ class EligibilityDropoutViewSpec extends ViewBehaviours {
   val messageKeyPrefix = "eligibilityDropout"
   implicit val msgs = messages
 
-  def createView = () => eligibilityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)
+  def createView: () => HtmlFormat.Appendable =
+    () => eligibilityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)
 
   "EligibilityDropout view" must {
     behave like normalPage(createView(), messageKeyPrefix)
