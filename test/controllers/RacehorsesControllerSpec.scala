@@ -75,7 +75,7 @@ class RacehorsesControllerSpec extends ControllerSpecBase with MockitoSugar{
       val result = controller().onSubmit()(postRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some("http://localhost:9895/register-for-vat/changed-name") //TODO - check if this can be retrieved from somewhere
+      redirectLocation(result) mustBe Some("http://localhost:9895/register-for-vat/honesty-declaration") //TODO - check if this can be retrieved from somewhere
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {
