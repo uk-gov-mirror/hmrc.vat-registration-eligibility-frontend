@@ -35,12 +35,6 @@ class FrontendAppConfig @Inject()(override val runModeConfiguration: Configurati
   private lazy val contactHost = baseUrl("contact-frontend")
   private val contactFormServiceIdentifier = "SCRS"
 
-  private def whitelistConfig(key: String): Seq[String] =
-    Some(new String(Base64.getDecoder.decode(runModeConfiguration.getString(key).getOrElse("")), "UTF-8"))
-      .map(_.split(","))
-      .getOrElse(Array.empty)
-      .toSeq
-
   lazy val analyticsToken = loadConfig(s"google-analytics.token")
   lazy val analyticsHost = loadConfig(s"google-analytics.host")
   lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
@@ -69,8 +63,6 @@ class FrontendAppConfig @Inject()(override val runModeConfiguration: Configurati
   lazy val VATSetUpVATGroup = getConfString("gov-uk.VATSetUpVATGroup",
     throw new Exception("Couldn't get VATSetUpVATGroup URL"))
   lazy val VATFileChanges = getConfString("gov-uk.VATFileChanges", throw new Exception("Couldn't get VATFileChanges URL"))
-  lazy val whitelist = whitelistConfig("whitelist")
-  lazy val whitelistExcluded = whitelistConfig("whitelist-excluded")
   lazy val languageTranslationEnabled = runModeConfiguration.getBoolean("microservice.services.features.welsh-translation").getOrElse(true)
 
   def languageMap: Map[String, Lang] = Map(
