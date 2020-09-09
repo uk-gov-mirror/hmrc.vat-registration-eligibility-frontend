@@ -61,7 +61,7 @@ trait VatRegistrationService extends I18nSupport {
 
   private[services] def getVoluntaryRegistrationJson(data: Boolean)(implicit r: DataRequest[_]): List[JsValue] = {
     val key = VoluntaryRegistrationId.toString
-    JsonSummaryRow(key, messagesApi(s"$key.summary.heading", DeprecatedConstants.fakeCompanyName), messagesApi(s"site.${if (data) "yes" else "no"}"), Json.toJson(data))
+    JsonSummaryRow(key, messagesApi(s"$key.summary.heading"), messagesApi(s"site.${if (data) "yes" else "no"}"), Json.toJson(data))
   }
 
   private[services] def prepareQuestionData(key: String, data: String): List[JsValue] = {
@@ -84,17 +84,13 @@ trait VatRegistrationService extends I18nSupport {
 
   private[services] def prepareThresholdPreviousThirty(key: String, data: ConditionalDateFormElement)()(implicit r: DataRequest[_]): List[JsValue] = {
     val value = JsonSummaryRow(s"$key-value", thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious), messagesApi(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
-    val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messagesApi(s"$key.heading2", DeprecatedConstants.fakeCompanyName), date.format(formatter), Json.toJson(date)))
+    val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messagesApi(s"$key.heading2"), date.format(formatter), Json.toJson(date)))
 
     dataObj.foldLeft(value)((old, list) => old ++ list)
   }
 
   private[services] def prepareQuestionData(key: String, data: TurnoverEstimateFormElement)(implicit r: DataRequest[_]): List[JsValue] = {
-    val value = JsonSummaryRow(s"$key-value", messagesApi(s"$key.heading", DeprecatedConstants.fakeCompanyName), messagesApi(s"turnoverEstimate.${data.value}"), Json.toJson(data.value))
-    val dataObj = data.optionalData
-      .map(turnover => JsonSummaryRow(s"$key-optionalData", messagesApi(s"$key.giveAnEstimate"), s"£${"%,d".format(turnover.toLong)}", JsNumber(BigDecimal(turnover.toLong))))
-
-    dataObj.foldLeft(value)((oList, dList) => oList ++ dList)
+    JsonSummaryRow(s"$key-value", messagesApi(s"$key.heading"), s"£${"%,d".format(data.value.toLong)}", JsNumber(BigDecimal(data.value.toLong)))
   }
 
   private[services] def prepareQuestionData(key: String, data: ConditionalNinoFormElement, officers: Seq[Officer], onBehalfOf: Option[String]): List[JsValue] = {

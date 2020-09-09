@@ -21,40 +21,20 @@ import utils.{Enumerable, RadioOption, WithName}
 
 sealed trait TurnoverEstimate
 
-object TurnoverEstimate {
-
-  case object Zeropounds extends WithName("zeropounds") with TurnoverEstimate
-  case object Oneandtenthousand extends WithName("oneandtenthousand") with TurnoverEstimate
-  case object TenThousand extends WithName("tenthousand") with TurnoverEstimate
-
-  val values: Set[TurnoverEstimate] = Set(
-    Zeropounds, Oneandtenthousand, TenThousand
-  )
-
-  val options: Set[RadioOption] = values.map {
-    value =>
-      RadioOption("turnoverEstimateSelection", value.toString)
-  }
-
-  implicit val enumerable: Enumerable[TurnoverEstimate] =
-    Enumerable(values.toSeq.map(v => v.toString -> v): _*)
-}
-
-case class TurnoverEstimateFormElement(value : String, optionalData : Option[String])
+case class TurnoverEstimateFormElement(value : String)
 
 object TurnoverEstimateFormElement {
   implicit val turnoverEstimateFormReads: Reads[TurnoverEstimateFormElement] = new Reads[TurnoverEstimateFormElement] {
     override def reads(json: JsValue): JsResult[TurnoverEstimateFormElement] = {
-      val selection = (json \ "selection").as[String]
-      val amount = (json \ "amount").asOpt[String]
+      val amount = (json \ "amount").as[String]
 
-      JsSuccess(TurnoverEstimateFormElement(selection, amount))
+      JsSuccess(TurnoverEstimateFormElement(amount))
     }
   }
 
   implicit val turnoverEstimateFormWrites: Writes[TurnoverEstimateFormElement] = new Writes[TurnoverEstimateFormElement] {
     override def writes(formEle: TurnoverEstimateFormElement): JsValue = {
-      val amount = if (formEle.optionalData.isDefined) Json.obj("amount" -> formEle.optionalData) else Json.obj()
+      val amount = Json.obj("amount" -> formEle.value)
 
       Json.obj("selection" -> formEle.value).deepMerge(amount)
     }

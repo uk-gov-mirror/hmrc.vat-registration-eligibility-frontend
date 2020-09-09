@@ -26,7 +26,6 @@ import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 
 class TurnoverEstimateFormProvider @Inject() extends FormErrorHelper with Mappings {
 
-  val turnoverEstimateSelection = s"turnoverEstimateSelection"
   val turnoverEstimateAmount = s"turnoverEstimateAmount"
   val errorKeyRoot = s"turnoverEstimate.error"
   val valueRequiredKey = s"$errorKeyRoot.required"
@@ -36,16 +35,12 @@ class TurnoverEstimateFormProvider @Inject() extends FormErrorHelper with Mappin
 
   def apply(): Form[TurnoverEstimateFormElement] = Form(
     mapping(
-      turnoverEstimateSelection -> text(valueRequiredKey).verifying(matchesRadioSeq(TurnoverEstimate.options, valueRequiredKey)),
-      turnoverEstimateAmount -> mandatoryIf(
-        isEqual(turnoverEstimateSelection, TurnoverEstimate.TenThousand.toString),
+      turnoverEstimateAmount ->
         text(valueRequiredKey)
           .verifying(StopOnFirstFail(
-              validBigIntConversion(amountNumbers),
-              bigIntRange(amountLessThan, amountMoreThan, BigInt("10000"), BigInt("999999999999999"))
-            )
-          )
-      )
+            validBigIntConversion(amountNumbers),
+            bigIntRange(amountLessThan, amountMoreThan, BigInt("0"), BigInt("999999999999999"))
+          ))
     )(TurnoverEstimateFormElement.apply)(TurnoverEstimateFormElement.unapply)
   )
 }

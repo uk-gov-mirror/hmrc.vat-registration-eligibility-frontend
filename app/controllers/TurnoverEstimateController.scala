@@ -25,6 +25,7 @@ import javax.inject.Inject
 import models.{Mode, TurnoverEstimateFormElement}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Enumerable, Navigator, UserAnswers}
 import views.html.turnoverEstimate
@@ -40,9 +41,9 @@ class TurnoverEstimateController @Inject()(override val messagesApi: MessagesApi
                                            formProvider: TurnoverEstimateFormProvider
                                           )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport with Enumerable.Implicits {
 
-  val form = formProvider()
+  val form: Form[TurnoverEstimateFormElement] = formProvider()
 
-  def onPageLoad(mode: Mode) = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.turnoverEstimate match {
         case None => form
@@ -51,7 +52,7 @@ class TurnoverEstimateController @Inject()(override val messagesApi: MessagesApi
       Ok(turnoverEstimate(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode) = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>

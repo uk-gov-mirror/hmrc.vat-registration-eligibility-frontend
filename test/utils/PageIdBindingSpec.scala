@@ -31,7 +31,7 @@ class PageIdBindingSpec extends PlaySpec {
     s"$ThresholdNextThirtyDaysId" -> JsBoolean(true),
     s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
     s"$VoluntaryRegistrationId" -> JsBoolean(true),
-    s"$TurnoverEstimateId" -> Json.obj("selection" -> JsString("oneandtenthousand")),
+    s"$TurnoverEstimateId" -> Json.obj("amount" -> JsString("50000")),
     s"$InternationalActivitiesId" -> JsBoolean(false),
     s"$InvolvedInOtherBusinessId" -> JsBoolean(false),
     s"$VoluntaryRegistrationId" -> JsBoolean(true),

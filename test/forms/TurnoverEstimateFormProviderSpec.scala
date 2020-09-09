@@ -34,68 +34,31 @@ class TurnoverEstimateFormProviderSpec extends BooleanFieldBehaviours {
     val turnoverEstimateNeedsNumbers = s"$errorKeyRoot.amount.numbers"
 
     "return errors" when {
-      "nothing is selected" in {
-        form.bind(Map("" -> "")).errors shouldBe Seq(FormError(selectionFieldName, turnoverEstimateRequired, Seq()))
-      }
 
-      "over ten thousand is selected but no amount is provided" in {
-        form.bind(Map(selectionFieldName -> TurnoverEstimate.TenThousand.toString))
+      "no amount is provided" in {
+        form.bind(
+          Map(
+            amountFieldName -> ""
+          )
+        )
           .errors shouldBe Seq(FormError(amountFieldName, turnoverEstimateRequired, Seq()))
       }
 
-      "over ten thousand is selected but an invalid amount is provided" in {
+      "an invalid amount is provided" in {
         form.bind(
           Map(
-            selectionFieldName -> TurnoverEstimate.TenThousand.toString,
             amountFieldName -> "abcd"
           )
         ).errors shouldBe Seq(FormError(amountFieldName, turnoverEstimateNeedsNumbers))
       }
 
-      "over ten thousand is selected but the amount is too high" in {
+      "the amount is too high" in {
         val wrappedArray = Seq(BigInt("999999999999999"))
         form.bind(
           Map(
-            selectionFieldName -> TurnoverEstimate.TenThousand.toString,
             amountFieldName -> "99999999999999999999999999"
           )
         ).errors shouldBe Seq(FormError(amountFieldName, turnoverEstimateAmountLessThan, wrappedArray))
-      }
-
-      "over ten thousand is selected but the amount is too low" in {
-        val wrappedArray = Seq(BigInt("10000"))
-        form.bind(
-          Map(
-            selectionFieldName -> TurnoverEstimate.TenThousand.toString,
-            amountFieldName -> "10000"
-          )
-        ).errors shouldBe Seq(FormError(amountFieldName, turnoverEstimateAmountMoreThan, wrappedArray))
-      }
-    }
-
-    "return a ConditionalFromElement" when {
-      "over ten thousand is selected" in {
-        val bind = form.bind(
-          Map(
-            selectionFieldName -> TurnoverEstimate.TenThousand.toString,
-            amountFieldName -> "10001"
-          )
-        )
-        bind.value shouldBe Some(TurnoverEstimateFormElement(TurnoverEstimate.TenThousand.toString, Some("10001")))
-      }
-      "between one and ten thousand is selected" in {
-        form.bind(
-          Map(
-            selectionFieldName -> TurnoverEstimate.Oneandtenthousand.toString
-          )
-        ).value shouldBe Some(TurnoverEstimateFormElement(TurnoverEstimate.Oneandtenthousand.toString, None))
-      }
-      "zero pounds" in {
-        form.bind(
-          Map(
-            selectionFieldName -> TurnoverEstimate.Zeropounds.toString
-          )
-        ).value shouldBe Some(TurnoverEstimateFormElement(TurnoverEstimate.Zeropounds.toString, None))
       }
     }
   }

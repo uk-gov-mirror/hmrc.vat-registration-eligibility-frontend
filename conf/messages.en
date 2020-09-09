@@ -41,6 +41,7 @@ site.hidden-edit = Change {0}
 site.no = No
 site.yes = Yes
 site.save_and_continue = Save and continue
+site.continue = Continue
 site.service_name = Register for VAT
 service.name = Register for VAT
 site.use_other_service = Use the other service
@@ -83,6 +84,7 @@ thresholdPreviousThirtyDays.error.date.invalid          = Enter a valid date
 
 voluntaryRegistration.title                 = Does the business want to register voluntarily?
 voluntaryRegistration.heading               = The business doesn''t have to register for VAT
+voluntaryRegistration.summary.heading       = Does the business want to register for VAT voluntarily?
 voluntaryRegistration.error.required        = Tell us if you want to register voluntarily for VAT
 voluntaryRegistration.text1                 = The business can still register voluntarily, if it:
 voluntaryRegistration.bullet1               = has ever sold VAT-taxable goods or services
@@ -120,16 +122,15 @@ thresholdInTwelveMonths.dateHint                    = For example, 02 2017
 thresholdInTwelveMonths.dropdownText                = What to include as VAT-taxable sales?
 thresholdInTwelveMonths.disclosureText              = Assume the business is already VAT-registered. Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate.
 
-turnoverEstimate.title                  = Estimate VAT-taxable turnover for the next 12 months
-turnoverEstimate.heading                = What do you think {0}''s VAT-taxable turnover will be for the next 12 months?
-turnoverEstimate.zeropounds             = £0
-turnoverEstimate.oneandtenthousand      = Between £1 and £10,000
-turnoverEstimate.tenthousand            = More than £10,000
+turnoverEstimate.title                  = What do you think the business’ VAT-taxable turnover will be for the next 12 months?
+turnoverEstimate.heading                = What do you think the business’ VAT-taxable turnover will be for the next 12 months?
 turnoverEstimate.text                   = Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate.
 turnoverEstimate.beforeLinkText         = Find out more about
 turnoverEstimate.linkText               = which goods and services are exempt from VAT (opens in a new window or tab)
-turnoverEstimate.giveAnEstimate         = Give an estimate rounded to the nearest £10,000
+turnoverEstimate.giveAnEstimate         = For example, £90,000
 turnoverEstimate.pound                  = £
+turnoverEstimate.error.required         = Enter what you think the business’ VAT-taxable turnover will be for the next 12 months
+turnoverEstimate.error.amount.numbers   = Give a value using only numbers
 
 completionCapacity.noneOfThese = None of these
 

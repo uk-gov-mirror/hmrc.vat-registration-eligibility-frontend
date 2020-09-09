@@ -17,46 +17,56 @@
 package views
 
 import forms.TurnoverEstimateFormProvider
-import models.{NormalMode, TurnoverEstimate}
+import models.NormalMode
 import play.api.data.Form
-import views.behaviours.ViewBehaviours
+import play.twirl.api.HtmlFormat
+import views.newbehaviours.ViewBehaviours
 import views.html.turnoverEstimate
 
 class TurnoverEstimateViewSpec extends ViewBehaviours {
 
+  object Selectors extends BaseSelectors
+
+  implicit val msgs = messages
   val messageKeyPrefix = "turnoverEstimate"
+  val button = "Continue"
+  val h1 = "What do you think the business’ VAT-taxable turnover will be for the next 12 months?"
+  val p1 = "Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate."
+  val estimateLinkText1 = "Find out more about"
+  val estimateLinkText2 = "which goods and services are exempt from VAT (opens in a new tab)."
+  val estimateLink = "https://www.gov.uk/guidance/rates-of-vat-on-different-goods-and-services"
+  val p2 = s"$estimateLinkText1 $estimateLinkText2"
 
   val form = new TurnoverEstimateFormProvider()()
 
-  def createView = () => turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+  def createView: () => HtmlFormat.Appendable = () => turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+  def createViewUsingForm: Form[_] => HtmlFormat.Appendable = (form: Form[_]) => turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "TurnoverEstimate view" must {
-    behave like normalPage(createView, messageKeyPrefix)
-  }
+    behave like normalPage(createView(), messageKeyPrefix)
+    behave like pageWithBackLink(createViewUsingForm(form))
+    behave like pageWithSubmitButton(createViewUsingForm(form), button)
 
-  "TurnoverEstimate view" when {
-    "rendered" must {
-      "contain radio buttons for the value" in {
-        val doc = asDocument(createViewUsingForm(form))
-        for (option <- TurnoverEstimate.options) {
-          assertContainsRadioButton(doc, option.id, "turnoverEstimateSelection", option.value, false)
-        }
-      }
+    "have a Continue button" in {
+      val doc = asDocument(createViewUsingForm(form))
+
+      doc.select(Selectors.button).text() mustBe button
     }
 
-    for(option <- TurnoverEstimate.options) {
-      s"rendered with a value of '${option.value}'" must {
-        s"have the '${option.value}' radio button selected" in {
-          val doc = asDocument(createViewUsingForm(form.bind(Map("turnoverEstimateSelection" -> s"${option.value}"))))
-          assertContainsRadioButton(doc, option.id, "turnoverEstimateSelection", option.value, true)
+    "have the correct heading" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.h1).text() mustBe h1
+    }
 
-          for(unselectedOption <- TurnoverEstimate.options.filterNot(o => o == option)) {
-            assertContainsRadioButton(doc, unselectedOption.id, "turnoverEstimateSelection", unselectedOption.value, false)
-          }
-        }
-      }
+    "have the first paragraph" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.p(1)).text() mustBe p1
+    }
+
+    "have the second paragraph with the correct url link" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select(Selectors.p(2)).select("a").attr("href") mustBe estimateLink
     }
   }
 }

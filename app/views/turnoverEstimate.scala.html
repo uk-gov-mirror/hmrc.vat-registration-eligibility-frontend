@@ -20,49 +20,26 @@
 @import models.TurnoverEstimate
 @import models.Mode
 @import models.requests.DataRequest
+@import views.html.layouts.layout
+@import views.html.newcomponents._
 
-@import deprecated.DeprecatedConstants
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@hiddenContent = {
-    <div class="additional-option-block panel panel-border-narrow">
-        @components.input_text(
-            field = form("turnoverEstimateAmount"),
-            label = messages("turnoverEstimate.giveAnEstimate"),
-            prefix = messages("turnoverEstimate.pound")
-        )
-    </div>
-}
+@layout(pageTitle = Some(title(form, messages("turnoverEstimate.title"))), backLink = true) {
 
-@main_template(
-    title = messages("turnoverEstimate.title"),
-    appConfig = appConfig,
-    bodyClasses = None) {
+        @errorSummary(form.errors)
 
-    @helpers.form(action = TurnoverEstimateController.onSubmit(), 'autoComplete -> "off") {
+        @h1(messages("turnoverEstimate.heading"))
 
-        @components.back_link()
+        @p{ @messages("turnoverEstimate.text") }
 
-        @components.error_summary(form.errors)
+        @p{
+            @messages("turnoverEstimate.beforeLinkText")
+            @link(appConfig.VATRateDifferentGoodsURL, "turnoverEstimate.linkText").
+        }
 
-        <h1 class="heading-large" id="main-heading">@messages("turnoverEstimate.heading",DeprecatedConstants.fakeCompanyName)</h1>
-
-        @components.text("turnoverEstimate.text")
-
-        @components.text_with_link("turnoverEstimate.beforeLinkText","turnoverEstimate.linkText",appConfig.VATRateDifferentGoodsURL, Some("."))
-
-        @components.vertical_input_radio(
-            field = form("turnoverEstimateSelection"),
-            radioOptions = Seq(
-                "zeropounds" -> messages("turnoverEstimate.zeropounds"),
-                "oneandtenthousand" -> messages("turnoverEstimate.oneandtenthousand"),
-                "tenthousand" -> messages("turnoverEstimate.tenthousand")
-            ),
-            radioAdditionalInfo = Map("tenthousand" -> hiddenContent),
-            '_legend -> Messages("turnoverEstimate.heading"),
-            '_legendClass -> "visually-hidden"
-        )
-
-        @components.submit_button()
+        @helpers.form(action = TurnoverEstimateController.onSubmit(), 'autoComplete -> "off") {
+            @inputCurrency(form = form, id = "turnoverEstimateAmount", name = "turnoverEstimateAmount", classes = Some("govuk-input--width-10"))
+            @button(messages("site.continue"))
+        }
     }
-}
