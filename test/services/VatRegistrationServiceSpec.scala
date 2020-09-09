@@ -106,7 +106,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
       s"$ThresholdNextThirtyDaysId" -> JsBoolean(false),
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$VoluntaryRegistrationId" -> JsBoolean(true),
-      s"$TurnoverEstimateId" -> Json.obj("selection" -> JsString("oneandtenthousand")),
+      s"$TurnoverEstimateId" -> Json.obj("amount" -> JsString("50000")),
       s"$InternationalActivitiesId" -> JsBoolean(false),
       s"$InvolvedInOtherBusinessId" -> JsBoolean(false),
       s"$VoluntaryRegistrationId" -> JsBoolean(true),
@@ -126,7 +126,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
           | "data":[
           | {"questionId":"thresholdInTwelveMonths-value","question":"foo","answer":"mocked message","answerValue":false}, {"questionId":"thresholdNextThirtyDays","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"thresholdPreviousThirtyDays-value","question":"foo","answer":"mocked message","answerValue":false},{"questionId":"voluntaryRegistration","question":"mocked message","answer":"mocked message","answerValue":true},
-          | {"questionId":"turnoverEstimate-value","question":"mocked message","answer":"mocked message","answerValue":"oneandtenthousand"}]},
+          | {"questionId":"turnoverEstimate-value","question":"mocked message","answer":"£50,000","answerValue":50000}]},
           | {"title":"Special situations",
           | "data":[{"questionId":"internationalActivities","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"involvedInOtherBusiness","question":"mocked message","answer":"mocked message","answerValue":false},

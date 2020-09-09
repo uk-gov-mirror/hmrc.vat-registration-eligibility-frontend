@@ -52,7 +52,7 @@ class TurnoverEstimateControllerSpec extends ControllerSpecBase {
     }
 
     "populate the view correctly on a GET when the question has previously been answered" in {
-      val element = TurnoverEstimateFormElement("test", None)
+      val element = TurnoverEstimateFormElement("test")
       val validData = Map(TurnoverEstimateId.toString -> Json.toJson(element))
       val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
 
@@ -63,7 +63,6 @@ class TurnoverEstimateControllerSpec extends ControllerSpecBase {
 
     "redirect to the next page when valid data is submitted" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody(
-        ("turnoverEstimateSelection", TurnoverEstimate.TenThousand.toString),
         ("turnoverEstimateAmount", "10001")
       )
 
@@ -92,7 +91,7 @@ class TurnoverEstimateControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to Session Expired for a POST if no existing data is found" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", TurnoverEstimate.options.head.value))
+      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", ""))
       val result = controller(dontGetAnyData).onSubmit(NormalMode)(postRequest)
 
       status(result) mustBe SEE_OTHER

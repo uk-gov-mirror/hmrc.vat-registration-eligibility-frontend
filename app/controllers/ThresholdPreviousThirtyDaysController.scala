@@ -16,26 +16,19 @@
 
 package controllers
 
-import java.time.LocalDate
-
-import org.joda.time.{LocalDate => LocalDateJoda}
-import uk.gov.hmrc.time.DateTimeUtils
 import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
-import deprecated.DeprecatedConstants
 import forms.ThresholdPreviousThirtyDaysFormProvider
 import identifiers.ThresholdPreviousThirtyDaysId
 import javax.inject.Inject
-import models.requests.DataRequest
 import models.{ConditionalDateFormElement, NormalMode}
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import services.ThresholdService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import utils.{Navigator, ThresholdHelper, UserAnswers, VATDateHelper}
+import utils.{Navigator, ThresholdHelper, UserAnswers}
 import views.html.thresholdPreviousThirtyDays
 
 import scala.concurrent.Future
@@ -63,13 +56,13 @@ class ThresholdPreviousThirtyDaysController @Inject()(override val messagesApi: 
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) => {
-          Future.successful(BadRequest(thresholdPreviousThirtyDays(formWithErrors, NormalMode,thresholdService)))
+          Future.successful(BadRequest(thresholdPreviousThirtyDays(formWithErrors, NormalMode, thresholdService)))
         },
         (formValue) =>
-          dataCacheConnector.save[ConditionalDateFormElement](request.internalId,ThresholdPreviousThirtyDaysId.toString, formValue).flatMap{
+          dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdPreviousThirtyDaysId.toString, formValue).flatMap {
             cacheMap =>
               val userAnswers = new UserAnswers(cacheMap)
-              if (ThresholdHelper.q1DefinedAndTrue(userAnswers) | formValue.value | userAnswers.thresholdNextThirtyDays.getOrElse(false))  {
+              if (ThresholdHelper.q1DefinedAndTrue(userAnswers) | formValue.value | userAnswers.thresholdNextThirtyDays.getOrElse(false)) {
                 thresholdService.removeVoluntaryRegistration
               } else {
                 Future.successful(cacheMap)

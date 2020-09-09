@@ -40,7 +40,6 @@ class AgriculturalFlatRateSchemeViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-
   def createView: () => HtmlFormat.Appendable =
     () => agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
 
