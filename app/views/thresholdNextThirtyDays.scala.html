@@ -31,8 +31,8 @@
 
     @errorSummary(form.errors)
 
-    @h1(messages("thresholdNextThirtyDays.heading", DeprecatedConstants.fakeCompanyName))
-    @p{ @messages("thresholdNextThirtyDays.text", DeprecatedConstants.fakeCompanyName) }
+    @h1(messages("thresholdNextThirtyDays.heading"))
+    @p{ @messages("thresholdNextThirtyDays.text") }
 
     @helpers.form(action = ThresholdNextThirtyDaysController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
