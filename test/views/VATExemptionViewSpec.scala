@@ -17,25 +17,30 @@
 package views
 
 import controllers.routes
-import deprecated.DeprecatedConstants
 import forms.VATExemptionFormProvider
 import models.NormalMode
 import play.api.data.Form
-import views.newbehaviours.YesNoViewBehaviours
+import play.twirl.api.HtmlFormat
 import views.html.vatExemption
+import views.newbehaviours.YesNoViewBehaviours
 
 class VATExemptionViewSpec extends YesNoViewBehaviours {
-  val extraParamForLegend: String = DeprecatedConstants.fakeCompanyName
+
+  val button = "Continue"
   val messageKeyPrefix = "vatExemption"
   val form = new VATExemptionFormProvider()()
   implicit val msgs = messages
 
-  def createView = () => vatExemption(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+  def createView: () => HtmlFormat.Appendable =
+    () => vatExemption(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
 
-  def createViewUsingForm = (form: Form[_]) => vatExemption(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
+    (form: Form[_]) => vatExemption(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
 
   "VATExemption view" must {
-    behave like normalPage(createView(), messageKeyPrefix, Seq(DeprecatedConstants.fakeCompanyName))
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VATExemptionController.onSubmit().url, headingArgs = Seq(DeprecatedConstants.fakeCompanyName))
+    behave like normalPage(createView(), messageKeyPrefix)
+    behave like pageWithBackLink(createViewUsingForm(form))
+    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VATExemptionController.onSubmit().url)
+    behave like pageWithSubmitButton(createViewUsingForm(form), button)
   }
 }
