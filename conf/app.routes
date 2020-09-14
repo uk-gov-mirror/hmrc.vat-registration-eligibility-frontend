@@ -62,3 +62,6 @@ POST       /agricultural-flat-rate                      controllers.Agricultural
 GET        /own-racehorses-buy-sell-property            controllers.RacehorsesController.onPageLoad()
 POST       /own-racehorses-buy-sell-property            controllers.RacehorsesController.onSubmit()
 
+GET        /whos-the-application-for                    controllers.RegisteringBusinessController.onPageLoad
+POST       /whos-the-application-for                    controllers.RegisteringBusinessController.onSubmit
+

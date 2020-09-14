@@ -38,6 +38,7 @@ class Navigator @Inject()() {
     case InvolvedInOtherBusinessId => routes.InvolvedInOtherBusinessController.onPageLoad()
     case InternationalActivitiesId => routes.InternationalActivitiesController.onPageLoad()
     case ZeroRatedSalesId => routes.ZeroRatedSalesController.onPageLoad()
+    case RegisteringBusinessId => routes.RegisteringBusinessController.onPageLoad()
     case VATExemptionId => routes.VATExemptionController.onPageLoad()
     case VATRegistrationExceptionId => routes.VATRegistrationExceptionController.onPageLoad()
     case ApplyInWritingId => routes.ApplyInWritingController.onPageLoad()
@@ -97,7 +98,8 @@ class Navigator @Inject()() {
     toNextPage(TurnoverEstimateId, InvolvedInOtherBusinessId),
     nextOn(false, InvolvedInOtherBusinessId, InternationalActivitiesId, EligibilityDropoutId(InvolvedInOtherBusinessId.toString)),
     nextOn(false, InternationalActivitiesId, ZeroRatedSalesId, EligibilityDropoutId(InternationalActivitiesId.toString)),
-    nextOn(true, ZeroRatedSalesId, VATExemptionId, AgriculturalFlatRateSchemeId),
+    nextOn(true, ZeroRatedSalesId, VATExemptionId, RegisteringBusinessId),
+    nextOn(true,RegisteringBusinessId,AgriculturalFlatRateSchemeId, EligibilityDropoutId(InvolvedInOtherBusinessId.toString)),
     nextOn(false, VATExemptionId, AgriculturalFlatRateSchemeId, ApplyInWritingId),
     nextOn(false, VATRegistrationExceptionId, TurnoverEstimateId, EligibilityDropoutId(VATRegistrationExceptionId.toString)),
     nextOn(false, AgriculturalFlatRateSchemeId, RacehorsesId, EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)),
