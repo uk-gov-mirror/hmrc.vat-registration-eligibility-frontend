@@ -82,7 +82,7 @@ thresholdPreviousThirtyDays.linkText                = previous VAT registration 
 thresholdPreviousThirtyDays.dateHint                = For example, 13 02 2017
 thresholdPreviousThirtyDays.heading2                = What date did the business first go over the threshold?
 thresholdPreviousThirtyDays.error.required          = Tell us if the business has ever thought it would go over the VAT-registration threshold in a single 30-day period
-thresholdPreviousThirtyDays.error.date.required     = Enter a date for when the business first thought it would go over the threshold in a 30-day period
+thresholdPreviousThirtyDays.error.date.required     = Select yes if the business realised it would go over the threshold in the next 30 days
 thresholdPreviousThirtyDays.error.date.inFuture     = Enter a date that''s in the past
 thresholdPreviousThirtyDays.error.date.invalid      = Enter a valid date
 
