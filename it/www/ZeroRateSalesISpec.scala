@@ -22,7 +22,7 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
 
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.AgriculturalFlatRateSchemeController.onPageLoad().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.RegisteringBusinessController.onPageLoad().url)
       verifySessionCacheData(internalId, ZeroRatedSalesId.toString, Option.apply[Boolean](false))
     }
     "navigate to Agriculture when false and data exists for Exemption" in {
@@ -37,7 +37,7 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
 
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.AgriculturalFlatRateSchemeController.onPageLoad().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.RegisteringBusinessController.onPageLoad().url)
       verifySessionCacheData(internalId, ZeroRatedSalesId.toString, Option.apply[Boolean](false))
       verifySessionCacheData(internalId, VATExemptionId.toString, Option.empty[Boolean])
     }
