@@ -81,6 +81,7 @@ object PageIdBinding {
           (InternationalActivitiesId, userAnswers.internationalActivities),
           (InvolvedInOtherBusinessId, userAnswers.involvedInOtherBusiness),
           (ZeroRatedSalesId, userAnswers.zeroRatedSales),
+          (RegisteringBusinessId, userAnswers.registeringBusiness),
           (VATExemptionId, userAnswers.vatExemption),
           (AgriculturalFlatRateSchemeId, userAnswers.agriculturalFlatRateScheme),
           (RacehorsesId, userAnswers.racehorses)

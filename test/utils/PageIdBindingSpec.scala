@@ -61,6 +61,7 @@ class PageIdBindingSpec extends PlaySpec {
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$VATExemptionId" -> JsBoolean(false),
       s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$RegisteringBusinessId" -> JsBoolean(true),
       s"$VATRegistrationExceptionId" -> JsBoolean(false)
     )
     PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested)))
@@ -91,6 +92,7 @@ class PageIdBindingSpec extends PlaySpec {
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ZeroRatedSalesId" -> JsBoolean(false),
+      s"$RegisteringBusinessId" -> JsBoolean(true),
       s"$VATRegistrationExceptionId" -> JsBoolean(false)
     )
     PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested)))
@@ -136,7 +138,9 @@ class PageIdBindingSpec extends PlaySpec {
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$VoluntaryRegistrationId" -> JsBoolean(true),
       s"$VATExemptionId" -> JsBoolean(false),
-      s"$ZeroRatedSalesId" -> JsBoolean(true)
+      s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$RegisteringBusinessId" -> JsBoolean(true)
+
     )
     PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested)))
   }
