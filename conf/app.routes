@@ -65,3 +65,6 @@ POST       /own-racehorses-buy-sell-property            controllers.RacehorsesCo
 GET        /whos-the-application-for                    controllers.RegisteringBusinessController.onPageLoad
 POST       /whos-the-application-for                    controllers.RegisteringBusinessController.onSubmit
 
+GET        /have-nino                                   controllers.NinoController.onPageLoad
+POST       /have-nino                                   controllers.NinoController.onSubmit
+
