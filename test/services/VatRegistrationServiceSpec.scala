@@ -113,6 +113,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
       s"$VATExemptionId" -> JsBoolean(false),
       s"$ZeroRatedSalesId" -> JsBoolean(true),
       s"$RegisteringBusinessId" -> JsBoolean(true),
+      s"$NinoId" -> JsBoolean(true),
       s"$AgriculturalFlatRateSchemeId" -> JsBoolean(false),
       s"$RacehorsesId" -> JsBoolean(false)
     )
@@ -135,6 +136,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
           | {"questionId":"involvedInOtherBusiness","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"zeroRatedSales","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"registeringBusiness","question":"mocked message","answer":"mocked message","answerValue":true},
+          | {"questionId":"nino","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"vatExemption","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"agriculturalFlatRateScheme","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"racehorses","question":"mocked message","answer":"mocked message","answerValue":false}

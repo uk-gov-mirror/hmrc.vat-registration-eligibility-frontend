@@ -48,6 +48,8 @@ class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
 
   def registeringBusiness: Option[Boolean] = cacheMap.getEntry[Boolean](RegisteringBusinessId.toString)
 
+  def nino: Option[Boolean] = cacheMap.getEntry[Boolean](NinoId.toString)
+
   def getAnswer[T](id: Identifier)(implicit reads: Reads[T]): Option[T] = cacheMap.getEntry[T](id.toString)
 
   def getAnswerFromIdString[T](id: String)(implicit reads: Reads[T]): Option[JsValue] = cacheMap.getEntry[JsValue](id)
