@@ -30,7 +30,7 @@ class AgriculturalFlatRateSchemeViewSpec extends YesNoViewBehaviours {
   val form = new AgriculturalFlatRateSchemeFormProvider()()
   implicit val msgs = messages
 
-  val saveAndContinueButton = "Save and continue"
+  val continueButton = "Continue"
   val h1 = "Is the business applying for the Agricultural Flat Rate Scheme?"
   val p1 = "The Agricultural Flat Rate Scheme is an alternative to VAT registration for farmers."
   val afrsLinkText1 = "Find out more about the"
@@ -50,7 +50,7 @@ class AgriculturalFlatRateSchemeViewSpec extends YesNoViewBehaviours {
     behave like normalPage(createView(), messageKeyPrefix)
     behave like pageWithBackLink(createViewUsingForm(form))
     behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.AgriculturalFlatRateSchemeController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), saveAndContinueButton)
+    behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
   }
 
   "have the correct heading" in {

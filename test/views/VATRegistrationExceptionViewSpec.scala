@@ -29,7 +29,7 @@ class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
   val form = new VATRegistrationExceptionFormProvider()()
   implicit val msgs = messages
 
-  val saveAndContinueButton = "Save and continue"
+  val continueButton = "Continue"
   val h1 = "Is the business applying for a VAT registration 'exception'?"
   val paragraph = "The business may not need to register for VAT if it can give evidence that it won't go over the threshold in the next 12 months. This is called a registration 'exception'."
 
@@ -45,7 +45,7 @@ class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
     behave like normalPage(createView(), messageKeyPrefix)
     behave like pageWithBackLink(createViewUsingForm(form))
     behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VATRegistrationExceptionController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), saveAndContinueButton)
+    behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
 
     "have the correct heading" in {
       val doc = asDocument(createViewUsingForm(form))

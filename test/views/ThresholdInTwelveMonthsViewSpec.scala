@@ -48,7 +48,7 @@ class ThresholdInTwelveMonthsViewSpec @Inject()(implicit appConfig: FrontendAppC
   val bullet1 = "Yes"
   val bullet2 = "No"
   val h2 = "In any 12-month period has the business gone over the VAT-registration threshold?"
-  val button = "Save and continue"
+  val button = "Continue"
 
   object Selectors extends BaseSelectors
 
@@ -74,7 +74,7 @@ class ThresholdInTwelveMonthsViewSpec @Inject()(implicit appConfig: FrontendAppC
       doc.select(Selectors.bullet(2)).text() mustBe bullet2
     }
 
-    "have a save and continue button" in {
+    "have a continue button" in {
       val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.button).text() mustBe button
     }
