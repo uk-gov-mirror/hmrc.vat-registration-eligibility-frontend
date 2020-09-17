@@ -30,7 +30,7 @@ class InternationalActivitiesViewSpec extends YesNoViewBehaviours {
   val form = new InternationalActivitiesFormProvider()()
   implicit val msgs = messages
 
-  val saveAndContinueButton = "Save and continue"
+  val continueButton = "Continue"
   val h1 = "Will the business do any of the following international activities over the next 12 months?"
   val paragraph = "Tell us if the business will:"
   val bullet1 = "export goods or services to EU countries"
@@ -51,7 +51,7 @@ class InternationalActivitiesViewSpec extends YesNoViewBehaviours {
     behave like normalPage(createView(), messageKeyPrefix)
     behave like pageWithBackLink(createViewUsingForm(form))
     behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.InternationalActivitiesController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), saveAndContinueButton)
+    behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
 
     "have the correct heading " in {
       val doc = asDocument(createViewUsingForm(form))

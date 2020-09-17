@@ -32,7 +32,7 @@ class RegisteringBusinessViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  val button = "Save and continue"
+  val button = "Continue"
 
   def createView: () => HtmlFormat.Appendable =
     () => registeringBusiness(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
@@ -43,7 +43,7 @@ class RegisteringBusinessViewSpec extends YesNoViewBehaviours {
   "RegisteringBusiness view" must {
     behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.RegisteringBusinessController.onSubmit().url)
 
-    "have a save and continue button" in {
+    "have a continue button" in {
       val doc = asDocument(createViewUsingForm(form))
 
       doc.select(Selectors.button).text() mustBe button

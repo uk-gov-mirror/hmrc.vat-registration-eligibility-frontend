@@ -35,7 +35,7 @@ class RacehorsesViewSpec extends YesNoViewBehaviours {
   val paragraph = "Tell us if the business will:"
   val bullet1 = "buy, sell or rent out land or property as a business activity (not just to have its own premises)"
   val bullet2 = "own one or more racehorses"
-  val button = "Save and continue"
+  val button = "Continue"
 
   def createView: () => HtmlFormat.Appendable =
     () => racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
@@ -60,7 +60,7 @@ class RacehorsesViewSpec extends YesNoViewBehaviours {
       doc.select(Selectors.bullet(2)).text() mustBe bullet2
     }
 
-    "have a save and continue button" in {
+    "have a continue button" in {
       val doc = asDocument(createViewUsingForm(form))
 
       doc.select(Selectors.button).text() mustBe button

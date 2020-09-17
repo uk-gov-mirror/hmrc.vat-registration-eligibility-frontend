@@ -42,7 +42,7 @@ class AnnualAccountingSchemeISpec extends IntegrationSpecBase with AuthHelper wi
       verifySessionCacheData(internalId, AnnualAccountingSchemeId.toString, Option.apply[Boolean](false))
     }
 
-    "navigate to VAT Exeption when true" in {
+    "navigate to VAT Exception when true" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()

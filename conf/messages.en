@@ -40,7 +40,6 @@ site.hidden-delete = Delete {0}
 site.hidden-edit = Change {0}
 site.no = No
 site.yes = Yes
-site.save_and_continue = Save and continue
 site.continue = Continue
 site.service_name = Register for VAT
 service.name = Register for VAT

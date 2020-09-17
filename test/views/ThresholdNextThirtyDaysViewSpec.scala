@@ -49,7 +49,7 @@ class ThresholdNextThirtyDaysViewSpec extends ViewBehaviours {
   val testText = "For example, the business is expecting orders - or has signed a contract - that will generate VAT-taxable sales of £85,000 or more in the next 30 days."
   val testLegend = "What date did the business realise it would go over the threshold?"
   val testHint = "For example, 13 02 2017"
-  val testButton = "Save and continue"
+  val testButton = "Continue"
 
   "ThresholdNextThirtyDays view" must {
     behave like normalPage(createView(), messageKeyPrefix)

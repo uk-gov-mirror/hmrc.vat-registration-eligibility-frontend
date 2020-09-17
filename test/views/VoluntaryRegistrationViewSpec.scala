@@ -30,7 +30,7 @@ class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
   val form = new VoluntaryRegistrationFormProvider()()
   implicit val msgs = messages
 
-  val saveAndContinueButton = "Save and continue"
+  val continueButton = "Continue"
   val h1 = "The business doesn't have to register for VAT"
   val paragraph = "The business can still register voluntarily, if it:"
   val bullet1 = "has ever sold VAT-taxable goods or services"
@@ -51,7 +51,7 @@ class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
     behave like normalPage(createView(), messageKeyPrefix)
     behave like pageWithBackLink(createViewUsingForm(form))
     behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VoluntaryRegistrationController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), saveAndContinueButton)
+    behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
 
 
     "have the correct heading" in {
