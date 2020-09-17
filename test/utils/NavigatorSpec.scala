@@ -33,7 +33,7 @@ class NavigatorSpec extends SpecBase with MockitoSugar {
     "in Normal mode" must {
       "go to Index from an identifier that doesn't exist in the route map" in {
         case object UnknownIdentifier extends Identifier
-        navigator.nextPage(UnknownIdentifier, NormalMode)(mock[UserAnswers]) mustBe routes.ThresholdNextThirtyDaysController.onPageLoad()
+        navigator.nextPage(UnknownIdentifier, NormalMode)(mock[UserAnswers]) mustBe routes.IntroductionController.onPageLoad()
       }
     }
   }
@@ -54,7 +54,7 @@ class NavigatorSpec extends SpecBase with MockitoSugar {
         val fakeId = new Identifier {
           override def toString: String = "fudge"
         }
-        navigator.pageIdToPageLoad(fakeId).url mustBe routes.ThresholdNextThirtyDaysController.onPageLoad().url
+        navigator.pageIdToPageLoad(fakeId).url mustBe routes.IntroductionController.onPageLoad().url
       }
     }
   }

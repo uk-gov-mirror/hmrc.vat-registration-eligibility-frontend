@@ -17,22 +17,23 @@
 package controllers
 
 import config.FrontendAppConfig
-import identifiers.Identifier
+import controllers.actions.CacheIdentifierAction
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import utils.Navigator
+import views.html.introduction
 
-class IndexController @Inject()(val messagesApi: MessagesApi,
-                                navigator: Navigator
-                               )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+class IntroductionController @Inject()(override val messagesApi: MessagesApi,
+                                       identify: CacheIdentifierAction
+                                      )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = Action { implicit request =>
-    Redirect(routes.IntroductionController.onPageLoad())
+  def onPageLoad: Action[AnyContent] = (identify) { implicit request =>
+    Ok(introduction())
   }
-  def navigateToPageId(pageId: String) = Action { implicit request =>
-    Redirect(navigator.pageIdToPageLoad(new Identifier {override def toString: String = pageId}))
+
+  def onSubmit: Action[AnyContent] = (identify) { implicit request =>
+    Redirect(controllers.routes.ThresholdInTwelveMonthsController.onPageLoad())
   }
 
 }

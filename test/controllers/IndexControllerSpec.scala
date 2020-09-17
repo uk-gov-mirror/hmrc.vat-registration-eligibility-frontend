@@ -29,7 +29,7 @@ class IndexControllerSpec extends ControllerSpecBase {
   "Index Controller" must {
     "return 200 for a GET" in new Setup {
       val result = controller.onPageLoad()(fakeRequest)
-      redirectLocation(result) mustBe Some(routes.ThresholdInTwelveMonthsController.onPageLoad().url)
+      redirectLocation(result) mustBe Some(routes.IntroductionController.onPageLoad().url)
     }
     "navigateToPage with a page id takes user to page in navigator" in new Setup {
       val result = controller.navigateToPageId("foo")(fakeRequest)
