@@ -34,7 +34,7 @@
     @p{ @messages("racehorses.bulletText") }
     @bullets("racehorses.bullet1","racehorses.bullet2")
 
-    @helpers.form(action = RacehorsesController.onSubmit(), 'autoComplete -> "off") {
+    @helpers.form(action = routes.RacehorsesController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "racehorses.heading",

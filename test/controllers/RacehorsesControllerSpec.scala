@@ -37,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class RacehorsesControllerSpec extends ControllerSpecBase with MockitoSugar{
 
-  def onwardRoute = routes.IndexController.onPageLoad()
+  def onwardRoute = routes.EligibleController.onPageLoad()
 
   val formProvider = new RacehorsesFormProvider()
   val form = formProvider()
@@ -45,12 +45,11 @@ class RacehorsesControllerSpec extends ControllerSpecBase with MockitoSugar{
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new RacehorsesController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider, mockVRService)
+      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
 
   def viewAsString(form: Form[_] = form) = racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "Racehorses Controller" must {
-
     "return OK and the correct view for a GET" in {
       val result = controller().onPageLoad()(fakeRequest)
 
@@ -68,14 +67,12 @@ class RacehorsesControllerSpec extends ControllerSpecBase with MockitoSugar{
     }
 
     "redirect to the next page when valid data is submitted" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
-      when(mockVRService.submitEligibility(Matchers.any[String])(Matchers.any[HeaderCarrier], Matchers.any[ExecutionContext], Matchers.any[DataRequest[_]]))
-        .thenReturn(Future.successful(Json.obj()))
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true")
 
       val result = controller().onSubmit()(postRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some("http://localhost:9895/register-for-vat/honesty-declaration") //TODO - check if this can be retrieved from somewhere
+      redirectLocation(result) mustBe Some(controllers.routes.EligibleController.onPageLoad().url)
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {
