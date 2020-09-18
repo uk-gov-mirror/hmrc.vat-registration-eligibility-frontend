@@ -49,7 +49,7 @@ class Navigator @Inject()() {
     case RacehorsesId => routes.RacehorsesController.onPageLoad()
     case page => {
       Logger.info(s"${page.toString} does not exist navigating to start of the journey")
-      routes.ThresholdNextThirtyDaysController.onPageLoad()
+      routes.IntroductionController.onPageLoad()
     }
   }
 
@@ -111,5 +111,5 @@ class Navigator @Inject()() {
   )
 
   def nextPage(id: Identifier, mode: Mode): UserAnswers => Call =
-    routeMap.getOrElse(id, _ => routes.ThresholdNextThirtyDaysController.onPageLoad())
+    routeMap.getOrElse(id, _ => routes.IntroductionController.onPageLoad())
 }

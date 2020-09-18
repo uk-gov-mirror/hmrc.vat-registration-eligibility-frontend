@@ -59,6 +59,10 @@ footer.accessibilityStatement = Accessibility statement
 unauthorised.title = You can''t access this service with this account
 unauthorised.heading = You can''t access this service with this account
 
+introduction.title                                  = Check if you can register for VAT online
+introduction.heading                                = Check if you can register for VAT online
+introduction.p1                                     = We will ask you some questions about the nature of the business to check if this is the best way for you to register.
+
 thresholdNextThirtyDays.title                       = Over VAT-registration threshold in the next 30 days
 thresholdNextThirtyDays.heading                     = In the next 30 days, does the business expect to exceed the £85,000 threshold?
 thresholdNextThirtyDays.heading2                    = What date did the business realise it would go over the threshold?
