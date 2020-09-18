@@ -20,7 +20,6 @@ import base.{SpecBase, VATEligiblityMocks}
 import connectors.{DataCacheConnector, VatRegistrationConnector}
 import identifiers._
 import models.requests.DataRequest
-import models.{Name, Officer}
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -29,7 +28,6 @@ import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc.{AnyContentAsEmpty, RequestHeader}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.JsonSummaryRow
 
 import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -58,11 +56,6 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
   }
 
   implicit val r: DataRequest[AnyContentAsEmpty.type] = fakeDataRequestIncorped
-
-  val officersList: Seq[Officer] = Seq(
-    Officer(Name(Some("First"), Some("Middle"), "Last", Some("Mrs")), "director", None, Some("some-url")),
-    Officer(Name(Some("Second"), None, "VeryLast", Some("Mr")), "secretary", None, Some("some-url"))
-  )
   val internalId = "internalID"
 
   "prepareQuestionData" should {

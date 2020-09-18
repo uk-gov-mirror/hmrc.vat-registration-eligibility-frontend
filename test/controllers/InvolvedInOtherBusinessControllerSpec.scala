@@ -19,12 +19,9 @@ package controllers
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.InvolvedInOtherBusinessFormProvider
-import identifiers.{InternationalActivitiesId, InvolvedInOtherBusinessId}
-import models.{Name, NormalMode, Officer}
+import models.NormalMode
 import play.api.data.Form
-import play.api.libs.json.{JsBoolean, JsString}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
 import views.html.involvedInOtherBusiness
 
@@ -35,11 +32,6 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
   val formProvider = new InvolvedInOtherBusinessFormProvider()
   val form = formProvider.form
   implicit val appConfig = frontendAppConfig
-
-  val officersList: Seq[Officer] = Seq(
-    Officer(Name(Some("First"), Some("Middle"), "Last",Some("Mrs")),"director", None, Some("some-url")),
-    Officer(Name(Some("Second"), None, "VeryLast",Some("Mr")), "secretary", None, Some("some-url"))
-  )
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new InvolvedInOtherBusinessController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
