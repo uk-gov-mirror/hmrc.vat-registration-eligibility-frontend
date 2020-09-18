@@ -7,9 +7,12 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.HeaderNames
 import play.api.libs.Crypto
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSCookie
 import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
 import uk.gov.hmrc.http.SessionKeys
+
+import scala.concurrent.Future
 
 trait AuthHelper extends SessionCookieBaker {
 

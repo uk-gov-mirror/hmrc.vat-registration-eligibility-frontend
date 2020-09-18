@@ -47,6 +47,7 @@ class Navigator @Inject()() {
     case EligibilityDropoutId(mode) => routes.EligibilityDropoutController.onPageLoad(mode)
     case AgriculturalFlatRateSchemeId => routes.AgriculturalFlatRateSchemeController.onPageLoad()
     case RacehorsesId => routes.RacehorsesController.onPageLoad()
+    case EligibleId => routes.EligibleController.onPageLoad()
     case page => {
       Logger.info(s"${page.toString} does not exist navigating to start of the journey")
       routes.IntroductionController.onPageLoad()
@@ -88,26 +89,76 @@ class Navigator @Inject()() {
     }
   }
 
-  private[utils] def toNextPage(fromPage: Identifier, toPage: Identifier): (Identifier, UserAnswers => Call) = fromPage -> {
-    _ => pageIdToPageLoad(toPage)
-  }
+  private[utils] def toNextPage(fromPage: Identifier, toPage: Identifier): (Identifier, UserAnswers => Call) =
+    fromPage -> { _ => pageIdToPageLoad(toPage) }
 
   private val routeMap: Map[Identifier, UserAnswers => Call] = Map(
-    nextOnConditionalFormElement(false, ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId),
-    ThresholdNextThirtyDaysId -> { _ => pageIdToPageLoad(ThresholdPreviousThirtyDaysId) },
-    lastThresholdQuestion(ThresholdPreviousThirtyDaysId, VATRegistrationExceptionId, TurnoverEstimateId),
-    nextOn(true, VoluntaryRegistrationId, TurnoverEstimateId, ChoseNotToRegisterId),
-    toNextPage(TurnoverEstimateId, InvolvedInOtherBusinessId),
-    nextOn(false, InvolvedInOtherBusinessId, InternationalActivitiesId, EligibilityDropoutId(InvolvedInOtherBusinessId.toString)),
-    nextOn(false, InternationalActivitiesId, AnnualAccountingSchemeId, EligibilityDropoutId(InternationalActivitiesId.toString)),
-    nextOn(false, AnnualAccountingSchemeId, ZeroRatedSalesId, VATRegistrationExceptionId),
-    nextOn(true, ZeroRatedSalesId, VATExemptionId, RegisteringBusinessId),
-    nextOn(true, RegisteringBusinessId, NinoId, EligibilityDropoutId(InvolvedInOtherBusinessId.toString)),
-    nextOn(true, NinoId, AgriculturalFlatRateSchemeId, EligibilityDropoutId(NinoId.toString)),
-    nextOn(false, VATExemptionId, AgriculturalFlatRateSchemeId, ApplyInWritingId),
-    nextOn(false, VATRegistrationExceptionId, TurnoverEstimateId, EligibilityDropoutId(VATRegistrationExceptionId.toString)),
-    nextOn(false, AgriculturalFlatRateSchemeId, RacehorsesId, EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)),
-    toNextPage(RacehorsesId, EligibilityDropoutId(RacehorsesId.toString))
+    nextOnConditionalFormElement(false,
+      fromPage = ThresholdInTwelveMonthsId,
+      onSuccessPage = ThresholdNextThirtyDaysId,
+      onFailPage =  ThresholdPreviousThirtyDaysId
+    ),
+    toNextPage(ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId),
+    toNextPage(RacehorsesId, EligibleId),
+    lastThresholdQuestion(
+      fromPage = ThresholdPreviousThirtyDaysId,
+      twelveMonthsTrue = VATRegistrationExceptionId,
+      twelveMonthsFalse = TurnoverEstimateId
+    ),
+    nextOn(true,
+      fromPage = VoluntaryRegistrationId,
+      onSuccessPage = TurnoverEstimateId,
+      onFailPage =  ChoseNotToRegisterId
+    ),
+    toNextPage(
+      fromPage = TurnoverEstimateId,
+      toPage = InvolvedInOtherBusinessId
+    ),
+    nextOn(false,
+      fromPage = InvolvedInOtherBusinessId,
+      onSuccessPage = InternationalActivitiesId,
+      onFailPage =  EligibilityDropoutId(InvolvedInOtherBusinessId.toString)
+    ),
+    nextOn(false,
+      fromPage = InternationalActivitiesId,
+      onSuccessPage = AnnualAccountingSchemeId,
+      onFailPage = EligibilityDropoutId(InternationalActivitiesId.toString)
+    ),
+    nextOn(false,
+      fromPage = AnnualAccountingSchemeId,
+      onSuccessPage = ZeroRatedSalesId,
+      onFailPage = VATRegistrationExceptionId
+    ),
+    nextOn(true,
+      fromPage = ZeroRatedSalesId,
+      onSuccessPage = VATExemptionId,
+      onFailPage = RegisteringBusinessId
+    ),
+    nextOn(true,
+      fromPage = RegisteringBusinessId,
+      onSuccessPage = NinoId,
+      onFailPage = EligibilityDropoutId(InvolvedInOtherBusinessId.toString)
+    ),
+    nextOn(true,
+      fromPage = NinoId,
+      onSuccessPage = AgriculturalFlatRateSchemeId,
+      onFailPage = EligibilityDropoutId(NinoId.toString)
+    ),
+    nextOn(false,
+      fromPage = VATExemptionId,
+      onSuccessPage = AgriculturalFlatRateSchemeId,
+      onFailPage = ApplyInWritingId
+    ),
+    nextOn(false,
+      fromPage = VATRegistrationExceptionId,
+      onSuccessPage = TurnoverEstimateId,
+      onFailPage = EligibilityDropoutId(VATRegistrationExceptionId.toString)
+    ),
+    nextOn(false,
+      fromPage = AgriculturalFlatRateSchemeId,
+      onSuccessPage = RacehorsesId,
+      onFailPage = EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)
+    )
   )
 
   def nextPage(id: Identifier, mode: Mode): UserAnswers => Call =

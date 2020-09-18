@@ -247,3 +247,7 @@ racehorses.bulletText = Tell us if the business will:
 racehorses.bullet1 = buy, sell or rent out land or property as a business activity (not just to have its own premises)
 racehorses.bullet2 = own one or more racehorses
 
+eligible.title = You can register for VAT online
+eligible.heading = You can register for VAT online
+eligible.p1 = Based on your answers, you can register for VAT using the online service.
+eligible.button = Continue to VAT registration

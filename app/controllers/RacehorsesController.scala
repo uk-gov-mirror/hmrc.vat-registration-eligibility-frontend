@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import forms.RacehorsesFormProvider
-import identifiers.RacehorsesId
+import identifiers.{EligibleId, RacehorsesId}
 import javax.inject.Inject
 import models.NormalMode
 import play.api.data.Form
@@ -38,11 +38,9 @@ class RacehorsesController @Inject()(override val messagesApi: MessagesApi,
                                      identify: CacheIdentifierAction,
                                      getData: DataRetrievalAction,
                                      requireData: DataRequiredAction,
-                                     formProvider: RacehorsesFormProvider,
-                                     vatRegistrationService: VatRegistrationService
+                                     formProvider: RacehorsesFormProvider
                                     )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
 
-  val frontendUrl = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
   val form: Form[Boolean] = formProvider()
 
   def onPageLoad() = (identify andThen getData andThen requireData) {
@@ -57,13 +55,12 @@ class RacehorsesController @Inject()(override val messagesApi: MessagesApi,
   def onSubmit() = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
-        (formWithErrors: Form[_]) =>
+        formWithErrors =>
           Future.successful(BadRequest(racehorses(formWithErrors, NormalMode))),
-        (value) =>
-          dataCacheConnector.save[Boolean](request.internalId, RacehorsesId.toString, value).flatMap(_ =>
-            vatRegistrationService.submitEligibility(request.internalId)(hc, implicitly[ExecutionContext], request)
-              .map(_ => Redirect(frontendUrl))
-          )
+        value =>
+          dataCacheConnector.save[Boolean](request.internalId, RacehorsesId.toString, value) map { cacheMap =>
+            Redirect(navigator.nextPage(RacehorsesId, NormalMode)(new UserAnswers(cacheMap)))
+          }
       )
   }
 }

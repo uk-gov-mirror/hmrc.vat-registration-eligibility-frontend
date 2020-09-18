@@ -74,3 +74,5 @@ POST       /whos-the-application-for                    controllers.RegisteringB
 GET        /have-nino                                   controllers.NinoController.onPageLoad
 POST       /have-nino                                   controllers.NinoController.onSubmit
 
+GET        /eligible                                    controllers.EligibleController.onPageLoad
+POST       /eligible                                    controllers.EligibleController.onSubmit
