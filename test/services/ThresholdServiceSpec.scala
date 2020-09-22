@@ -97,15 +97,15 @@ class ThresholdServiceSpec extends SpecBase with VATEligiblityMocks {
     }
 
     "return more than or equal to 12 months heading text when incorpDate is more than 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(13))) {
-      service.returnThresholdDateResult(service.returnHeadingTwelveMonths) mustBe s"In any 12-month period has $fakeCompanyName gone over the VAT-registration threshold?"
+      service.returnThresholdDateResult(service.returnHeadingTwelveMonths) mustBe s"In any 12-month period has the business gone over the VAT-registration threshold?"
     }
 
     "return more than or equal to 12 months heading text when incorpDate is exactly 12 months ago" in new Setup(Some(LocalDate.now().minusMonths(12))) {
-      service.returnThresholdDateResult(service.returnHeadingTwelveMonths) mustBe s"In any 12-month period has $fakeCompanyName gone over the VAT-registration threshold?"
+      service.returnThresholdDateResult(service.returnHeadingTwelveMonths) mustBe s"In any 12-month period has the business gone over the VAT-registration threshold?"
     }
 
     "always return heading2 text when any incorpDate is used" in new Setup(Some(LocalDate.now())) {
-      service.returnThresholdDateResult(service.returnHeadingForTwelveMonthsDateEntry) mustBe s"What month did $fakeCompanyName first go over the threshold?"
+      service.returnThresholdDateResult(service.returnHeadingForTwelveMonthsDateEntry) mustBe s"What month did the business first go over the threshold?"
     }
 
     "always return not incorped helptext1 text when no incorpDate is used" in new Setup(None) {

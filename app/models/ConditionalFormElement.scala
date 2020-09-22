@@ -25,9 +25,3 @@ case class ConditionalDateFormElement(value: Boolean, optionalData: Option[Local
 object ConditionalDateFormElement {
   implicit val conditionalDateFormElementFormat = Json.format[ConditionalDateFormElement]
 }
-
-case class ConditionalNinoFormElement(value: Boolean, optionalData: Option[String])
-
-object ConditionalNinoFormElement {
-  implicit val conditionalNinoElementFormant = Json.format[ConditionalNinoFormElement]
-}

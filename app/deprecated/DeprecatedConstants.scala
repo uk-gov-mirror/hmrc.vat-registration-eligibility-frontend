@@ -28,6 +28,4 @@ object DeprecatedConstants {
   @Deprecated
   val fakeIncorpDateMessage: String = "[INCORP_DATE_REMOVED]"
 
-  @Deprecated
-  val fakeOfficerName: String = "[OFFICER_NAME_REMOVED]"
 }

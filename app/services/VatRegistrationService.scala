@@ -46,7 +46,7 @@ trait VatRegistrationService extends I18nSupport {
 
   def submitEligibility(internalId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, r: DataRequest[_]): Future[JsObject] = {
     for {
-      block <- createEligibilityBlock(internalId, Nil) //TODO - officers was being passed down here but is no longer available
+      block <- createEligibilityBlock(internalId)
       _ <- vrConnector.saveEligibility(r.currentProfile.registrationID, block)
     } yield {
       block
@@ -56,7 +56,7 @@ trait VatRegistrationService extends I18nSupport {
   val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
   private[services] def prepareQuestionData(key: String, data: Boolean)(implicit r: DataRequest[_]): List[JsValue] = {
-    JsonSummaryRow(key, messagesApi(s"$key.heading", DeprecatedConstants.fakeCompanyName), messagesApi(s"site.${if (data) "yes" else "no"}"), Json.toJson(data))
+    JsonSummaryRow(key, messagesApi(s"$key.heading"), messagesApi(s"site.${if (data) "yes" else "no"}"), Json.toJson(data))
   }
 
   private[services] def getVoluntaryRegistrationJson(data: Boolean)(implicit r: DataRequest[_]): List[JsValue] = {
@@ -69,15 +69,29 @@ trait VatRegistrationService extends I18nSupport {
   }
 
   private[services] def prepareQuestionData(key: String, data: ConditionalDateFormElement)()(implicit r: DataRequest[_]): List[JsValue] = {
-    val value = JsonSummaryRow(s"$key-value", messagesApi(s"$key.heading", DeprecatedConstants.fakeCompanyName), messagesApi(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
-    val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messagesApi(s"$key.heading2", DeprecatedConstants.fakeCompanyName), date.format(formatter), Json.toJson(date)))
+    val value = JsonSummaryRow(s"$key-value", messagesApi(s"$key.heading"), messagesApi(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
+    val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messagesApi(s"$key.heading2"), date.format(formatter), Json.toJson(date)))
 
     dataObj.foldLeft(value)((old, list) => old ++ list)
   }
 
-  private[services] def prepareThresholdInTwelveMonths(key: String, data: ConditionalDateFormElement)()(implicit r: DataRequest[_]): List[JsValue] = {
-    val value = JsonSummaryRow(s"$key-value", thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths), messagesApi(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
-    val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry), date.format(formatter), Json.toJson(date)))
+  private[services] def prepareThresholdInTwelveMonths(key: String, data: ConditionalDateFormElement)()
+                                                      (implicit r: DataRequest[_]): List[JsValue] = {
+    val value = JsonSummaryRow(
+      questionId = s"$key-value",
+      question = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths),
+      answer = messagesApi(if (data.value) s"site.yes" else "site.no"),
+      answerValue = Json.toJson(data.value)
+    )
+
+    val dataObj = data.optionalData.map(date =>
+      JsonSummaryRow(
+        s"$key-optionalData",
+        thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry),
+        date.format(formatter),
+        Json.toJson(date)
+      )
+    )
 
     dataObj.foldLeft(value)((old, list) => old ++ list)
   }
@@ -100,46 +114,36 @@ trait VatRegistrationService extends I18nSupport {
     JsonSummaryRow(s"$key-value", messagesApi(s"$key.heading"), s"£${"%,d".format(data.value.toLong)}", JsNumber(BigDecimal(data.value.toLong)))
   }
 
-  private[services] def prepareQuestionData(key: String, data: ConditionalNinoFormElement, officers: Seq[Officer], onBehalfOf: Option[String]): List[JsValue] = {
-    val heading = onBehalfOf.fold(messagesApi(s"$key.heading")) {
-      id =>
-        val officer = officers.find(_.generateId == id).getOrElse(throw new Exception("director not present"))
-        messagesApi(s"$key.heading.onBehalfOf", officer.shortName)
-    }
-    val value = JsonSummaryRow(s"$key-value", heading, messagesApi(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
-    val dataObj = data.optionalData.map(nino => JsonSummaryRow(s"$key-optionalData", messagesApi(s"$key.heading2"), nino, Json.toJson(nino)))
-
-    dataObj.foldLeft(value)((oList, dList) => oList ++ dList)
-  }
-
-  private[services] def buildIndividualQuestion(officers: Seq[Officer], onBehalfOf: Option[String])(implicit r: DataRequest[_]): PartialFunction[(Identifier, Any), List[JsValue]] = {
+  private[services] def buildIndividualQuestion(implicit r: DataRequest[_]): PartialFunction[(Identifier, Any), List[JsValue]] = {
     case (id@ThresholdInTwelveMonthsId, e: ConditionalDateFormElement) => prepareThresholdInTwelveMonths(id.toString, e)
     case (id@ThresholdNextThirtyDaysId, e: ConditionalDateFormElement) => prepareDateData(id.toString, e)
     case (id@ThresholdPreviousThirtyDaysId, e: ConditionalDateFormElement) => prepareThresholdPreviousThirty(id.toString, e)
     case (id, e: ConditionalDateFormElement) => prepareQuestionData(id.toString, e)
-    case (id, e: ConditionalNinoFormElement) => prepareQuestionData(id.toString, e, officers, onBehalfOf)
     case (id, e: TurnoverEstimateFormElement) => prepareQuestionData(id.toString, e)
     case (VoluntaryRegistrationId, e: Boolean) => getVoluntaryRegistrationJson(e)
     case (id, e: Boolean) => prepareQuestionData(id.toString, e)
     case (id, e: String) => prepareQuestionData(id.toString, e)
   }
 
-  private def getEligibilitySections(cacheMap: CacheMap, officers: Seq[Officer])(implicit r: DataRequest[_]) =
+  private def getEligibilitySections(cacheMap: CacheMap)(implicit r: DataRequest[_]) =
     PageIdBinding.sectionBindings(cacheMap) map {
       case (sectionTitle, questionIds) => Json.obj(
         "title" -> sectionTitle,
         "data" -> (questionIds flatMap {
           case (questionId, userAnswer) =>
             userAnswer.fold(List[JsValue]())(
-              answer => buildIndividualQuestion(officers, Some(DeprecatedConstants.fakeOfficerName))(r)((questionId, answer))
+              answer => buildIndividualQuestion(r)((questionId, answer))
             )
         })
       )
     }
 
-  private def createEligibilityBlock(internalId: String, officer: Seq[Officer])(implicit hc: HeaderCarrier, executionContext: ExecutionContext, r: DataRequest[_]): Future[JsObject] = {
+  private def createEligibilityBlock(internalId: String)
+                                    (implicit hc: HeaderCarrier,
+                                     executionContext: ExecutionContext,
+                                     r: DataRequest[_]): Future[JsObject] = {
     dataCacheConnector.fetch(internalId) map {
-      case Some(map) => Json.obj("sections" -> getEligibilitySections(map, officer))
+      case Some(map) => Json.obj("sections" -> getEligibilitySections(map))
       case _ => throw new RuntimeException
     }
   }
