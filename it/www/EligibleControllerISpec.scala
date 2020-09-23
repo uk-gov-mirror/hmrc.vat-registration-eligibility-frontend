@@ -1,12 +1,9 @@
 package www
 
-import java.time.LocalDate
-
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub, VatRegistrationStub}
-import identifiers.{AgriculturalFlatRateSchemeId, AnnualAccountingSchemeId, InternationalActivitiesId, InvolvedInOtherBusinessId, NinoId, RacehorsesId, RegisteringBusinessId, ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId, TurnoverEstimateId, VATExemptionId, VoluntaryRegistrationId, ZeroRatedSalesId}
-import models.{ConditionalDateFormElement, TurnoverEstimateFormElement}
+import identifiers._
+import models.{BusinessEntity, ConditionalDateFormElement, TurnoverEstimateFormElement, UKCompany}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.mvc.Http.HeaderNames
 
@@ -38,6 +35,7 @@ class EligibleControllerISpec extends IntegrationSpecBase
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
+      cacheSessionData[BusinessEntity]("testInternalId", s"$BusinessEntityId", UKCompany)
       cacheSessionData[ConditionalDateFormElement]("testInternalId", s"$ThresholdInTwelveMonthsId", ConditionalDateFormElement(false, None))
       cacheSessionData[ConditionalDateFormElement]("testInternalId", s"$ThresholdPreviousThirtyDaysId", ConditionalDateFormElement(false, None))
       cacheSessionData[ConditionalDateFormElement]("testInternalId", s"$ThresholdNextThirtyDaysId", ConditionalDateFormElement(false, None))

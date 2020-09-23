@@ -3,7 +3,6 @@ package www
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.test.FakeApplication
 import play.api.test.Helpers._
 import play.mvc.Http.HeaderNames
 
@@ -38,7 +37,7 @@ class IntroductionControllerISpec extends IntegrationSpecBase with AuthHelper wi
         .post(Json.obj()))
 
       res.status mustBe SEE_OTHER
-      res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdInTwelveMonthsController.onPageLoad().url)
+      res.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.BusinessEntityController.onPageLoad().url)
     }
   }
 

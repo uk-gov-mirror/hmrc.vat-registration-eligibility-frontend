@@ -19,7 +19,7 @@ package utils
 import controllers.routes
 import identifiers.{Identifier, _}
 import javax.inject.{Inject, Singleton}
-import models.{ConditionalDateFormElement, Mode}
+import models._
 import play.api.Logger
 import play.api.libs.json.Reads
 import play.api.mvc.Call
@@ -29,6 +29,7 @@ import utils.DefaultImplicitJsonReads.BooleanReads
 class Navigator @Inject()() {
 
   def pageIdToPageLoad(pageId: Identifier): Call = pageId match {
+    case BusinessEntityId => routes.BusinessEntityController.onPageLoad()
     case ThresholdNextThirtyDaysId => routes.ThresholdNextThirtyDaysController.onPageLoad()
     case ThresholdPreviousThirtyDaysId => routes.ThresholdPreviousThirtyDaysController.onPageLoad()
     case VoluntaryRegistrationId => routes.VoluntaryRegistrationController.onPageLoad()
@@ -93,10 +94,20 @@ class Navigator @Inject()() {
     fromPage -> { _ => pageIdToPageLoad(toPage) }
 
   private val routeMap: Map[Identifier, UserAnswers => Call] = Map(
+    BusinessEntityId -> { userAnswers =>
+      userAnswers.getAnswer[BusinessEntity](BusinessEntityId) match {
+        case Some(UKCompany) => routes.ThresholdInTwelveMonthsController.onPageLoad()
+        case Some(SoleTrader) => routes.ThresholdInTwelveMonthsController.onPageLoad()
+        case Some(Partnership) => routes.ThresholdInTwelveMonthsController.onPageLoad()
+        case Some(Division) => routes.EligibilityDropoutController.onPageLoad(BusinessEntityId.toString)
+        case Some(Other) => routes.ThresholdInTwelveMonthsController.onPageLoad()
+        case _ => routes.BusinessEntityController.onPageLoad()
+      }
+    },
     nextOnConditionalFormElement(false,
       fromPage = ThresholdInTwelveMonthsId,
       onSuccessPage = ThresholdNextThirtyDaysId,
-      onFailPage =  ThresholdPreviousThirtyDaysId
+      onFailPage = ThresholdPreviousThirtyDaysId
     ),
     toNextPage(ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId),
     toNextPage(RacehorsesId, EligibleId),
@@ -108,7 +119,7 @@ class Navigator @Inject()() {
     nextOn(true,
       fromPage = VoluntaryRegistrationId,
       onSuccessPage = TurnoverEstimateId,
-      onFailPage =  ChoseNotToRegisterId
+      onFailPage = ChoseNotToRegisterId
     ),
     toNextPage(
       fromPage = TurnoverEstimateId,
@@ -117,7 +128,7 @@ class Navigator @Inject()() {
     nextOn(false,
       fromPage = InvolvedInOtherBusinessId,
       onSuccessPage = InternationalActivitiesId,
-      onFailPage =  EligibilityDropoutId(InvolvedInOtherBusinessId.toString)
+      onFailPage = EligibilityDropoutId(InvolvedInOtherBusinessId.toString)
     ),
     nextOn(false,
       fromPage = InternationalActivitiesId,

@@ -19,6 +19,7 @@ package services
 import base.{SpecBase, VATEligiblityMocks}
 import connectors.{DataCacheConnector, VatRegistrationConnector}
 import identifiers._
+import models.UKCompany
 import models.requests.DataRequest
 import org.mockito.Matchers
 import org.mockito.Matchers._
@@ -87,6 +88,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
   "submitEligibility" should {
     val fullListMapHappyPathTwelveMonthsFalse: ListMap[String, JsValue] = ListMap[String, JsValue](
       "" -> JsString(""),
+      s"$BusinessEntityId" -> JsString(UKCompany.toString),
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdNextThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
@@ -118,7 +120,8 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
           | {"questionId":"voluntaryRegistration","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"turnoverEstimate-value","question":"mocked message","answer":"£50,000","answerValue":50000}]},
           | {"title":"Special situations",
-          | "data":[{"questionId":"internationalActivities","question":"mocked message","answer":"mocked message","answerValue":false},
+          | "data":[{"questionId":"businessEntity-value","question":"mocked message","answer":"UK company","answerValue":"uk-company"},
+          | {"questionId":"internationalActivities","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"involvedInOtherBusiness","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"annualAccountingScheme","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"zeroRatedSales","question":"mocked message","answer":"mocked message","answerValue":true},

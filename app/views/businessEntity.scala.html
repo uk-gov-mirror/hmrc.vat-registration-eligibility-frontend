@@ -1,0 +1,74 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.FrontendAppConfig
+@import uk.gov.hmrc.play.views.html._
+@import controllers.routes._
+@import models.Mode
+@import utils.FormHelpers
+@import models.requests.DataRequest
+@import views.html.layouts.layout
+@import views.html.newcomponents._
+@import uk.gov.hmrc.play.views.html.helpers.form
+
+@(businessEntityForm: Form[BusinessEntity], postAction: Call)(implicit request: Request[_], messages: Messages, appconfig: FrontendAppConfig)
+
+@layout(pageTitle = Some(title(businessEntityForm, messages("businessEntity.title"))), backLink = true) {
+
+    @errorSummary(businessEntityForm.errors)
+
+    @h1(messages("businessEntity.heading"))
+
+
+    @form(action = postAction) {
+        @inputRadio(
+                     form = businessEntityForm,
+                     legend = Messages("businessEntity.heading"),
+                     items = Seq(
+                                RadioItem(id = Some("uk-company"),
+                                    value = Some("uk-company"),
+                                    content = Text(Messages("businessEntity.ukcompany")),
+                                    checked = businessEntityForm("value").value.contains("uk-company")
+                                ),
+                                RadioItem(id = Some("sole-trader"),
+                                    value = Some("sole-trader"),
+                                    content = Text(Messages("businessEntity.soletrader")),
+                                    checked = businessEntityForm("value").value.contains("sole-trader")
+                                ),
+                                RadioItem(id = Some("partnership"),
+                                    value = Some("partnership"),
+                                    content = Text(Messages("businessEntity.partnership")),
+                                    checked = businessEntityForm("value").value.contains("partnership")
+                                ),
+                                RadioItem(id = Some("division"),
+                                    value = Some("division"),
+                                    content = Text(Messages("businessEntity.division")),
+                                    checked = businessEntityForm("value").value.contains("division")
+                                ),
+                                RadioItem(id = Some("other"),
+                                    value = Some("other"),
+                                    content = Text(Messages("businessEntity.other")),
+                                    checked = businessEntityForm("value").value.contains("other")
+                                )
+),
+                                 legendAsHeading = Messages("businessEntity.heading"),
+                                 classes = "govuk-visually-hidden"
+)
+
+        @button(messages("site.save_and_continue"))
+    }
+}
+
