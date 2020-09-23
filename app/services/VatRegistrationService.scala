@@ -22,6 +22,7 @@ import connectors.{DataCacheConnector, VatRegistrationConnector}
 import deprecated.DeprecatedConstants
 import identifiers._
 import javax.inject.Inject
+import models.BusinessEntity.businessEntityToString
 import models._
 import models.requests.DataRequest
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -103,6 +104,10 @@ trait VatRegistrationService extends I18nSupport {
     dataObj.foldLeft(value)((old, list) => old ++ list)
   }
 
+  private[services] def prepareBusinessEntity(key: String, data: BusinessEntity)()(implicit r: DataRequest[_]): List[JsValue] = {
+    JsonSummaryRow(s"$key-value", messagesApi(s"$key.heading"), businessEntityToString(data), Json.toJson(data.toString))
+  }
+
   private[services] def prepareDateData(key: String, data: ConditionalDateFormElement)()(implicit r: DataRequest[_]): List[JsValue] = {
     val value = JsonSummaryRow(s"$key-value", messagesApi(s"$key.heading"), messagesApi(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
     val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messagesApi(s"$key.heading2"), date.format(formatter), Json.toJson(date)))
@@ -114,7 +119,9 @@ trait VatRegistrationService extends I18nSupport {
     JsonSummaryRow(s"$key-value", messagesApi(s"$key.heading"), s"£${"%,d".format(data.value.toLong)}", JsNumber(BigDecimal(data.value.toLong)))
   }
 
+
   private[services] def buildIndividualQuestion(implicit r: DataRequest[_]): PartialFunction[(Identifier, Any), List[JsValue]] = {
+    case (id@BusinessEntityId, e: BusinessEntity) => prepareBusinessEntity(id.toString, e)
     case (id@ThresholdInTwelveMonthsId, e: ConditionalDateFormElement) => prepareThresholdInTwelveMonths(id.toString, e)
     case (id@ThresholdNextThirtyDaysId, e: ConditionalDateFormElement) => prepareDateData(id.toString, e)
     case (id@ThresholdPreviousThirtyDaysId, e: ConditionalDateFormElement) => prepareThresholdPreviousThirty(id.toString, e)

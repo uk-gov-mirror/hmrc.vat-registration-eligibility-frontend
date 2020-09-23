@@ -78,6 +78,7 @@ object PageIdBinding {
         ).collect(ThresholdSectionValidationAndConstruction),
       "Special situations" ->
         Seq(
+          (BusinessEntityId, userAnswers.businessEntity),
           (InternationalActivitiesId, userAnswers.internationalActivities),
           (InvolvedInOtherBusinessId, userAnswers.involvedInOtherBusiness),
           (AnnualAccountingSchemeId, userAnswers.annualAccountingScheme),

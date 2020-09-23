@@ -22,6 +22,8 @@ import play.api.libs.json.{JsValue, Reads}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
+  def businessEntity: Option[BusinessEntity] = cacheMap.getEntry[BusinessEntity](BusinessEntityId.toString)
+
   def racehorses: Option[Boolean] = cacheMap.getEntry[Boolean](RacehorsesId.toString)
 
   def agriculturalFlatRateScheme: Option[Boolean] = cacheMap.getEntry[Boolean](AgriculturalFlatRateSchemeId.toString)

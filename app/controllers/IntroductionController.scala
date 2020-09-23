@@ -33,7 +33,7 @@ class IntroductionController @Inject()(override val messagesApi: MessagesApi,
   }
 
   def onSubmit: Action[AnyContent] = (identify) { implicit request =>
-    Redirect(controllers.routes.ThresholdInTwelveMonthsController.onPageLoad())
+    Redirect(controllers.routes.BusinessEntityController.onPageLoad())
   }
 
 }

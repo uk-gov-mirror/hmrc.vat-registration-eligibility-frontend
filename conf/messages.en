@@ -40,6 +40,7 @@ site.hidden-delete = Delete {0}
 site.hidden-edit = Change {0}
 site.no = No
 site.yes = Yes
+site.save_and_continue = Save and continue
 site.continue = Continue
 site.service_name = Register for VAT
 service.name = Register for VAT
@@ -58,6 +59,15 @@ footer.accessibilityStatement = Accessibility statement
 
 unauthorised.title = You can''t access this service with this account
 unauthorised.heading = You can''t access this service with this account
+
+businessEntity.title = What type of business do you want to register for VAT?
+businessEntity.heading = What type of business do you want to register for VAT?
+businessEntity.ukcompany = UK company
+businessEntity.soletrader = Sole trader
+businessEntity.partnership = Partnership
+businessEntity.division = Division
+businessEntity.other = Other
+businessEntity.error.required = Select the type of business you want to register
 
 introduction.title                                  = Check if you can register for VAT online
 introduction.heading                                = Check if you can register for VAT online

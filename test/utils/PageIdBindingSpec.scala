@@ -17,6 +17,7 @@
 package utils
 
 import identifiers.{ThresholdInTwelveMonthsId, _}
+import models.UKCompany
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsBoolean, JsString, JsValue, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -26,6 +27,7 @@ import scala.collection.immutable.ListMap
 class PageIdBindingSpec extends PlaySpec {
   val fullListMapHappyPathTwelveMonthsFalse: ListMap[String, JsValue] = ListMap[String, JsValue](
     "" -> JsString(""),
+    s"$BusinessEntityId" -> JsString(UKCompany.toString),
     s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
     s"$ThresholdNextThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
     s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
@@ -58,6 +60,7 @@ class PageIdBindingSpec extends PlaySpec {
 
   "no exception should be thrown when a cacheMap containing ThresholdTwelveMonths == true, ThresholdNextThirty doesn't exist" in {
     val mapOfValuesToBeTested = List(
+      s"$BusinessEntityId" -> JsString(UKCompany.toString),
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$VATExemptionId" -> JsBoolean(false),
@@ -70,6 +73,7 @@ class PageIdBindingSpec extends PlaySpec {
   }
   "exception should be thrown when a cacheMap containing ThresholdTwelveMonths == true, ThresholdNextThirty does exist" in {
     val mapOfValuesToBeTested = List(
+      s"$BusinessEntityId" -> JsString(UKCompany.toString),
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
       s"$ThresholdNextThirtyDaysId" -> JsBoolean(true),
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
@@ -91,6 +95,7 @@ class PageIdBindingSpec extends PlaySpec {
   }
   "no exception should be thrown when a cacheMap containing zero rated sales == false, Vat exemption does not exist" in {
     val mapOfValuesToBeTested = List(
+      s"$BusinessEntityId" -> JsString(UKCompany.toString),
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(true)),
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ZeroRatedSalesId" -> JsBoolean(false),
@@ -136,6 +141,7 @@ class PageIdBindingSpec extends PlaySpec {
   }
   "no exception if ThresholdTwelveMonths == false, Exception does not exist" in {
     val mapOfValuesToBeTested = List(
+      s"$BusinessEntityId" -> JsString(UKCompany.toString),
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdNextThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
