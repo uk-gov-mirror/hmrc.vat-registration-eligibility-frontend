@@ -7,7 +7,7 @@ import play.mvc.Http.HeaderNames
 class VATExemptionISpec extends IntegrationSpecBase with AuthHelper with SessionStub {
   override implicit lazy val app = FakeApplication(additionalConfiguration = fakeConfig())
   s"${controllers.routes.VATExemptionController.onSubmit()}" should {
-    s"redirect the user to ${controllers.routes.ApplyInWritingController.onPageLoad()} page when answer is true" in {
+    s"redirect the user to ${controllers.routes.RegisteringBusinessController.onPageLoad()} page when answer is true" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
@@ -18,10 +18,10 @@ class VATExemptionISpec extends IntegrationSpecBase with AuthHelper with Session
         ))
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ApplyInWritingController.onPageLoad().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.RegisteringBusinessController.onPageLoad().url)
 
     }
-    s"redirect the user to ${controllers.routes.AgriculturalFlatRateSchemeController.onPageLoad()} when answer is false" in {
+    s"redirect the user to ${controllers.routes.RegisteringBusinessController.onPageLoad()} when answer is false" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
@@ -32,7 +32,7 @@ class VATExemptionISpec extends IntegrationSpecBase with AuthHelper with Session
         ))
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.AgriculturalFlatRateSchemeController.onPageLoad().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.RegisteringBusinessController.onPageLoad().url)
 
     }
   }
