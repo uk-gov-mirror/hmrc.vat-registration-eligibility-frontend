@@ -138,7 +138,7 @@ class Navigator @Inject()() {
     nextOn(false,
       fromPage = AnnualAccountingSchemeId,
       onSuccessPage = ZeroRatedSalesId,
-      onFailPage = VATRegistrationExceptionId
+      onFailPage = EligibilityDropoutId(AnnualAccountingSchemeId.toString)
     ),
     nextOn(true,
       fromPage = ZeroRatedSalesId,
@@ -148,7 +148,7 @@ class Navigator @Inject()() {
     nextOn(true,
       fromPage = RegisteringBusinessId,
       onSuccessPage = NinoId,
-      onFailPage = EligibilityDropoutId(InvolvedInOtherBusinessId.toString)
+      onFailPage = EligibilityDropoutId(RegisteringBusinessId.toString)
     ),
     nextOn(true,
       fromPage = NinoId,
@@ -157,8 +157,8 @@ class Navigator @Inject()() {
     ),
     nextOn(false,
       fromPage = VATExemptionId,
-      onSuccessPage = AgriculturalFlatRateSchemeId,
-      onFailPage = ApplyInWritingId
+      onSuccessPage = RegisteringBusinessId,
+      onFailPage = RegisteringBusinessId
     ),
     nextOn(false,
       fromPage = VATRegistrationExceptionId,

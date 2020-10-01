@@ -25,6 +25,7 @@ import javax.inject.Inject
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.vatExemption
@@ -42,7 +43,7 @@ class VATExemptionController @Inject()(override val messagesApi: MessagesApi,
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad() = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.vatExemption match {
         case None => form
@@ -51,7 +52,7 @@ class VATExemptionController @Inject()(override val messagesApi: MessagesApi,
       Ok(vatExemption(preparedForm, NormalMode))
   }
 
-  def onSubmit() = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
