@@ -21,21 +21,14 @@ import controllers.actions._
 import forms.RacehorsesFormProvider
 import identifiers.RacehorsesId
 import models.NormalMode
-import models.requests.DataRequest
-import org.mockito.Matchers
-import org.scalatest.mockito.MockitoSugar
 import play.api.data.Form
-import play.api.libs.json.{JsBoolean, JsValue, Json}
+import play.api.libs.json.JsBoolean
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
 import views.html.racehorses
-import org.mockito.Mockito._
 
-import scala.concurrent.{ExecutionContext, Future}
-
-class RacehorsesControllerSpec extends ControllerSpecBase with MockitoSugar{
+class RacehorsesControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.EligibleController.onPageLoad()
 
@@ -43,9 +36,11 @@ class RacehorsesControllerSpec extends ControllerSpecBase with MockitoSugar{
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
 
+  val dataRequiredAction = new DataRequiredAction
+
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new RacehorsesController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+    new RacehorsesController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+      dataRetrievalAction, dataRequiredAction, formProvider)
 
   def viewAsString(form: Form[_] = form) = racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 

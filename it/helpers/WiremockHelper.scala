@@ -19,7 +19,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.ws.WSClient
 
 object WiremockHelper {
@@ -29,7 +29,7 @@ object WiremockHelper {
 }
 
 trait WiremockHelper {
-  self: OneServerPerSuite =>
+  self: GuiceOneServerPerSuite =>
 
   import WiremockHelper._
 
@@ -48,7 +48,7 @@ trait WiremockHelper {
   def resetWiremock() = WireMock.reset()
 
   def buildClient(path: String) =
-    ws.url(s"http://localhost:$port/check-if-you-can-register-for-vat${path.replace("/check-if-you-can-register-for-vat","")}").withFollowRedirects(false)
+    ws.url(s"http://localhost:$port/check-if-you-can-register-for-vat${path.replace("/check-if-you-can-register-for-vat", "")}").withFollowRedirects(false)
 
   def listAllStubs = listAllStubMappings
 
@@ -61,7 +61,7 @@ trait WiremockHelper {
       )
     )
 
-  def stubPost(url: String, status: Integer, responseBody: String, inputBody : String) =
+  def stubPost(url: String, status: Integer, responseBody: String, inputBody: String) =
     stubFor(post(urlMatching(url)).withRequestBody(equalToJson(inputBody))
       .willReturn(
         aResponse().
@@ -70,7 +70,7 @@ trait WiremockHelper {
       )
     )
 
-  def stubPatch(url: String, status: Integer, responseBody: String, inputBody : String) =
+  def stubPatch(url: String, status: Integer, responseBody: String, inputBody: String) =
     stubFor(patch(urlMatching(url)).withRequestBody(equalToJson(inputBody))
       .willReturn(
         aResponse().

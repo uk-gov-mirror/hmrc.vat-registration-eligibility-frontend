@@ -25,7 +25,7 @@ trait FakeConfig {
   val mockPort: Int
   lazy val mockUrl = s"http://$mockHost:$mockPort"
 
-  def fakeConfig(extraConfig: (String,String)*) = Map(
+  def fakeConfig(extraConfig: (String, String)*) = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "microservice.services.auth.port" -> s"$mockPort",
@@ -43,6 +43,7 @@ trait FakeConfig {
     "microservice.services.vat-registration-frontend.url" -> "",
     "auditing.consumer.baseUri.host" -> mockHost,
     "auditing.consumer.baseUri.port" -> s"$mockPort",
-    "mongodb.uri" -> s"$mongoUri"
+    "mongodb.uri" -> s"$mongoUri",
+    "metrics.enabled" -> "false"
   ) ++ extraConfig
 }

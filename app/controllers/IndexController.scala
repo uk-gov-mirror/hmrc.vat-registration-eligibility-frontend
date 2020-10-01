@@ -19,20 +19,23 @@ package controllers
 import config.FrontendAppConfig
 import identifiers.Identifier
 import javax.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.Navigator
 
-class IndexController @Inject()(val messagesApi: MessagesApi,
+class IndexController @Inject()(mcc: MessagesControllerComponents,
                                 navigator: Navigator
-                               )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                               )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = Action { implicit request =>
     Redirect(routes.IntroductionController.onPageLoad())
   }
+
   def navigateToPageId(pageId: String) = Action { implicit request =>
-    Redirect(navigator.pageIdToPageLoad(new Identifier {override def toString: String = pageId}))
+    Redirect(navigator.pageIdToPageLoad(new Identifier {
+      override def toString: String = pageId
+    }))
   }
 
 }

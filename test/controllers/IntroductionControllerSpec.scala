@@ -22,10 +22,8 @@ import views.html.introduction
 
 class IntroductionControllerSpec extends ControllerSpecBase {
 
-  implicit val appConfig = frontendAppConfig
-
   object Controller extends IntroductionController(
-    messagesApi = messagesApi,
+    controllerComponents,
     identify = FakeCacheIdentifierAction
   )
 

@@ -24,22 +24,22 @@ import identifiers.AnnualAccountingSchemeId
 import javax.inject.Inject
 import models.NormalMode
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.annualAccountingScheme
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class AnnualAccountingSchemeController @Inject()(override val messagesApi: MessagesApi,
+class AnnualAccountingSchemeController @Inject()(mcc: MessagesControllerComponents,
                                                  dataCacheConnector: DataCacheConnector,
                                                  navigator: Navigator,
                                                  identify: CacheIdentifierAction,
                                                  getData: DataRetrievalAction,
                                                  requireData: DataRequiredAction,
-                                                 formProvider: AnnualAccountingSchemeFormProvider
-                                                )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                                 formProvider: AnnualAccountingSchemeFormProvider)
+                                                (implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -47,6 +47,7 @@ class AnnualAccountingSchemeController @Inject()(override val messagesApi: Messa
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
+
       Ok(annualAccountingScheme(preparedForm, NormalMode))
   }
 

@@ -1,2 +1,0 @@
-GET         /feature-flag/:featureName/:featureState        controllers.test.FeatureSwitchController.switcher(featureName: String, featureState: String)
-GET         /feature-flag/                                  controllers.test.FeatureSwitchController.show

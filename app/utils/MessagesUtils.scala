@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package controllers
+package utils
 
-import config.FrontendAppConfig
-import javax.inject.Inject
-import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.session_expired
+import models.requests.DataRequest
+import play.api.i18n.{Messages, MessagesApi}
 
-class SessionExpiredController @Inject()(mcc: MessagesControllerComponents)
-                                        (implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
+trait MessagesUtils {
+  def messagesApi: MessagesApi
 
-  def onPageLoad: Action[AnyContent] = Action { implicit request =>
-    Ok(session_expired())
-  }
+  implicit def messages(implicit request: DataRequest[_]): Messages = messagesApi.preferred(request)
+
+  def messages(messageKey: String)(implicit request: DataRequest[_]): String = messagesApi.preferred(request)(messageKey)
 }

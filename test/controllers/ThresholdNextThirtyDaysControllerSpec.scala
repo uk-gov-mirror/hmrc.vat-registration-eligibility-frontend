@@ -48,9 +48,19 @@ class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
   val form: Form[ConditionalDateFormElement] = formProvider()
   implicit val appConfig: FrontendAppConfig = frontendAppConfig
 
+  val dataRequiredAction = new DataRequiredAction
+
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ThresholdNextThirtyDaysController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, mockThresholdService, formProvider)
+    new ThresholdNextThirtyDaysController(
+      controllerComponents,
+      FakeDataCacheConnector,
+      new FakeNavigator(desiredRoute = onwardRoute),
+      FakeCacheIdentifierAction,
+      dataRetrievalAction,
+      dataRequiredAction,
+      mockThresholdService,
+      formProvider
+    )
 
   def viewAsString(form: Form[_] = form): String = thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 

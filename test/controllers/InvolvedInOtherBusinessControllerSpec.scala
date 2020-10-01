@@ -33,9 +33,11 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
   val form = formProvider.form
   implicit val appConfig = frontendAppConfig
 
+  val dataRequiredAction = new DataRequiredAction
+
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new InvolvedInOtherBusinessController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+    new InvolvedInOtherBusinessController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+      dataRetrievalAction, dataRequiredAction, formProvider)
 
   def viewAsString(form: Form[_] = form, officer: Option[String] = None) = involvedInOtherBusiness(form, NormalMode)(fakeRequest, messages, frontendAppConfig).toString
 

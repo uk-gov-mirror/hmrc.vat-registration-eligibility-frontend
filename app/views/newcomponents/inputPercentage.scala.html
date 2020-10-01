@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components.{toClasses => govukToClasses}
+@import play.twirl.api.HtmlFormat
 
 @(form: Form[_],
         id: String,
@@ -81,7 +82,7 @@
 
 @divSnippet = @{
     val (describedBy1, hintHtml) = hintSnippet("")
-    val (describedBy2, errorMessageHtml) = errorMessageSnippet(describedBy1)
+    val (describedBy2, errorMessageHtml) = errorMessageSnippet(describedBy1.toString)
     val inputHtml = inputSnippet(describedBy2)
     HtmlFormat.fill(collection.immutable.Seq(hintHtml, errorMessageHtml, inputHtml))
 }

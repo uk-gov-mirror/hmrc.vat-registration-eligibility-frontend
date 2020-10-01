@@ -20,12 +20,11 @@ import base.SpecBase
 import controllers.routes
 import identifiers._
 import models._
-import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.JsBoolean
 import play.api.mvc.Call
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-class NavigatorSpec extends SpecBase with MockitoSugar {
+class NavigatorSpec extends SpecBase {
 
   val navigator = new Navigator
 

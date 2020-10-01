@@ -16,20 +16,18 @@
 
 package controllers
 
+import play.api.mvc.Call
 import play.api.test.Helpers._
 
 class FeedbackControllerSpec extends ControllerSpecBase {
 
-  def onwardRoute = routes.IndexController.onPageLoad()
+  def onwardRoute: Call = routes.IndexController.onPageLoad()
 
-
-  val controller = new FeedbackController {
-    override val messagesApi = mockMessagesAPI
-    override val appConfig = frontendAppConfig
-    override val feedbackUrl = "/feedtest"
-    override val frontendUrl = "frontendUrl"
-
+  val controller: FeedbackController = new FeedbackController(frontendAppConfig, controllerComponents) {
+    override lazy val feedbackUrl = "/feedtest"
+    override lazy val frontendUrl = "frontendUrl"
   }
+
   "VoluntaryRegistration Controller" must {
 
     "redirect to the feedback repo on a GET" in {

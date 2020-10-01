@@ -24,21 +24,22 @@ import identifiers.VATRegistrationExceptionId
 import javax.inject.Inject
 import models.NormalMode
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
+import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.vatRegistrationException
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class VATRegistrationExceptionController @Inject()(override val messagesApi: MessagesApi,
+class VATRegistrationExceptionController @Inject()(mcc: MessagesControllerComponents,
                                                    dataCacheConnector: DataCacheConnector,
                                                    navigator: Navigator,
                                                    identify: CacheIdentifierAction,
                                                    getData: DataRetrievalAction,
                                                    requireData: DataRequiredAction,
                                                    formProvider: VATRegistrationExceptionFormProvider
-                                                  )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                                  )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 

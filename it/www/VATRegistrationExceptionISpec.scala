@@ -1,18 +1,23 @@
 package www
 
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
-import play.api.test.FakeApplication
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.HeaderNames
 
 class VATRegistrationExceptionISpec extends IntegrationSpecBase with AuthHelper with SessionStub {
-  override implicit lazy val app = FakeApplication(additionalConfiguration = fakeConfig())
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(fakeConfig())
+    .build()
+
   s"${controllers.routes.VATRegistrationExceptionController.onSubmit()}" should {
     "redirect to dropout if answer is yes" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
 
-      val request = buildClient("/registration-exception").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+      val request = buildClient("/registration-exception").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map(
           "value" -> Seq("true"))
         )
@@ -21,17 +26,17 @@ class VATRegistrationExceptionISpec extends IntegrationSpecBase with AuthHelper 
       response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.EligibilityDropoutController.onPageLoad("vatRegistrationException").url)
     }
     s"redirect to ${controllers.routes.TurnoverEstimateController.onPageLoad()} if answer is false" in {
-        stubSuccessfulLogin()
-        stubSuccessfulRegIdGet()
-        stubAudits()
+      stubSuccessfulLogin()
+      stubSuccessfulRegIdGet()
+      stubAudits()
 
-        val request = buildClient("/registration-exception").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
-          .post(Map(
-            "value" -> Seq("false"))
-          )
-        val response = await(request)
-        response.status mustBe 303
-        response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.TurnoverEstimateController.onPageLoad().url)
-      }
+      val request = buildClient("/registration-exception").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .post(Map(
+          "value" -> Seq("false"))
+        )
+      val response = await(request)
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.TurnoverEstimateController.onPageLoad().url)
+    }
   }
 }

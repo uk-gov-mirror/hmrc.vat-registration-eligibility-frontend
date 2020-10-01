@@ -28,10 +28,10 @@
 
 @beforeContentBlock = {
     @newcomponents.phaseBanner("alpha")
-    @hmrcBanner(Banner(if(messages.lang.code == "cy") {Cy} else {En}))
+    @HmrcBanner(Banner(if(messages.lang.code == "cy") {Cy} else {En}))
 
     @if(backLink == true) {
-        @govukBackLink(BackLink(href = "#", content = Text(messages("site.back")), attributes = Map("id" -> "back-link")))
+        @GovukBackLink(BackLink(href = "#", content = Text(messages("site.back")), attributes = Map("id" -> "back-link")))
     }
 }
 

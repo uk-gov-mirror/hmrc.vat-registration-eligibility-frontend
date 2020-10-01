@@ -17,10 +17,10 @@
 package connectors
 
 import base.ConnectorSpecBase
-import config.WSHttp
 import play.api.http.Status.OK
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{CoreGet, CorePost, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -32,10 +32,9 @@ class VatRegistrationConnectorSpec extends ConnectorSpecBase {
   val jsonBlock = Json.toJson("""{}""")
 
   "Calling saveEligibility" must {
-    val connector = new VatRegistrationConnector {
-      override val vatRegistrationUrl: String = fakeUrl
-      override val vatRegistrationUri: String = fakeUri
-      override val http: CoreGet with CorePost with WSHttp = mockWSHttp
+    val connector = new VatRegistrationConnector(http = mockHttpClient, servicesConfig = mock[ServicesConfig]) {
+      override lazy val vatRegistrationUrl: String = fakeUrl
+      override lazy val vatRegistrationUri: String = fakeUri
     }
 
     "save the eligibility block to backend" in {

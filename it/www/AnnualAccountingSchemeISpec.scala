@@ -18,13 +18,17 @@ package www
 
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
 import identifiers.AnnualAccountingSchemeId
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Format._
-import play.api.test.FakeApplication
 import play.mvc.Http.HeaderNames
 
 class AnnualAccountingSchemeISpec extends IntegrationSpecBase with AuthHelper with SessionStub {
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = fakeConfig())
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(fakeConfig())
+    .build()
+
   val internalId = "testInternalId"
   s"POST ${controllers.routes.AnnualAccountingSchemeController.onSubmit().url}" should {
     "navigate to Zero Rated Sales when false" in {
@@ -33,7 +37,7 @@ class AnnualAccountingSchemeISpec extends IntegrationSpecBase with AuthHelper wi
       stubAudits()
 
       val request = buildClient(controllers.routes.AnnualAccountingSchemeController.onSubmit().url)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map("value" -> Seq("false")))
 
       val response = await(request)
@@ -48,7 +52,7 @@ class AnnualAccountingSchemeISpec extends IntegrationSpecBase with AuthHelper wi
       stubAudits()
 
       val request = buildClient(controllers.routes.AnnualAccountingSchemeController.onSubmit().url)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map("value" -> Seq("true")))
 
       val response = await(request)

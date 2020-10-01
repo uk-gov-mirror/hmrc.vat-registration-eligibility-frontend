@@ -27,7 +27,7 @@ class ApplyInWritingControllerSpec extends ControllerSpecBase {
   def onwardRoute = routes.ApplyInWritingController.onPageLoad()
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ApplyInWritingController(messagesApi, FakeCacheIdentifierAction)
+    new ApplyInWritingController(controllerComponents, FakeCacheIdentifierAction)
 
   def viewAsString() = applyInWriting()(fakeRequest, messages, frontendAppConfig).toString
 

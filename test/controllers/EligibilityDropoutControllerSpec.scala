@@ -29,10 +29,12 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase {
   implicit val appConfig = app.injector.instanceOf[FrontendAppConfig]
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new EligibilityDropoutController(messagesApi, FakeCacheIdentifierAction)
+    new EligibilityDropoutController(controllerComponents, FakeCacheIdentifierAction)
 
   def viewAsString(default: Boolean) = eligibilityDropout(default)(fakeCacheDataRequestIncorped, messages, appConfig).toString
+
   def internationalView() = internationalActivityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
+
   def agricultureView() = agriculturalDropout()(fakeCacheDataRequestIncorped, messages, appConfig).toString
 
   "EligibilityDropout Controller" must {

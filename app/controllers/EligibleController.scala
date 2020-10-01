@@ -19,20 +19,20 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{CacheIdentifierAction, DataRequiredAction, DataRetrievalAction}
 import javax.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.VatRegistrationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.eligible
 
 import scala.concurrent.ExecutionContext
 
-class EligibleController @Inject()(override val messagesApi: MessagesApi,
+class EligibleController @Inject()(mcc: MessagesControllerComponents,
                                    identify: CacheIdentifierAction,
                                    getData: DataRetrievalAction,
                                    requireData: DataRequiredAction,
                                    vatRegistrationService: VatRegistrationService
-                                  )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                  )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   val frontendUrl = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
 

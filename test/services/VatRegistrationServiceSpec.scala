@@ -17,17 +17,15 @@
 package services
 
 import base.{SpecBase, VATEligiblityMocks}
-import connectors.{DataCacheConnector, VatRegistrationConnector}
 import identifiers._
 import models.UKCompany
 import models.requests.DataRequest
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.mockito.stubbing.OngoingStubbing
-import play.api.i18n.MessagesApi
+import play.api.i18n.Messages
 import play.api.libs.json._
-import play.api.mvc.{AnyContentAsEmpty, RequestHeader}
+import play.api.mvc.AnyContentAsEmpty
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.collection.immutable.ListMap
@@ -37,22 +35,21 @@ import scala.concurrent.Future
 class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
 
   class Setup {
-    val service = new VatRegistrationService {
-      override val vrConnector: VatRegistrationConnector = mockVatRegConnector
-      override val dataCacheConnector: DataCacheConnector = mockDataCacheConnector
-      override val messagesApi: MessagesApi = mockMessagesAPI
-      override val thresholdService: ThresholdService = mockThresholdService
-    }
+    val service = new VatRegistrationService(
+      mockVatRegConnector,
+      mockDataCacheConnector,
+      mockThresholdService,
+      mockMessagesAPI
+    )
 
-    def mockAllMessages: OngoingStubbing[String] = {
-      when(mockMessagesAPI.preferred(Matchers.any[RequestHeader]()))
-        .thenReturn(messages)
+    val mockMessages: Messages = mock[Messages]
 
-      when(mockMessagesAPI.apply(Matchers.any[String](), Matchers.any())(Matchers.any()))
-        .thenReturn("mocked message")
-    }
+    when(mockMessagesAPI.preferred(Matchers.any[DataRequest[_]]()))
+      .thenReturn(mockMessages)
 
-    mockAllMessages
+    when(mockMessages.apply(Matchers.anyString(), Matchers.any()))
+      .thenReturn("mocked message")
+
     when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
   }
 
@@ -63,7 +60,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
     "prepare simple boolean data" in new Setup {
       val key = "thresholdNextThirtyDays"
 
-      service.prepareQuestionData(key, false) mustBe
+      service.prepareQuestionData(key, data = false) mustBe
         List(Json.obj(
           "questionId" -> key,
           "question" -> "mocked message",
@@ -120,7 +117,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
           | {"questionId":"voluntaryRegistration","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"turnoverEstimate-value","question":"mocked message","answer":"£50,000","answerValue":50000}]},
           | {"title":"Special situations",
-          | "data":[{"questionId":"businessEntity-value","question":"mocked message","answer":"UK company","answerValue":"uk-company"},
+          | "data":[{"questionId":"businessEntity-value","question":"mocked message","answer":"mocked message","answerValue":"uk-company"},
           | {"questionId":"internationalActivities","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"involvedInOtherBusiness","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"annualAccountingScheme","question":"mocked message","answer":"mocked message","answerValue":false},

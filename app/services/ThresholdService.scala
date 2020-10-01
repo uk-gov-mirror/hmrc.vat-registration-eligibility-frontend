@@ -20,25 +20,20 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import deprecated.DeprecatedConstants
 import identifiers.{ThresholdNextThirtyDaysId, VATRegistrationExceptionId, VoluntaryRegistrationId}
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.requests.DataRequest
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.VATDateHelper
+import utils.{MessagesUtils, VATDateHelper}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ThresholdServiceImpl @Inject()(val dataCacheConnector: DataCacheConnector,
-                                     val messagesApi: MessagesApi,
-                                     val appConfig: FrontendAppConfig) extends ThresholdService
-
-trait ThresholdService extends I18nSupport {
-  val dataCacheConnector: DataCacheConnector
-  val messagesApi: MessagesApi
-  val appConfig: FrontendAppConfig
-
+@Singleton
+class ThresholdService @Inject()(val messagesApi: MessagesApi,
+                                 val dataCacheConnector: DataCacheConnector
+                                )(implicit val appConfig: FrontendAppConfig) extends MessagesUtils {
 
   def removeVoluntaryAndNextThirtyDays(implicit request: DataRequest[_]): Future[CacheMap] = {
     dataCacheConnector.removeEntry(request.internalId, VoluntaryRegistrationId.toString).flatMap {
@@ -71,19 +66,19 @@ trait ThresholdService extends I18nSupport {
 
   def returnHeadingTwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_]): String = {
     enum match {
-      case notIncorped() => messagesApi("threshold.headingNotIncorp")
-      case limitedIncorpedLessThan12MonthsAgo() => messagesApi("thresholdInTwelveMonths.headingIncorpLess12m")
-      case _ => messagesApi("thresholdInTwelveMonths.headingIncorpMore12m")
+      case notIncorped() => messages("threshold.headingNotIncorp")
+      case limitedIncorpedLessThan12MonthsAgo() => messages("thresholdInTwelveMonths.headingIncorpLess12m")
+      case _ => messages("thresholdInTwelveMonths.headingIncorpMore12m")
     }
   }
 
   def returnHeadingForTwelveMonthsDateEntry(enum: ThresholdDateResult)(implicit r: DataRequest[_]): String = {
     enum match {
-      case _ => messagesApi("thresholdInTwelveMonths.heading2")
+      case _ => messages("thresholdInTwelveMonths.heading2")
     }
   }
 
-  def returnHelpText1TwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_], messages: Messages): String = {
+  def returnHelpText1TwelveMonths(enum: ThresholdDateResult)(implicit r: DataRequest[_]): String = {
     enum match {
       case notIncorped() => messages("thresholdInTwelveMonths.firstHelpTextNotIncorp")
       case limitedIncorpedLessThan12MonthsAgo() => messages("thresholdInTwelveMonths.firstHelpTextIncorpLess12m")
@@ -94,8 +89,8 @@ trait ThresholdService extends I18nSupport {
 
   def returnHeadingPrevious(enum: ThresholdDateResult)(implicit r: DataRequest[_]): String = {
     enum match {
-      case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo()) => messagesApi("thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17")
-      case _ => messagesApi("thresholdPreviousThirtyDays.heading")
+      case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo()) => messages("thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17")
+      case _ => messages("thresholdPreviousThirtyDays.heading")
     }
   }
 
@@ -104,35 +99,35 @@ trait ThresholdService extends I18nSupport {
       case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo()) => Html("")
       case limitedIncorpedTaxYear2016to2017() => HtmlFormat.fill(collection.immutable.Seq(
         views.html.newcomponents.p {
-          Html(messagesApi("thresholdPreviousThirtyDays.text"))
+          Html(messages("thresholdPreviousThirtyDays.text"))
         },
         views.html.newcomponents.bullets(
-          messagesApi("thresholdPreviousThirtyDays.bullet1"),
-          messagesApi("thresholdPreviousThirtyDays.bullet2")
+          messages("thresholdPreviousThirtyDays.bullet1"),
+          messages("thresholdPreviousThirtyDays.bullet2")
         )
       ))
       case limitedIncorpedTaxYear2015to2016() => HtmlFormat.fill(collection.immutable.Seq(
         views.html.newcomponents.p {
-          Html(messagesApi("thresholdPreviousThirtyDays.text"))
+          Html(messages("thresholdPreviousThirtyDays.text"))
         },
         views.html.newcomponents.bullets(
-          messagesApi("thresholdPreviousThirtyDays.bullet1"),
-          messagesApi("thresholdPreviousThirtyDays.bullet2"),
-          messagesApi("thresholdPreviousThirtyDays.bullet3")
+          messages("thresholdPreviousThirtyDays.bullet1"),
+          messages("thresholdPreviousThirtyDays.bullet2"),
+          messages("thresholdPreviousThirtyDays.bullet3")
         )
       ))
       case _ => HtmlFormat.fill(collection.immutable.Seq(
         views.html.newcomponents.p {
-          Html(messagesApi("thresholdPreviousThirtyDays.text"))
+          Html(messages("thresholdPreviousThirtyDays.text"))
         },
         views.html.newcomponents.bullets(
-          messagesApi("thresholdPreviousThirtyDays.bullet1"),
-          messagesApi("thresholdPreviousThirtyDays.bullet2"),
-          messagesApi("thresholdPreviousThirtyDays.bullet3")
+          messages("thresholdPreviousThirtyDays.bullet1"),
+          messages("thresholdPreviousThirtyDays.bullet2"),
+          messages("thresholdPreviousThirtyDays.bullet3")
         ),
         views.html.newcomponents.p {
-          Html(messagesApi("thresholdPreviousThirtyDays.beforeLinkText"))
-          views.html.newcomponents.link(appConfig.VATNotice700_1supplementURL, messagesApi("thresholdPreviousThirtyDays.linkText"))
+          Html(messages("thresholdPreviousThirtyDays.beforeLinkText"))
+          views.html.newcomponents.link(appConfig.VATNotice700_1supplementURL, messages("thresholdPreviousThirtyDays.linkText"))
           Html(".")
         }
       )

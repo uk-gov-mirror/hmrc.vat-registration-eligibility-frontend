@@ -20,26 +20,26 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import forms.RacehorsesFormProvider
-import identifiers.{EligibleId, RacehorsesId}
+import identifiers.RacehorsesId
 import javax.inject.Inject
 import models.NormalMode
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, MessagesApi}
-import services.VatRegistrationService
+import play.api.i18n.I18nSupport
+import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.racehorses
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RacehorsesController @Inject()(override val messagesApi: MessagesApi,
+class RacehorsesController @Inject()(mcc: MessagesControllerComponents,
                                      dataCacheConnector: DataCacheConnector,
                                      navigator: Navigator,
                                      identify: CacheIdentifierAction,
                                      getData: DataRetrievalAction,
                                      requireData: DataRequiredAction,
                                      formProvider: RacehorsesFormProvider
-                                    )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                    )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
 

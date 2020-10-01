@@ -36,16 +36,18 @@ class AnnualAccountingSchemeControllerSpec extends ControllerSpecBase {
   val formProvider = new AnnualAccountingSchemeFormProvider()
   val form: Form[Boolean] = formProvider()
 
+  val dataRequiredAction = new DataRequiredAction
+
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new AnnualAccountingSchemeController(
-      messagesApi,
+      controllerComponents,
       FakeDataCacheConnector,
       new FakeNavigator(desiredRoute = onwardRoute),
       FakeCacheIdentifierAction,
       dataRetrievalAction,
-      new DataRequiredActionImpl,
+      dataRequiredAction,
       formProvider
-    )(frontendAppConfig)
+    )(frontendAppConfig, executionContext)
 
   def viewAsString(form: Form[_] = form): String = annualAccountingScheme(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 

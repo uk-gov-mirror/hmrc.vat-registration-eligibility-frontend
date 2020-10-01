@@ -2,13 +2,17 @@ package www
 
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
 import identifiers.{AgriculturalFlatRateSchemeId, RegisteringBusinessId, VATExemptionId, ZeroRatedSalesId}
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Format._
-import play.api.test.FakeApplication
 import play.mvc.Http.HeaderNames
 
 class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with SessionStub {
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = fakeConfig())
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(fakeConfig())
+    .build()
+
   val internalId = "testInternalId"
   s"POST ${controllers.routes.ZeroRatedSalesController.onSubmit().url}" should {
     "navigate to Registering Business when false and no data exists in Exemption" in {
@@ -17,7 +21,7 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
       stubAudits()
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map("value" -> Seq("false")))
 
       val response = await(request)
@@ -32,7 +36,7 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
       cacheSessionData(internalId, VATExemptionId.toString, true)
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map("value" -> Seq("false")))
 
       val response = await(request)
@@ -48,7 +52,7 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
       stubAudits()
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map("value" -> Seq("true")))
 
       val response = await(request)
@@ -64,7 +68,7 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
       cacheSessionData(internalId, AgriculturalFlatRateSchemeId.toString, true)
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map("value" -> Seq("true")))
 
       val response = await(request)
