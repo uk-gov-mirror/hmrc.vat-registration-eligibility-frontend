@@ -24,8 +24,9 @@ class IndexControllerSpec extends ControllerSpecBase {
   implicit val appConfig = frontendAppConfig
 
   class Setup {
-    val controller = new IndexController(messagesApi, new FakeNavigator(desiredRoute = routes.ThresholdInTwelveMonthsController.onPageLoad()))
+    val controller = new IndexController(controllerComponents, new FakeNavigator(desiredRoute = routes.ThresholdInTwelveMonthsController.onPageLoad()))
   }
+
   "Index Controller" must {
     "return 200 for a GET" in new Setup {
       val result = controller.onPageLoad()(fakeRequest)

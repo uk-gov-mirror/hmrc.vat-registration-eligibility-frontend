@@ -21,7 +21,6 @@ import controllers.actions._
 import forms.RegisteringBusinessFormProvider
 import identifiers.RegisteringBusinessId
 import models.NormalMode
-import org.scalatest.mockito.MockitoSugar
 import play.api.data.Form
 import play.api.libs.json.JsBoolean
 import play.api.test.Helpers._
@@ -29,7 +28,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
 import views.html.registeringBusiness
 
-class RegisteringBusinessControllerSpec extends ControllerSpecBase with MockitoSugar {
+class RegisteringBusinessControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
@@ -37,9 +36,11 @@ class RegisteringBusinessControllerSpec extends ControllerSpecBase with MockitoS
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
 
+  val dataRequiredAction = new DataRequiredAction
+
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new RegisteringBusinessController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+    new RegisteringBusinessController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+      dataRetrievalAction, dataRequiredAction, formProvider)
 
   def viewAsString(form: Form[_] = form) = registeringBusiness(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 

@@ -16,14 +16,17 @@
 
 package controllers.actions
 
+import base.SpecBase
 import models.CurrentProfile
 import models.requests.CacheIdentifierRequest
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{AnyContent, BodyParser, Request, Result}
 
 import scala.concurrent.Future
 
-object FakeCacheIdentifierAction extends CacheIdentifierAction {
-  override def invokeBlock[A](request: Request[A], block: (CacheIdentifierRequest[A]) => Future[Result]): Future[Result] =
+object FakeCacheIdentifierAction extends SpecBase with CacheIdentifierAction {
+
+  override def parser: BodyParser[AnyContent] = controllerComponents.parsers.defaultBodyParser
+
+  override def invokeBlock[A](request: Request[A], block: CacheIdentifierRequest[A] => Future[Result]): Future[Result] =
     block(CacheIdentifierRequest(request, "id", CurrentProfile("regId")))
 }
-

@@ -24,16 +24,16 @@ import identifiers.ThresholdPreviousThirtyDaysId
 import javax.inject.Inject
 import models.{ConditionalDateFormElement, NormalMode}
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.ThresholdService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, ThresholdHelper, UserAnswers}
 import views.html.thresholdPreviousThirtyDays
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class ThresholdPreviousThirtyDaysController @Inject()(override val messagesApi: MessagesApi,
+class ThresholdPreviousThirtyDaysController @Inject()(mcc: MessagesControllerComponents,
                                                       dataCacheConnector: DataCacheConnector,
                                                       navigator: Navigator,
                                                       identify: CacheIdentifierAction,
@@ -41,7 +41,8 @@ class ThresholdPreviousThirtyDaysController @Inject()(override val messagesApi: 
                                                       requireData: DataRequiredAction,
                                                       thresholdService: ThresholdService,
                                                       formProvider: ThresholdPreviousThirtyDaysFormProvider
-                                                     )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                                     )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>

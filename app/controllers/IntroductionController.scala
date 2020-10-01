@@ -19,14 +19,14 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.CacheIdentifierAction
 import javax.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.introduction
 
-class IntroductionController @Inject()(override val messagesApi: MessagesApi,
+class IntroductionController @Inject()(mcc: MessagesControllerComponents,
                                        identify: CacheIdentifierAction
-                                      )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                      )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify) { implicit request =>
     Ok(introduction())

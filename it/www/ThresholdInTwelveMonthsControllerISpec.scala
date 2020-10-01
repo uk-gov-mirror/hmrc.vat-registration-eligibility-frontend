@@ -7,7 +7,8 @@ import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
 import identifiers.{ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, VATRegistrationExceptionId, VoluntaryRegistrationId}
 import models.ConditionalDateFormElement
 import org.jsoup.Jsoup
-import play.api.test.FakeApplication
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.HeaderNames
 
 class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with AuthHelper with SessionStub {
@@ -18,7 +19,9 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
   val pageHeading = "In any 12-month period has Test Company gone over the VAT-registration threshold?"
   val dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = fakeConfig())
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(fakeConfig())
+    .build
 
   //TODO - fix when we determine how to deal with dates for VAT threshold
   s"GET ${controllers.routes.ThresholdInTwelveMonthsController.onPageLoad().url}" ignore {
@@ -28,7 +31,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubSuccessfulRegIdGet()
         stubAudits()
 
-        val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
+        val request = buildClient("/gone-over-threshold").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
         val response = await(request)
         response.status mustBe 200
         val document = Jsoup.parse(response.body)
@@ -43,9 +46,9 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubSuccessfulRegIdGet()
         stubAudits()
 
-        cacheSessionData[ConditionalDateFormElement](internalId, s"$ThresholdInTwelveMonthsId", ConditionalDateFormElement(true, Some(LocalDate.of(2017,12,1))))
+        cacheSessionData[ConditionalDateFormElement](internalId, s"$ThresholdInTwelveMonthsId", ConditionalDateFormElement(true, Some(LocalDate.of(2017, 12, 1))))
 
-        val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
+        val request = buildClient("/gone-over-threshold").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
         val response = await(request)
         response.status mustBe 200
         val document = Jsoup.parse(response.body)
@@ -61,7 +64,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
           stubSuccessfulLogin()
           stubSuccessfulRegIdGet()
           stubAudits()
-          val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
+          val request = buildClient("/gone-over-threshold").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).get()
           val response = await(request)
           response.status mustBe 500
         }
@@ -82,7 +85,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubAudits()
 
 
-        val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        val request = buildClient("/gone-over-threshold").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
           .post(Map(
             selectionFieldName -> Seq("true"),
             s"$dateFieldName.month" -> Seq(s"${dateBeforeIncorp.getMonthValue}"),
@@ -94,7 +97,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         val document = Jsoup.parse(response.body)
         document.getElementById("main-heading").text() mustBe pageHeading
         document.getElementById("error-summary-heading").text() mustBe "This page has errors"
-        document.getElementsByAttributeValue("href",s"#$dateFieldName").text() mustBe s"Enter a date that's after the date the business was set up: ${incorpDate.format(dateTimeFormatter)}"
+        document.getElementsByAttributeValue("href", s"#$dateFieldName").text() mustBe s"Enter a date that's after the date the business was set up: ${incorpDate.format(dateTimeFormatter)}"
       }
     }
     s"redirect to ${controllers.routes.ThresholdPreviousThirtyDaysController.onPageLoad().url}" when {
@@ -108,7 +111,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         cacheSessionData[Boolean](internalId, VoluntaryRegistrationId.toString, true)
         cacheSessionData(internalId, VATRegistrationExceptionId.toString, true)
 
-        val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        val request = buildClient("/gone-over-threshold").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
           .post(Map(
             selectionFieldName -> Seq("true"),
             s"$dateFieldName.month" -> Seq(s"${dateAfterIncorp.getMonthValue}"),
@@ -120,7 +123,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdPreviousThirtyDaysController.onPageLoad().url)
         verifySessionCacheData(internalId, VoluntaryRegistrationId.toString, Option.empty[Boolean])
         verifySessionCacheData[ConditionalDateFormElement](internalId, ThresholdInTwelveMonthsId.toString,
-          Some(ConditionalDateFormElement(true, Some(LocalDate.of(dateAfterIncorp.getYear, dateAfterIncorp.getMonthValue,1)))))
+          Some(ConditionalDateFormElement(true, Some(LocalDate.of(dateAfterIncorp.getYear, dateAfterIncorp.getMonthValue, 1)))))
         verifySessionCacheData(internalId, ThresholdNextThirtyDaysId.toString, Option.empty[Boolean])
         verifySessionCacheData(internalId, VATRegistrationExceptionId.toString, Some(true))
       }
@@ -132,10 +135,10 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubAudits()
 
         cacheSessionData(internalId, VoluntaryRegistrationId.toString, true)
-        cacheSessionData(internalId,  ThresholdNextThirtyDaysId.toString, false)
+        cacheSessionData(internalId, ThresholdNextThirtyDaysId.toString, false)
         cacheSessionData(internalId, VATRegistrationExceptionId.toString, true)
 
-        val request = buildClient("/gone-over-threshold").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        val request = buildClient("/gone-over-threshold").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
           .post(Map(
             selectionFieldName -> Seq("false")
           ))

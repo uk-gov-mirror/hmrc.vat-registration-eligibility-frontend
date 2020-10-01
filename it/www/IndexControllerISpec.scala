@@ -3,7 +3,7 @@ package www
 import helpers.IntegrationSpecBase
 import play.mvc.Http.HeaderNames
 
-class IndexControllerSpec extends IntegrationSpecBase {
+class IndexControllerISpec extends IntegrationSpecBase {
 
   s"GET ${controllers.routes.IndexController.navigateToPageId("foo").url}" should {
     "redirect to the start of eligibility because question id is invalid" in {

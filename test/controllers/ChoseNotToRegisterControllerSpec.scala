@@ -27,7 +27,7 @@ class ChoseNotToRegisterControllerSpec extends ControllerSpecBase {
   def onwardRoute = routes.ChoseNotToRegisterController.onPageLoad()
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ChoseNotToRegisterController(messagesApi, FakeCacheIdentifierAction)
+    new ChoseNotToRegisterController(controllerComponents, FakeCacheIdentifierAction)
 
   def viewAsString() = choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
 

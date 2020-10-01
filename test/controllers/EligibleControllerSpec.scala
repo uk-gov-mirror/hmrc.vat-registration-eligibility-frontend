@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{DataRequiredActionImpl, FakeCacheIdentifierAction}
+import controllers.actions.{DataRequiredAction, FakeCacheIdentifierAction}
 import models.requests.DataRequest
 import org.mockito.Matchers
 import org.mockito.Mockito.when
@@ -31,11 +31,13 @@ class EligibleControllerSpec extends ControllerSpecBase {
 
   implicit val appConfig = frontendAppConfig
 
+  val dataRequiredAction = new DataRequiredAction
+
   object Controller extends EligibleController(
-    messagesApi = messagesApi,
+    controllerComponents,
     identify = FakeCacheIdentifierAction,
     getData = getEmptyCacheMap,
-    requireData = new DataRequiredActionImpl,
+    requireData = dataRequiredAction,
     vatRegistrationService = mockVRService
   )
 

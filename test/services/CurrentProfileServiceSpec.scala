@@ -17,7 +17,6 @@
 package services
 
 import base.CommonSpecBase
-import connectors.{DataCacheConnector, VatRegistrationConnector}
 import models.CurrentProfile
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -30,10 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CurrentProfileServiceSpec extends CommonSpecBase {
 
   class Setup {
-    val service = new CurrentProfileService {
-      override val dataCacheConnector: DataCacheConnector = mockDataCacheConnector
-      override val vatRegistrationConnector: VatRegistrationConnector = mockVatRegConnector
-    }
+    val service = new CurrentProfileService(mockDataCacheConnector, mockVatRegConnector)
   }
 
   val testIntId = "internalId"
@@ -42,9 +38,9 @@ class CurrentProfileServiceSpec extends CommonSpecBase {
     "build a profile" when {
       "it hasn't been built" in new Setup {
         when(mockDataCacheConnector.getEntry[CurrentProfile](Matchers.any(), Matchers.any())(Matchers.any()))
-            .thenReturn(Future.successful(None))
+          .thenReturn(Future.successful(None))
         when(mockVatRegConnector.getRegistrationId()(Matchers.any[HeaderCarrier], Matchers.any[ExecutionContext]))
-            .thenReturn(Future.successful(regId))
+          .thenReturn(Future.successful(regId))
         when(mockDataCacheConnector.save[CurrentProfile](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any()))
           .thenReturn(Future.successful(CacheMap("test", Map("test" -> Json.obj()))))
 
@@ -55,7 +51,7 @@ class CurrentProfileServiceSpec extends CommonSpecBase {
         private val profile = CurrentProfile(regId)
 
         when(mockDataCacheConnector.getEntry[CurrentProfile](Matchers.any(), Matchers.any())(Matchers.any()))
-            .thenReturn(Future.successful(Some(profile)))
+          .thenReturn(Future.successful(Some(profile)))
 
         await(service.fetchOrBuildCurrentProfile(testIntId)) mustBe profile
       }

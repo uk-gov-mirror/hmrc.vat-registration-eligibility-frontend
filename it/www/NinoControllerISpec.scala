@@ -1,14 +1,15 @@
 package www
 
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
-import identifiers.{AgriculturalFlatRateSchemeId, VATExemptionId, ZeroRatedSalesId}
-import play.api.libs.json.Format._
-import play.api.test.FakeApplication
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.HeaderNames
 
 class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with SessionStub {
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = fakeConfig())
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(fakeConfig())
+    .build()
 
   s"${controllers.routes.NinoController.onSubmit()}" should {
     "redirect to Agricultural Flat Rate Scheme if the answer is yes" in {
@@ -16,7 +17,7 @@ class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with Sessi
       stubSuccessfulRegIdGet()
       stubAudits()
 
-      val request = buildClient("/have-nino").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+      val request = buildClient("/have-nino").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map(
           "value" -> Seq("true"))
         )

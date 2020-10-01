@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import play.twirl.api.HtmlFormat
+
 @(appConfig: config.FrontendAppConfig,
   title: String,
   mainClass: Option[String] = None,
@@ -28,6 +30,7 @@
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
+@import play.twirl.api.HtmlFormat
 
 @head = {
     @uiLayouts.head(

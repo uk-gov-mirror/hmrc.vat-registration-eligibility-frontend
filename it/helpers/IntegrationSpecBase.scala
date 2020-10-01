@@ -4,14 +4,15 @@ import akka.util.Timeout
 import itutil.WiremockHelper
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.concurrent.duration._
 
 trait IntegrationSpecBase extends PlaySpec
-  with OneServerPerSuite
+  with GuiceOneServerPerSuite
   with ScalaFutures
   with IntegrationPatience
   with WiremockHelper

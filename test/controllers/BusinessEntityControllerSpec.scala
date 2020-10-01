@@ -21,7 +21,6 @@ import controllers.actions._
 import forms.BusinessEntityFormProvider
 import identifiers.BusinessEntityId
 import models.{BusinessEntity, UKCompany}
-import org.scalatest.mockito.MockitoSugar
 import play.api.data.Form
 import play.api.libs.json.JsString
 import play.api.mvc.Call
@@ -30,7 +29,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
 import views.html.businessEntity
 
-class BusinessEntityControllerSpec extends ControllerSpecBase with MockitoSugar {
+class BusinessEntityControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
@@ -39,11 +38,13 @@ class BusinessEntityControllerSpec extends ControllerSpecBase with MockitoSugar 
   implicit val appConfig = frontendAppConfig
   val testCall = Call("POST", "/check-if-you-can-register-for-vat/business-entity")
 
+  val dataRequiredAction = new DataRequiredAction
+
   val postAction = testCall
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new BusinessEntityController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+    new BusinessEntityController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+      dataRetrievalAction, dataRequiredAction, formProvider)
 
   def viewAsString(form: Form[BusinessEntity] = form) = businessEntity(form, postAction)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 

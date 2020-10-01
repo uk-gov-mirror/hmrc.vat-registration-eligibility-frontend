@@ -11,4 +11,3 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
-->         /check-if-you-can-register-for-vat/test-only/                test.Routes

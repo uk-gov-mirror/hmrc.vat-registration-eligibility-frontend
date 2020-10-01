@@ -33,7 +33,7 @@ class IntroductionControllerISpec extends IntegrationSpecBase with AuthHelper wi
       stubAudits()
 
       val res = await(buildClient(testUrl)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Json.obj()))
 
       res.status mustBe SEE_OTHER

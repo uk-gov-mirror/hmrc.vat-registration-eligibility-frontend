@@ -20,14 +20,14 @@ import config.FrontendAppConfig
 import controllers.actions._
 import identifiers._
 import javax.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.{agriculturalDropout, eligibilityDropout, internationalActivityDropout}
 
-class EligibilityDropoutController @Inject()(override val messagesApi: MessagesApi,
+class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
                                              identify: CacheIdentifierAction
-                                            )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                            )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(mode: String) = identify {
     implicit request =>

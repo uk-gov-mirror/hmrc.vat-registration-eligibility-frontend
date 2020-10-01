@@ -23,22 +23,22 @@ import forms.BusinessEntityFormProvider
 import identifiers.BusinessEntityId
 import javax.inject.Inject
 import models._
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.businessEntity
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class BusinessEntityController @Inject()(override val messagesApi: MessagesApi,
+class BusinessEntityController @Inject()(mcc: MessagesControllerComponents,
                                          dataCacheConnector: DataCacheConnector,
                                          navigator: Navigator,
                                          identify: CacheIdentifierAction,
                                          getData: DataRetrievalAction,
                                          requireData: DataRequiredAction,
                                          formProvider: BusinessEntityFormProvider
-                                        )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                        )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {

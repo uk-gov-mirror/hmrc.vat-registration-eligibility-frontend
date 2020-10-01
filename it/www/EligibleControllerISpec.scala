@@ -3,6 +3,7 @@ package www
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub, VatRegistrationStub}
 import identifiers._
 import models.{BusinessEntity, ConditionalDateFormElement, TurnoverEstimateFormElement, UKCompany}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.mvc.Http.HeaderNames
@@ -12,9 +13,9 @@ class EligibleControllerISpec extends IntegrationSpecBase
   with SessionStub
   with VatRegistrationStub {
 
-  override implicit lazy val app = new GuiceApplicationBuilder()
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .configure(fakeConfig())
-    .build
+    .build()
 
   val testUrl = controllers.routes.EligibleController.onPageLoad.url
 
@@ -53,7 +54,7 @@ class EligibleControllerISpec extends IntegrationSpecBase
       stubSaveEligibilityData("testRegId")
 
       val res = await(buildClient(testUrl)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map("value" -> Seq("false"))))
 
       res.status mustBe SEE_OTHER
@@ -67,7 +68,7 @@ class EligibleControllerISpec extends IntegrationSpecBase
       stubSaveEligibilityData("testRegId")
 
       val res = await(buildClient(testUrl)
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map("value" -> Seq("false"))))
 
       res.status mustBe INTERNAL_SERVER_ERROR

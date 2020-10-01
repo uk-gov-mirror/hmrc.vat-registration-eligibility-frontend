@@ -16,25 +16,21 @@
 
 package connectors
 
-import config.{FrontendAppConfig, WSHttp}
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.libs.json.{JsObject, JsValue, Json}
-import uk.gov.hmrc.http._
+import play.api.libs.json.{JsObject, JsValue}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class VatRegistrationConnectorImpl @Inject()(val http: WSHttp,
-                                             val servicesConfig: FrontendAppConfig) extends VatRegistrationConnector {
-  override val vatRegistrationUrl: String = servicesConfig.baseUrl("vat-registration")
-  override val vatRegistrationUri: String =
+@Singleton
+class VatRegistrationConnector @Inject()(val http: HttpClient,
+                                         val servicesConfig: ServicesConfig) {
+  lazy val vatRegistrationUrl: String = servicesConfig.baseUrl("vat-registration")
+  lazy val vatRegistrationUri: String =
     servicesConfig.getConfString("vat-registration.uri", throw new RuntimeException("expected incorporation-information.uri in config but none found"))
-}
-
-trait VatRegistrationConnector {
-  val http: CoreGet with CorePost with WSHttp
-  val vatRegistrationUrl: String
-  val vatRegistrationUri: String
 
   def getRegistrationId()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[String] = {
     http.GET[JsObject](s"$vatRegistrationUrl$vatRegistrationUri/scheme").recover {

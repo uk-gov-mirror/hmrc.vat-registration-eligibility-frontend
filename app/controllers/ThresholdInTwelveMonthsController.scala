@@ -24,15 +24,16 @@ import identifiers.ThresholdInTwelveMonthsId
 import javax.inject.Inject
 import models.{ConditionalDateFormElement, NormalMode}
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
+import play.api.mvc.MessagesControllerComponents
 import services.ThresholdService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.thresholdInTwelveMonths
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class ThresholdInTwelveMonthsController @Inject()(override val messagesApi: MessagesApi,
+class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerComponents,
                                                   dataCacheConnector: DataCacheConnector,
                                                   navigator: Navigator,
                                                   identify: CacheIdentifierAction,
@@ -40,7 +41,7 @@ class ThresholdInTwelveMonthsController @Inject()(override val messagesApi: Mess
                                                   requireData: DataRequiredAction,
                                                   thresholdService: ThresholdService,
                                                   formProvider: ThresholdInTwelveMonthsFormProvider
-                                                 )(implicit appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+                                                 )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
 
   def onPageLoad() = (identify andThen getData andThen requireData) {

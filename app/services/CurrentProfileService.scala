@@ -17,31 +17,27 @@
 package services
 
 import connectors.{DataCacheConnector, VatRegistrationConnector}
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-class CurrentProfileServiceImpl @Inject()(val dataCacheConnector: DataCacheConnector, val vatRegistrationConnector: VatRegistrationConnector) extends CurrentProfileService {
+@Singleton
+class CurrentProfileService @Inject()(val dataCacheConnector: DataCacheConnector, val vatRegistrationConnector: VatRegistrationConnector) {
 
-}
-
-trait CurrentProfileService {
-  val dataCacheConnector: DataCacheConnector
-  val vatRegistrationConnector: VatRegistrationConnector
-
-  private def constructCurrentProfile(internalID : String)(implicit headerCarrier: HeaderCarrier): Future[CurrentProfile] = for {
-    regId           <- vatRegistrationConnector.getRegistrationId()
-    currentProfile  = CurrentProfile(regId)
-    _               <- dataCacheConnector.save(internalID, "CurrentProfile", currentProfile)
+  private def constructCurrentProfile(internalID: String)(implicit headerCarrier: HeaderCarrier): Future[CurrentProfile] = for {
+    regId <- vatRegistrationConnector.getRegistrationId()
+    currentProfile = CurrentProfile(regId)
+    _ <- dataCacheConnector.save(internalID, "CurrentProfile", currentProfile)
   } yield currentProfile
 
-  def fetchOrBuildCurrentProfile(internalID : String)(implicit headerCarrier: HeaderCarrier): Future[CurrentProfile] = {
+  def fetchOrBuildCurrentProfile(internalID: String)(implicit headerCarrier: HeaderCarrier): Future[CurrentProfile] = {
     dataCacheConnector.getEntry[CurrentProfile](internalID, "CurrentProfile") flatMap {
       case Some(currentProfile) => Future.successful(currentProfile)
-      case _                    => constructCurrentProfile(internalID)
+      case _ => constructCurrentProfile(internalID)
     }
   }
 }
+

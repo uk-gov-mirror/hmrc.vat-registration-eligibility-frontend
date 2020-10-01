@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.AgriculturalFlatRateSchemeFormProvider
@@ -24,6 +23,7 @@ import identifiers.AgriculturalFlatRateSchemeId
 import models.NormalMode
 import play.api.data.Form
 import play.api.libs.json.JsBoolean
+import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
@@ -31,17 +31,23 @@ import views.html.agriculturalFlatRateScheme
 
 class AgriculturalFlatRateSchemeControllerSpec extends ControllerSpecBase {
 
-  def onwardRoute = routes.IndexController.onPageLoad()
-  implicit val appConfig = app.injector.instanceOf[FrontendAppConfig]
+  def onwardRoute: Call = routes.IndexController.onPageLoad()
 
   val formProvider = new AgriculturalFlatRateSchemeFormProvider()
-  val form = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new AgriculturalFlatRateSchemeController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+    new AgriculturalFlatRateSchemeController(
+      controllerComponents,
+      FakeDataCacheConnector,
+      new FakeNavigator(desiredRoute = onwardRoute),
+      FakeCacheIdentifierAction,
+      dataRetrievalAction,
+      new DataRequiredAction,
+      formProvider
+    )
 
-  def viewAsString(form: Form[_] = form) = agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequestIncorped, messages, appConfig).toString
+  def viewAsString(form: Form[_] = form): String = agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "AgriculturalFlatRateScheme Controller" must {
 

@@ -20,6 +20,8 @@ import deprecated.DeprecatedConstants
 import play.twirl.api.HtmlFormat
 import views.ViewSpecBase
 
+import scala.xml.Text
+
 trait ViewBehaviours extends ViewSpecBase {
 
   def normalPage(view: () => HtmlFormat.Appendable,
@@ -32,7 +34,7 @@ trait ViewBehaviours extends ViewSpecBase {
           val doc = asDocument(view())
           val nav = doc.getElementById("proposition-menu")
           val span = nav.children.first
-          span.text mustBe messagesApi("site.service_name")
+          span.text mustBe Text("site.service_name")
         }
 
         "display the correct browser title" in {

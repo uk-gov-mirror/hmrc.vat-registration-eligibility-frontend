@@ -16,11 +16,13 @@
 
 package base
 
-import config.WSHttp
 import connectors._
-import org.scalatest.mockito.MockitoSugar
+import controllers.actions.DataRequiredAction
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.MessagesApi
 import services._
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.VATFeatureSwitch
 
 
@@ -28,16 +30,18 @@ trait VATEligiblityMocks {
   self: MockitoSugar =>
 
   //Connectors
-  lazy val mockDataCacheConnector    = mock[DataCacheConnector]
-  lazy val mockVatRegConnector       = mock[VatRegistrationConnector]
+  lazy val mockDataCacheConnector = mock[DataCacheConnector]
+  lazy val mockVatRegConnector = mock[VatRegistrationConnector]
+  lazy val mockAuthConnector = mock[AuthConnector]
 
   //Services
-  lazy val mockVRService             = mock[VatRegistrationService]
+  lazy val mockVRService = mock[VatRegistrationService]
   lazy val mockCurrentProfileService = mock[CurrentProfileService]
-  lazy val mockThresholdService      = mock[ThresholdService]
+  lazy val mockThresholdService = mock[ThresholdService]
 
   //Other
-  lazy val mockWSHttp                = mock[WSHttp]
-  lazy val mockVATFeatureSwitch      = mock[VATFeatureSwitch]
-  lazy val mockMessagesAPI           = mock[MessagesApi]
+  lazy val mockHttpClient = mock[HttpClient]
+  lazy val mockVATFeatureSwitch = mock[VATFeatureSwitch]
+  lazy val mockDataRequiredAction = mock[DataRequiredAction]
+  lazy val mockMessagesAPI = mock[MessagesApi]
 }

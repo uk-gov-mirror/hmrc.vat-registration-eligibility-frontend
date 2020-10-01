@@ -16,15 +16,15 @@
 
 package forms
 
+import base.SpecBase
 import models._
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
 
-class BusinessEntityFormProviderSpec extends UnitSpec {
+class BusinessEntityFormProviderSpec extends SpecBase {
   val form = new BusinessEntityFormProvider()()
 
-  "businessEntityForm" should {
+  "businessEntityForm" must {
 
     val businessEntity = "value"
 
@@ -32,37 +32,37 @@ class BusinessEntityFormProviderSpec extends UnitSpec {
 
     "successfully parse a UK Company entity" in {
       val res = form.bind(Map(businessEntity -> UKCompany.toString))
-      res.value should contain(UKCompany)
+      res.value must contain(UKCompany)
     }
 
     "successfully parse a Sole trader entity" in {
       val res = form.bind(Map(businessEntity -> SoleTrader.toString))
-      res.value should contain(SoleTrader)
+      res.value must contain(SoleTrader)
     }
 
     "successfully parse a Partnership entity" in {
       val res = form.bind(Map(businessEntity -> Partnership.toString))
-      res.value should contain(Partnership)
+      res.value must contain(Partnership)
     }
 
     "successfully parse a Division entity" in {
       val res = form.bind(Map(businessEntity -> Division.toString))
-      res.value should contain(Division)
+      res.value must contain(Division)
     }
 
     "successfully parse a Other entity" in {
       val res = form.bind(Map(businessEntity -> Other.toString))
-      res.value should contain(Other)
+      res.value must contain(Other)
     }
 
     "fail when nothing has been entered in the view" in {
       val res = form.bind(Map.empty[String, String])
-      res.errors should contain(FormError(businessEntity, businessEntityErrorKey))
+      res.errors must contain(FormError(businessEntity, businessEntityErrorKey))
     }
 
     "fail when it is not an expected value in the view" in {
       val res = form.bind(Map(businessEntity -> "invalid"))
-      res.errors should contain(FormError(businessEntity, businessEntityErrorKey))
+      res.errors must contain(FormError(businessEntity, businessEntityErrorKey))
     }
   }
 }

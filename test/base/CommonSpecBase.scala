@@ -16,16 +16,11 @@
 
 package base
 
-import java.time.LocalDate
-
-import models.CurrentProfile
-import models.requests.DataRequest
 import org.mockito.Mockito.reset
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.mvc.Call
-import play.api.test.{DefaultAwaitTimeout, FakeRequest, FutureAwaits}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 
@@ -33,6 +28,7 @@ trait CommonSpecBase extends PlaySpec with FutureAwaits with DefaultAwaitTimeout
   implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Option(SessionId("sess-ID")))
   val regId = "regId"
   val txId = "txId"
+
   override def beforeEach() = {
     super.beforeEach()
     resetMocks()
@@ -40,12 +36,16 @@ trait CommonSpecBase extends PlaySpec with FutureAwaits with DefaultAwaitTimeout
 
   def resetMocks() = {
     reset(
-      mockWSHttp,
       mockDataCacheConnector,
-      mockCurrentProfileService,
+      mockVatRegConnector,
+      mockAuthConnector,
       mockVRService,
+      mockCurrentProfileService,
       mockThresholdService,
-      mockVATFeatureSwitch
+      mockHttpClient,
+      mockVATFeatureSwitch,
+      mockDataRequiredAction,
+      mockMessagesAPI
     )
   }
 }

@@ -21,7 +21,6 @@ import controllers.actions._
 import forms.NinoFormProvider
 import identifiers.NinoId
 import models.NormalMode
-import org.scalatest.mockito.MockitoSugar
 import play.api.data.Form
 import play.api.libs.json.JsBoolean
 import play.api.mvc.Call
@@ -30,7 +29,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
 import views.html.nino
 
-class NinoControllerSpec extends ControllerSpecBase with MockitoSugar {
+class NinoControllerSpec extends ControllerSpecBase {
 
   def onwardRoute: Call = routes.IndexController.onPageLoad()
 
@@ -38,9 +37,11 @@ class NinoControllerSpec extends ControllerSpecBase with MockitoSugar {
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
 
+  val dataRequiredAction = new DataRequiredAction
+
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new NinoController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+    new NinoController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+      dataRetrievalAction, dataRequiredAction, formProvider)
 
   def viewAsString(form: Form[_] = form) = nino(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig).toString
 

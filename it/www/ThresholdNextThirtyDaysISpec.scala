@@ -3,12 +3,15 @@
 package www
 
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
-import play.api.test.FakeApplication
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.HeaderNames
 
 class ThresholdNextThirtyDaysISpec extends IntegrationSpecBase with AuthHelper with SessionStub {
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = fakeConfig())
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(fakeConfig())
+    .build()
 
   //TODO - fix when we determine how to deal with dates for VAT threshold
   s" ${controllers.routes.ThresholdNextThirtyDaysController.onSubmit()}" ignore {
@@ -17,7 +20,7 @@ class ThresholdNextThirtyDaysISpec extends IntegrationSpecBase with AuthHelper w
       stubSuccessfulRegIdGet()
       stubAudits()
 
-      val request = buildClient("/make-more-taxable-sales").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+      val request = buildClient("/make-more-taxable-sales").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map(
           "value" -> Seq("true"))
         )
@@ -30,7 +33,7 @@ class ThresholdNextThirtyDaysISpec extends IntegrationSpecBase with AuthHelper w
       stubSuccessfulRegIdGet()
       stubAudits()
 
-      val request = buildClient("/make-more-taxable-sales").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+      val request = buildClient("/make-more-taxable-sales").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map(
           "value" -> Seq("false"))
         )

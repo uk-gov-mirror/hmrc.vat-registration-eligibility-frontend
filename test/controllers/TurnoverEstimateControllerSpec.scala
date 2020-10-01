@@ -20,7 +20,7 @@ import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.TurnoverEstimateFormProvider
 import identifiers.TurnoverEstimateId
-import models.{NormalMode, TurnoverEstimate, TurnoverEstimateFormElement}
+import models.{NormalMode, TurnoverEstimateFormElement}
 import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.test.Helpers._
@@ -36,9 +36,11 @@ class TurnoverEstimateControllerSpec extends ControllerSpecBase {
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
 
+  val dataRequiredAction = new DataRequiredAction
+
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new TurnoverEstimateController(messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+    new TurnoverEstimateController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+      dataRetrievalAction, dataRequiredAction, formProvider)
 
   def viewAsString(form: Form[_] = form) = turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
