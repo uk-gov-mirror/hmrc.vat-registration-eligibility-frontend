@@ -33,6 +33,7 @@ class Navigator @Inject()() {
     case ThresholdNextThirtyDaysId => routes.ThresholdNextThirtyDaysController.onPageLoad()
     case ThresholdPreviousThirtyDaysId => routes.ThresholdPreviousThirtyDaysController.onPageLoad()
     case VoluntaryRegistrationId => routes.VoluntaryRegistrationController.onPageLoad()
+    case VoluntaryInformationId => routes.VoluntaryInformationController.onPageLoad()
     case ChoseNotToRegisterId => routes.ChoseNotToRegisterController.onPageLoad()
     case ThresholdInTwelveMonthsId => routes.ThresholdInTwelveMonthsController.onPageLoad()
     case TurnoverEstimateId => routes.TurnoverEstimateController.onPageLoad()
@@ -118,8 +119,12 @@ class Navigator @Inject()() {
     ),
     nextOn(true,
       fromPage = VoluntaryRegistrationId,
-      onSuccessPage = TurnoverEstimateId,
+      onSuccessPage = VoluntaryInformationId,
       onFailPage = ChoseNotToRegisterId
+    ),
+    toNextPage(
+      fromPage = VoluntaryInformationId,
+      toPage = TurnoverEstimateId
     ),
     toNextPage(
       fromPage = TurnoverEstimateId,

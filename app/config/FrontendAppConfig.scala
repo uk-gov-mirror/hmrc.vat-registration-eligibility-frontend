@@ -63,6 +63,8 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
     throw new Exception("Couldn't get VATRateDifferentGoodsURL URL"))
   lazy val VATSetUpVATGroup = servicesConfig.getConfString("gov-uk.VATSetUpVATGroup",
     throw new Exception("Couldn't get VATSetUpVATGroup URL"))
+  lazy val VATVoluntaryInformationGroup = servicesConfig.getConfString("gov-uk.VATVoluntaryInformationGroup",
+    throw new Exception("Couldn't get VATVoluntaryInformationGroup URL"))
   lazy val VATFileChanges = servicesConfig.getConfString("gov-uk.VATFileChanges", throw new Exception("Couldn't get VATFileChanges URL"))
   lazy val languageTranslationEnabled = runModeConfiguration.getBoolean("microservice.services.features.welsh-translation").getOrElse(true)
 

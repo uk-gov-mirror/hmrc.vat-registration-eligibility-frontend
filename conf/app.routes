@@ -29,6 +29,9 @@ POST       /make-more-taxable-sales                     controllers.ThresholdNex
 GET        /gone-over-threshold-period                  controllers.ThresholdPreviousThirtyDaysController.onPageLoad()
 POST       /gone-over-threshold-period                  controllers.ThresholdPreviousThirtyDaysController.onSubmit()
 
+GET        /voluntary-information                       controllers.VoluntaryInformationController.onPageLoad()
+POST       /voluntary-information                       controllers.VoluntaryInformationController.onSubmit()
+
 GET        /register-voluntarily                        controllers.VoluntaryRegistrationController.onPageLoad()
 POST       /register-voluntarily                        controllers.VoluntaryRegistrationController.onSubmit()
 

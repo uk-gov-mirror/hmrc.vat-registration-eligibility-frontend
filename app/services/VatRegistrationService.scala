@@ -58,6 +58,11 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
     JsonSummaryRow(key, messages(s"$key.summary.heading"), messages(s"site.${if (data) "yes" else "no"}"), Json.toJson(data))
   }
 
+  private[services] def getVoluntaryInformationJson(data: Boolean)(implicit r: DataRequest[_]): List[JsValue] = {
+    val key = VoluntaryInformationId.toString
+    JsonSummaryRow(key, messages(s"$key.heading"), messages(s"site.${if (data) "yes" else "no"}"), Json.toJson(data))
+  }
+
   private[services] def prepareQuestionData(key: String, data: String)(implicit r: DataRequest[_]): List[JsValue] = {
     JsonSummaryRow(key, messages(s"$key.heading"), data, Json.toJson(data))
   }
@@ -121,6 +126,7 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
     case (id, e: ConditionalDateFormElement) => prepareQuestionData(id.toString, e)
     case (id, e: TurnoverEstimateFormElement) => prepareQuestionData(id.toString, e)
     case (VoluntaryRegistrationId, e: Boolean) => getVoluntaryRegistrationJson(e)
+    case (VoluntaryInformationId, e: Boolean) => getVoluntaryInformationJson(e)
     case (id, e: Boolean) => prepareQuestionData(id.toString, e)
     case (id, e: String) => prepareQuestionData(id.toString, e)
   }

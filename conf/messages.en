@@ -113,6 +113,17 @@ voluntaryRegistration.text2                 = Only register voluntarily if the c
 choseNotToRegister.title    = You''ve chosen not to register the business for VAT
 choseNotToRegister.heading  = You''ve chosen not to register the business for VAT
 
+voluntaryInformation.title                 = Would you like to sign up to Making Tax Digital for VAT?
+voluntaryInformation.heading               = Would you like to sign up to Making Tax Digital for VAT?
+voluntaryInformation.error.required        = Select yes if you would like to sign up to Making Tax Digital
+voluntaryInformation.text1                 = As your taxable turnover is below the registration threshold of £85,000 in a rolling 12 month period, you are not required to sign up for Making Tax Digital for VAT. However, you might find it convenient to use compatible software to keep your VAT records and submit them directly to HMRC.
+voluntaryInformation.radioyes              = Yes, I would like to sign up to Making Tax Digital
+voluntaryInformation.radiono               = No, I do not want to sign up to Making Tax Digital
+voluntaryInformation.linkText              = Find out more about Making Tax Digital for VAT (opens in a new tab)
+voluntaryInformation.button                = Continue to register for VAT
+
+
+
 thresholdInTwelveMonths.title                       = Over VAT-registration threshold in a 12-month period?
 thresholdInTwelveMonths.headingIncorpLess12m        = In any 12-month period has the business gone over the VAT-registration threshold?
 thresholdInTwelveMonths.headingIncorpMore12m        = In any 12-month period has the business gone over the VAT-registration threshold?
