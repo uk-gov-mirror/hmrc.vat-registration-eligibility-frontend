@@ -16,6 +16,7 @@
 
 package utils
 
+import akka.japi.Option.Some
 import identifiers._
 import models._
 import play.api.libs.json.{JsValue, Reads}
@@ -43,6 +44,9 @@ class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
   def turnoverEstimate: Option[TurnoverEstimateFormElement] = cacheMap.getEntry[TurnoverEstimateFormElement](TurnoverEstimateId.toString)
 
   def thresholdInTwelveMonths: Option[ConditionalDateFormElement] = cacheMap.getEntry[ConditionalDateFormElement](ThresholdInTwelveMonthsId.toString)
+
+  def voluntaryInformation: Option[Boolean] = cacheMap.getEntry[Boolean](VoluntaryInformationId.toString)
+
 
   def voluntaryRegistration: Option[Boolean] = cacheMap.getEntry[Boolean](VoluntaryRegistrationId.toString)
 

@@ -66,6 +66,8 @@ object PageIdBinding {
       case _ => false
     }
 
+
+
     Map(
       "VAT-taxable sales" ->
         Seq(
@@ -74,6 +76,7 @@ object PageIdBinding {
           (ThresholdPreviousThirtyDaysId, userAnswers.thresholdPreviousThirtyDays),
           (VATRegistrationExceptionId, userAnswers.vatRegistrationException),
           (VoluntaryRegistrationId, userAnswers.voluntaryRegistration),
+          (VoluntaryInformationId, userAnswers.voluntaryInformation.orElse(Some(true))),
           (TurnoverEstimateId, userAnswers.turnoverEstimate)
         ).collect(ThresholdSectionValidationAndConstruction),
       "Special situations" ->
