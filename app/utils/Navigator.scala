@@ -33,7 +33,6 @@ class Navigator @Inject()() {
     case ThresholdNextThirtyDaysId => routes.ThresholdNextThirtyDaysController.onPageLoad()
     case ThresholdPreviousThirtyDaysId => routes.ThresholdPreviousThirtyDaysController.onPageLoad()
     case VoluntaryRegistrationId => routes.VoluntaryRegistrationController.onPageLoad()
-    case VoluntaryInformationId => routes.VoluntaryInformationController.onPageLoad()
     case ChoseNotToRegisterId => routes.ChoseNotToRegisterController.onPageLoad()
     case ThresholdInTwelveMonthsId => routes.ThresholdInTwelveMonthsController.onPageLoad()
     case TurnoverEstimateId => routes.TurnoverEstimateController.onPageLoad()
@@ -49,6 +48,7 @@ class Navigator @Inject()() {
     case EligibilityDropoutId(mode) => routes.EligibilityDropoutController.onPageLoad(mode)
     case AgriculturalFlatRateSchemeId => routes.AgriculturalFlatRateSchemeController.onPageLoad()
     case RacehorsesId => routes.RacehorsesController.onPageLoad()
+    case VoluntaryInformationId => routes.VoluntaryInformationController.onPageLoad()
     case EligibleId => routes.EligibleController.onPageLoad()
     case page => {
       Logger.info(s"${page.toString} does not exist navigating to start of the journey")
@@ -91,6 +91,18 @@ class Navigator @Inject()() {
     }
   }
 
+  private def checkVoluntaryQuestion(fromPage: Identifier, mandatoryTrue: Identifier, mandatoryFalse: Identifier):
+  (Identifier, UserAnswers => Call) = {
+    fromPage -> { userAns =>
+      if (ThresholdHelper.q1DefinedAndTrue(userAns) || ThresholdHelper.taxableTurnoverCheck(userAns) ) {
+        pageIdToPageLoad(mandatoryTrue)
+      } else {
+          pageIdToPageLoad(mandatoryFalse)
+        }
+      }
+    }
+
+
   private[utils] def toNextPage(fromPage: Identifier, toPage: Identifier): (Identifier, UserAnswers => Call) =
     fromPage -> { _ => pageIdToPageLoad(toPage) }
 
@@ -111,7 +123,7 @@ class Navigator @Inject()() {
       onFailPage = ThresholdPreviousThirtyDaysId
     ),
     toNextPage(ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId),
-    toNextPage(RacehorsesId, EligibleId),
+    toNextPage(VoluntaryInformationId, EligibleId),
     lastThresholdQuestion(
       fromPage = ThresholdPreviousThirtyDaysId,
       twelveMonthsTrue = VATRegistrationExceptionId,
@@ -119,12 +131,8 @@ class Navigator @Inject()() {
     ),
     nextOn(true,
       fromPage = VoluntaryRegistrationId,
-      onSuccessPage = VoluntaryInformationId,
+      onSuccessPage = TurnoverEstimateId,
       onFailPage = ChoseNotToRegisterId
-    ),
-    toNextPage(
-      fromPage = VoluntaryInformationId,
-      toPage = TurnoverEstimateId
     ),
     toNextPage(
       fromPage = TurnoverEstimateId,
@@ -174,6 +182,11 @@ class Navigator @Inject()() {
       fromPage = AgriculturalFlatRateSchemeId,
       onSuccessPage = RacehorsesId,
       onFailPage = EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)
+    ),
+    checkVoluntaryQuestion(
+      fromPage = RacehorsesId,
+      mandatoryTrue = EligibleId,
+      mandatoryFalse = VoluntaryInformationId
     )
   )
 
