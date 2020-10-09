@@ -29,15 +29,10 @@
 
     @errorSummary(form.errors)
 
-    @h1(messages("registeringBusiness.heading"))
-
-
-
     @helpers.form(action = RegisteringBusinessController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "registeringBusiness.heading",
-            classes = "govuk-visually-hidden",
             yesText = Some(messages("registeringBusiness.radioyes")),
             noText = Some(messages("registeringBusiness.radiono"))
         )

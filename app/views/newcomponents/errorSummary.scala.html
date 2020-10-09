@@ -18,9 +18,7 @@
 
     @if(errors.nonEmpty) {
         @defining(errors.map { error =>
-            val id = if(error.key == "") { errorId.getOrElse("") } else {
-                error.key + errorFieldSuffix.fold("")(suffix => s".$suffix")
-            }
+            val id = errorId.getOrElse(error.key + errorFieldSuffix.fold("")(suffix => s".$suffix"))
             ErrorLink(
                 href = Some(s"#$id"),
                 content = Text(messages(error.message, error.args:_*))
