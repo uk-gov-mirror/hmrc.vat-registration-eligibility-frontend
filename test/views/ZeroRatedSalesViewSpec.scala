@@ -31,10 +31,10 @@ class ZeroRatedSalesViewSpec extends YesNoViewBehaviours {
   implicit val msgs = messages
 
   val detailsSummary = "Examples of zero-rated goods or services"
-  val linkText = "VAT rates on different goods and services (opens in new window)"
+  val linkText = "VAT rates on different goods and services"
   val line1 = "Zero-rated goods and services are VAT-taxable but the VAT rate on them is 0%."
   val line2 = "They include:"
-  val line3 = s"Find out about $linkText."
+  val line3 = s"Find out about $linkText"
   val bullet1 = "most food and drink (but not things like alcoholic drinks, confectionery, crisps and savoury snacks, hot food, sports drinks, hot takeaways, ice cream, soft drinks and mineral water)"
   val bullet2 = "books and newspapers"
   val bullet3 = "printing services for brochures, leaflets or pamphlets"
@@ -76,10 +76,6 @@ class ZeroRatedSalesViewSpec extends YesNoViewBehaviours {
       doc.select(Selectors.bullet(3)).text() mustBe bullet3
       doc.select(Selectors.bullet(4)).text() mustBe bullet4
       doc.select(Selectors.bullet(5)).text() mustBe bullet5
-    }
-
-    "have a link" in {
-      doc.select(Selectors.link(1)).text() mustBe linkText
     }
   }
 }

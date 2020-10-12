@@ -34,12 +34,18 @@
         @p{ @messages("turnoverEstimate.text") }
 
         @p{
-            @messages("turnoverEstimate.beforeLinkText")
-            @link(appConfig.VATRateDifferentGoodsURL, "turnoverEstimate.linkText").
+            @link(appConfig.VATRateDifferentGoodsURL, "turnoverEstimate.linkText")
         }
 
         @helpers.form(action = TurnoverEstimateController.onSubmit(), 'autoComplete -> "off") {
-            @inputCurrency(form = form, id = "turnoverEstimateAmount", name = "turnoverEstimateAmount", classes = Some("govuk-input--width-10"))
+            @inputCurrency(
+                form = form,
+                id = "turnoverEstimateAmount",
+                name = "turnoverEstimateAmount",
+                classes = Some("govuk-input--width-10"),
+                labelClasses = Some("govuk-visually-hidden"),
+                label = Some(messages("turnoverEstimate.heading"))
+            )
             @button(messages("site.continue"))
         }
     }

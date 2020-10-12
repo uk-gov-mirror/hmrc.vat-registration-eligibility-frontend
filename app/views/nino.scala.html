@@ -29,16 +29,10 @@
 
     @errorSummary(form.errors)
 
-    @h1(messages("nino.heading"))
-
-
-
     @helpers.form(action = NinoController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
-            headingKey = "nino.heading",
-            isPageHeading = false,
-            classes = "govuk-visually-hidden"
+            headingKey = "nino.heading"
         )
 
         @button(messages("site.continue"))

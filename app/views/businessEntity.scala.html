@@ -23,45 +23,40 @@
 
 @layout(pageTitle = Some(title(businessEntityForm, messages("businessEntity.title"))), backLink = true) {
 
-    @errorSummary(businessEntityForm.errors)
-
-    @h1(messages("businessEntity.heading"))
-
+    @errorSummary(businessEntityForm.errors, errorId = Some("uk-company"))
 
     @form(action = postAction) {
         @inputRadio(
-                     form = businessEntityForm,
-                     legend = Messages("businessEntity.heading"),
-                     items = Seq(
-                                RadioItem(id = Some("uk-company"),
-                                    value = Some("uk-company"),
-                                    content = Text(Messages("businessEntity.ukcompany")),
-                                    checked = businessEntityForm("value").value.contains("uk-company")
-                                ),
-                                RadioItem(id = Some("sole-trader"),
-                                    value = Some("sole-trader"),
-                                    content = Text(Messages("businessEntity.soletrader")),
-                                    checked = businessEntityForm("value").value.contains("sole-trader")
-                                ),
-                                RadioItem(id = Some("partnership"),
-                                    value = Some("partnership"),
-                                    content = Text(Messages("businessEntity.partnership")),
-                                    checked = businessEntityForm("value").value.contains("partnership")
-                                ),
-                                RadioItem(id = Some("division"),
-                                    value = Some("division"),
-                                    content = Text(Messages("businessEntity.division")),
-                                    checked = businessEntityForm("value").value.contains("division")
-                                ),
-                                RadioItem(id = Some("other"),
-                                    value = Some("other"),
-                                    content = Text(Messages("businessEntity.other")),
-                                    checked = businessEntityForm("value").value.contains("other")
-                                )
-),
-                                 legendAsHeading = Messages("businessEntity.heading"),
-                                 classes = "govuk-visually-hidden"
-)
+            form = businessEntityForm,
+            legend = Messages("businessEntity.heading"),
+            items = Seq(
+                RadioItem(id = Some("uk-company"),
+                    value = Some("uk-company"),
+                    content = Text(Messages("businessEntity.ukcompany")),
+                    checked = businessEntityForm("value").value.contains("uk-company")
+                ),
+                RadioItem(id = Some("sole-trader"),
+                    value = Some("sole-trader"),
+                    content = Text(Messages("businessEntity.soletrader")),
+                    checked = businessEntityForm("value").value.contains("sole-trader")
+                ),
+                RadioItem(id = Some("partnership"),
+                    value = Some("partnership"),
+                    content = Text(Messages("businessEntity.partnership")),
+                    checked = businessEntityForm("value").value.contains("partnership")
+                ),
+                RadioItem(id = Some("division"),
+                    value = Some("division"),
+                    content = Text(Messages("businessEntity.division")),
+                    checked = businessEntityForm("value").value.contains("division")
+                ),
+                RadioItem(id = Some("other"),
+                    value = Some("other"),
+                    content = Text(Messages("businessEntity.other")),
+                    checked = businessEntityForm("value").value.contains("other")
+                )
+            )
+        )
 
         @button(messages("site.continue"))
     }

@@ -50,13 +50,16 @@ class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
   "VoluntaryRegistration view" must {
     behave like normalPage(createView(), messageKeyPrefix)
     behave like pageWithBackLink(createViewUsingForm(form))
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VoluntaryRegistrationController.onSubmit().url)
     behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
-
 
     "have the correct heading" in {
       val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the correct legend" in {
+      val doc = asDocument(createViewUsingForm(form))
+      doc.select("legend").text() mustBe h2
     }
 
     "have the first paragraph " in {
