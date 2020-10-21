@@ -122,6 +122,12 @@ voluntaryInformation.radiono               = No, I do not want to sign up to Mak
 voluntaryInformation.linkText              = Find out more about Making Tax Digital for VAT (opens in a new tab)
 voluntaryInformation.button                = Continue to register for VAT
 
+mandatoryInformation.title                 = You must sign up for Making Tax Digital for VAT
+mandatoryInformation.heading               = You must sign up for Making Tax Digital for VAT
+mandatoryInformation.text1                 = Most VAT registered businesses with a taxable turnover above £85,000 must use compatible software to keep VAT records and send VAT returns.
+mandatoryInformation.text2                 = As your taxable turnover is above, or will go above, £85,000 in a rolling 12 month period, you will sign up for Making Tax Digital for VAT as part of the registration process.
+mandatoryInformation.linkText              = Find out more about Making Tax Digital for VAT (opens in a new tab)
+mandatoryInformation.button                = Continue to register for VAT
 
 
 thresholdInTwelveMonths.title                       = Over VAT-registration threshold in a 12-month period?
