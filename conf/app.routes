@@ -32,6 +32,9 @@ POST       /gone-over-threshold-period                  controllers.ThresholdPre
 GET        /voluntary-information                       controllers.VoluntaryInformationController.onPageLoad()
 POST       /voluntary-information                       controllers.VoluntaryInformationController.onSubmit()
 
+GET        /mtd-mandatory-information                       controllers.MandatoryInformationController.onPageLoad()
+POST       /mtd-mandatory-information                       controllers.MandatoryInformationController.onSubmit()
+
 GET        /register-voluntarily                        controllers.VoluntaryRegistrationController.onPageLoad()
 POST       /register-voluntarily                        controllers.VoluntaryRegistrationController.onSubmit()
 

@@ -49,6 +49,7 @@ class Navigator @Inject()() {
     case AgriculturalFlatRateSchemeId => routes.AgriculturalFlatRateSchemeController.onPageLoad()
     case RacehorsesId => routes.RacehorsesController.onPageLoad()
     case VoluntaryInformationId => routes.VoluntaryInformationController.onPageLoad()
+    case MandatoryInformationId => routes.MandatoryInformationController.onPageLoad()
     case EligibleId => routes.EligibleController.onPageLoad()
     case page => {
       Logger.info(s"${page.toString} does not exist navigating to start of the journey")
@@ -185,7 +186,7 @@ class Navigator @Inject()() {
     ),
     checkVoluntaryQuestion(
       fromPage = RacehorsesId,
-      mandatoryTrue = EligibleId,
+      mandatoryTrue = MandatoryInformationId,
       mandatoryFalse = VoluntaryInformationId
     )
   )
