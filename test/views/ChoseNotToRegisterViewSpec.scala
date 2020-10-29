@@ -24,7 +24,7 @@ class ChoseNotToRegisterViewSpec extends ViewBehaviours {
   val messageKeyPrefix = "choseNotToRegister"
   implicit val msgs = messages
 
-  val h1 = "You've chosen not to register the business for VAT"
+  val h1 = "You have chosen not to register the business for VAT"
   val finishButton = "Finish"
 
   def createView = () => choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)

@@ -31,7 +31,7 @@ class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
   implicit val msgs = messages
 
   val continueButton = "Continue"
-  val h1 = "The business doesn't have to register for VAT"
+  val h1 = "Would you like to voluntarily register the business for VAT?"
   val paragraph = "The business can still register voluntarily, if it:"
   val bullet1 = "has ever sold VAT-taxable goods or services"
   val bullet2 = "currently sells VAT-taxable goods or services"
@@ -60,23 +60,6 @@ class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
     "have the correct legend" in {
       val doc = asDocument(createViewUsingForm(form))
       doc.select("legend").text() mustBe h2
-    }
-
-    "have the first paragraph " in {
-      val doc = asDocument(createViewUsingForm(form))
-      doc.select(Selectors.p(1)).text() mustBe paragraph
-    }
-
-    "display the bullet text correctly" in {
-      val doc = asDocument(createViewUsingForm(form))
-      doc.select(Selectors.bullet(1)).first().text() mustBe bullet1
-      doc.select(Selectors.bullet(2)).first().text() mustBe bullet2
-      doc.select(Selectors.bullet(3)).first().text() mustBe bullet3
-    }
-
-    "have the correct second heading" in {
-      val doc = asDocument(createViewUsingForm(form))
-      doc.select(Selectors.h2(1)).first().text() mustBe h2
     }
 
     "have the correct indent text" in {

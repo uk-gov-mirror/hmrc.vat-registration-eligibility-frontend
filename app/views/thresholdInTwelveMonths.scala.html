@@ -36,8 +36,6 @@
     @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths))
     @p{ @thresholdService.returnThresholdDateResult[String](thresholdService.returnHelpText1TwelveMonths) }
 
-    @details(messages("thresholdInTwelveMonths.dropdownText"), detailsContent)
-
     @helpers.form(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off") {
         @conditionalYesNoRadio(
             form = form,
@@ -63,9 +61,3 @@
     )
 }
 
-@detailsContent = {
-    @p{ @messages("thresholdInTwelveMonths.disclosureText")}
-    @p {
-        @link(appConfig.VATRateDifferentGoodsURL, "thresholdInTwelveMonths.linkText").
-    }
-}

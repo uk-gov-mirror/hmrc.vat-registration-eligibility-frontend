@@ -30,7 +30,8 @@
     @errorSummary(form.errors)
 
     @h1(messages("vatRegistrationException.heading"))
-    @p{ @messages("vatRegistrationException.text") }
+    @p{ @messages("vatRegistrationException.p1") }
+    @p{ @messages("vatRegistrationException.p2") }
 
     @helpers.form(action = VATRegistrationExceptionController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(

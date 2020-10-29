@@ -32,7 +32,7 @@ class AgriculturalFlatRateSchemeViewSpec extends YesNoViewBehaviours {
 
   val continueButton = "Continue"
   val h1 = "Is the business applying for the Agricultural Flat Rate Scheme?"
-  val p1 = "The Agricultural Flat Rate Scheme is an alternative to VAT registration for farmers."
+  val p1 = "The scheme is a different type of VAT registration for farmers."
   val afrsLinkText1 = "Find out more about the"
   val afrsLinkText2 = "Agricultural Flat Rate Scheme (opens in a new window)."
   val afrsLink = "https://www.gov.uk/government/publications/vat-notice-70046-agricultural-flat-rate-scheme/vat-notice-70046-agricultural-flat-rate-scheme"

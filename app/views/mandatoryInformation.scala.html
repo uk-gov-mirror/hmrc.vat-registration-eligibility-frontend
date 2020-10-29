@@ -35,7 +35,7 @@
 
     @helpers.form(action = MandatoryInformationController.onSubmit(), 'autoComplete -> "off") {
         @p {
-            @link(appConfig.VATMandatoryInformationGroup ,"mandatoryInformation.linkText")
+            @link(appConfig.VATMandatoryInformationGroup ,"mandatoryInformation.linkText", isExternal = true)
         }
         @button(messages("mandatoryInformation.button"))
     }

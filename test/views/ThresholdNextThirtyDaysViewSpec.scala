@@ -46,7 +46,7 @@ class ThresholdNextThirtyDaysViewSpec extends ViewBehaviours {
   def createViewUsingForm: Form[_] => HtmlFormat.Appendable = (form: Form[_]) =>
     thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
-  val testText = "For example, the business is expecting orders - or has signed a contract - that will generate VAT-taxable sales of £85,000 or more in the next 30 days."
+  val testText = "This could happen when, for example, on 16 April a business wins a big contract to supply goods or services, which would mean the value of supplies made solely within the next 30 days, by 15 May, are more than the VAT registration threshold."
   val testLegend = "What date did the business realise it would go over the threshold?"
   val testHint = "For example, 13 02 2017"
   val testButton = "Continue"

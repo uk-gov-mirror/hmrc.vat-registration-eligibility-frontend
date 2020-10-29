@@ -21,7 +21,7 @@ error.integer = Give an answer in whole numbers
 error.non_numeric = Give a value using only numbers
 error.number = Please enter a valid number
 error.required = Please enter a value
-error.summary.title = This page has errors
+error.summary.title = There is a problem
 
 index.title = vat-registration-eligibility-frontend
 index.heading = vat-registration-eligibility-frontend
@@ -46,6 +46,7 @@ site.service_name = Register for VAT
 service.name = Register for VAT
 site.use_other_service = Use the other service
 site.textarea.char_limit = (Limit is {0} characters)
+site.opensInNewTab = (opens in new tab)
 
 common.feedbackFirst                                                = This is a new service - your
 common.feedbackSecond                                               = feedback
@@ -67,25 +68,26 @@ businessEntity.soletrader = Sole trader
 businessEntity.partnership = Partnership
 businessEntity.division = Division
 businessEntity.other = Other
-businessEntity.error.required = Select the type of business you want to register
+businessEntity.error.required = Select the type of business you want to register for VAT
 
 introduction.title                                  = Check if you can register for VAT online
 introduction.heading                                = Check if you can register for VAT online
 introduction.p1                                     = We will ask you some questions about the nature of the business to check if this is the best way for you to register.
 
 thresholdNextThirtyDays.title                       = Over VAT-registration threshold in the next 30 days
-thresholdNextThirtyDays.heading                     = In the next 30 days, does the business expect to exceed the £85,000 threshold?
+thresholdNextThirtyDays.heading                     = Does the business expect to make more than £85,000 in a single month or a 30-day period?
 thresholdNextThirtyDays.heading2                    = What date did the business realise it would go over the threshold?
-thresholdNextThirtyDays.text                        = For example, the business is expecting orders - or has signed a contract - that will generate VAT-taxable sales of £85,000 or more in the next 30 days.
+thresholdNextThirtyDays.text                        = This could happen when, for example, on 16 April a business wins a big contract to supply goods or services, which would mean the value of supplies made solely within the next 30 days, by 15 May, are more than the VAT registration threshold.
 thresholdNextThirtyDays.dateHint                    = For example, 13 02 2017
-thresholdNextThirtyDays.error.required              = Select yes if the business expects to exceed the £85,000 threshold in the next 30 days
-thresholdNextThirtyDays.error.date.required         = Enter a date for when the business first thought it would go over the threshold in the next 30 days
-thresholdNextThirtyDays.error.date.inFuture         = Enter a date that''s in the past
+thresholdNextThirtyDays.error.required              = Select yes if the business expected to make more than £85,000 in a single month or 30-day period
+thresholdNextThirtyDays.error.date.required         = Enter the date when the business expected to make more than £85,000 in a single month or 30-day period
+thresholdNextThirtyDays.error.date.inFuture         = Enter a date that is in the past
 thresholdNextThirtyDays.error.date.invalid          = Enter a valid date
 
-thresholdPreviousThirtyDays.title                   = Has the business ever expected to make more than £85,000 in VAT-taxable sales in a single 30-day period?
-thresholdPreviousThirtyDays.heading                 = Has the business ever expected to make more than £85,000 in VAT-taxable sales in a single 30-day period?
-thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17 = Has the business ever expected to make more than £85,000 in VAT-taxable sales in a single 30-day period?
+thresholdPreviousThirtyDays.title                   = Did the business expect its taxable-turnover to go over £85,000 in any 30 day period in the past?
+thresholdPreviousThirtyDays.heading                 = Did the business expect its taxable-turnover to go over £85,000 in any 30 day period in the past?
+thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17 = Did the business expect its taxable-turnover to go over £85,000 in any 30 day period in the past?
+thresholdPreviousThirtyDays.p1                      = This could happen if, for example, a business planned to run an exhibition and anticipated selling so many tickets it expected to go over the VAT threshold. The business must register for VAT when you expected it to go over the threshold, not when it actually went over the threshold.
 thresholdPreviousThirtyDays.text                    = VAT-registration thresholds can change. Recent ones include:
 thresholdPreviousThirtyDays.bullet1                 = 1 April 2017 to present: £85,000
 thresholdPreviousThirtyDays.bullet2                 = 1 April 2016 to 31 March 2017: £83,000
@@ -94,24 +96,20 @@ thresholdPreviousThirtyDays.beforeLinkText          = Before this, use these
 thresholdPreviousThirtyDays.linkText                = previous VAT registration thresholds
 thresholdPreviousThirtyDays.dateHint                = For example, 13 02 2017
 thresholdPreviousThirtyDays.heading2                = What date did the business first go over the threshold?
-thresholdPreviousThirtyDays.error.required          = Select yes if the business has ever thought it would go over the VAT-registration threshold in a single 30-day period
+thresholdPreviousThirtyDays.error.required          = Select yes if the business expects to make more than £85,000 in VAT-taxable sales in a single 30-day period
 thresholdPreviousThirtyDays.error.date.required     = Enter a date for when the business first thought it would go over the threshold in a 30-day period
-thresholdPreviousThirtyDays.error.date.inFuture     = Enter a date that''s in the past
+thresholdPreviousThirtyDays.error.date.inFuture     = Enter a date that is in the past
 thresholdPreviousThirtyDays.error.date.invalid      = Enter a valid date
 
 voluntaryRegistration.title                 = Does the business want to register voluntarily?
-voluntaryRegistration.heading               = The business doesn''t have to register for VAT
+voluntaryRegistration.heading               = Would you like to voluntarily register the business for VAT?
 voluntaryRegistration.summary.heading       = Does the business want to register for VAT voluntarily?
 voluntaryRegistration.error.required        = Select yes if you want to register voluntarily for VAT
-voluntaryRegistration.text1                 = The business can still register voluntarily, if it:
-voluntaryRegistration.bullet1               = has ever sold VAT-taxable goods or services
-voluntaryRegistration.bullet2               = currently sells VAT-taxable goods or services
-voluntaryRegistration.bullet3               = intends to sell VAT-taxable goods or services
 voluntaryRegistration.heading2              = Does the business want to register voluntarily?
-voluntaryRegistration.text2                 = Only register voluntarily if the company intends to start reporting VAT in the next 3 months.
+voluntaryRegistration.text                  = Only register voluntarily if the company intends to start reporting VAT in the next 3 months.
 
-choseNotToRegister.title    = You''ve chosen not to register the business for VAT
-choseNotToRegister.heading  = You''ve chosen not to register the business for VAT
+choseNotToRegister.title    = You have chosen not to register the business for VAT
+choseNotToRegister.heading  = You have chosen not to register the business for VAT
 
 voluntaryInformation.title                 = Would you like to sign up to Making Tax Digital for VAT?
 voluntaryInformation.heading               = Would you like to sign up to Making Tax Digital for VAT?
@@ -119,27 +117,27 @@ voluntaryInformation.error.required        = Select yes if you would like to sig
 voluntaryInformation.text1                 = As your taxable turnover is below the registration threshold of £85,000 in a rolling 12 month period, you are not required to sign up for Making Tax Digital for VAT. However, you might find it convenient to use compatible software to keep your VAT records and submit them directly to HMRC.
 voluntaryInformation.radioyes              = Yes, I would like to sign up to Making Tax Digital
 voluntaryInformation.radiono               = No, I do not want to sign up to Making Tax Digital
-voluntaryInformation.linkText              = Find out more about Making Tax Digital for VAT (opens in a new tab)
+voluntaryInformation.linkText              = Find out more about Making Tax Digital for VAT
 voluntaryInformation.button                = Continue to register for VAT
 
 mandatoryInformation.title                 = You must sign up for Making Tax Digital for VAT
 mandatoryInformation.heading               = You must sign up for Making Tax Digital for VAT
 mandatoryInformation.text1                 = Most VAT registered businesses with a taxable turnover above £85,000 must use compatible software to keep VAT records and send VAT returns.
 mandatoryInformation.text2                 = As your taxable turnover is above, or will go above, £85,000 in a rolling 12 month period, you will sign up for Making Tax Digital for VAT as part of the registration process.
-mandatoryInformation.linkText              = Find out more about Making Tax Digital for VAT (opens in a new tab)
+mandatoryInformation.linkText              = Find out more about Making Tax Digital for VAT
 mandatoryInformation.button                = Continue to register for VAT
 
 
 thresholdInTwelveMonths.title                       = Over VAT-registration threshold in a 12-month period?
-thresholdInTwelveMonths.headingIncorpLess12m        = In any 12-month period has the business gone over the VAT-registration threshold?
-thresholdInTwelveMonths.headingIncorpMore12m        = In any 12-month period has the business gone over the VAT-registration threshold?
+thresholdInTwelveMonths.headingIncorpMore12m        = Has the bussiness’s taxable turnover gone over £85,000 in any 12 month period?
+thresholdInTwelveMonths.headingIncorpLess12m        = Has the bussiness’s taxable turnover gone over £85,000 in any 12 month period?
 thresholdInTwelveMonths.error.required              = Select yes if the business has gone over the VAT-registration threshold in any 12-month period
 thresholdInTwelveMonths.error.date.required         = Enter a date for when the business went over the threshold in a 12-month period
-thresholdInTwelveMonths.error.date.inFuture         = Enter a date that''s in the past
+thresholdInTwelveMonths.error.date.inFuture         = Enter a date that is in the past
 thresholdInTwelveMonths.error.date.beforeIncorp     = Enter a date that''s after the date the business was set up: {0}
 thresholdInTwelveMonths.error.date.invalid          = Enter a valid date
 thresholdInTwelveMonths.firstHelpTextIncorpMore12m  = £85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales {0} can make before it has to register for VAT.
-thresholdInTwelveMonths.firstHelpTextIncorpLess12m  = £85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales the business can make before it has to register for VAT.
+thresholdInTwelveMonths.firstHelpTextIncorpLess12m  = You must monitor your turnover every month and add up the total amount to cover the last 12 months. This is called a ‘rolling 12 month period’. If one month’s turnover takes you over £85,000 in any rolling 12 month period, you must register for VAT.
 thresholdInTwelveMonths.firstHelpTextNotIncorp      = £85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales sole traders can make before they have to register for VAT.
 thresholdInTwelveMonths.over85kThreshold            = Answer ''yes'' if the business''s VAT-taxable sales went over £85,000 between 1 April 2017 and today.
 thresholdInTwelveMonths.overAnyOtherThresholds      = Answer ''yes'' if the business''s VAT-taxable sales went over any of the following:
@@ -150,20 +148,20 @@ thresholdInTwelveMonths.bullet3                     = £82,000 between 1 April 2
 thresholdInTwelveMonths.linkText                    = Find out more about which goods and services are exempt from VAT
 thresholdInTwelveMonths.beforeLinkText2             = Before this,
 thresholdInTwelveMonths.linkText2                   = use these previous VAT registration thresholds
-thresholdInTwelveMonths.heading2                    = What month did the business first go over the threshold?
+thresholdInTwelveMonths.heading2                    = When did the business expect to go over the threshold?
 thresholdInTwelveMonths.dateHint                    = For example, 02 2017
 thresholdInTwelveMonths.dropdownText                = What to include as VAT-taxable sales?
 thresholdInTwelveMonths.disclosureText              = Assume the business is already VAT-registered. Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate.
 
-turnoverEstimate.title                  = What do you think the business’ VAT-taxable turnover will be for the next 12 months?
-turnoverEstimate.heading                = What do you think the business’ VAT-taxable turnover will be for the next 12 months?
+turnoverEstimate.title                  = What do you think the business’s VAT-taxable turnover will be for the next 12 months?
+turnoverEstimate.heading                = What do you think the business’s VAT-taxable turnover will be for the next 12 months?
 turnoverEstimate.text                   = Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate.
 turnoverEstimate.linkText               = Find out more about which goods and services are exempt from VAT
-turnoverEstimate.giveAnEstimate         = For example, £90,000
+turnoverEstimate.giveAnEstimate         = For example, £90000
 turnoverEstimate.pound                  = £
-turnoverEstimate.error.required         = Enter what you think the business’ VAT-taxable turnover will be for the next 12 months
+turnoverEstimate.error.required         = Enter what you think the business’s VAT-taxable turnover will be for the next 12 months
 turnoverEstimate.error.amount.numbers   = Give a value using only numbers
-turnoverEstimate.error.amount.giveMoreThan  = Give an estimate that''s more than £{0}
+turnoverEstimate.error.amount.giveMoreThan  = Give an estimate that is more than £{0}
 turnoverEstimate.error.amount.giveLessThan  = Give an estimate that''s less than or equal to £{0}
 completionCapacity.noneOfThese = None of these
 
@@ -209,7 +207,7 @@ internationalActivities.bullet5 = have its head office outside the UK
 
 zeroRatedSales.title = Does the business sell mainly zero-rated goods or services?
 zeroRatedSales.heading = Does the business sell mainly zero-rated goods or services?
-zeroRatedSales.error.required = Tell us if the company sells mainly zero-rated goods or services
+zeroRatedSales.error.required = Select yes if the business sells mainly zero-rated goods or services
 zeroRatedSales.dropdownText = Examples of zero-rated goods or services
 zeroRatedSales.dropdownLine1 = Zero-rated goods and services are VAT-taxable but the VAT rate on them is 0%.
 zeroRatedSales.dropdownLine2 = They include:
@@ -233,25 +231,26 @@ annualAccountingScheme.bulletB1 = want to keep up to date with the exact amount 
 annualAccountingScheme.bulletB2 = regularly reclaim more VAT than they charge, because they will only get one VAT refund a year
 annualAccountingScheme.linkText = Find out more about the Annual Accounting Scheme
 
-registeringBusiness.title = Do you want to register your business or someone else''s?
-registeringBusiness.heading = Do you want to register your business or someone else''s?
+registeringBusiness.title = Do you want to register your business or someone else’s?
+registeringBusiness.heading = Do you want to register your business or someone else’s?
 registeringBusiness.radioyes = Yes, I want to register my business
 registeringBusiness.radiono = No, I want to register someone else''s business
 registeringBusiness.error.required = Select yes if you want to register your own business for VAT
 
 nino.title = Do you have a UK National Insurance number?
 nino.heading = Do you have a UK National Insurance number?
-nino.error.required = Select yes if you have a UK National Insurance Number
+nino.error.required = Select yes if you have a UK National Insurance number
 
 vatExemption.title = Does the business want to apply for a VAT exemption?
 vatExemption.heading = Does the business want to apply for a VAT exemption?
 vatExemption.error.required = Select yes if the business wants to apply for a VAT exemption
 vatExemption.text = The business may not have to register for VAT if it sells mainly or only zero-rated goods or services.
 
-vatRegistrationException.title = Is the business applying for a VAT registration ''exception''?
-vatRegistrationException.heading = Is the business applying for a VAT registration ''exception''?
-vatRegistrationException.error.required = Tell us if the business is applying for a VAT registration exception
-vatRegistrationException.text = The business may not need to register for VAT if it can give evidence that it won''t go over the threshold in the next 12 months. This is called a registration ''exception''.
+vatRegistrationException.title = Would you like to apply for a VAT registration exception?
+vatRegistrationException.heading = Would you like to apply for a VAT registration exception?
+vatRegistrationException.error.required = Select yes if the business is applying for a VAT registration exception
+vatRegistrationException.p1 = You can apply for a registration exception if the business goes over the VAT threshold temporarily.
+vatRegistrationException.p2 = If you apply for an exception and are susseccful, we will contact you to tell you your request has been accepted.
 
 applyInWriting.title = You must apply in writing
 applyInWriting.heading = You must apply in writing
@@ -259,8 +258,8 @@ applyInWriting.text = Please use form VAT1 to apply for an exemption from VAT re
 
 agriculturalFlatRateScheme.title = Is the business applying for the Agricultural Flat Rate Scheme?
 agriculturalFlatRateScheme.heading = Is the business applying for the Agricultural Flat Rate Scheme?
-agriculturalFlatRateScheme.error.required = Tell us if the business is applying for the Agricultural Flat Rate Scheme
-agriculturalFlatRateScheme.text = The Agricultural Flat Rate Scheme is an alternative to VAT registration for farmers.
+agriculturalFlatRateScheme.error.required = Select yes if the business is applying for the Agricultural Flat Rate Scheme
+agriculturalFlatRateScheme.text = The scheme is a different type of VAT registration for farmers.
 agriculturalFlatRateScheme.linkText = Find out more about the Agricultural Flat Rate Scheme
 
 racehorses.title = Will the business be doing any of the following?

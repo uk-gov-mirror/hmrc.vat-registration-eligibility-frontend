@@ -30,10 +30,10 @@ class TurnoverEstimateViewSpec extends ViewBehaviours {
   implicit val msgs = messages
   val messageKeyPrefix = "turnoverEstimate"
   val button = "Continue"
-  val h1 = "What do you think the business’ VAT-taxable turnover will be for the next 12 months?"
+  val h1 = "What do you think the business’s VAT-taxable turnover will be for the next 12 months?"
   val p1 = "Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate."
   val estimateLinkText1 = "Find out more about"
-  val estimateLinkText2 = "which goods and services are exempt from VAT (opens in a new tab)."
+  val estimateLinkText2 = "which goods and services are exempt from VAT (opens in new tab)."
   val estimateLink = "https://www.gov.uk/guidance/rates-of-vat-on-different-goods-and-services"
   val p2 = s"$estimateLinkText1 $estimateLinkText2"
 

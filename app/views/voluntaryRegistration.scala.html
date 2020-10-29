@@ -30,15 +30,8 @@
     @errorSummary(form.errors)
 
     @h1(messages("voluntaryRegistration.heading"))
-    @p{ @messages("voluntaryRegistration.text1") }
-    @bullets(
-        messages("voluntaryRegistration.bullet1"),
-        messages("voluntaryRegistration.bullet2"),
-        messages("voluntaryRegistration.bullet3")
-    )
 
-    @h2(messages("voluntaryRegistration.heading2"))
-    @panelIndent{ @messages("voluntaryRegistration.text2") }
+    @panelIndent{ @messages("voluntaryRegistration.text") }
 
     @helpers.form(action = VoluntaryRegistrationController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
