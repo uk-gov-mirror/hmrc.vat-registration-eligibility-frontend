@@ -70,6 +70,9 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
   lazy val VATFileChanges = servicesConfig.getConfString("gov-uk.VATFileChanges", throw new Exception("Couldn't get VATFileChanges URL"))
   lazy val languageTranslationEnabled = runModeConfiguration.getBoolean("microservice.services.features.welsh-translation").getOrElse(true)
 
+  def trafficAllocationUrl(regId: String) =
+    servicesConfig.baseUrl("vat-registration") + s"/traffic-management/$regId/allocate"
+
   def languageMap: Map[String, Lang] = Map(
     "english" -> Lang("en"),
     "cymraeg" -> Lang("cy"))

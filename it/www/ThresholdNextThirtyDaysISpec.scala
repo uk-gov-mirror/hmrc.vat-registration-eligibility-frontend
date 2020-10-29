@@ -3,6 +3,7 @@
 package www
 
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
+import identifiers.ThresholdNextThirtyDaysId
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.HeaderNames
@@ -13,8 +14,9 @@ class ThresholdNextThirtyDaysISpec extends IntegrationSpecBase with AuthHelper w
     .configure(fakeConfig())
     .build()
 
-  //TODO - fix when we determine how to deal with dates for VAT threshold
-  s" ${controllers.routes.ThresholdNextThirtyDaysController.onSubmit()}" ignore {
+  val dateFieldName = s"${ThresholdNextThirtyDaysId}Date"
+
+  s" ${controllers.routes.ThresholdNextThirtyDaysController.onSubmit()}" should {
     s"redirect to ${controllers.routes.ThresholdPreviousThirtyDaysController.onPageLoad()} with value of true" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
@@ -22,8 +24,11 @@ class ThresholdNextThirtyDaysISpec extends IntegrationSpecBase with AuthHelper w
 
       val request = buildClient("/make-more-taxable-sales").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map(
-          "value" -> Seq("true"))
-        )
+          "value" -> Seq("true"),
+          s"$dateFieldName.day" -> Seq("1"),
+          s"$dateFieldName.month" -> Seq("1"),
+          s"$dateFieldName.year" -> Seq("2020")
+        ))
       val response = await(request)
       response.status mustBe 303
       response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdPreviousThirtyDaysController.onPageLoad().url)
