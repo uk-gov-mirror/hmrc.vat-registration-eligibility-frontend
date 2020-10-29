@@ -48,7 +48,6 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
 
   val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
-
   private[services] def prepareQuestionData(key: String, data: Boolean)(implicit r: DataRequest[_]): List[JsValue] = {
     JsonSummaryRow(key, messages(s"$key.heading"), messages(s"site.${if (data) "yes" else "no"}"), Json.toJson(data))
   }
