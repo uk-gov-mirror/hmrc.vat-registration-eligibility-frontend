@@ -19,7 +19,7 @@ package utils
 import identifiers.{Identifier, _}
 import models.ConditionalDateFormElement
 import uk.gov.hmrc.http.cache.client.CacheMap
-
+//scalastyle:off
 object PageIdBinding {
   def sectionBindings(map: CacheMap): Map[String, Seq[(Identifier, Option[Any])]] = {
 
@@ -47,6 +47,7 @@ object PageIdBinding {
         e
       }
       case e@(VoluntaryRegistrationId, None) if (validateVoluntaryReason) => elemMiss(e._1)
+      case e@(VoluntaryInformationId, None) => e
       case e if (e._1 != ThresholdNextThirtyDaysId && e._1 != VATRegistrationExceptionId && e._1 != VoluntaryRegistrationId) => (e._1, e._2.orElse(elemMiss(e._1)))
     }
 
@@ -66,8 +67,6 @@ object PageIdBinding {
       case _ => false
     }
 
-
-
     Map(
       "VAT-taxable sales" ->
         Seq(
@@ -76,7 +75,7 @@ object PageIdBinding {
           (ThresholdPreviousThirtyDaysId, userAnswers.thresholdPreviousThirtyDays),
           (VATRegistrationExceptionId, userAnswers.vatRegistrationException),
           (VoluntaryRegistrationId, userAnswers.voluntaryRegistration),
-          (VoluntaryInformationId, userAnswers.voluntaryInformation.orElse(Some(true))),
+          (VoluntaryInformationId, userAnswers.voluntaryInformation),
           (TurnoverEstimateId, userAnswers.turnoverEstimate)
         ).collect(ThresholdSectionValidationAndConstruction),
       "Special situations" ->
