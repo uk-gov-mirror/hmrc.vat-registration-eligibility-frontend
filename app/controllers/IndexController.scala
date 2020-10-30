@@ -17,6 +17,8 @@
 package controllers
 
 import config.FrontendAppConfig
+import connectors.DataCacheConnector
+import controllers.actions.{CacheIdentifierAction, DataRetrievalAction}
 import identifiers.Identifier
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
@@ -24,11 +26,19 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.Navigator
 
-class IndexController @Inject()(mcc: MessagesControllerComponents,
-                                navigator: Navigator
-                               )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
+import scala.concurrent.ExecutionContext
 
-  def onPageLoad: Action[AnyContent] = Action { implicit request =>
+class IndexController @Inject()(mcc: MessagesControllerComponents,
+                                navigator: Navigator,
+                                dataCacheConnector: DataCacheConnector,
+                                identify: CacheIdentifierAction,
+                                getData: DataRetrievalAction
+                               )(implicit appConfig: FrontendAppConfig,
+                                 executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+
+  def onPageLoad: Action[AnyContent] = (identify andThen getData) { implicit request =>
+    dataCacheConnector.delete(request.internalId) //TODO Remove as part of SAR-6520
+
     Redirect(routes.IntroductionController.onPageLoad())
   }
 

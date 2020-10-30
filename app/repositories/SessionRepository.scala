@@ -66,10 +66,10 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
     }
   }
 
-  def dropCollectionIndexTemp = collection.indexesManager.drop(createdIndexName).map{ res =>
-      Logger.warn(s"[$createdIndexName dropped successfully finding a count of $res before dropping this index")
+  def dropCollectionIndexTemp = collection.indexesManager.drop(createdIndexName).map { res =>
+    Logger.warn(s"[$createdIndexName dropped successfully finding a count of $res before dropping this index")
     true
-  }.recoverWith{
+  }.recoverWith {
     case e =>
       Future.successful {
         Logger.warn(s"[$expireAfterSeconds did not drop as expected] and threw an exception with message ${e.getMessage}")
@@ -81,9 +81,15 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
     val selector = BSONDocument("id" -> id)
     val update = BSONDocument("$unset" -> BSONDocument(s"data.$key" -> 1))
 
-    collection.findAndModify(selector, collection.updateModifier(update,true,false)).map {
+    collection.findAndModify(selector, collection.updateModifier(update, true, false)).map {
       res => res.value.map(_.as[CacheMap]).getOrElse(throw new Exception(s"[removeEntry] Attempted to remove $key but document did not exist"))
     }
+  }
+
+  def delete(id: String): Future[Boolean] = {
+    val selector = BSONDocument("id" -> id)
+
+    collection.delete.one(selector).map(_.ok)
   }
 
   def upsert(cm: CacheMap): Future[Boolean] = {

@@ -16,15 +16,23 @@
 
 package controllers
 
+import config.FrontendAppConfig
+import controllers.actions.FakeCacheIdentifierAction
 import play.api.test.Helpers._
 import utils.FakeNavigator
 
 class IndexControllerSpec extends ControllerSpecBase {
 
-  implicit val appConfig = frontendAppConfig
+  implicit val appConfig: FrontendAppConfig = frontendAppConfig
 
   class Setup {
-    val controller = new IndexController(controllerComponents, new FakeNavigator(desiredRoute = routes.ThresholdInTwelveMonthsController.onPageLoad()))
+    val controller = new IndexController(
+      controllerComponents,
+      new FakeNavigator(desiredRoute = routes.ThresholdInTwelveMonthsController.onPageLoad()),
+      mockDataCacheConnector,
+      FakeCacheIdentifierAction,
+      getEmptyCacheMap
+    )
   }
 
   "Index Controller" must {
