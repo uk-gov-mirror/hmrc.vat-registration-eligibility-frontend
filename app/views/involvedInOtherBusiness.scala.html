@@ -24,7 +24,7 @@
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(title(form, messages("involvedInOtherBusiness.title"))), backLink = true) {
+@layout(pageTitle = Some(title(form, messages("involvedInOtherBusiness.heading"))), backLink = true) {
 
     @errorSummary(form.errors)
 

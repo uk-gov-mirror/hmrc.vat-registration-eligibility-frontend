@@ -21,7 +21,7 @@
 
 @(businessEntityForm: Form[BusinessEntity], postAction: Call)(implicit request: Request[_], messages: Messages, appconfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(title(businessEntityForm, messages("businessEntity.title"))), backLink = true) {
+@layout(pageTitle = Some(title(businessEntityForm, messages("businessEntity.heading"))), backLink = true) {
 
     @errorSummary(businessEntityForm.errors, errorId = Some("uk-company"))
 

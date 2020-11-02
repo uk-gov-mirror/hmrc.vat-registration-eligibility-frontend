@@ -75,7 +75,7 @@ trait DecimalViewBehaviours extends QuestionViewBehaviours[BigDecimal] {
         "show an error prefix in the browser title" in {
 
           val doc = asDocument(createView(form.withError(error)))
-          assertEqualsValue(doc, "title", s"""${messages("error.browser.title.prefix")} ${title(messages(s"$messageKeyPrefix.title", headingArgs:_*), section)}""")
+          assertEqualsValue(doc, "title", s"""${messages("error.browser.title.prefix")} ${title(messages(s"$messageKeyPrefix.heading", headingArgs:_*), section)}""")
         }
       }
     }

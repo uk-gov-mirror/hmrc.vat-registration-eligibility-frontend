@@ -29,7 +29,7 @@
 
 @(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(messages("thresholdInTwelveMonths.title")), backLink = true) {
+@layout(pageTitle = Some(title(form, messages("thresholdInTwelveMonths.title"))), backLink = true) {
 
     @errorSummary(form.errors)
 

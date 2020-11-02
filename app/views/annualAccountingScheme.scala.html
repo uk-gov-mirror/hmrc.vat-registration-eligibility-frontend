@@ -24,7 +24,7 @@
 
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(title(form, messages("annualAccountingScheme.title"))), backLink = true) {
+@layout(pageTitle = Some(title(form, messages("annualAccountingScheme.heading"))), backLink = true) {
 
     @errorSummary(form.errors)
 
