@@ -31,7 +31,7 @@ class ZeroRatedSalesViewSpec extends YesNoViewBehaviours {
   implicit val msgs = messages
 
   val detailsSummary = "Examples of zero-rated goods or services"
-  val linkText = "VAT rates on different goods and services"
+  val linkText = "VAT rates on different goods and services (opens in new tab)"
   val line1 = "Zero-rated goods and services are VAT-taxable but the VAT rate on them is 0%."
   val line2 = "They include:"
   val line3 = s"Find out about $linkText"

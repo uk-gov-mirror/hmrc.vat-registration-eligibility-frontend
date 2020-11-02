@@ -28,12 +28,13 @@
 
 @(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(title(form, messages("thresholdPreviousThirtyDays.title"))), backLink = true) {
+@layout(pageTitle = Some(title(form, messages("thresholdPreviousThirtyDays.heading"))), backLink = true) {
 
     @errorSummary(form.errors)
 
     @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious))
     @p{ @thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1Previous) }
+    @p{ @messages("thresholdPreviousThirtyDays.p1") }
 
     @helpers.form(action = ThresholdPreviousThirtyDaysController.onSubmit(), 'autoComplete -> "off") {
         @conditionalYesNoRadio(

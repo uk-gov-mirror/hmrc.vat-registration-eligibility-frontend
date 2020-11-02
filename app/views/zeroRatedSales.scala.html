@@ -26,7 +26,7 @@
 
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(title(form, messages("zeroRatedSales.title"))), backLink = true) {
+@layout(pageTitle = Some(title(form, messages("zeroRatedSales.heading"))), backLink = true) {
 
     @errorSummary(form.errors)
 
@@ -58,6 +58,6 @@
         )
     }
     @p{
-        @link(appConfig.VATRateDifferentGoodsURL, "zeroRatedSales.linkText")
+        @link(appConfig.VATRateDifferentGoodsURL, "zeroRatedSales.linkText", isExternal = true)
     }
 }

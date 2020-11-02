@@ -30,8 +30,8 @@ class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
   implicit val msgs = messages
 
   val continueButton = "Continue"
-  val h1 = "Is the business applying for a VAT registration 'exception'?"
-  val paragraph = "The business may not need to register for VAT if it can give evidence that it won't go over the threshold in the next 12 months. This is called a registration 'exception'."
+  val h1 = "Would you like to apply for a VAT registration exception?"
+  val paragraph = "You can apply for a registration exception if the business goes over the VAT threshold temporarily."
 
   object Selectors extends BaseSelectors
 

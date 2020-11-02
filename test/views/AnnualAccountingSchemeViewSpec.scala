@@ -38,7 +38,7 @@ class AnnualAccountingSchemeViewSpec extends YesNoViewBehaviours {
   val bulletB = "It may not suit companies that:"
   val bulletB1 = "want to keep up to date with the exact amount of VAT they owe or need to reclaim"
   val bulletB2 = "regularly reclaim more VAT than they charge, because they will only get one VAT refund a year"
-  val linkText = "Annual Accounting Scheme"
+  val linkText = "Annual Accounting Scheme (opens in new tab)"
   val para2 = s"Find out more about the $linkText"
   val button = "Continue"
 

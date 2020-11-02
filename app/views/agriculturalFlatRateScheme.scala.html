@@ -26,7 +26,7 @@
 
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(title(form, messages("agriculturalFlatRateScheme.title"))), backLink = true) {
+@layout(pageTitle = Some(title(form, messages("agriculturalFlatRateScheme.heading"))), backLink = true) {
 
     @errorSummary(form.errors)
 
@@ -34,7 +34,7 @@
 
     @p{ @messages("agriculturalFlatRateScheme.text") }
     @p{
-        @link(appConfig.VATNotice700_46agriculturalURL, "agriculturalFlatRateScheme.linkText")
+        @link(appConfig.VATNotice700_46agriculturalURL, "agriculturalFlatRateScheme.linkText", isExternal = true)
     }
 
     @helpers.form(action = AgriculturalFlatRateSchemeController.onSubmit(), 'autoComplete -> "off") {

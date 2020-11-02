@@ -29,14 +29,12 @@
 
 @(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(messages("thresholdInTwelveMonths.title")), backLink = true) {
+@layout(pageTitle = Some(title(form, messages("thresholdInTwelveMonths.title"))), backLink = true) {
 
     @errorSummary(form.errors)
 
     @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths))
     @p{ @thresholdService.returnThresholdDateResult[String](thresholdService.returnHelpText1TwelveMonths) }
-
-    @details(messages("thresholdInTwelveMonths.dropdownText"), detailsContent)
 
     @helpers.form(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off") {
         @conditionalYesNoRadio(
@@ -63,9 +61,3 @@
     )
 }
 
-@detailsContent = {
-    @p{ @messages("thresholdInTwelveMonths.disclosureText")}
-    @p {
-        @link(appConfig.VATRateDifferentGoodsURL, "thresholdInTwelveMonths.linkText").
-    }
-}
