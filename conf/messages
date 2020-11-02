@@ -121,9 +121,9 @@ mandatoryInformation.linkText              = Find out more about Making Tax Digi
 mandatoryInformation.button                = Continue to register for VAT
 
 
-thresholdInTwelveMonths.title                       = Has the bussiness’s taxable turnover gone over £85,000 in any 12 month period?
-thresholdInTwelveMonths.headingIncorpMore12m        = Has the bussiness’s taxable turnover gone over £85,000 in any 12 month period?
-thresholdInTwelveMonths.headingIncorpLess12m        = Has the bussiness’s taxable turnover gone over £85,000 in any 12 month period?
+thresholdInTwelveMonths.title                       = Has the business’s taxable turnover gone over £85,000 in any 12 month period?
+thresholdInTwelveMonths.headingIncorpMore12m        = Has the business’s taxable turnover gone over £85,000 in any 12 month period?
+thresholdInTwelveMonths.headingIncorpLess12m        = Has the business’s taxable turnover gone over £85,000 in any 12 month period?
 thresholdInTwelveMonths.error.required              = Select yes if the business has gone over the VAT-registration threshold in any 12-month period
 thresholdInTwelveMonths.error.date.required         = Enter a date for when the business went over the threshold in a 12-month period
 thresholdInTwelveMonths.error.date.inFuture         = Enter a date that is in the past
@@ -141,7 +141,7 @@ thresholdInTwelveMonths.bullet3                     = £82,000 between 1 April 2
 thresholdInTwelveMonths.linkText                    = Find out more about which goods and services are exempt from VAT
 thresholdInTwelveMonths.beforeLinkText2             = Before this,
 thresholdInTwelveMonths.linkText2                   = use these previous VAT registration thresholds
-thresholdInTwelveMonths.heading2                    = When did the business expect to go over the threshold?
+thresholdInTwelveMonths.heading2                    = When did the business go over the threshold?
 thresholdInTwelveMonths.dateHint                    = For example, 02 2017
 thresholdInTwelveMonths.dropdownText                = What to include as VAT-taxable sales?
 thresholdInTwelveMonths.disclosureText              = Assume the business is already VAT-registered. Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate.
