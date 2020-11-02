@@ -1,7 +1,10 @@
 package www
 
+import java.time.LocalDate
+
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
-import identifiers.{AgriculturalFlatRateSchemeId, RegisteringBusinessId, VATExemptionId, ZeroRatedSalesId}
+import identifiers.{RegisteringBusinessId, ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, ZeroRatedSalesId}
+import models.ConditionalDateFormElement
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Format._
@@ -13,12 +16,16 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
     .configure(fakeConfig())
     .build()
 
+  val localDate = LocalDate.of(2020, 1, 1)
+
   val internalId = "testInternalId"
   s"POST ${controllers.routes.ZeroRatedSalesController.onSubmit().url}" should {
-    "navigate to Registering Business when false and no data exists in Exemption" in {
+    s"navigate to ${controllers.routes.VoluntaryInformationController.onPageLoad()} when false and in the voluntary flow" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
+      cacheSessionData(internalId, ThresholdInTwelveMonthsId.toString, ConditionalDateFormElement(false, None))
+      cacheSessionData(internalId, ThresholdNextThirtyDaysId.toString, ConditionalDateFormElement(false, None))
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
         .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
@@ -26,30 +33,30 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
 
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.RegisteringBusinessController.onPageLoad().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VoluntaryInformationController.onPageLoad().url)
       verifySessionCacheData(internalId, ZeroRatedSalesId.toString, Option.apply[Boolean](false))
     }
-    "navigate to Registering Business when false and data exists for Exemption" in {
+    s"navigate to ${controllers.routes.VoluntaryInformationController.onPageLoad()} when true and in the voluntary flow" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
-      cacheSessionData(internalId, VATExemptionId.toString, true)
+      cacheSessionData(internalId, ThresholdInTwelveMonthsId.toString, ConditionalDateFormElement(false, None))
+      cacheSessionData(internalId, ThresholdNextThirtyDaysId.toString, ConditionalDateFormElement(false, None))
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
         .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
-        .post(Map("value" -> Seq("false")))
+        .post(Map("value" -> Seq("true")))
 
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.RegisteringBusinessController.onPageLoad().url)
-      verifySessionCacheData(internalId, ZeroRatedSalesId.toString, Option.apply[Boolean](false))
-      verifySessionCacheData(internalId, VATExemptionId.toString, Option.empty[Boolean])
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VoluntaryInformationController.onPageLoad().url)
+      verifySessionCacheData(internalId, ZeroRatedSalesId.toString, Option.apply[Boolean](true))
     }
-
-    "navigate to VAT Exemption when true and no Registering Business data" in {
+    "navigate to VAT Exemption when true and in the mandatory flow" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
+      cacheSessionData(internalId, ThresholdInTwelveMonthsId.toString, ConditionalDateFormElement(true, Some(localDate)))
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
         .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
@@ -61,20 +68,20 @@ class ZeroRateSalesISpec extends IntegrationSpecBase with AuthHelper with Sessio
       verifySessionCacheData(internalId, ZeroRatedSalesId.toString, Option.apply[Boolean](true))
     }
 
-    "navigate to VAT Exemption when true and Registering Business data exists" in {
+    s"navigate to ${controllers.routes.MandatoryInformationController.onPageLoad()} when false and in the mandatory flow" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
-      cacheSessionData(internalId, AgriculturalFlatRateSchemeId.toString, true)
+      cacheSessionData(internalId, ThresholdInTwelveMonthsId.toString, ConditionalDateFormElement(true, Some(localDate)))
 
       val request = buildClient(controllers.routes.ZeroRatedSalesController.onSubmit().url)
         .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
-        .post(Map("value" -> Seq("true")))
+        .post(Map("value" -> Seq("false")))
 
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VATExemptionController.onPageLoad().url)
-      verifySessionCacheData(internalId, ZeroRatedSalesId.toString, Option.apply[Boolean](true))
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.MandatoryInformationController.onPageLoad().url)
+      verifySessionCacheData(internalId, ZeroRatedSalesId.toString, Option.apply[Boolean](false))
       verifySessionCacheData(internalId, RegisteringBusinessId.toString, Option.empty[Boolean])
     }
   }

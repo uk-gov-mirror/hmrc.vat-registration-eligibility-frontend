@@ -19,7 +19,9 @@ package utils
 import models.ConditionalDateFormElement
 
 object ThresholdHelper {
-  val q1DefinedAndTrue = (userAns: UserAnswers) => userAns.thresholdInTwelveMonths.collect{case ConditionalDateFormElement(true,_) => true}.isDefined
+  val q1DefinedAndTrue = (userAns: UserAnswers) => userAns.thresholdInTwelveMonths.collect { case ConditionalDateFormElement(true, _) => true }.isDefined
+  val nextThirtyDaysDefinedAndTrue = (userAns: UserAnswers) => userAns.thresholdNextThirtyDays.collect { case ConditionalDateFormElement(true, _) => true }.isDefined
+  val nextThirtyDaysDefinedAndFalse = (userAns: UserAnswers) => userAns.thresholdNextThirtyDays.collect { case ConditionalDateFormElement(false, _) => false }.isDefined
 
   val taxableTurnoverCheck = (userAns: UserAnswers) => {
     (userAns.thresholdNextThirtyDays, userAns.thresholdPreviousThirtyDays) match {

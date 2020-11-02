@@ -12,7 +12,7 @@ class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with Sessi
     .build()
 
   s"${controllers.routes.NinoController.onSubmit()}" should {
-    "redirect to Agricultural Flat Rate Scheme if the answer is yes" in {
+    "redirect to Threshold In Twelve Months if the answer is yes" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
@@ -23,14 +23,14 @@ class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with Sessi
         )
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.AgriculturalFlatRateSchemeController.onPageLoad().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdInTwelveMonthsController.onPageLoad().url)
     }
     "redirect to Eligibility Dropout if the answer is no" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
 
-      val request = buildClient("/have-nino").withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
+      val request = buildClient("/have-nino").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map(
           "value" -> Seq("false"))
         )
