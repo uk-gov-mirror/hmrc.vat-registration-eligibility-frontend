@@ -12,7 +12,7 @@ class VATRegistrationExceptionISpec extends IntegrationSpecBase with AuthHelper 
     .build()
 
   s"${controllers.routes.VATRegistrationExceptionController.onSubmit()}" should {
-    "redirect to dropout if answer is yes" in {
+    s"redirect to ${controllers.routes.TurnoverEstimateController.onPageLoad()} if answer is yes" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
@@ -23,7 +23,7 @@ class VATRegistrationExceptionISpec extends IntegrationSpecBase with AuthHelper 
         )
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.EligibilityDropoutController.onPageLoad("vatRegistrationException").url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.TurnoverEstimateController.onPageLoad.url)
     }
     s"redirect to ${controllers.routes.TurnoverEstimateController.onPageLoad()} if answer is false" in {
       stubSuccessfulLogin()

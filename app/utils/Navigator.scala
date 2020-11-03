@@ -67,10 +67,20 @@ class Navigator @Inject()() {
     }
   }
 
-  private[utils] def nextOnConditionalFormElement(condition: Boolean, fromPage: Identifier, onSuccessPage: Identifier, onFailPage: Identifier):
+  private[utils] def nextOn12MonthThresholdConditionalFormElement(condition: Boolean, fromPage: Identifier, onSuccessPage: Identifier, onFailPage: Identifier):
   (Identifier, UserAnswers => Call) = {
     fromPage -> {
       _.thresholdInTwelveMonths match {
+        case Some(ConditionalDateFormElement(`condition`, _)) => pageIdToPageLoad(onSuccessPage)
+        case _ => pageIdToPageLoad(onFailPage)
+      }
+    }
+  }
+
+  private[utils] def nextOnNextThirtyDaysThresholdConditionalFormElement(condition: Boolean, fromPage: Identifier, onSuccessPage: Identifier, onFailPage: Identifier):
+  (Identifier, UserAnswers => Call) = {
+    fromPage -> {
+      _.thresholdNextThirtyDays match {
         case Some(ConditionalDateFormElement(`condition`, _)) => pageIdToPageLoad(onSuccessPage)
         case _ => pageIdToPageLoad(onFailPage)
       }
@@ -92,17 +102,35 @@ class Navigator @Inject()() {
     }
   }
 
-  private def checkVoluntaryQuestion(fromPage: Identifier, mandatoryTrue: Identifier, mandatoryFalse: Identifier):
+  private def checkZeroRatedSalesVoluntaryQuestion(fromPage: Identifier, mandatoryTrue: Identifier, mandatoryFalse: Identifier, onFailPage: Identifier):
   (Identifier, UserAnswers => Call) = {
     fromPage -> { userAns =>
-      if (ThresholdHelper.q1DefinedAndTrue(userAns) || ThresholdHelper.taxableTurnoverCheck(userAns) ) {
-        pageIdToPageLoad(mandatoryTrue)
-      } else {
+      if (userAns.zeroRatedSales.contains(false)) {
+        if (ThresholdHelper.q1DefinedAndTrue(userAns) || ThresholdHelper.nextThirtyDaysDefinedAndTrue(userAns)) {
+          pageIdToPageLoad(mandatoryTrue)
+        } else {
           pageIdToPageLoad(mandatoryFalse)
         }
       }
+      else if (userAns.zeroRatedSales.contains(true) && ThresholdHelper.nextThirtyDaysDefinedAndFalse(userAns)) {
+        pageIdToPageLoad(mandatoryFalse)
+      }
+      else {
+        pageIdToPageLoad(onFailPage)
+      }
     }
+  }
 
+  private def checkVoluntaryQuestion(fromPage: Identifier, mandatoryTrue: Identifier, mandatoryFalse: Identifier):
+  (Identifier, UserAnswers => Call) = {
+    fromPage -> { userAns =>
+      if (ThresholdHelper.q1DefinedAndTrue(userAns) || ThresholdHelper.nextThirtyDaysDefinedAndTrue(userAns)) {
+        pageIdToPageLoad(mandatoryTrue)
+      } else {
+        pageIdToPageLoad(mandatoryFalse)
+      }
+    }
+  }
 
   private[utils] def toNextPage(fromPage: Identifier, toPage: Identifier): (Identifier, UserAnswers => Call) =
     fromPage -> { _ => pageIdToPageLoad(toPage) }
@@ -110,7 +138,7 @@ class Navigator @Inject()() {
   private val routeMap: Map[Identifier, UserAnswers => Call] = Map(
     BusinessEntityId -> { userAnswers =>
       userAnswers.getAnswer[BusinessEntity](BusinessEntityId) match {
-        case Some(UKCompany) => routes.ThresholdInTwelveMonthsController.onPageLoad()
+        case Some(UKCompany) => routes.AgriculturalFlatRateSchemeController.onPageLoad()
         case Some(SoleTrader) => routes.ThresholdInTwelveMonthsController.onPageLoad()
         case Some(Partnership) => routes.ThresholdInTwelveMonthsController.onPageLoad()
         case Some(Division) => routes.EligibilityDropoutController.onPageLoad(BusinessEntityId.toString)
@@ -118,46 +146,30 @@ class Navigator @Inject()() {
         case _ => routes.BusinessEntityController.onPageLoad()
       }
     },
-    nextOnConditionalFormElement(false,
-      fromPage = ThresholdInTwelveMonthsId,
-      onSuccessPage = ThresholdNextThirtyDaysId,
-      onFailPage = ThresholdPreviousThirtyDaysId
-    ),
-    toNextPage(ThresholdNextThirtyDaysId, ThresholdPreviousThirtyDaysId),
-    toNextPage(VoluntaryInformationId, EligibleId),
-    lastThresholdQuestion(
-      fromPage = ThresholdPreviousThirtyDaysId,
-      twelveMonthsTrue = VATRegistrationExceptionId,
-      twelveMonthsFalse = TurnoverEstimateId
-    ),
-    nextOn(true,
-      fromPage = VoluntaryRegistrationId,
-      onSuccessPage = TurnoverEstimateId,
-      onFailPage = ChoseNotToRegisterId
-    ),
-    toNextPage(
-      fromPage = TurnoverEstimateId,
-      toPage = InvolvedInOtherBusinessId
-    ),
     nextOn(false,
-      fromPage = InvolvedInOtherBusinessId,
+      fromPage = AgriculturalFlatRateSchemeId,
       onSuccessPage = InternationalActivitiesId,
-      onFailPage = EligibilityDropoutId(InvolvedInOtherBusinessId.toString)
+      onFailPage = EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)
     ),
     nextOn(false,
       fromPage = InternationalActivitiesId,
-      onSuccessPage = AnnualAccountingSchemeId,
+      onSuccessPage = InvolvedInOtherBusinessId,
       onFailPage = EligibilityDropoutId(InternationalActivitiesId.toString)
     ),
     nextOn(false,
-      fromPage = AnnualAccountingSchemeId,
-      onSuccessPage = ZeroRatedSalesId,
-      onFailPage = EligibilityDropoutId(AnnualAccountingSchemeId.toString)
+      fromPage = InvolvedInOtherBusinessId,
+      onSuccessPage = RacehorsesId,
+      onFailPage = EligibilityDropoutId(InvolvedInOtherBusinessId.toString)
     ),
-    nextOn(true,
-      fromPage = ZeroRatedSalesId,
-      onSuccessPage = VATExemptionId,
-      onFailPage = RegisteringBusinessId
+    nextOn(false,
+      fromPage = RacehorsesId,
+      onSuccessPage = AnnualAccountingSchemeId,
+      onFailPage = EligibilityDropoutId(RacehorsesId.toString)
+    ),
+    nextOn(false,
+      fromPage = AnnualAccountingSchemeId,
+      onSuccessPage = RegisteringBusinessId,
+      onFailPage = EligibilityDropoutId(AnnualAccountingSchemeId.toString)
     ),
     nextOn(true,
       fromPage = RegisteringBusinessId,
@@ -166,29 +178,48 @@ class Navigator @Inject()() {
     ),
     nextOn(true,
       fromPage = NinoId,
-      onSuccessPage = AgriculturalFlatRateSchemeId,
+      onSuccessPage = ThresholdInTwelveMonthsId,
       onFailPage = EligibilityDropoutId(NinoId.toString)
     ),
-    nextOn(false,
-      fromPage = VATExemptionId,
-      onSuccessPage = RegisteringBusinessId,
-      onFailPage = RegisteringBusinessId
+    nextOn12MonthThresholdConditionalFormElement(true,
+      fromPage = ThresholdInTwelveMonthsId,
+      onSuccessPage = ThresholdPreviousThirtyDaysId,
+      onFailPage = ThresholdNextThirtyDaysId
     ),
-    nextOn(false,
+    toNextPage(
+      fromPage = ThresholdPreviousThirtyDaysId,
+      toPage = VATRegistrationExceptionId
+    ),
+    nextOnNextThirtyDaysThresholdConditionalFormElement(true,
+      fromPage = ThresholdNextThirtyDaysId,
+      onSuccessPage = VATRegistrationExceptionId,
+      onFailPage = VoluntaryRegistrationId
+    ),
+    toNextPage(
       fromPage = VATRegistrationExceptionId,
-      onSuccessPage = TurnoverEstimateId,
-      onFailPage = EligibilityDropoutId(VATRegistrationExceptionId.toString)
+      toPage = TurnoverEstimateId
     ),
-    nextOn(false,
-      fromPage = AgriculturalFlatRateSchemeId,
-      onSuccessPage = RacehorsesId,
-      onFailPage = EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)
+    toNextPage(
+      fromPage = TurnoverEstimateId,
+      toPage = ZeroRatedSalesId
+    ),
+    checkZeroRatedSalesVoluntaryQuestion(
+      ZeroRatedSalesId,
+      MandatoryInformationId,
+      VoluntaryInformationId,
+      VATExemptionId
     ),
     checkVoluntaryQuestion(
-      fromPage = RacehorsesId,
+      fromPage = VATExemptionId,
       mandatoryTrue = MandatoryInformationId,
       mandatoryFalse = VoluntaryInformationId
-    )
+    ),
+    nextOn(true,
+      fromPage = VoluntaryRegistrationId,
+      onSuccessPage = TurnoverEstimateId,
+      onFailPage = ChoseNotToRegisterId
+    ),
+    toNextPage(VoluntaryInformationId, EligibleId)
   )
 
   def nextPage(id: Identifier, mode: Mode): UserAnswers => Call =

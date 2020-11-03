@@ -16,9 +16,11 @@
 
 package utils
 
+import akka.util.Helpers.Requiring
 import identifiers.{Identifier, _}
 import models.ConditionalDateFormElement
 import uk.gov.hmrc.http.cache.client.CacheMap
+
 //scalastyle:off
 object PageIdBinding {
   def sectionBindings(map: CacheMap): Map[String, Seq[(Identifier, Option[Any])]] = {
@@ -27,6 +29,7 @@ object PageIdBinding {
     val elemMiss = (e: Identifier) => throw new NoSuchElementException(s"Element missing - $e")
     val illegalState = (e: Identifier) => throw new IllegalStateException(s"Illegal state of elem - $e")
     val twelveMonthsValue = userAnswers.thresholdInTwelveMonths.getOrElse(elemMiss(ThresholdInTwelveMonthsId)).value
+    val nextThirtyDaysValue = userAnswers.thresholdNextThirtyDays.getOrElse(None).value
 
     def ThresholdSectionValidationAndConstruction: PartialFunction[(Identifier, Option[Any]), (Identifier, Option[Any])] = {
       case e@(ThresholdNextThirtyDaysId, Some(_)) => if (twelveMonthsValue) {
@@ -35,7 +38,7 @@ object PageIdBinding {
         e
       }
       case e@(ThresholdNextThirtyDaysId, None) if !twelveMonthsValue => elemMiss(e._1)
-      case e@(VATRegistrationExceptionId, Some(_)) => if (!twelveMonthsValue) {
+      case e@(VATRegistrationExceptionId, Some(_)) => if (!twelveMonthsValue && (nextThirtyDaysValue == None || nextThirtyDaysValue == (ThresholdNextThirtyDaysId, Some(false)))) {
         illegalState(e._1)
       } else {
         e
@@ -48,7 +51,7 @@ object PageIdBinding {
       }
       case e@(VoluntaryRegistrationId, None) if (validateVoluntaryReason) => elemMiss(e._1)
       case e@(VoluntaryInformationId, None) => e
-      case e if (e._1 != ThresholdNextThirtyDaysId && e._1 != VATRegistrationExceptionId && e._1 != VoluntaryRegistrationId) => (e._1, e._2.orElse(elemMiss(e._1)))
+      case e if (e._1 != ThresholdNextThirtyDaysId && e._1 != ThresholdPreviousThirtyDaysId && e._1 != VATRegistrationExceptionId && e._1 != VoluntaryRegistrationId) => (e._1, e._2.orElse(elemMiss(e._1)))
     }
 
     def SpecialSituationsValidateAndConstruction: PartialFunction[(Identifier, Option[Any]), (Identifier, Option[Any])] = {
@@ -62,10 +65,11 @@ object PageIdBinding {
       case e if (e._1 != VATExemptionId) => (e._1, e._2.orElse(elemMiss(e._1)))
     }
 
-    def validateVoluntaryReason: Boolean = (userAnswers.thresholdNextThirtyDays, userAnswers.thresholdPreviousThirtyDays, userAnswers.thresholdInTwelveMonths) match {
-      case (Some(ConditionalDateFormElement(false, _)), Some(ConditionalDateFormElement(false, _)), Some(ConditionalDateFormElement(false, _))) => true
+    def validateVoluntaryReason: Boolean = (userAnswers.thresholdNextThirtyDays, userAnswers.thresholdInTwelveMonths) match {
+      case (Some(ConditionalDateFormElement(false, _)), Some(ConditionalDateFormElement(false, _))) => true
       case _ => false
     }
+
 
     Map(
       "VAT-taxable sales" ->
@@ -81,15 +85,15 @@ object PageIdBinding {
       "Special situations" ->
         Seq(
           (BusinessEntityId, userAnswers.businessEntity),
+          (AgriculturalFlatRateSchemeId, userAnswers.agriculturalFlatRateScheme),
           (InternationalActivitiesId, userAnswers.internationalActivities),
           (InvolvedInOtherBusinessId, userAnswers.involvedInOtherBusiness),
+          (RacehorsesId, userAnswers.racehorses),
           (AnnualAccountingSchemeId, userAnswers.annualAccountingScheme),
-          (ZeroRatedSalesId, userAnswers.zeroRatedSales),
           (RegisteringBusinessId, userAnswers.registeringBusiness),
           (NinoId, userAnswers.nino),
-          (VATExemptionId, userAnswers.vatExemption),
-          (AgriculturalFlatRateSchemeId, userAnswers.agriculturalFlatRateScheme),
-          (RacehorsesId, userAnswers.racehorses)
+          (ZeroRatedSalesId, userAnswers.zeroRatedSales),
+          (VATExemptionId, userAnswers.vatExemption)
         ).collect(SpecialSituationsValidateAndConstruction)
     )
   }

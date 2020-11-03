@@ -60,7 +60,7 @@ class ZeroRatedSalesController @Inject()(mcc: MessagesControllerComponents,
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, ZeroRatedSalesId.toString, value).flatMap {
             cacheMap =>
-              val removeStaleData = (b: Boolean) => if (b) AgriculturalFlatRateSchemeId else VATExemptionId
+              val removeStaleData = (b: Boolean) => if (!b) VATExemptionId
               dataCacheConnector.removeEntry(cacheMap.id, removeStaleData(value).toString).map(_ =>
                 Redirect(navigator.nextPage(ZeroRatedSalesId, NormalMode)(new UserAnswers(cacheMap))))
           }

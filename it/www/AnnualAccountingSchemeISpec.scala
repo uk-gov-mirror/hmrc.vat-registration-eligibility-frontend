@@ -31,7 +31,7 @@ class AnnualAccountingSchemeISpec extends IntegrationSpecBase with AuthHelper wi
 
   val internalId = "testInternalId"
   s"POST ${controllers.routes.AnnualAccountingSchemeController.onSubmit().url}" should {
-    "navigate to Zero Rated Sales when false" in {
+    "navigate to Registering Business when false" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
@@ -42,7 +42,7 @@ class AnnualAccountingSchemeISpec extends IntegrationSpecBase with AuthHelper wi
 
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ZeroRatedSalesController.onPageLoad().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.RegisteringBusinessController.onPageLoad().url)
       verifySessionCacheData(internalId, AnnualAccountingSchemeId.toString, Option.apply[Boolean](false))
     }
 

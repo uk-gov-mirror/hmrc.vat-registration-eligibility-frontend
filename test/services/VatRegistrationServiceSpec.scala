@@ -88,7 +88,6 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
       s"$BusinessEntityId" -> JsString(UKCompany.toString),
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdNextThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
-      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$VoluntaryRegistrationId" -> JsBoolean(true),
       s"$VoluntaryInformationId" -> JsBoolean(true),
       s"$TurnoverEstimateId" -> Json.obj("amount" -> JsString("50000")),
@@ -114,21 +113,20 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
           | "data":[
           | {"questionId":"thresholdInTwelveMonths-value","question":"foo","answer":"mocked message","answerValue":false},
           | {"questionId":"thresholdNextThirtyDays-value","question":"mocked message","answer":"mocked message","answerValue":false},
-          | {"questionId":"thresholdPreviousThirtyDays-value","question":"foo","answer":"mocked message","answerValue":false},
           | {"questionId":"voluntaryRegistration","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"voluntaryInformation","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"turnoverEstimate-value","question":"mocked message","answer":"£50,000","answerValue":50000}]},
           | {"title":"Special situations",
           | "data":[{"questionId":"businessEntity-value","question":"mocked message","answer":"mocked message","answerValue":"uk-company"},
+          | {"questionId":"agriculturalFlatRateScheme","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"internationalActivities","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"involvedInOtherBusiness","question":"mocked message","answer":"mocked message","answerValue":false},
+          | {"questionId":"racehorses","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"annualAccountingScheme","question":"mocked message","answer":"mocked message","answerValue":false},
-          | {"questionId":"zeroRatedSales","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"registeringBusiness","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"nino","question":"mocked message","answer":"mocked message","answerValue":true},
-          | {"questionId":"vatExemption","question":"mocked message","answer":"mocked message","answerValue":false},
-          | {"questionId":"agriculturalFlatRateScheme","question":"mocked message","answer":"mocked message","answerValue":false},
-          | {"questionId":"racehorses","question":"mocked message","answer":"mocked message","answerValue":false}
+          | {"questionId":"zeroRatedSales","question":"mocked message","answer":"mocked message","answerValue":true},
+          | {"questionId":"vatExemption","question":"mocked message","answer":"mocked message","answerValue":false}
           |]}]}
           |""".stripMargin)
     }
