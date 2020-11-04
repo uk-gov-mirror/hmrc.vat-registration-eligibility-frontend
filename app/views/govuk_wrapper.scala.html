@@ -50,7 +50,13 @@
       navLinks = Some(headerNavLinks))
 }
 
-@afterHeader = {}
+@afterHeader = {
+    <!-- Google Tag Manager -->
+    @if(appConfig.isGtmEnabled == "true") {
+        @google_tag_manager(appConfig.googleTagManagerId)
+    }
+    <!-- End Google Tag Manager -->
+}
 
 @bodyEnd = {
     @uiLayouts.footer(
