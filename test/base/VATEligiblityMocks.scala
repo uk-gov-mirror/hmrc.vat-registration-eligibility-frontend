@@ -22,6 +22,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.MessagesApi
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.VATFeatureSwitch
 
@@ -33,6 +34,7 @@ trait VATEligiblityMocks {
   lazy val mockDataCacheConnector = mock[DataCacheConnector]
   lazy val mockVatRegConnector = mock[VatRegistrationConnector]
   lazy val mockAuthConnector = mock[AuthConnector]
+  lazy val mockAuditConnector = mock[AuditConnector]
 
   //Services
   lazy val mockVRService = mock[VatRegistrationService]

@@ -16,12 +16,13 @@
 
 package utils
 
-import java.time.{Instant, LocalDate}
+import java.util.UUID
 
-class TimeMachine {
+import javax.inject.{Inject, Singleton}
 
-  def today: LocalDate = LocalDate.now()
+@Singleton
+class IdGenerator @Inject()() {
 
-  def instant: Instant = Instant.now()
+  def createId: String = UUID.randomUUID().toString
 
 }

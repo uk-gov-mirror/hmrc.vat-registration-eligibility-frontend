@@ -16,17 +16,53 @@
 
 package services
 
-import connectors.{AllocationResponse, TrafficManagementConnector}
+import config.FrontendAppConfig
+import connectors.{Allocated, AllocationResponse, QuotaReached, TrafficManagementConnector}
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.libs.json.Json
+import play.api.mvc.Request
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
+import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.play.audit.AuditExtensions
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import utils.{IdGenerator, TimeMachine}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TrafficManagementService @Inject()(trafficManagementConnector: TrafficManagementConnector)
-                                        (implicit ec: ExecutionContext) {
+class TrafficManagementService @Inject()(trafficManagementConnector: TrafficManagementConnector,
+                                         val authConnector: AuthConnector,
+                                         auditConnector: AuditConnector,
+                                         timeMachine: TimeMachine,
+                                         idGenerator: IdGenerator
+                                        )(implicit ec: ExecutionContext,
+                                          appConfig: FrontendAppConfig) extends AuthorisedFunctions {
 
-  def allocate(regId: String)(implicit hc: HeaderCarrier): Future[AllocationResponse] =
-    trafficManagementConnector.allocate(regId)
+  def allocate(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[AllocationResponse] =
+    authorised().retrieve(Retrievals.credentials) {
+      case Some(credentials) =>
+        trafficManagementConnector.allocate(regId).map {
+          case Allocated =>
+            val auditEvent = ExtendedDataEvent(
+              auditSource = appConfig.appName,
+              auditType = "StartRegistration",
+              tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags("start-tax-registration", request.path),
+              detail = Json.obj(
+                "authProviderId" -> credentials.providerId,
+                "journeyId" -> regId
+              ),
+              generatedAt = timeMachine.instant,
+              eventId = idGenerator.createId
+            )
 
+            auditConnector.sendExtendedEvent(auditEvent)
+
+            Allocated
+          case QuotaReached => QuotaReached //TODO To be finished in the traffic management intergation story
+        }
+      case None =>
+        throw new InternalServerException("[TrafficManagementService][allocate] Missing authProviderId for journey start auditing")
+    }
 }

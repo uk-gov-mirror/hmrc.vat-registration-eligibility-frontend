@@ -16,29 +16,92 @@
 
 package services
 
+import java.time.Instant
+
 import base.SpecBase
 import connectors.{Allocated, QuotaReached}
 import mocks.TrafficManagementConnectorMock
+import org.joda.time.DateTimeUtils
+import org.mockito.Matchers
+import org.mockito.Mockito.{verify, when}
+import play.api.libs.json.Json
+import play.api.mvc.Request
+import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.AuditExtensions
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import utils.{FakeIdGenerator, FakeTimeMachine}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TrafficManagementServiceSpec extends SpecBase
   with TrafficManagementConnectorMock {
 
-  object Service extends TrafficManagementService(mockTrafficManagementConnector)
+  val timeMachine = new FakeTimeMachine
+  val idGenerator = new FakeIdGenerator
+
+  object Service extends TrafficManagementService(
+    mockTrafficManagementConnector,
+    mockAuthConnector,
+    mockAuditConnector,
+    timeMachine,
+    idGenerator
+  )
 
   val testRegId = "testRegId"
+  val testProviderId: String = "testProviderID"
+  val testProviderType: String = "GovernmentGateway"
+  val testCredentials: Credentials = Credentials(testProviderId, testProviderType)
+
+  implicit val request: Request[_] = fakeRequest
 
   "allocate" must {
     "pass through the value when the connector returns an Allocated response" in {
       mockAllocation(testRegId)(Future.successful(Allocated))
+      when(
+        mockAuthConnector.authorise(
+          Matchers.any,
+          Matchers.eq(Retrievals.credentials)
+        )(
+          Matchers.any[HeaderCarrier],
+          Matchers.any[ExecutionContext]
+        )
+      ).thenReturn(Future.successful(Some(testCredentials)))
+
+      val testAuditEvent = ExtendedDataEvent(
+        auditSource = frontendAppConfig.appName,
+        auditType = "StartRegistration",
+        tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags("start-tax-registration", request.path),
+        detail = Json.obj(
+          "authProviderId" -> testProviderId,
+          "journeyId" -> testRegId
+        ),
+        generatedAt = timeMachine.instant,
+        eventId = idGenerator.createId
+      )
 
       val res = await(Service.allocate(testRegId))
 
       res mustBe Allocated
+      verify(mockAuditConnector).sendExtendedEvent(
+        Matchers.eq(testAuditEvent)
+      )(
+        Matchers.any[HeaderCarrier],
+        Matchers.any[ExecutionContext]
+      )
     }
+
     "pass through the value when the connector returns an QuotaReached response" in {
       mockAllocation(testRegId)(Future.successful(QuotaReached))
+      when(
+        mockAuthConnector.authorise(
+          Matchers.any,
+          Matchers.eq(Retrievals.credentials)
+        )(
+          Matchers.any[HeaderCarrier],
+          Matchers.any[ExecutionContext])
+      ).thenReturn(Future.successful(Some(testCredentials)))
 
       val res = await(Service.allocate(testRegId))
 
