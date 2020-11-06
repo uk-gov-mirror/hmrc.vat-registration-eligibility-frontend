@@ -16,7 +16,6 @@
 
 package identifiers
 
-case object BusinessEntityId extends Identifier {
-  override val toString: String = "businessEntity"
-
+case object VATExceptionKickoutId extends Identifier {
+  override val toString: String = "vatExceptionKickout"
 }

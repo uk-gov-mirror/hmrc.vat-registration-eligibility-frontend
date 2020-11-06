@@ -23,7 +23,7 @@ import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.{agriculturalDropout, eligibilityDropout, internationalActivityDropout}
+import views.html._
 
 class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
                                              identify: CacheIdentifierAction
@@ -34,6 +34,8 @@ class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
       mode match {
         case InternationalActivitiesId.toString => Ok(internationalActivityDropout())
         case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout())
+        case VATExceptionKickoutId.toString => Ok(vatExceptionDropout())
+        case BusinessEntityId.toString => Ok(vatDivisionDropout())
         case _ => Ok(eligibilityDropout())
       }
   }

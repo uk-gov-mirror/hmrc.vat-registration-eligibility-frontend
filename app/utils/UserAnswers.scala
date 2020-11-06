@@ -16,7 +16,6 @@
 
 package utils
 
-import akka.japi.Option.Some
 import identifiers._
 import models._
 import play.api.libs.json.{JsValue, Reads}
@@ -30,6 +29,8 @@ class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
   def agriculturalFlatRateScheme: Option[Boolean] = cacheMap.getEntry[Boolean](AgriculturalFlatRateSchemeId.toString)
 
   def vatRegistrationException: Option[Boolean] = cacheMap.getEntry[Boolean](VATRegistrationExceptionId.toString)
+
+  def vatExceptionKickout: Option[Boolean] = cacheMap.getEntry[Boolean](VATExceptionKickoutId.toString)
 
   def vatExemption: Option[Boolean] = cacheMap.getEntry[Boolean](VATExemptionId.toString)
 
