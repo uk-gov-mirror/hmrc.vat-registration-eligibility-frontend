@@ -23,10 +23,10 @@ class FeedbackControllerSpec extends ControllerSpecBase {
 
   def onwardRoute: Call = routes.IndexController.onPageLoad()
 
-  val controller: FeedbackController = new FeedbackController(frontendAppConfig, controllerComponents) {
-    override lazy val feedbackUrl = "/feedtest"
-    override lazy val frontendUrl = "frontendUrl"
-  }
+  val controller: FeedbackController = new FeedbackController(frontendAppConfig, controllerComponents)
+
+  val deskproId = "vrs"
+
 
   "VoluntaryRegistration Controller" must {
 
@@ -34,7 +34,11 @@ class FeedbackControllerSpec extends ControllerSpecBase {
       val result = controller.show()(fakeRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result).contains("frontendUrl/feedtest") mustBe true
+
+      redirectLocation(result).map { url =>
+        url.contains("/contact/beta-feedback") mustBe true
+        url.contains(s"service=$deskproId") mustBe true
+      }
     }
   }
 }
