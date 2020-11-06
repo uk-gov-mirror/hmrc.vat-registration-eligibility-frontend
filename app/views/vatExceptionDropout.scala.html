@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package identifiers
+@import config.FrontendAppConfig
+@import models.requests.CacheIdentifierRequest
+@import views.html.layouts.layout
+@import views.html.newcomponents._
 
-case object BusinessEntityId extends Identifier {
-  override val toString: String = "businessEntity"
+@()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
+
+@layout(pageTitle = Some(titleNoForm(messages("eligibilityDropout.heading"))), backLink = true) {
+
+    @h1(messages("eligibilityDropout.heading"))
+
+    @p{
+        @link(appConfig.VATWriteInURL, messages("eligibility.exception.link"))
+    }
 
 }

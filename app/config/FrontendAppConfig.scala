@@ -58,6 +58,8 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
   lazy val VAT1BFormURL = servicesConfig.getConfString("gov-uk.VAT1BFormURL", throw new Exception("Couldn't get VAT1BFormURL URL"))
   lazy val VAT1CFormURL = servicesConfig.getConfString("gov-uk.VAT1CFormURL", throw new Exception("Couldn't get VAT1CFormURL URL"))
   lazy val VAT98FormURL = servicesConfig.getConfString("gov-uk.VAT98FormURL", throw new Exception("Couldn't get VAT98FormURL URL"))
+  lazy val VATDivisionURL = servicesConfig.getConfString("gov-uk.VATDivisionURL", throw new Exception("Couldn't get VATDivisionURL URL"))
+  lazy val VATWriteInURL = servicesConfig.getConfString("gov-uk.VATWriteInURL", throw new Exception("Couldn't get VATWriteInURL URL"))
   lazy val VATNotice700_46agriculturalURL = servicesConfig.getConfString("gov-uk.VATNotice700_46agriculturalURL",
     throw new Exception("Couldn't get VATNotice700_46agriculturalURL URL"))
   lazy val VATRateDifferentGoodsURL = servicesConfig.getConfString("gov-uk.VATRateDifferentGoodsURL",

@@ -25,6 +25,7 @@ import play.api.libs.json.Reads
 import play.api.mvc.Call
 import utils.DefaultImplicitJsonReads.BooleanReads
 
+//scalastyle:off
 @Singleton
 class Navigator @Inject()() {
 
@@ -43,6 +44,7 @@ class Navigator @Inject()() {
     case RegisteringBusinessId => routes.RegisteringBusinessController.onPageLoad()
     case NinoId => routes.NinoController.onPageLoad()
     case VATExemptionId => routes.VATExemptionController.onPageLoad()
+    case VATExceptionKickoutId => routes.VATExceptionKickoutController.onPageLoad()
     case VATRegistrationExceptionId => routes.VATRegistrationExceptionController.onPageLoad()
     case ApplyInWritingId => routes.ApplyInWritingController.onPageLoad()
     case EligibilityDropoutId(mode) => routes.EligibilityDropoutController.onPageLoad(mode)
@@ -132,17 +134,33 @@ class Navigator @Inject()() {
     }
   }
 
+  private def checkBusinessEntity(fromPage: Identifier, ukCompanyTrue: Identifier, ukCompanyFalse: Identifier, onFailPage: Identifier):
+  (Identifier, UserAnswers => Call) = {
+    fromPage -> { userAns =>
+      if (userAns.businessEntity.contains(UKCompany)) {
+        if (userAns.internationalActivities.contains(false)) {
+          pageIdToPageLoad(ukCompanyTrue)
+        } else {
+          pageIdToPageLoad(onFailPage)
+        }
+      }
+      else if (userAns.internationalActivities.contains(false)) {
+        pageIdToPageLoad(ukCompanyFalse)
+      }
+      else {
+        pageIdToPageLoad(onFailPage)
+      }
+    }
+  }
+
   private[utils] def toNextPage(fromPage: Identifier, toPage: Identifier): (Identifier, UserAnswers => Call) =
     fromPage -> { _ => pageIdToPageLoad(toPage) }
 
   private val routeMap: Map[Identifier, UserAnswers => Call] = Map(
     BusinessEntityId -> { userAnswers =>
       userAnswers.getAnswer[BusinessEntity](BusinessEntityId) match {
-        case Some(UKCompany) => routes.AgriculturalFlatRateSchemeController.onPageLoad()
-        case Some(SoleTrader) => routes.ThresholdInTwelveMonthsController.onPageLoad()
-        case Some(Partnership) => routes.ThresholdInTwelveMonthsController.onPageLoad()
         case Some(Division) => routes.EligibilityDropoutController.onPageLoad(BusinessEntityId.toString)
-        case Some(Other) => routes.ThresholdInTwelveMonthsController.onPageLoad()
+        case Some(_) => routes.AgriculturalFlatRateSchemeController.onPageLoad()
         case _ => routes.BusinessEntityController.onPageLoad()
       }
     },
@@ -151,10 +169,16 @@ class Navigator @Inject()() {
       onSuccessPage = InternationalActivitiesId,
       onFailPage = EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)
     ),
-    nextOn(false,
+    checkBusinessEntity(
       fromPage = InternationalActivitiesId,
-      onSuccessPage = InvolvedInOtherBusinessId,
+      ukCompanyTrue = InvolvedInOtherBusinessId,
+      ukCompanyFalse = VATExceptionKickoutId,
       onFailPage = EligibilityDropoutId(InternationalActivitiesId.toString)
+    ),
+    nextOn(true,
+      fromPage = VATExceptionKickoutId,
+      onSuccessPage = EligibilityDropoutId(VATExceptionKickoutId.toString),
+      onFailPage = EligibilityDropoutId(VATRegistrationExceptionId.toString)
     ),
     nextOn(false,
       fromPage = InvolvedInOtherBusinessId,

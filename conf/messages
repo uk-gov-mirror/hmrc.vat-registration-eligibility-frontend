@@ -176,6 +176,11 @@ eligibilityDropout.ApplicantUKNinoId.variant    = This is because the person who
 eligibility.agriculture.text = To join the Agricultural Flat Rate Scheme, the business will need to
 eligibility.agriculture.link = register using form VAT98
 
+eligibility.divisionDropout.text = To register a group, division or joint venture,
+eligibility.divisionDropout.link = use the VAT 1 form.
+
+eligibility.exception.link = Find out how to apply for an exception
+
 eligibility.international.special.text = If the business:
 eligibility.international.bullet0 = is exporting goods or services to EU countries -
 eligibility.international.link = register using form VAT1

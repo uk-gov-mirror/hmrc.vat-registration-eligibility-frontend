@@ -65,6 +65,9 @@ POST       /annual-accounting                           controllers.AnnualAccoun
 GET        /vat-exemption                               controllers.VATExemptionController.onPageLoad()
 POST       /vat-exemption                               controllers.VATExemptionController.onSubmit()
 
+GET        /vat-exception-registration                  controllers.VATExceptionKickoutController.onPageLoad()
+POST       /vat-exception-registration                  controllers.VATExceptionKickoutController.onSubmit()
+
 GET        /registration-exception                      controllers.VATRegistrationExceptionController.onPageLoad()
 POST       /registration-exception                      controllers.VATRegistrationExceptionController.onSubmit()
 
