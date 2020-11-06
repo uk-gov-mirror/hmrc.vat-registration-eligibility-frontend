@@ -18,10 +18,8 @@ package utils
 
 import java.time.{Instant, LocalDate}
 
-class TimeMachine {
+class FakeTimeMachine extends TimeMachine {
+  override def today: LocalDate = LocalDate.of(2020, 1, 1)
 
-  def today: LocalDate = LocalDate.now()
-
-  def instant: Instant = Instant.now()
-
+  override val instant: Instant = Instant.now
 }

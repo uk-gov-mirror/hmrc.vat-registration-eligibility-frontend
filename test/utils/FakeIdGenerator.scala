@@ -16,12 +16,10 @@
 
 package utils
 
-import java.time.{Instant, LocalDate}
+import java.util.UUID
 
-class TimeMachine {
+class FakeIdGenerator extends IdGenerator {
 
-  def today: LocalDate = LocalDate.now()
-
-  def instant: Instant = Instant.now()
+  override val createId: String = UUID.randomUUID().toString
 
 }

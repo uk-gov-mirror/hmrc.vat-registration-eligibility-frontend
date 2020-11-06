@@ -34,6 +34,7 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
   private lazy val contactHost = servicesConfig.baseUrl("contact-frontend")
   private val contactFormServiceIdentifier = "SCRS"
 
+  lazy val appName = loadConfig(s"appName")
   lazy val analyticsToken = loadConfig(s"google-analytics.token")
   lazy val analyticsHost = loadConfig(s"google-analytics.host")
   lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
