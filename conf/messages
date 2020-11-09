@@ -1,4 +1,5 @@
 site.govuk = GOV.UK
+getHelp.linkText = Get help with this page (opens in new tab)
 
 checkYourAnswers.title = Check Your Answers
 checkYourAnswers.heading = Check Your Answers

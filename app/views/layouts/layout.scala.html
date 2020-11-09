@@ -49,6 +49,18 @@
     <!-- End Google Tag Manager -->
 }
 
+@getHelpForm = {
+    <div class="govuk-!-margin-bottom-6">
+        @contentBlock
+    </div>
+
+    <div class="govuk-body">
+        <a lang="en" hreflang="en" class="govuk-link " target="_blank" href="@{appConfig.reportAProblemNonJSUrl}">
+            @messages("getHelp.linkText")
+        </a>
+    </div>
+}
+
 @GovukLayout(
     pageTitle = pageTitle,
     headBlock = Some(head),
@@ -57,4 +69,4 @@
     headerBlock = Some(siteHeader(signOutLink)),
     footerItems = FooterLinks.items,
     scriptsBlock = Some(scripts)
-)(contentBlock)
+)(getHelpForm)
