@@ -183,17 +183,17 @@ class Navigator @Inject()() {
     nextOn(false,
       fromPage = InvolvedInOtherBusinessId,
       onSuccessPage = RacehorsesId,
-      onFailPage = EligibilityDropoutId(InvolvedInOtherBusinessId.toString)
+      onFailPage = VATExceptionKickoutId
     ),
     nextOn(false,
       fromPage = RacehorsesId,
       onSuccessPage = AnnualAccountingSchemeId,
-      onFailPage = EligibilityDropoutId(RacehorsesId.toString)
+      onFailPage = VATExceptionKickoutId
     ),
     nextOn(false,
       fromPage = AnnualAccountingSchemeId,
       onSuccessPage = RegisteringBusinessId,
-      onFailPage = EligibilityDropoutId(AnnualAccountingSchemeId.toString)
+      onFailPage = VATExceptionKickoutId
     ),
     nextOn(true,
       fromPage = RegisteringBusinessId,

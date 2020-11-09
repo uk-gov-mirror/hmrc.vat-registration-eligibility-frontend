@@ -57,7 +57,7 @@ class AnnualAccountingSchemeISpec extends IntegrationSpecBase with AuthHelper wi
 
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.EligibilityDropoutController.onPageLoad("annualAccountingScheme").url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VATExceptionKickoutController.onPageLoad().url)
       verifySessionCacheData(internalId, AnnualAccountingSchemeId.toString, Option.apply[Boolean](true))
     }
   }

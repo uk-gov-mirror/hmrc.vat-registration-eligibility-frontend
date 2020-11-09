@@ -241,7 +241,7 @@ vatRegistrationException.title = Would you like to apply for a VAT registration 
 vatRegistrationException.heading = Would you like to apply for a VAT registration exception?
 vatRegistrationException.error.required = Select yes if the business is applying for a VAT registration exception
 vatRegistrationException.p1 = You can apply for a registration exception if the business goes over the VAT threshold temporarily.
-vatRegistrationException.p2 = If you apply for an exception and are susseccful, we will contact you to tell you your request has been accepted.
+vatRegistrationException.p2 = If you apply for an exception and are successful, we will contact you to tell you your request has been accepted.
 
 applyInWriting.title = You must apply in writing
 applyInWriting.heading = You must apply in writing
