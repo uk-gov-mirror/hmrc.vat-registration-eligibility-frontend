@@ -18,7 +18,7 @@
 
 @feedbackBanner = {
     @messages("common.feedbackFirst")
-    <a class='govuk-link' href='@{appConfig.feedbackUrl}'>@messages("common.feedbackSecond")</a>
+    <a href="@controllers.routes.FeedbackController.show" id="phase-banner-feedback-url">@messages("common.feedbackSecond")</a>
     @messages("common.feedbackThird")
 }
 

@@ -16,9 +16,11 @@
 
 package controllers
 
+import java.net.URLEncoder
+
 import config.FrontendAppConfig
 import javax.inject.Inject
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
@@ -26,12 +28,20 @@ import scala.concurrent.Future
 class FeedbackController @Inject()(val appConfig: FrontendAppConfig,
                                    val mcc: MessagesControllerComponents) extends FrontendController(mcc) {
 
-  lazy val feedbackUrl = appConfig.feedbackUrl
-  lazy val frontendUrl = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}"
+  lazy val contactFrontendFeedbackPartialUrl: String = appConfig.contactFrontendFeedbackPartialUrl
+  lazy val contactFormServiceIdentifier: String = appConfig.contactFormServiceIdentifier
 
+  def contactFormReferrer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
 
   def show: Action[AnyContent] = Action.async {
     implicit request =>
-      Future.successful(Redirect(s"$frontendUrl$feedbackUrl"))
+      Future.successful(Redirect(feedbackFormPartialUrl))
   }
+
+  private def feedbackFormPartialUrl(implicit request: Request[AnyContent]) =
+    s"$contactFrontendFeedbackPartialUrl?backUrl=${urlEncode(contactFormReferrer)}" +
+      s"&service=$contactFormServiceIdentifier"
+
+  private def urlEncode(value: String) = URLEncoder.encode(value, "UTF-8")
+
 }

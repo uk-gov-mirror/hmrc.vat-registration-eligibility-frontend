@@ -31,14 +31,15 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
 
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
-  private lazy val contactHost = servicesConfig.baseUrl("contact-frontend")
-  private val contactFormServiceIdentifier = "SCRS"
+  private lazy val contactFrontendPartialBaseUrl = servicesConfig.baseUrl("contact-frontend")
+  lazy val contactFormServiceIdentifier = "vrs"
 
   lazy val appName = loadConfig(s"appName")
   lazy val analyticsToken = loadConfig(s"google-analytics.token")
   lazy val analyticsHost = loadConfig(s"google-analytics.host")
-  lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemPartialUrl = s"$contactFrontendPartialBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemNonJSUrl = s"$contactFrontendPartialBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  lazy val contactFrontendFeedbackPartialUrl = s"$contactFrontendPartialBaseUrl/contact/beta-feedback"
   lazy val loginUrl = loadConfig("urls.login")
   private val configRoot = "microservice.services"
   lazy val vatRegFEURL = loadConfig(s"$configRoot.vat-registration-frontend.url")
