@@ -198,12 +198,12 @@ class Navigator @Inject()() {
     nextOn(true,
       fromPage = RegisteringBusinessId,
       onSuccessPage = NinoId,
-      onFailPage = EligibilityDropoutId(RegisteringBusinessId.toString)
+      onFailPage = VATExceptionKickoutId
     ),
     nextOn(true,
       fromPage = NinoId,
       onSuccessPage = ThresholdInTwelveMonthsId,
-      onFailPage = EligibilityDropoutId(NinoId.toString)
+      onFailPage = VATExceptionKickoutId
     ),
     nextOn12MonthThresholdConditionalFormElement(true,
       fromPage = ThresholdInTwelveMonthsId,

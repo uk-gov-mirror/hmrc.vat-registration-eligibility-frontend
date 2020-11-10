@@ -25,7 +25,7 @@ class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with Sessi
       response.status mustBe 303
       response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.ThresholdInTwelveMonthsController.onPageLoad().url)
     }
-    "redirect to Eligibility Dropout if the answer is no" in {
+    "redirect to VAT Exception if the answer is no" in {
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
@@ -36,7 +36,7 @@ class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with Sessi
         )
       val response = await(request)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.EligibilityDropoutController.onPageLoad("nino").url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.routes.VATExceptionKickoutController.onPageLoad().url)
     }
   }
 }
