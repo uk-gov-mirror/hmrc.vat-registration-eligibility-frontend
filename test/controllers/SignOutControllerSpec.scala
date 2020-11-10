@@ -16,41 +16,23 @@
 
 package controllers
 
-import controllers.actions._
 import play.api.test.Helpers._
-import views.html.choseNotToRegister
 
-class ChoseNotToRegisterControllerSpec extends ControllerSpecBase {
+class SignOutControllerSpec extends ControllerSpecBase {
 
-  implicit val appConfig = frontendAppConfig
+  def controller = new SignOutController(controllerComponents)
 
-  def onwardRoute = routes.ChoseNotToRegisterController.onPageLoad()
+  val questionnaireUrl: String = frontendAppConfig.exitSurveyUrl
 
-  def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ChoseNotToRegisterController(controllerComponents, FakeCacheIdentifierAction)
-
-  def viewAsString() = choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
-
-  val questionnaireUrl = frontendAppConfig.exitSurveyUrl
-
-  "ChoseNotToRegister Controller" must {
-
-    "return OK and the correct view for a GET" in {
-      val result = controller().onPageLoad(fakeRequest)
-
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
-    }
-
+  "SignOutController" must {
     "redirect to the next page when valid data is submitted" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody()
 
-      val result = controller().onSubmit()(postRequest)
+      val result = controller.signOut()(postRequest)
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(questionnaireUrl)
     }
-
   }
 }
 

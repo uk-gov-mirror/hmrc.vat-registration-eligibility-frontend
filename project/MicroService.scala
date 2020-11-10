@@ -5,7 +5,6 @@ import net.ground5hark.sbt.concat.Import._
 import play.sbt.PlayImport.PlayKeys
 import play.twirl.sbt.Import.TwirlKeys
 import sbt.Keys._
-import sbt.Tests.{Group, SubProcess}
 import sbt._
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
@@ -37,14 +36,26 @@ trait MicroService {
       ScoverageKeys.coverageMinimum := 90,
       ScoverageKeys.coverageFailOnMinimum := false,
       ScoverageKeys.coverageHighlighting := true,
-      parallelExecution in Test := false,
       PlayKeys.playDefaultPort := 9894
     )
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
+    .configs(IntegrationTest)
+    .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
+    .settings(
+      fork                       in IntegrationTest := false,
+      testForkedParallel         in IntegrationTest := false,
+      parallelExecution          in IntegrationTest := false,
+      logBuffered                in IntegrationTest := false,
+      unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it")).value,
+      fork                       in Test            := true,
+      testForkedParallel         in Test            := true,
+      parallelExecution          in Test            := false,
+      logBuffered                in Test            := false,
+      addTestReportOption(IntegrationTest, "int-test-reports")
+    )
     .settings(majorVersion := 0)
-    .settings(integrationTestSettings())
     .settings(
       scalacOptions ++= Seq("-feature"), //TODO: "-Xfatal-warnings" cause deprecated warnings to fail, what alternatives are there?
       libraryDependencies ++= appDependencies,
@@ -63,7 +74,6 @@ trait MicroService {
         "views.ViewUtils._"
       )
     )
-    .configs(IntegrationTest)
     .settings(resolvers ++= Seq(
       Resolver.bintrayRepo("hmrc", "releases"),
       Resolver.jcenterRepo,
@@ -90,12 +100,4 @@ trait MicroService {
         "com.typesafe.akka" %% "akka-stream" % "2.5.23"
       )
     )
-}
-
-private object TestPhases {
-
-  def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
-    tests map {
-      test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
-    }
 }
