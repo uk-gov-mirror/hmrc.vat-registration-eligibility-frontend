@@ -88,3 +88,5 @@ POST       /have-nino                                   controllers.NinoControll
 
 GET        /eligible                                    controllers.EligibleController.onPageLoad
 POST       /eligible                                    controllers.EligibleController.onSubmit
+
+GET        /sign-out                                    controllers.SignOutController.signOut

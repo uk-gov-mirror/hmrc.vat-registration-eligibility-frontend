@@ -15,10 +15,10 @@
  *@
 
 @import config.FrontendAppConfig
-
 @import views.newcomponents._
+@import views.html.newcomponents.siteHeader
 
-@(pageTitle: Option[String] = None, beforeContentBlock: Option[Html] = None, backLink: Boolean = false)(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(pageTitle: Option[String] = None, beforeContentBlock: Option[Html] = None, backLink: Boolean = false, signOutLink: Boolean = true)(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @head = {
     <!--[if lte IE 8]><link href='@controllers.routes.Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
@@ -54,6 +54,7 @@
     headBlock = Some(head),
     beforeContentBlock = Some(beforeContentBlock),
     bodyEndBlock = Some(bodyEndBlock),
+    headerBlock = Some(siteHeader(signOutLink)),
     footerItems = FooterLinks.items,
     scriptsBlock = Some(scripts)
 )(contentBlock)

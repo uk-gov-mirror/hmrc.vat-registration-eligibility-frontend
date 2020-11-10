@@ -17,23 +17,20 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions._
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.choseNotToRegister
 
-class ChoseNotToRegisterController @Inject()(mcc: MessagesControllerComponents,
-                                             identify: CacheIdentifierAction
-                                            )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
+import scala.concurrent.ExecutionContext
 
-  def onPageLoad = identify {
+@Singleton
+class SignOutController @Inject()(mcc: MessagesControllerComponents)
+                                 (implicit val appConfig: FrontendAppConfig,
+                                  val executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+
+  def signOut: Action[AnyContent] = Action {
     implicit request =>
-      Ok(choseNotToRegister())
-  }
-
-  def onSubmit: Action[AnyContent] = Action { implicit request =>
-    Redirect(appConfig.exitSurveyUrl).withNewSession
+      Redirect(appConfig.exitSurveyUrl).withNewSession
   }
 }

@@ -47,9 +47,8 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
   lazy val vatRegFEFirstPage = loadConfig(s"$configRoot.vat-registration-frontend.vrfeFirstPage")
   lazy val postSignInUrl = loadConfig(s"$configRoot.vat-registration-frontend.postSignInUrl")
   lazy val feedbackUrl = loadConfig(s"$configRoot.vat-registration-frontend.feedbackUrl")
-  lazy val companyRegUrl = loadConfig(s"$configRoot.company-registration-frontend.url")
-  lazy val companyRegUri = loadConfig(s"$configRoot.company-registration-frontend.uri")
-  lazy val exitSurveyUri = loadConfig(s"$configRoot.company-registration-frontend.exit-survey")
+  lazy val feedbackFrontendUrl = loadConfig(s"$configRoot.feedback-frontend.url")
+  lazy val exitSurveyUrl = s"$feedbackFrontendUrl/feedback/vat-registration"
   lazy val otrsUrl = servicesConfig.getConfString("otrs.url", throw new Exception("Couldn't get otrs URL"))
   lazy val VATNotice700_1supplementURL = servicesConfig.getConfString("gov-uk.VATNotice700_1supplementURL",
     throw new Exception("Couldn't get VATNotice700_1supplementURL URL"))

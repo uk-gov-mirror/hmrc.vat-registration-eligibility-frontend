@@ -1,9 +1,15 @@
 package www
 
 import helpers.IntegrationSpecBase
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.HeaderNames
 
 class IndexControllerISpec extends IntegrationSpecBase {
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(fakeConfig())
+    .build()
 
   s"GET ${controllers.routes.IndexController.navigateToPageId("foo").url}" should {
     "redirect to the start of eligibility because question id is invalid" in {
