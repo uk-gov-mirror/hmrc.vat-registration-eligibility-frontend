@@ -19,6 +19,7 @@ package services
 import config.FrontendAppConfig
 import connectors.{Allocated, AllocationResponse, QuotaReached, TrafficManagementConnector}
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -57,10 +58,15 @@ class TrafficManagementService @Inject()(trafficManagementConnector: TrafficMana
               eventId = idGenerator.createId
             )
 
+            Logger.info("Started registration journey")
+
             auditConnector.sendExtendedEvent(auditEvent)
 
             Allocated
-          case QuotaReached => QuotaReached //TODO To be finished in the traffic management intergation story
+          case QuotaReached => {
+            Logger.info("Daily quota reached")
+            QuotaReached
+          } //TODO To be finished in the traffic management intergation story
         }
       case None =>
         throw new InternalServerException("[TrafficManagementService][allocate] Missing authProviderId for journey start auditing")
