@@ -89,22 +89,7 @@ class Navigator @Inject()() {
     }
   }
 
-  private def lastThresholdQuestion(fromPage: Identifier, twelveMonthsTrue: Identifier, twelveMonthsFalse: Identifier):
-  (Identifier, UserAnswers => Call) = {
-    fromPage -> { userAns =>
-      if (ThresholdHelper.q1DefinedAndTrue(userAns)) {
-        pageIdToPageLoad(twelveMonthsTrue)
-      } else {
-        if (ThresholdHelper.taxableTurnoverCheck(userAns)) {
-          pageIdToPageLoad(twelveMonthsFalse)
-        } else {
-          pageIdToPageLoad(VoluntaryRegistrationId)
-        }
-      }
-    }
-  }
-
-  private def checkZeroRatedSalesVoluntaryQuestion(fromPage: Identifier, mandatoryTrue: Identifier, mandatoryFalse: Identifier, onFailPage: Identifier):
+  private[utils] def checkZeroRatedSalesVoluntaryQuestion(fromPage: Identifier, mandatoryTrue: Identifier, mandatoryFalse: Identifier, onFailPage: Identifier):
   (Identifier, UserAnswers => Call) = {
     fromPage -> { userAns =>
       if (userAns.zeroRatedSales.contains(false)) {
@@ -113,6 +98,9 @@ class Navigator @Inject()() {
         } else {
           pageIdToPageLoad(mandatoryFalse)
         }
+      }
+     else if (userAns.zeroRatedSales.contains(true) && userAns.vatRegistrationException.contains(true)) {
+        pageIdToPageLoad(mandatoryTrue)
       }
       else if (userAns.zeroRatedSales.contains(true) && ThresholdHelper.nextThirtyDaysDefinedAndFalse(userAns)) {
         pageIdToPageLoad(mandatoryFalse)
