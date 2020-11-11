@@ -29,17 +29,17 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
 
   lazy val host: String = servicesConfig.getString("host")
 
-  private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+  private def loadConfig(key: String) = servicesConfig.getString(key)
 
-  private lazy val contactFrontendPartialBaseUrl = servicesConfig.baseUrl("contact-frontend")
+  private lazy val contactFrontendUrl: String = loadConfig("microservice.services.contact-frontend.url")
   lazy val contactFormServiceIdentifier = "vrs"
 
   lazy val appName = loadConfig(s"appName")
   lazy val analyticsToken = loadConfig(s"google-analytics.token")
   lazy val analyticsHost = loadConfig(s"google-analytics.host")
-  lazy val reportAProblemPartialUrl = s"$contactFrontendPartialBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  lazy val reportAProblemNonJSUrl = s"$contactFrontendPartialBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  lazy val contactFrontendFeedbackPartialUrl = s"$contactFrontendPartialBaseUrl/contact/beta-feedback"
+  lazy val reportAProblemPartialUrl = s"$contactFrontendUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemNonJSUrl = s"$contactFrontendUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  lazy val betaFeedbackUrl = s"$contactFrontendUrl/contact/beta-feedback?service=$contactFormServiceIdentifier"
   lazy val loginUrl = loadConfig("urls.login")
   private val configRoot = "microservice.services"
   lazy val vatRegFEURL = loadConfig(s"$configRoot.vat-registration-frontend.url")

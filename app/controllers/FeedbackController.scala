@@ -28,8 +28,7 @@ import scala.concurrent.Future
 class FeedbackController @Inject()(val appConfig: FrontendAppConfig,
                                    val mcc: MessagesControllerComponents) extends FrontendController(mcc) {
 
-  lazy val contactFrontendFeedbackPartialUrl: String = appConfig.contactFrontendFeedbackPartialUrl
-  lazy val contactFormServiceIdentifier: String = appConfig.contactFormServiceIdentifier
+  lazy val betaFeedbackUrl: String = appConfig.betaFeedbackUrl
 
   def contactFormReferrer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
 
@@ -39,8 +38,7 @@ class FeedbackController @Inject()(val appConfig: FrontendAppConfig,
   }
 
   private def feedbackFormPartialUrl(implicit request: Request[AnyContent]) =
-    s"$contactFrontendFeedbackPartialUrl?backUrl=${urlEncode(contactFormReferrer)}" +
-      s"&service=$contactFormServiceIdentifier"
+    s"$betaFeedbackUrl&backUrl=${urlEncode(contactFormReferrer)}"
 
   private def urlEncode(value: String) = URLEncoder.encode(value, "UTF-8")
 
