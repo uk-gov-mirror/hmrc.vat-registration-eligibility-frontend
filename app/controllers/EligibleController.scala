@@ -19,9 +19,10 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{CacheIdentifierAction, DataRequiredAction, DataRetrievalAction}
 import javax.inject.Inject
+import models.RegistrationInformation
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.VatRegistrationService
+import services.{TrafficManagementService, VatRegistrationService}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.eligible
 
@@ -31,7 +32,8 @@ class EligibleController @Inject()(mcc: MessagesControllerComponents,
                                    identify: CacheIdentifierAction,
                                    getData: DataRetrievalAction,
                                    requireData: DataRequiredAction,
-                                   vatRegistrationService: VatRegistrationService
+                                   vatRegistrationService: VatRegistrationService,
+                                  trafficManagementService: TrafficManagementService
                                   )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   val frontendUrl = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
@@ -41,8 +43,11 @@ class EligibleController @Inject()(mcc: MessagesControllerComponents,
   }
 
   def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    vatRegistrationService.submitEligibility(request.internalId)(hc, implicitly[ExecutionContext], request) map { _ =>
-      Redirect(frontendUrl)
+    vatRegistrationService.submitEligibility(request.internalId)(hc, implicitly[ExecutionContext], request).flatMap { _ =>
+      trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = false, isSubmitted = true).map {
+        case RegistrationInformation(_, _, _, _, _) =>
+        Redirect(frontendUrl)
+      }
     }
   }
 

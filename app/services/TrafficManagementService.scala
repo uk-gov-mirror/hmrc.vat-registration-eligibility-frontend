@@ -16,10 +16,13 @@
 
 package services
 
+import java.time.LocalDate
+
 import config.FrontendAppConfig
 import connectors.{Allocated, AllocationResponse, QuotaReached, TrafficManagementConnector}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
+import models._
 import play.api.libs.json.Json
 import play.api.mvc.Request
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -71,4 +74,22 @@ class TrafficManagementService @Inject()(trafficManagementConnector: TrafficMana
       case None =>
         throw new InternalServerException("[TrafficManagementService][allocate] Missing authProviderId for journey start auditing")
     }
+
+  def getRegistrationInformation()(implicit hc: HeaderCarrier): Future[Option[RegistrationInformation]] =
+    trafficManagementConnector.getRegistrationInformation()
+
+
+  def upsertRegistrationInformation(internalId: String, regId: String, isOtrs: Boolean, isSubmitted: Boolean
+                                   )(implicit hc: HeaderCarrier): Future[RegistrationInformation] = {
+
+    val regInfo = RegistrationInformation(
+      internalId = internalId,
+      registrationId = regId,
+      status = if (isSubmitted) Submitted else Draft,
+      regStartDate = Some(LocalDate.now()),
+      channel = if (isOtrs) OTRS else VatReg
+    )
+
+    trafficManagementConnector.upsertRegistrationInformation(regInfo)
+  }
 }

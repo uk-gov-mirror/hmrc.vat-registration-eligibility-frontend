@@ -24,9 +24,9 @@ import utils.UserAnswers
 
 import scala.concurrent.Future
 
-class FakeDataRetrievalAction(cacheMapToReturn: Option[CacheMap]) extends SpecBase with DataRetrievalAction {
+class FakeDataRetrievalAction(cacheMapToReturn: Option[CacheMap], regId: String = "regId") extends SpecBase with DataRetrievalAction {
   override protected def transform[A](request: CacheIdentifierRequest[A]): Future[OptionalDataRequest[A]] = cacheMapToReturn match {
-    case None => Future(OptionalDataRequest(request.request, request.cacheId, CurrentProfile(""), None))
-    case Some(cacheMap) => Future(OptionalDataRequest(request.request, request.cacheId, CurrentProfile(""), Some(new UserAnswers(cacheMap))))
+    case None => Future(OptionalDataRequest(request.request, request.cacheId, CurrentProfile(regId), None))
+    case Some(cacheMap) => Future(OptionalDataRequest(request.request, request.cacheId, CurrentProfile(regId), Some(new UserAnswers(cacheMap))))
   }
 }

@@ -16,12 +16,12 @@
 
 package services
 
-import java.time.Instant
+import java.time.LocalDate
 
 import base.SpecBase
 import connectors.{Allocated, QuotaReached}
 import mocks.TrafficManagementConnectorMock
-import org.joda.time.DateTimeUtils
+import models.{Draft, RegistrationInformation, VatReg}
 import org.mockito.Matchers
 import org.mockito.Mockito.{verify, when}
 import play.api.libs.json.Json
@@ -49,10 +49,12 @@ class TrafficManagementServiceSpec extends SpecBase
     idGenerator
   )
 
+  val testInternalId = "testInternalId"
   val testRegId = "testRegId"
   val testProviderId: String = "testProviderID"
   val testProviderType: String = "GovernmentGateway"
   val testCredentials: Credentials = Credentials(testProviderId, testProviderType)
+  val testDate = LocalDate.now
 
   implicit val request: Request[_] = fakeRequest
 
@@ -106,6 +108,34 @@ class TrafficManagementServiceSpec extends SpecBase
       val res = await(Service.allocate(testRegId))
 
       res mustBe QuotaReached
+    }
+  }
+
+  "getRegistrationInformation" must {
+    "return registration information if registration information exists" in {
+      val testRegInfo = RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)
+      mockGetRegistrationInformation()(Future.successful(Some(testRegInfo)))
+
+      val res = await(Service.getRegistrationInformation())
+
+      res mustBe Some(testRegInfo)
+    }
+    "return None if no registration information exists" in {
+      mockGetRegistrationInformation()(Future.successful(None))
+
+      val res = await(Service.getRegistrationInformation())
+
+      res mustBe None
+    }
+  }
+  "upsertRegistrationInformation" must {
+    "return registration information" in {
+      val testRegInfo = RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)
+      mockUpsertRegistrationInformation(testRegInfo)(Future.successful(testRegInfo))
+
+      val res = await(Service.upsertRegistrationInformation(testInternalId, testRegId, false, false))
+
+      res mustBe testRegInfo
     }
   }
 

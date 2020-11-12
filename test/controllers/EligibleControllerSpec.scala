@@ -16,7 +16,11 @@
 
 package controllers
 
+import java.time.LocalDate
+
 import controllers.actions.{DataRequiredAction, FakeCacheIdentifierAction}
+import mocks.TrafficManagementServiceMock
+import models.{Draft, RegistrationInformation, VatReg}
 import models.requests.DataRequest
 import org.mockito.Matchers
 import org.mockito.Mockito.when
@@ -27,7 +31,7 @@ import views.html.eligible
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class EligibleControllerSpec extends ControllerSpecBase {
+class EligibleControllerSpec extends ControllerSpecBase with TrafficManagementServiceMock {
 
   implicit val appConfig = frontendAppConfig
 
@@ -38,10 +42,15 @@ class EligibleControllerSpec extends ControllerSpecBase {
     identify = FakeCacheIdentifierAction,
     getData = getEmptyCacheMap,
     requireData = dataRequiredAction,
-    vatRegistrationService = mockVRService
+    vatRegistrationService = mockVRService,
+    mockTrafficManagementService
   )
 
   val viewAsString = eligible()(fakeRequest, messages, frontendAppConfig).toString
+
+  val testInternalId = "testInternalId"
+  val testRegId = "testRegId"
+  val testDate = LocalDate.now
 
   "onPageLoad" must {
     "return OK with the correct view" in {
@@ -55,6 +64,8 @@ class EligibleControllerSpec extends ControllerSpecBase {
     "redirect to VAT reg frontend" in {
       when(mockVRService.submitEligibility(Matchers.any[String])(Matchers.any[HeaderCarrier], Matchers.any[ExecutionContext], Matchers.any[DataRequest[_]]))
         .thenReturn(Future.successful(Json.obj()))
+
+      mockUpsertRegistrationInformation(testInternalId, testRegId, false, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
 
       val res = Controller.onSubmit()(fakeRequest)
 

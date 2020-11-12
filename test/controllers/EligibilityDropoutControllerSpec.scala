@@ -16,20 +16,35 @@
 
 package controllers
 
+import java.time.LocalDate
+
 import config.FrontendAppConfig
 import controllers.actions._
 import identifiers.{AgriculturalFlatRateSchemeId, InternationalActivitiesId}
+import mocks.TrafficManagementServiceMock
+import models.{Draft, RegistrationInformation, VatReg}
 import play.api.test.Helpers._
 import views.html.{agriculturalDropout, eligibilityDropout, internationalActivityDropout}
 
-class EligibilityDropoutControllerSpec extends ControllerSpecBase {
+import scala.concurrent.Future
+
+class EligibilityDropoutControllerSpec extends ControllerSpecBase with TrafficManagementServiceMock {
 
   def onwardRoute = routes.EligibilityDropoutController.onPageLoad("")
 
   implicit val appConfig = app.injector.instanceOf[FrontendAppConfig]
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new EligibilityDropoutController(controllerComponents, FakeCacheIdentifierAction)
+    new EligibilityDropoutController(
+      controllerComponents,
+      FakeCacheIdentifierAction,
+      dataRetrievalAction,
+      new DataRequiredAction,
+      mockTrafficManagementService)
+
+  val testInternalId = "testInternalId"
+  val testRegId = "testRegId"
+  val testDate = LocalDate.now
 
   def viewAsString(default: Boolean) = eligibilityDropout(default)(fakeCacheDataRequestIncorped, messages, appConfig).toString
 
@@ -61,6 +76,8 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to the next page when valid data is submitted" in {
+      mockUpsertRegistrationInformation(testInternalId, testRegId, false, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
+
       val postRequest = fakeRequest.withFormUrlEncodedBody()
 
       val result = controller().onSubmit()(postRequest)

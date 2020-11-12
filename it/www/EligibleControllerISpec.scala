@@ -1,8 +1,10 @@
 package www
 
-import helpers.{AuthHelper, IntegrationSpecBase, SessionStub, VatRegistrationStub}
+import java.time.LocalDate
+
+import helpers._
 import identifiers._
-import models.{BusinessEntity, ConditionalDateFormElement, TurnoverEstimateFormElement, UKCompany}
+import models._
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
@@ -11,7 +13,8 @@ import play.mvc.Http.HeaderNames
 class EligibleControllerISpec extends IntegrationSpecBase
   with AuthHelper
   with SessionStub
-  with VatRegistrationStub {
+  with VatRegistrationStub
+  with TrafficManagementStub {
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .configure(fakeConfig())
@@ -52,6 +55,7 @@ class EligibleControllerISpec extends IntegrationSpecBase
       cacheSessionData[Boolean]("testInternalId", s"$RacehorsesId", false)
 
       stubSaveEligibilityData("testRegId")
+      stubUpsertRegistrationInformation(RegistrationInformation("testInternalId", "testRegId", Draft, Some(LocalDate.now), VatReg))
 
       val res = await(buildClient(testUrl)
         .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")

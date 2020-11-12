@@ -16,31 +16,33 @@
 
 package mocks
 
-import connectors.{AllocationResponse, TrafficManagementConnector}
+import connectors.AllocationResponse
 import models.RegistrationInformation
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.Suite
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.mvc.Request
+import services.TrafficManagementService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-trait TrafficManagementConnectorMock extends MockitoSugar {
+trait TrafficManagementServiceMock extends MockitoSugar {
+
   self: Suite =>
 
-  val mockTrafficManagementConnector = mock[TrafficManagementConnector]
+  val mockTrafficManagementService: TrafficManagementService = mock[TrafficManagementService]
 
-  def mockAllocation(regId: String)(response: Future[AllocationResponse]) =
-    when(mockTrafficManagementConnector.allocate(Matchers.eq(regId))(Matchers.any[HeaderCarrier]))
+  def mockServiceAllocation(regId: String)(response: Future[AllocationResponse]) =
+    when(mockTrafficManagementService.allocate(Matchers.any[String])(Matchers.any[HeaderCarrier], Matchers.any()))
       .thenReturn(response)
 
   def mockGetRegistrationInformation()(response: Future[Option[RegistrationInformation]]) =
-    when(mockTrafficManagementConnector.getRegistrationInformation()(Matchers.any[HeaderCarrier]))
+    when(mockTrafficManagementService.getRegistrationInformation()(Matchers.any[HeaderCarrier]))
       .thenReturn(response)
 
-  def mockUpsertRegistrationInformation(regInfo: RegistrationInformation)(response: Future[RegistrationInformation]) =
-    when(mockTrafficManagementConnector.upsertRegistrationInformation(Matchers.eq(regInfo))(Matchers.any[HeaderCarrier], Matchers.any()))
+  def mockUpsertRegistrationInformation(internalId: String, regId: String, isOtrs: Boolean, isSubmitted: Boolean)(response: Future[RegistrationInformation]) =
+    when(mockTrafficManagementService.upsertRegistrationInformation(Matchers.any[String], Matchers.any[String], Matchers.any[Boolean], Matchers.any[Boolean])(Matchers.any[HeaderCarrier]))
       .thenReturn(response)
-
 }

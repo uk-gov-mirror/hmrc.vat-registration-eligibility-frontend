@@ -17,6 +17,7 @@
 package config
 
 import controllers.routes
+import featureswitch.core.config.{FeatureSwitching, TrafficManagement}
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.i18n.Lang
@@ -25,7 +26,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
                                   val servicesConfig: ServicesConfig
-                                 ) {
+                                 ) extends FeatureSwitching {
 
   lazy val host: String = servicesConfig.getString("host")
 
@@ -73,8 +74,12 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
   lazy val VATFileChanges = servicesConfig.getConfString("gov-uk.VATFileChanges", throw new Exception("Couldn't get VATFileChanges URL"))
   lazy val languageTranslationEnabled = runModeConfiguration.getBoolean("microservice.services.features.welsh-translation").getOrElse(true)
 
-  def trafficAllocationUrl(regId: String) =
-    servicesConfig.baseUrl("vat-registration") + s"/traffic-management/$regId/allocate"
+  def trafficAllocationUrl(regId: String): String =
+    servicesConfig.baseUrl("vat-registration") + s"/vatreg/traffic-management/$regId/allocate"
+
+  def upsertRegistrationInformationUrl: String = servicesConfig.baseUrl("vat-registration") + "/vatreg/traffic-management/reg-info"
+
+  def getRegistrationInformationUrl: String = servicesConfig.baseUrl("vat-registration") + "/vatreg/traffic-management/reg-info"
 
   def languageMap: Map[String, Lang] = Map(
     "english" -> Lang("en"),

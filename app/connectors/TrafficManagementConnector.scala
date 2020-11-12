@@ -18,9 +18,11 @@ package connectors
 
 import config.FrontendAppConfig
 import javax.inject.{Inject, Singleton}
+import models.RegistrationInformation
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, InternalServerException, Upstream4xxResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import play.api.http.Status._
+import play.api.libs.json.{Json, Reads, Writes}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,8 +39,15 @@ class TrafficManagementConnector @Inject()(httpClient: HttpClient,
           throw new InternalServerException("[TrafficManagementConnector][allocate] Unexpected response from VAT Registration")
       }
     }.recover {
-      case Upstream4xxResponse(_, TOO_MANY_REQUESTS,_,_) => QuotaReached
+      case Upstream4xxResponse(_, TOO_MANY_REQUESTS, _, _) => QuotaReached
     }
+
+  def getRegistrationInformation()(implicit hc: HeaderCarrier): Future[Option[RegistrationInformation]] =
+    httpClient.GET[Option[RegistrationInformation]](config.getRegistrationInformationUrl)
+
+  def upsertRegistrationInformation[DataType](regInfo: DataType
+                                             )(implicit hc: HeaderCarrier, dataTypeWriter: Writes[DataType]): Future[RegistrationInformation] =
+    httpClient.PUT[DataType, RegistrationInformation](config.upsertRegistrationInformationUrl, regInfo)
 
 }
 
