@@ -23,7 +23,8 @@ import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.ThresholdInTwelveMonthsFormProvider
 import identifiers.ThresholdInTwelveMonthsId
-import models.{ConditionalDateFormElement, NormalMode}
+import mocks.TrafficManagementServiceMock
+import models.{ConditionalDateFormElement, Draft, NormalMode, RegistrationInformation, VatReg}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.data.Form
@@ -36,7 +37,7 @@ import views.html.thresholdInTwelveMonths
 import scala.concurrent.Future
 
 
-class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
+class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase with TrafficManagementServiceMock {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
@@ -52,9 +53,13 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new ThresholdInTwelveMonthsController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, mockThresholdService, formProvider)
+      dataRetrievalAction, dataRequiredAction, mockThresholdService, formProvider, mockTrafficManagementService)
 
   def viewAsString(form: Form[_] = form) = thresholdInTwelveMonths(form, NormalMode, mockThresholdService)(fakeDataRequestIncorpedOver12m, messages, frontendAppConfig).toString
+
+  val testInternalId = "testInternalId"
+  val testRegId = "testRegId"
+  val testDate = LocalDate.now
 
   "ThresholdInTwelveMonths Controller" must {
     when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
@@ -77,6 +82,7 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase {
 
     "redirect to the next page when valid data is submitted and also remove Voluntary registration because answer to question is true" in {
       when(mockThresholdService.removeVoluntaryAndNextThirtyDays(any())) thenReturn Future.successful(emptyCacheMap)
+      mockUpsertRegistrationInformation(testInternalId, testRegId, false, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
       val date = LocalDate.parse("2019-01-01")
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true",
         "valueDate.year" -> date.getYear.toString,

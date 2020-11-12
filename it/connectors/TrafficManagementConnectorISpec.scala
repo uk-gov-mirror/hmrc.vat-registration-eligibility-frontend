@@ -1,16 +1,17 @@
 package connectors
 
+import featureswitch.core.config.FeatureSwitching
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub, TrafficManagementStub}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
 class TrafficManagementConnectorISpec extends IntegrationSpecBase
   with AuthHelper
   with SessionStub
-  with TrafficManagementStub {
+  with TrafficManagementStub
+  with FeatureSwitching {
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .configure(fakeConfig())

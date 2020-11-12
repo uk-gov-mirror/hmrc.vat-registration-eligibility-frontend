@@ -3,16 +3,15 @@ package www
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import helpers.{AuthHelper, IntegrationSpecBase, SessionStub}
+import helpers.{AuthHelper, IntegrationSpecBase, SessionStub, TrafficManagementStub}
 import identifiers.{ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, VATRegistrationExceptionId, VoluntaryRegistrationId}
-import models.ConditionalDateFormElement
-import org.jsoup.Jsoup
+import models.{ConditionalDateFormElement, Draft, RegistrationInformation, VatReg}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.mvc.Http.HeaderNames
 import play.api.test.Helpers._
+import play.mvc.Http.HeaderNames
 
-class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with AuthHelper with SessionStub {
+class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with AuthHelper with SessionStub with TrafficManagementStub {
 
   val selectionFieldName = "value"
   val dateFieldName = "valueDate"
@@ -77,6 +76,7 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubSuccessfulLogin()
         stubSuccessfulRegIdGet()
         stubAudits()
+        stubUpsertRegistrationInformation(RegistrationInformation("testInternalId", "testRegId", Draft, Some(LocalDate.now), VatReg))
 
         cacheSessionData[ConditionalDateFormElement](internalId, ThresholdNextThirtyDaysId.toString, ConditionalDateFormElement(false, None))
         cacheSessionData[Boolean](internalId, VoluntaryRegistrationId.toString, true)
@@ -105,8 +105,10 @@ class ThresholdInTwelveMonthsControllerISpec extends IntegrationSpecBase with Au
         stubSuccessfulRegIdGet()
         stubAudits()
 
+        stubUpsertRegistrationInformation(RegistrationInformation("testInternalId", "testRegId", Draft, Some(LocalDate.now), VatReg))
+
         cacheSessionData(internalId, VoluntaryRegistrationId.toString, true)
-        cacheSessionData[Boolean](internalId, ThresholdNextThirtyDaysId.toString,false)
+        cacheSessionData[Boolean](internalId, ThresholdNextThirtyDaysId.toString, false)
         cacheSessionData(internalId, VATRegistrationExceptionId.toString, true)
 
         val request = buildClient("/gone-over-threshold").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")

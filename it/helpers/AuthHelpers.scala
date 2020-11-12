@@ -2,6 +2,7 @@ package helpers
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.HeaderNames
+import play.api.libs.json.Json
 import support.SessionCookieBaker
 import uk.gov.hmrc.http.SessionKeys
 
@@ -37,8 +38,15 @@ trait AuthHelper {
 
     stubFor(
       post(urlPathEqualTo("/auth/authorise"))
-        .willReturn(ok("""{ "internalId" : "testInternalId" }""")))
+        .willReturn(ok(Json.obj(
+          "optionalCredentials" -> Json.obj(
+            "providerId" -> "testProviderID",
+            "providerType" -> "GovernmentGateway"
+          ),
+          "internalId" -> "testInternalId"
+        ).toString())))
   }
+
 
   def stubAudits() = {
     stubFor(post(urlMatching("/write/audit"))

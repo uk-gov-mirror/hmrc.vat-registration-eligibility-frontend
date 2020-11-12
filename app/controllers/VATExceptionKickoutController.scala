@@ -22,10 +22,11 @@ import controllers.actions._
 import forms.VATRegistrationExceptionFormProvider
 import identifiers.VATExceptionKickoutId
 import javax.inject.Inject
-import models.NormalMode
+import models.{NormalMode, RegistrationInformation}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
+import services.TrafficManagementService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.vatExceptionKickout
@@ -38,7 +39,8 @@ class VATExceptionKickoutController @Inject()(mcc: MessagesControllerComponents,
                                               identify: CacheIdentifierAction,
                                               getData: DataRetrievalAction,
                                               requireData: DataRequiredAction,
-                                              formProvider: VATRegistrationExceptionFormProvider
+                                              formProvider: VATRegistrationExceptionFormProvider,
+                                              trafficManagementService: TrafficManagementService
                                              )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   val form: Form[Boolean] = formProvider()
@@ -58,8 +60,12 @@ class VATExceptionKickoutController @Inject()(mcc: MessagesControllerComponents,
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(vatExceptionKickout(formWithErrors, NormalMode))),
         (value) =>
-          dataCacheConnector.save[Boolean](request.internalId, VATExceptionKickoutId.toString, value).map(cacheMap =>
-            Redirect(navigator.nextPage(VATExceptionKickoutId, NormalMode)(new UserAnswers(cacheMap))))
+          dataCacheConnector.save[Boolean](request.internalId, VATExceptionKickoutId.toString, value).flatMap(cacheMap =>
+            trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = true, isSubmitted = false).map {
+              case RegistrationInformation(_, _, _, _, _) =>
+                Redirect(navigator.nextPage(VATExceptionKickoutId, NormalMode)(new UserAnswers(cacheMap)))
+            }
+          )
       )
   }
 }

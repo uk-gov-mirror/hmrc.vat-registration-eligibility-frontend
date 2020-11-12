@@ -22,11 +22,11 @@ import controllers.actions._
 import forms.ThresholdInTwelveMonthsFormProvider
 import identifiers.ThresholdInTwelveMonthsId
 import javax.inject.Inject
-import models.{ConditionalDateFormElement, NormalMode}
+import models.{ConditionalDateFormElement, NormalMode, RegistrationInformation}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
-import services.ThresholdService
+import services.{ThresholdService, TrafficManagementService}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.thresholdInTwelveMonths
@@ -40,8 +40,10 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
                                                   thresholdService: ThresholdService,
-                                                  formProvider: ThresholdInTwelveMonthsFormProvider
-                                                 )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                                  formProvider: ThresholdInTwelveMonthsFormProvider,
+                                                  trafficManagementService: TrafficManagementService
+                                                 )(implicit appConfig: FrontendAppConfig,
+                                                   executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
 
   def onPageLoad() = (identify andThen getData andThen requireData) {
@@ -58,10 +60,14 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(thresholdInTwelveMonths(formWithErrors, NormalMode, thresholdService))),
-        (formValue) => dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap { cacheMap =>
-          if (formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException
-        }.map(cMap =>
-          Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cMap)))
-        ))
+        (formValue) =>
+          dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap { cacheMap =>
+            if (formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException
+          }.flatMap(cMap =>
+            trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = false, isSubmitted = false).map {
+              case RegistrationInformation(_, _, _, _, _) =>
+                Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cMap)))
+            }
+          ))
   }
 }

@@ -16,16 +16,20 @@
 
 package controllers
 
+import java.time.LocalDate
+
 import config.FrontendAppConfig
-import connectors.DataCacheConnector
+import connectors.{Allocated, DataCacheConnector, QuotaReached}
 import controllers.actions._
+import featureswitch.core.config.{FeatureSwitching, TrafficManagement}
 import forms.NinoFormProvider
 import identifiers.NinoId
 import javax.inject.Inject
-import models.NormalMode
+import models.{Draft, NormalMode, RegistrationInformation, VatReg}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.TrafficManagementService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.nino
@@ -38,8 +42,10 @@ class NinoController @Inject()(mcc: MessagesControllerComponents,
                                identify: CacheIdentifierAction,
                                getData: DataRetrievalAction,
                                requireData: DataRequiredAction,
-                               formProvider: NinoFormProvider
-                              )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                               formProvider: NinoFormProvider,
+                               trafficManagementService: TrafficManagementService
+                              )(implicit appConfig: FrontendAppConfig,
+                                executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport with FeatureSwitching {
 
   val form: Form[Boolean] = formProvider()
 
@@ -58,8 +64,30 @@ class NinoController @Inject()(mcc: MessagesControllerComponents,
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(nino(formWithErrors, NormalMode))),
         (value) =>
-          dataCacheConnector.save[Boolean](request.internalId, NinoId.toString, value).map(cacheMap =>
-            Redirect(navigator.nextPage(NinoId, NormalMode)(new UserAnswers(cacheMap))))
-      )
+          dataCacheConnector.save[Boolean](request.internalId, NinoId.toString, value).flatMap(cacheMap =>
+            if (!value) {
+              Future.successful(Redirect(controllers.routes.VATExceptionKickoutController.onPageLoad()))
+            }
+            else {
+              if (isEnabled(TrafficManagement)) {
+                trafficManagementService.allocate(request.currentProfile.registrationID).flatMap {
+                  case Allocated =>
+                    Future.successful(Redirect(navigator.nextPage(NinoId, NormalMode)(new UserAnswers(cacheMap))))
+                  case QuotaReached =>
+                    trafficManagementService.getRegistrationInformation().map {
+                      case Some(RegistrationInformation(_, _, Draft, Some(date), VatReg)) if date == LocalDate.now =>
+                        Redirect(navigator.nextPage(NinoId, NormalMode)(new UserAnswers(cacheMap)))
+                      case _ =>
+                        Redirect(controllers.routes.VATExceptionKickoutController.onPageLoad())
+                    }
+                }
+              }
+              else {
+                Future.successful(Redirect(navigator.nextPage(NinoId, NormalMode)(new UserAnswers(cacheMap))))
+              }
+            }
+          ))
+
   }
+
 }

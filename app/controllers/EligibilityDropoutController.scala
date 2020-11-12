@@ -20,14 +20,22 @@ import config.FrontendAppConfig
 import controllers.actions._
 import identifiers._
 import javax.inject.Inject
+import models.RegistrationInformation
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.TrafficManagementService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html._
 
+import scala.concurrent.ExecutionContext
+
 class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
-                                             identify: CacheIdentifierAction
-                                            )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
+                                             identify: CacheIdentifierAction,
+                                             getData: DataRetrievalAction,
+                                             requireData: DataRequiredAction,
+                                             trafficManagementService: TrafficManagementService
+                                            )(implicit appConfig: FrontendAppConfig,
+                                              executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(mode: String) = identify {
     implicit request =>
@@ -40,7 +48,10 @@ class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
       }
   }
 
-  def onSubmit: Action[AnyContent] = Action { implicit request =>
-    Redirect(controllers.routes.EligibilityDropoutController.onPageLoad(""))
+  def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = true, isSubmitted = false).map {
+      case RegistrationInformation(_, _, _, _, _) =>
+        Redirect(controllers.routes.EligibilityDropoutController.onPageLoad(""))
+    }
   }
 }

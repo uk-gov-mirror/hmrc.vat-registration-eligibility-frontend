@@ -16,22 +16,34 @@
 
 package controllers
 
-import connectors.FakeDataCacheConnector
+import java.time.LocalDate
+
+import connectors.{Allocated, FakeDataCacheConnector, QuotaReached}
 import controllers.actions._
+import featureswitch.core.config.{FeatureSwitching, TrafficManagement}
 import forms.NinoFormProvider
 import identifiers.NinoId
-import models.NormalMode
+import mocks.TrafficManagementServiceMock
+import models.requests.DataRequest
+import models._
+import org.mockito.Matchers
+import org.mockito.Mockito.when
 import play.api.data.Form
 import play.api.libs.json.JsBoolean
 import play.api.mvc.Call
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.FakeNavigator
+import utils.{FakeIdGenerator, FakeNavigator, FakeTimeMachine, UserAnswers}
 import views.html.nino
 
-class NinoControllerSpec extends ControllerSpecBase {
+import scala.concurrent.{ExecutionContext, Future}
 
-  def onwardRoute: Call = routes.IndexController.onPageLoad()
+class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with TrafficManagementServiceMock {
+
+  def onwardRoute: Call = routes.ThresholdInTwelveMonthsController.onPageLoad()
 
   val formProvider = new NinoFormProvider()
   val form = formProvider()
@@ -39,9 +51,22 @@ class NinoControllerSpec extends ControllerSpecBase {
 
   val dataRequiredAction = new DataRequiredAction
 
-  def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
+  val timeMachine = new FakeTimeMachine
+  val idGenerator = new FakeIdGenerator
+
+  val testInternalId = "testInternalId"
+  val testRegId = "testRegId"
+  val testProviderId: String = "testProviderID"
+  val testProviderType: String = "GovernmentGateway"
+  val testCredentials: Credentials = Credentials(testProviderId, testProviderType)
+  val testDate = LocalDate.now
+
+  def testPostRequest(postData: (String, String)*) =
+    DataRequest(fakeRequest.withFormUrlEncodedBody(postData:_*), "1", CurrentProfile(testRegId), new UserAnswers(CacheMap("1", Map())))
+
+  def controller(dataRetrievalAction: DataRetrievalAction = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, Map())))) =
     new NinoController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, mockTrafficManagementService)
 
   def viewAsString(form: Form[_] = form) = nino(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig).toString
 
@@ -63,10 +88,79 @@ class NinoControllerSpec extends ControllerSpecBase {
       contentAsString(result) mustBe viewAsString(form.fill(true))
     }
 
-    "redirect to the next page when valid data is submitted" in {
+    "redirect to the next page when valid data is submitted and Traffic Management returns Allocated" in {
+      enable(TrafficManagement)
+      mockServiceAllocation(testRegId)(Future.successful(Allocated))
+      mockGetRegistrationInformation()(Future.successful(Some(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg))))
+      when(
+        mockAuthConnector.authorise(
+          Matchers.any,
+          Matchers.eq(Retrievals.credentials)
+        )(
+          Matchers.any[HeaderCarrier],
+          Matchers.any[ExecutionContext])
+      ).thenReturn(Future.successful(Some(testCredentials)))
+
+      val result = controller().onSubmit()(testPostRequest("value" -> "true"))
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(onwardRoute.url)
+    }
+
+    "redirect to the exception page when no is selected" in {
+      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "false"))
+
+      val result = controller().onSubmit()(postRequest)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.VATExceptionKickoutController.onPageLoad().url)
+    }
+
+    "redirect to the next page when the Traffic Management is disabled" in {
+      disable(TrafficManagement)
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
 
       val result = controller().onSubmit()(postRequest)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(onwardRoute.url)
+    }
+
+    "redirect to the exception page when valid data is submitted, Traffic Management returns Quota Reached and RegistrationInformation does not match" in {
+      enable(TrafficManagement)
+      mockServiceAllocation(testRegId)(Future.successful(QuotaReached))
+      mockGetRegistrationInformation()(Future.successful(Some(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), OTRS))))
+      when(
+        mockAuthConnector.authorise(
+          Matchers.any,
+          Matchers.eq(Retrievals.credentials)
+        )(
+          Matchers.any[HeaderCarrier],
+          Matchers.any[ExecutionContext])
+      ).thenReturn(Future.successful(Some(testCredentials)))
+
+      val result = controller().onSubmit()(testPostRequest("value" -> "true"))
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.VATExceptionKickoutController.onPageLoad().url)
+    }
+
+    "redirect to the next page when valid data is submitted, Traffic Management returns Quota Reached but RegistrationInformation does match" in {
+      enable(TrafficManagement)
+
+      mockServiceAllocation(testRegId)(Future.successful(QuotaReached))
+      mockGetRegistrationInformation()(Future.successful(Some(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg))))
+
+      when(
+        mockAuthConnector.authorise(
+          Matchers.any,
+          Matchers.eq(Retrievals.credentials)
+        )(
+          Matchers.any[HeaderCarrier],
+          Matchers.any[ExecutionContext])
+      ).thenReturn(Future.successful(Some(testCredentials)))
+
+      val result = controller().onSubmit()(testPostRequest("value" -> "true"))
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(onwardRoute.url)

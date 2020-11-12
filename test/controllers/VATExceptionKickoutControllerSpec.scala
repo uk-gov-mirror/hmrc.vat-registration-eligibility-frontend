@@ -16,11 +16,14 @@
 
 package controllers
 
+import java.time.LocalDate
+
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.VATRegistrationExceptionFormProvider
 import identifiers.VATExceptionKickoutId
-import models.NormalMode
+import mocks.TrafficManagementServiceMock
+import models.{Draft, NormalMode, RegistrationInformation, VatReg}
 import play.api.data.Form
 import play.api.libs.json.JsBoolean
 import play.api.test.Helpers._
@@ -28,7 +31,9 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
 import views.html.vatExceptionKickout
 
-class VATExceptionKickoutControllerSpec extends ControllerSpecBase {
+import scala.concurrent.Future
+
+class VATExceptionKickoutControllerSpec extends ControllerSpecBase with TrafficManagementServiceMock {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
@@ -40,9 +45,13 @@ class VATExceptionKickoutControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new VATExceptionKickoutController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, mockTrafficManagementService)
 
   def viewAsString(form: Form[_] = form) = vatExceptionKickout(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+
+  val testInternalId = "testInternalId"
+  val testRegId = "testRegId"
+  val testDate = LocalDate.now
 
   "VATRegistrationException Controller" must {
 
@@ -63,6 +72,8 @@ class VATExceptionKickoutControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to the next page when valid data is submitted" in {
+      mockUpsertRegistrationInformation(testInternalId, testRegId, false, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
+
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
 
       val result = controller().onSubmit()(postRequest)
