@@ -16,11 +16,13 @@
 
 package utils
 
+import java.time.LocalDate
+
 import base.SpecBase
 import controllers.routes
 import identifiers._
 import models._
-import play.api.libs.json.JsBoolean
+import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc.Call
 import uk.gov.hmrc.http.cache.client.CacheMap
 
@@ -64,6 +66,46 @@ class NavigatorSpec extends SpecBase {
         val data = new UserAnswers(CacheMap("some-id", Map(ZeroRatedSalesId.toString -> JsBoolean(true))))
         val result = navigator.nextOn(true, ZeroRatedSalesId, AgriculturalFlatRateSchemeId, EligibilityDropoutId("mode"))
         result._2(data) mustBe controllers.routes.AgriculturalFlatRateSchemeController.onPageLoad()
+      }
+    }
+  }
+
+  "checkZeroRatedSalesVoluntaryQuestion" should {
+    "Skip Exemption" when {
+      "Exception is true and yes is answered" in {
+        val data = new UserAnswers(CacheMap("some-id", Map(ZeroRatedSalesId.toString -> JsBoolean(true), VATRegistrationExceptionId.toString -> JsBoolean(true))))
+        val result = navigator.checkZeroRatedSalesVoluntaryQuestion(ZeroRatedSalesId, MandatoryInformationId, VoluntaryInformationId, VATExemptionId)
+        result._2(data) mustBe controllers.routes.MandatoryInformationController.onPageLoad()
+      }
+    }
+    "Redirect to Exemption" when {
+      "Not Voluntary Registration and yes is answered" in {
+        val data = new UserAnswers(CacheMap("some-id", Map(ZeroRatedSalesId.toString -> JsBoolean(true))))
+        val result = navigator.checkZeroRatedSalesVoluntaryQuestion(ZeroRatedSalesId, MandatoryInformationId, VoluntaryInformationId, VATExemptionId)
+        result._2(data) mustBe controllers.routes.VATExemptionController.onPageLoad()
+      }
+    }
+    "Redirect to Voluntary" when {
+      "Is Voluntary Registration and yes is answered" in {
+        val testDate = LocalDate.of(1999, 12, 12)
+        val data = new UserAnswers(CacheMap("some-id", Map(ZeroRatedSalesId.toString -> JsBoolean(true), ThresholdNextThirtyDaysId.toString -> Json.toJson(ConditionalDateFormElement(false, Some(testDate))))))
+        val result = navigator.checkZeroRatedSalesVoluntaryQuestion(ZeroRatedSalesId, MandatoryInformationId, VoluntaryInformationId, VATExemptionId)
+        result._2(data) mustBe controllers.routes.VoluntaryInformationController.onPageLoad()
+      }
+    }
+    "Redirect to Voluntary" when {
+      "Is Voluntary Registration and no is answered" in {
+        val data = new UserAnswers(CacheMap("some-id", Map(ZeroRatedSalesId.toString -> JsBoolean(false), VoluntaryRegistrationId.toString -> JsBoolean(true))))
+        val result = navigator.checkZeroRatedSalesVoluntaryQuestion(ZeroRatedSalesId, MandatoryInformationId, VoluntaryInformationId, VATExemptionId)
+        result._2(data) mustBe controllers.routes.VoluntaryInformationController.onPageLoad()
+      }
+    }
+    "Redirect to Mandatory" when {
+      "Is Mandatory Registration and no is answered" in {
+        val testDate = LocalDate.of(1999, 12, 12)
+        val data = new UserAnswers(CacheMap("some-id", Map(ZeroRatedSalesId.toString -> JsBoolean(false), ThresholdInTwelveMonthsId.toString -> Json.toJson(ConditionalDateFormElement(true, Some(testDate))))))
+        val result = navigator.checkZeroRatedSalesVoluntaryQuestion(ZeroRatedSalesId, MandatoryInformationId, VoluntaryInformationId, VATExemptionId)
+        result._2(data) mustBe controllers.routes.MandatoryInformationController.onPageLoad()
       }
     }
   }
