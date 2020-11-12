@@ -70,14 +70,14 @@ class NinoController @Inject()(mcc: MessagesControllerComponents,
             }
             else {
               if (isEnabled(TrafficManagement)) {
-                trafficManagementService.allocate(request.currentProfile.registrationID).flatMap {
-                  case Allocated =>
+                trafficManagementService.getRegistrationInformation flatMap {
+                  case Some(RegistrationInformation(_, _, Draft, Some(date), VatReg)) if date == LocalDate.now =>
                     Future.successful(Redirect(navigator.nextPage(NinoId, NormalMode)(new UserAnswers(cacheMap))))
-                  case QuotaReached =>
-                    trafficManagementService.getRegistrationInformation().map {
-                      case Some(RegistrationInformation(_, _, Draft, Some(date), VatReg)) if date == LocalDate.now =>
+                  case _ =>
+                    trafficManagementService.allocate(request.currentProfile.registrationID) map {
+                      case Allocated =>
                         Redirect(navigator.nextPage(NinoId, NormalMode)(new UserAnswers(cacheMap)))
-                      case _ =>
+                      case QuotaReached =>
                         Redirect(controllers.routes.VATExceptionKickoutController.onPageLoad())
                     }
                 }
@@ -86,8 +86,8 @@ class NinoController @Inject()(mcc: MessagesControllerComponents,
                 Future.successful(Redirect(navigator.nextPage(NinoId, NormalMode)(new UserAnswers(cacheMap))))
               }
             }
-          ))
-
+          )
+      )
   }
 
 }
