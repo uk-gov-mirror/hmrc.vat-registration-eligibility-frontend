@@ -42,7 +42,12 @@ trait TrafficManagementServiceMock extends MockitoSugar {
     when(mockTrafficManagementService.getRegistrationInformation()(Matchers.any[HeaderCarrier]))
       .thenReturn(response)
 
-  def mockUpsertRegistrationInformation(internalId: String, regId: String, isOtrs: Boolean, isSubmitted: Boolean)(response: Future[RegistrationInformation]) =
-    when(mockTrafficManagementService.upsertRegistrationInformation(Matchers.any[String], Matchers.any[String], Matchers.any[Boolean], Matchers.any[Boolean])(Matchers.any[HeaderCarrier]))
-      .thenReturn(response)
+  def mockUpsertRegistrationInformation(internalId: String, regId: String, isOtrs: Boolean)(response: Future[RegistrationInformation]) =
+    when(mockTrafficManagementService.upsertRegistrationInformation(
+      Matchers.eq(internalId),
+      Matchers.eq(regId),
+      Matchers.eq(isOtrs)
+    )(
+      Matchers.any[HeaderCarrier])
+    ).thenReturn(response)
 }

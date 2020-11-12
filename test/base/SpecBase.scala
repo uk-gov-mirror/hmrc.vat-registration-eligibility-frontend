@@ -17,6 +17,7 @@
 package base
 
 import config.FrontendAppConfig
+import controllers.actions.FakeDataRetrievalAction
 import models.CurrentProfile
 import models.requests.{CacheIdentifierRequest, DataRequest}
 import org.scalatestplus.play.guice._
@@ -48,6 +49,8 @@ trait SpecBase extends CommonSpecBase with GuiceOneAppPerSuite {
   lazy val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   lazy val fakeRequest = FakeRequest("", "")
+
+  lazy val fakeDataRetrievalAction = new FakeDataRetrievalAction(Some(CacheMap("id", Map())))
 
   lazy val fakeDataRequestIncorped = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers((CacheMap("1", Map()))))
 

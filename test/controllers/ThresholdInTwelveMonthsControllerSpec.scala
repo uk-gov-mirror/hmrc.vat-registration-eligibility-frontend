@@ -57,8 +57,8 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase with Traf
 
   def viewAsString(form: Form[_] = form) = thresholdInTwelveMonths(form, NormalMode, mockThresholdService)(fakeDataRequestIncorpedOver12m, messages, frontendAppConfig).toString
 
-  val testInternalId = "testInternalId"
-  val testRegId = "testRegId"
+  val testInternalId = "id"
+  val testRegId = "regId"
   val testDate = LocalDate.now
 
   "ThresholdInTwelveMonths Controller" must {
@@ -82,7 +82,7 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase with Traf
 
     "redirect to the next page when valid data is submitted and also remove Voluntary registration because answer to question is true" in {
       when(mockThresholdService.removeVoluntaryAndNextThirtyDays(any())) thenReturn Future.successful(emptyCacheMap)
-      mockUpsertRegistrationInformation(testInternalId, testRegId, false, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
+      mockUpsertRegistrationInformation(testInternalId, testRegId, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
       val date = LocalDate.parse("2019-01-01")
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true",
         "valueDate.year" -> date.getYear.toString,

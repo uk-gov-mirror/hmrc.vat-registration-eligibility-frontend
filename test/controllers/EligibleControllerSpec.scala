@@ -18,15 +18,17 @@ package controllers
 
 import java.time.LocalDate
 
-import controllers.actions.{DataRequiredAction, FakeCacheIdentifierAction}
+import controllers.actions.{DataRequiredAction, FakeCacheIdentifierAction, FakeDataRetrievalAction}
 import mocks.TrafficManagementServiceMock
-import models.{Draft, RegistrationInformation, VatReg}
+import models.{CurrentProfile, Draft, RegistrationInformation, VatReg}
 import models.requests.DataRequest
 import org.mockito.Matchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
+import utils.UserAnswers
 import views.html.eligible
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,7 +42,7 @@ class EligibleControllerSpec extends ControllerSpecBase with TrafficManagementSe
   object Controller extends EligibleController(
     controllerComponents,
     identify = FakeCacheIdentifierAction,
-    getData = getEmptyCacheMap,
+    getData = fakeDataRetrievalAction,
     requireData = dataRequiredAction,
     vatRegistrationService = mockVRService,
     mockTrafficManagementService
@@ -48,8 +50,8 @@ class EligibleControllerSpec extends ControllerSpecBase with TrafficManagementSe
 
   val viewAsString = eligible()(fakeRequest, messages, frontendAppConfig).toString
 
-  val testInternalId = "testInternalId"
-  val testRegId = "testRegId"
+  val testInternalId = "id"
+  val testRegId = "regId"
   val testDate = LocalDate.now
 
   "onPageLoad" must {
@@ -65,7 +67,9 @@ class EligibleControllerSpec extends ControllerSpecBase with TrafficManagementSe
       when(mockVRService.submitEligibility(Matchers.any[String])(Matchers.any[HeaderCarrier], Matchers.any[ExecutionContext], Matchers.any[DataRequest[_]]))
         .thenReturn(Future.successful(Json.obj()))
 
-      mockUpsertRegistrationInformation(testInternalId, testRegId, false, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
+      mockUpsertRegistrationInformation(testInternalId, testRegId, false)(
+        Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg))
+      )
 
       val res = Controller.onSubmit()(fakeRequest)
 

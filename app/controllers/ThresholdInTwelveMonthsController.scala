@@ -64,7 +64,7 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
           dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap { cacheMap =>
             if (formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException
           }.flatMap(cMap =>
-            trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = false, isSubmitted = false).map {
+            trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = false).map {
               case RegistrationInformation(_, _, _, _, _) =>
                 Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cMap)))
             }

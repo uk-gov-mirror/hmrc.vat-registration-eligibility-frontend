@@ -44,7 +44,8 @@ class EligibleController @Inject()(mcc: MessagesControllerComponents,
 
   def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     vatRegistrationService.submitEligibility(request.internalId)(hc, implicitly[ExecutionContext], request).flatMap { _ =>
-      trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = false, isSubmitted = true).map {
+      println("request", request.internalId, request.currentProfile)
+      trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = false).map {
         case RegistrationInformation(_, _, _, _, _) =>
         Redirect(frontendUrl)
       }

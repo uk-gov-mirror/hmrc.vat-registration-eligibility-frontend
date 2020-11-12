@@ -49,8 +49,8 @@ class VATExceptionKickoutControllerSpec extends ControllerSpecBase with TrafficM
 
   def viewAsString(form: Form[_] = form) = vatExceptionKickout(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
-  val testInternalId = "testInternalId"
-  val testRegId = "testRegId"
+  val testInternalId = "id"
+  val testRegId = "regId"
   val testDate = LocalDate.now
 
   "VATRegistrationException Controller" must {
@@ -72,7 +72,7 @@ class VATExceptionKickoutControllerSpec extends ControllerSpecBase with TrafficM
     }
 
     "redirect to the next page when valid data is submitted" in {
-      mockUpsertRegistrationInformation(testInternalId, testRegId, false, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
+      mockUpsertRegistrationInformation(testInternalId, testRegId, true)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
 
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
 
