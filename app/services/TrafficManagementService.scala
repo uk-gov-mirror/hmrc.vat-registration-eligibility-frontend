@@ -79,13 +79,13 @@ class TrafficManagementService @Inject()(trafficManagementConnector: TrafficMana
     trafficManagementConnector.getRegistrationInformation()
 
 
-  def upsertRegistrationInformation(internalId: String, regId: String, isOtrs: Boolean, isSubmitted: Boolean
+  def upsertRegistrationInformation(internalId: String, regId: String, isOtrs: Boolean
                                    )(implicit hc: HeaderCarrier): Future[RegistrationInformation] = {
 
     val regInfo = RegistrationInformation(
       internalId = internalId,
       registrationId = regId,
-      status = if (isSubmitted) Submitted else Draft,
+      status = Draft,
       regStartDate = Some(LocalDate.now()),
       channel = if (isOtrs) OTRS else VatReg
     )

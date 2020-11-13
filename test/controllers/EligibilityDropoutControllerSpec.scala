@@ -38,12 +38,12 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase with TrafficMa
     new EligibilityDropoutController(
       controllerComponents,
       FakeCacheIdentifierAction,
-      dataRetrievalAction,
+      fakeDataRetrievalAction,
       new DataRequiredAction,
       mockTrafficManagementService)
 
-  val testInternalId = "testInternalId"
-  val testRegId = "testRegId"
+  val testInternalId = "id"
+  val testRegId = "regId"
   val testDate = LocalDate.now
 
   def viewAsString(default: Boolean) = eligibilityDropout(default)(fakeCacheDataRequestIncorped, messages, appConfig).toString
@@ -76,7 +76,7 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase with TrafficMa
     }
 
     "redirect to the next page when valid data is submitted" in {
-      mockUpsertRegistrationInformation(testInternalId, testRegId, false, false)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
+      mockUpsertRegistrationInformation(testInternalId, testRegId, true)(Future.successful(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)))
 
       val postRequest = fakeRequest.withFormUrlEncodedBody()
 

@@ -133,7 +133,7 @@ class TrafficManagementServiceSpec extends SpecBase
       val testRegInfo = RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg)
       mockUpsertRegistrationInformation(testRegInfo)(Future.successful(testRegInfo))
 
-      val res = await(Service.upsertRegistrationInformation(testInternalId, testRegId, false, false))
+      val res = await(Service.upsertRegistrationInformation(testInternalId, testRegId, false))
 
       res mustBe testRegInfo
     }

@@ -61,7 +61,7 @@ class VATExceptionKickoutController @Inject()(mcc: MessagesControllerComponents,
           Future.successful(BadRequest(vatExceptionKickout(formWithErrors, NormalMode))),
         (value) =>
           dataCacheConnector.save[Boolean](request.internalId, VATExceptionKickoutId.toString, value).flatMap(cacheMap =>
-            trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = true, isSubmitted = false).map {
+            trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = true).map {
               case RegistrationInformation(_, _, _, _, _) =>
                 Redirect(navigator.nextPage(VATExceptionKickoutId, NormalMode)(new UserAnswers(cacheMap)))
             }
