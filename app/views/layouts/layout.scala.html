@@ -66,6 +66,6 @@
     beforeContentBlock = Some(beforeContentBlock),
     bodyEndBlock = Some(bodyEndBlock),
     headerBlock = Some(siteHeader(signOutLink)),
-    footerItems = FooterLinks.items,
+    footerBlock = Some(HmrcFooter()),
     scriptsBlock = Some(scripts)
 )(getHelpForm)
