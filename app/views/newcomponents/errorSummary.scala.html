@@ -14,11 +14,15 @@
  * limitations under the License.
  *@
 
-@(errors: Seq[FormError], errorFieldSuffix: Option[String] = None, errorId: Option[String] = None)(implicit messages: Messages)
+@(errors: Seq[FormError], errorFieldSuffix: Option[Map[String, String]] = None, errorId: Option[String] = None)(implicit messages: Messages)
 
     @if(errors.nonEmpty) {
         @defining(errors.map { error =>
-            val id = errorId.getOrElse(error.key + errorFieldSuffix.fold("")(suffix => s".$suffix"))
+            val suffix = errorFieldSuffix.fold("")(suffix => suffix.getOrElse(error.key, "")) match{
+                case "" => ""
+                case someSuffix => s".$someSuffix"
+            }
+            val id = errorId.getOrElse(error.key + suffix)
             ErrorLink(
                 href = Some(s"#$id"),
                 content = Text(messages(error.message, error.args:_*))

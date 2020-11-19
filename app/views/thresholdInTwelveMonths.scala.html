@@ -31,7 +31,7 @@
 
 @layout(pageTitle = Some(title(form, messages("thresholdInTwelveMonths.title"))), backLink = true) {
 
-    @errorSummary(form.errors)
+    @errorSummary(form.errors, Some(Map("valueDate" -> "month")))
 
     @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths))
     @p{ @thresholdService.returnThresholdDateResult[String](thresholdService.returnHelpText1TwelveMonths) }
