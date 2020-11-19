@@ -20,18 +20,19 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import forms.ZeroRatedSalesFormProvider
-import identifiers.{AgriculturalFlatRateSchemeId, VATExemptionId, ZeroRatedSalesId}
-import javax.inject.Inject
+import identifiers.{VATExemptionId, ZeroRatedSalesId}
+import javax.inject.{Inject, Singleton}
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.I18nSupport
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.zeroRatedSales
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class ZeroRatedSalesController @Inject()(mcc: MessagesControllerComponents,
                                          dataCacheConnector: DataCacheConnector,
                                          navigator: Navigator,
@@ -39,25 +40,24 @@ class ZeroRatedSalesController @Inject()(mcc: MessagesControllerComponents,
                                          getData: DataRetrievalAction,
                                          requireData: DataRequiredAction,
                                          formProvider: ZeroRatedSalesFormProvider
-                                        )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                        )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
-  val form: Form[Boolean] = formProvider()
-
-  def onPageLoad() = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.zeroRatedSales match {
-        case None => form
-        case Some(value) => form.fill(value)
+        case None => formProvider()
+        case Some(value) => formProvider().fill(value)
       }
       Ok(zeroRatedSales(preparedForm, NormalMode))
   }
 
-  def onSubmit() = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      form.bindFromRequest().fold(
+      formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(zeroRatedSales(formWithErrors, NormalMode))),
-        (value) =>
+        value =>
           dataCacheConnector.save[Boolean](request.internalId, ZeroRatedSalesId.toString, value).flatMap {
             cacheMap =>
               val removeStaleData = (b: Boolean) => if (!b) VATExemptionId

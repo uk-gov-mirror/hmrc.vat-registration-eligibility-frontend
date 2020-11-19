@@ -18,18 +18,14 @@ package views
 
 import forms.TurnoverEstimateFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
-import views.newbehaviours.ViewBehaviours
 import views.html.turnoverEstimate
 
-class TurnoverEstimateViewSpec extends ViewBehaviours {
+class TurnoverEstimateViewSpec extends ViewSpecBase {
 
   object Selectors extends BaseSelectors
 
   implicit val msgs = messages
   val messageKeyPrefix = "turnoverEstimate"
-  val button = "Continue"
   val h1 = "What do you think the business’s VAT-taxable turnover will be for the next 12 months?"
   val p1 = "Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate."
   val estimateLinkText1 = "Find out more about"
@@ -39,33 +35,30 @@ class TurnoverEstimateViewSpec extends ViewBehaviours {
 
   val form = new TurnoverEstimateFormProvider()()
 
-  def createView: () => HtmlFormat.Appendable = () => turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable = (form: Form[_]) => turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
   "TurnoverEstimate view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createViewUsingForm(form))
-    behave like pageWithSubmitButton(createViewUsingForm(form), button)
+    lazy val doc = asDocument(turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
-    "have a Continue button" in {
-      val doc = asDocument(createViewUsingForm(form))
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
 
-      doc.select(Selectors.button).text() mustBe button
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
     }
 
     "have the correct heading" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.h1).text() mustBe h1
     }
 
     "have the first paragraph" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.p(1)).text() mustBe p1
     }
 
     "have the second paragraph with the correct url link" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.p(2)).select("a").attr("href") mustBe estimateLink
     }
   }

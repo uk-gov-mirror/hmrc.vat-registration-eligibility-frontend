@@ -21,7 +21,7 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.BusinessEntityFormProvider
 import identifiers.BusinessEntityId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models._
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -31,6 +31,7 @@ import views.html.businessEntity
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class BusinessEntityController @Inject()(mcc: MessagesControllerComponents,
                                          dataCacheConnector: DataCacheConnector,
                                          navigator: Navigator,
@@ -38,8 +39,8 @@ class BusinessEntityController @Inject()(mcc: MessagesControllerComponents,
                                          getData: DataRetrievalAction,
                                          requireData: DataRequiredAction,
                                          formProvider: BusinessEntityFormProvider
-                                        )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
-
+                                        )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>

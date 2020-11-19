@@ -21,9 +21,8 @@ import org.jsoup.Jsoup
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
-import views.newbehaviours.ViewBehaviours
 
-class BusinessEntityViewSpec extends ViewBehaviours {
+class BusinessEntityViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "businessEntity"
   val formProvider = new BusinessEntityFormProvider()()

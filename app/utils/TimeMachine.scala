@@ -18,6 +18,9 @@ package utils
 
 import java.time.{Instant, LocalDate}
 
+import javax.inject.Singleton
+
+@Singleton
 class TimeMachine {
 
   def today: LocalDate = LocalDate.now()

@@ -16,21 +16,15 @@
 
 package views
 
-import controllers.routes
 import forms.VoluntaryRegistrationFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.voluntaryRegistration
-import views.newbehaviours.YesNoViewBehaviours
 
-class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
+class VoluntaryRegistrationViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "voluntaryRegistration"
   val form = new VoluntaryRegistrationFormProvider()()
-  implicit val msgs = messages
 
-  val continueButton = "Continue"
   val h1 = "Would you like to voluntarily register the business for VAT?"
   val paragraph = "The business can still register voluntarily, if it:"
   val bullet1 = "has ever sold VAT-taxable goods or services"
@@ -41,31 +35,31 @@ class VoluntaryRegistrationViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  def createView: () => HtmlFormat.Appendable =
-    () => voluntaryRegistration(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => voluntaryRegistration(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
   "VoluntaryRegistration view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createViewUsingForm(form))
-    behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
+    lazy val doc = asDocument(voluntaryRegistration(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
 
     "have the correct heading" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.h1).text() mustBe h1
     }
 
     "have the correct legend" in {
-      val doc = asDocument(createViewUsingForm(form))
-      doc.select("legend").text() mustBe h2
+      doc.select(Selectors.legend(1)).text() mustBe h2
     }
 
     "have the correct indent text" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.indent).first().text() mustBe indentText
     }
   }
-
 }

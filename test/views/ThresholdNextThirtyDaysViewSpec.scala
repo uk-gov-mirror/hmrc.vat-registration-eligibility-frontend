@@ -20,14 +20,10 @@ import java.time.LocalDate
 
 import forms.ThresholdNextThirtyDaysFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.api.i18n.Messages
-import play.twirl.api.HtmlFormat
 import utils.TimeMachine
 import views.html.thresholdNextThirtyDays
-import views.newbehaviours.ViewBehaviours
 
-class ThresholdNextThirtyDaysViewSpec extends ViewBehaviours {
+class ThresholdNextThirtyDaysViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "thresholdNextThirtyDays"
 
@@ -37,26 +33,32 @@ class ThresholdNextThirtyDaysViewSpec extends ViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  implicit val msgs: Messages = messages
   val form = new ThresholdNextThirtyDaysFormProvider(TestTimeMachine)()
 
-  def createView: () => HtmlFormat.Appendable = () =>
-    thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable = (form: Form[_]) =>
-    thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
+  val h1 = "Does the business expect to make more than £85,000 in a single month or a 30-day period?"
   val testText = "This could happen when, for example, on 16 April a business wins a big contract to supply goods or services, which would mean the value of supplies made solely within the next 30 days, by 15 May, are more than the VAT registration threshold."
   val testLegend = "What date did the business realise it would go over the threshold?"
   val testHint = "For example, 13 02 2017"
   val testButton = "Continue"
 
   "ThresholdNextThirtyDays view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createView())
-    behave like pageWithSubmitButton(createView(), testButton)
+    val doc = asDocument(thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
-    val doc = asDocument(createViewUsingForm(form))
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
 
     "have the correct text" in {
       doc.select(Selectors.p(1)).text() mustBe testText

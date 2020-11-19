@@ -16,16 +16,28 @@
 
 package views
 
-import views.newbehaviours.ViewBehaviours
 import views.html.session_expired
 
-class SessionExpiredViewSpec extends ViewBehaviours {
+class SessionExpiredViewSpec extends ViewSpecBase {
 
-  def view = () => session_expired()(fakeRequest, messages, frontendAppConfig)
-  implicit val msgs = messages
+  object Selectors extends BaseSelectors
+
+  val h1 = "For your security, this service has been reset"
+  val p1 = "The details you have given have been deleted because you did not continue the service for 1 hour."
 
   "Session Expired view" must {
-    behave like normalPage(view(), "session_expired")
-  }
+    lazy val doc = asDocument(session_expired()(fakeRequest, messages, frontendAppConfig))
 
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
+      doc.select(Selectors.p(1)).text() mustBe p1
+    }
+  }
 }

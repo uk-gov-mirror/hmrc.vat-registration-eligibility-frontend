@@ -16,17 +16,23 @@
 
 package views
 
-import views.newbehaviours.ViewBehaviours
 import views.html.index
 
-class IndexViewSpec extends ViewBehaviours {
+class IndexViewSpec extends ViewSpecBase {
 
-  implicit val msgs = messages
+  object Selectors extends BaseSelectors
 
-  def view = () => index()(fakeRequest, messages, frontendAppConfig)
+  val h1 = "vat-registration-eligibility-frontend"
 
   "Index view" must {
-    behave like normalPage(view(), "index", Seq("guidance"))
-  }
+    lazy val doc = asDocument(index()(fakeRequest, messages, frontendAppConfig))
 
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+  }
 }

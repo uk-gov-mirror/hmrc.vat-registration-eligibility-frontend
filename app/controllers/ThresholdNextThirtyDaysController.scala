@@ -21,7 +21,7 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.ThresholdNextThirtyDaysFormProvider
 import identifiers.ThresholdNextThirtyDaysId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.{ConditionalDateFormElement, NormalMode}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,6 +32,7 @@ import views.html.thresholdNextThirtyDays
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class ThresholdNextThirtyDaysController @Inject()(mcc: MessagesControllerComponents,
                                                   dataCacheConnector: DataCacheConnector,
                                                   navigator: Navigator,
@@ -40,7 +41,8 @@ class ThresholdNextThirtyDaysController @Inject()(mcc: MessagesControllerCompone
                                                   requireData: DataRequiredAction,
                                                   thresholdService: ThresholdService,
                                                   formProvider: ThresholdNextThirtyDaysFormProvider
-                                                 )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                                 )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>

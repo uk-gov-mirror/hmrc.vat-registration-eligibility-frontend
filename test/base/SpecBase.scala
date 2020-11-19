@@ -38,29 +38,29 @@ trait SpecBase extends CommonSpecBase with GuiceOneAppPerSuite {
     .configure("metrics.enabled" -> "false")
     .build()
 
-  lazy val injector: Injector = app.injector
+  def injector: Injector = app.injector
 
-  implicit lazy val frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+  implicit def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
 
-  lazy val controllerComponents: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
+  def controllerComponents: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
 
-  implicit lazy val executionContext: ExecutionContext = injector.instanceOf[ExecutionContext]
+  implicit def executionContext: ExecutionContext = injector.instanceOf[ExecutionContext]
 
-  lazy val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
-  lazy val fakeRequest = FakeRequest("", "")
+  def fakeRequest = FakeRequest("", "")
 
-  lazy val fakeDataRetrievalAction = new FakeDataRetrievalAction(Some(CacheMap("id", Map())))
+  def fakeDataRetrievalAction = new FakeDataRetrievalAction(Some(CacheMap("id", Map())))
 
-  lazy val fakeDataRequestIncorped = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers((CacheMap("1", Map()))))
+  def fakeDataRequestIncorped = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers((CacheMap("1", Map()))))
 
-  lazy val fakeDataRequestIncorpedOver12m = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers((CacheMap("1", Map()))))
+  def fakeDataRequestIncorpedOver12m = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers((CacheMap("1", Map()))))
 
-  lazy val fakeDataRequest = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers(CacheMap("1", Map())))
+  def fakeDataRequest = new DataRequest(fakeRequest, "1", CurrentProfile("foo"), new UserAnswers(CacheMap("1", Map())))
 
-  lazy val fakeCacheDataRequestIncorped = new CacheIdentifierRequest(fakeRequest, "1", CurrentProfile("foo"))
+  def fakeCacheDataRequestIncorped = new CacheIdentifierRequest(fakeRequest, "1", CurrentProfile("foo"))
 
-  lazy val messages: Messages = messagesApi.preferred(fakeRequest)
+  def messages: Messages = messagesApi.preferred(fakeRequest)
 
-  lazy val messagesIncorped: Messages = messagesApi.preferred(fakeDataRequestIncorped)
+  def messagesIncorped: Messages = messagesApi.preferred(fakeDataRequestIncorped)
 }

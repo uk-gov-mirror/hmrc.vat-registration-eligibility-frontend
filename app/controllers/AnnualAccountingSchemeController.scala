@@ -21,7 +21,7 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.AnnualAccountingSchemeFormProvider
 import identifiers.AnnualAccountingSchemeId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.I18nSupport
@@ -32,14 +32,16 @@ import views.html.annualAccountingScheme
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class AnnualAccountingSchemeController @Inject()(mcc: MessagesControllerComponents,
                                                  dataCacheConnector: DataCacheConnector,
                                                  navigator: Navigator,
                                                  identify: CacheIdentifierAction,
                                                  getData: DataRetrievalAction,
                                                  requireData: DataRequiredAction,
-                                                 formProvider: AnnualAccountingSchemeFormProvider)
-                                                (implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                                 formProvider: AnnualAccountingSchemeFormProvider
+                                                )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -56,7 +58,7 @@ class AnnualAccountingSchemeController @Inject()(mcc: MessagesControllerComponen
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(annualAccountingScheme(formWithErrors, NormalMode))),
-        (value) =>
+        value =>
           dataCacheConnector.save[Boolean](request.internalId, AnnualAccountingSchemeId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(AnnualAccountingSchemeId, NormalMode)(new UserAnswers(cacheMap))))
       )

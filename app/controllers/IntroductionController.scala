@@ -18,21 +18,22 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.CacheIdentifierAction
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.introduction
 
+@Singleton
 class IntroductionController @Inject()(mcc: MessagesControllerComponents,
                                        identify: CacheIdentifierAction
                                       )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify) { implicit request =>
+  def onPageLoad: Action[AnyContent] = identify { implicit request =>
     Ok(introduction())
   }
 
-  def onSubmit: Action[AnyContent] = (identify) { implicit request =>
+  def onSubmit: Action[AnyContent] = identify { implicit request =>
     Redirect(controllers.routes.BusinessEntityController.onPageLoad())
   }
 

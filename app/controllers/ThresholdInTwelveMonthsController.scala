@@ -21,11 +21,11 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.ThresholdInTwelveMonthsFormProvider
 import identifiers.ThresholdInTwelveMonthsId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.{ConditionalDateFormElement, NormalMode, RegistrationInformation}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{ThresholdService, TrafficManagementService}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
@@ -33,6 +33,7 @@ import views.html.thresholdInTwelveMonths
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerComponents,
                                                   dataCacheConnector: DataCacheConnector,
                                                   navigator: Navigator,
@@ -45,8 +46,7 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
                                                  )(implicit appConfig: FrontendAppConfig,
                                                    executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
-
-  def onPageLoad() = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.thresholdInTwelveMonths match {
         case None => formProvider()
@@ -55,12 +55,12 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
       Ok(thresholdInTwelveMonths(preparedForm, NormalMode, thresholdService))
   }
 
-  def onSubmit() = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(thresholdInTwelveMonths(formWithErrors, NormalMode, thresholdService))),
-        (formValue) =>
+        formValue =>
           dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap { cacheMap =>
             if (formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException
           }.flatMap(cMap =>

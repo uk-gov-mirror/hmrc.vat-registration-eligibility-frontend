@@ -21,7 +21,7 @@ import connectors.DataCacheConnector
 import controllers.actions.{CacheIdentifierAction, DataRequiredAction, DataRetrievalAction}
 import forms.VoluntaryInformationFormProvider
 import identifiers.VoluntaryInformationId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.I18nSupport
@@ -32,6 +32,7 @@ import views.html.voluntaryInformation
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class VoluntaryInformationController @Inject()(mcc: MessagesControllerComponents,
                                                dataCacheConnector: DataCacheConnector,
                                                navigator: Navigator,
@@ -39,25 +40,24 @@ class VoluntaryInformationController @Inject()(mcc: MessagesControllerComponents
                                                getData: DataRetrievalAction,
                                                requireData: DataRequiredAction,
                                                formProvider: VoluntaryInformationFormProvider
-                                              )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
-
-  val form: Form[Boolean] = formProvider()
+                                              )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.voluntaryInformation match {
-        case None => form
-        case Some(value) => form.fill(value)
+        case None => formProvider()
+        case Some(value) => formProvider().fill(value)
       }
       Ok(voluntaryInformation(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      form.bindFromRequest().fold(
+      formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(voluntaryInformation(formWithErrors, NormalMode))),
-        (value) =>
+        value =>
           dataCacheConnector.save[Boolean](request.internalId, VoluntaryInformationId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(VoluntaryInformationId, NormalMode)(new UserAnswers(cacheMap))))
       )

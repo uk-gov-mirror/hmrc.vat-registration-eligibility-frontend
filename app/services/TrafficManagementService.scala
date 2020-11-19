@@ -66,10 +66,9 @@ class TrafficManagementService @Inject()(trafficManagementConnector: TrafficMana
             auditConnector.sendExtendedEvent(auditEvent)
 
             Allocated
-          case QuotaReached => {
+          case QuotaReached =>
             Logger.info("Daily quota reached")
-            QuotaReached
-          } //TODO To be finished in the traffic management intergation story
+            QuotaReached //TODO To be finished in the traffic management intergation story
         }
       case None =>
         throw new InternalServerException("[TrafficManagementService][allocate] Missing authProviderId for journey start auditing")

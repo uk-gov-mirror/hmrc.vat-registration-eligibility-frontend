@@ -16,29 +16,34 @@
 
 package views
 
-import play.twirl.api.Html
-import views.html.{choseNotToRegister, introduction}
-import views.newbehaviours.ViewBehaviours
+import views.html.introduction
 
-class IntroductionViewSpec extends ViewBehaviours with BaseSelectors {
+class IntroductionViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "introduction"
-  implicit val msgs = messages
 
-  val h1Text = "Check if you can register for VAT online"
-  val p1Text = "We will ask you some questions about the nature of the business to check if this is the best way for you to register."
-  val buttonText = "Continue"
+  val h1 = "Check if you can register for VAT online"
+  val p1 = "We will ask you some questions about the nature of the business to check if this is the best way for you to register."
 
-  def createView = () => introduction()(fakeRequest, messages, frontendAppConfig)
-  lazy val doc = asDocument(createView())
+  object Selectors extends BaseSelectors
 
   "Introduction view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithHeading(createView(), h1Text)
-    behave like pageWithSubmitButton(createView(), buttonText)
+    lazy val doc = asDocument(introduction()(fakeRequest, messages, frontendAppConfig))
 
-    "have the correct paragraph" in {
-      doc.select(p(1)).first.text mustBe p1Text
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
+      doc.select(Selectors.p(1)).text() mustBe p1
     }
   }
 }

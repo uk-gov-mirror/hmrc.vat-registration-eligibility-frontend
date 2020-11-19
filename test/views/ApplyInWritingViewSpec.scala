@@ -16,17 +16,34 @@
 
 package views
 
-import views.newbehaviours.ViewBehaviours
 import views.html.applyInWriting
 
-class ApplyInWritingViewSpec extends ViewBehaviours {
+class ApplyInWritingViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "applyInWriting"
-  implicit val msgs = messages
 
-  def createView = () => applyInWriting()(fakeRequest, messages, frontendAppConfig)
+  object Selectors extends BaseSelectors
+
+  val h1 = "You must apply in writing"
+  val p1 = "Please use form VAT1 to apply for an exemption from VAT registration."
 
   "ApplyInWriting view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
+    lazy val doc = asDocument(applyInWriting()(fakeRequest, messages, frontendAppConfig))
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
+      doc.select(Selectors.p(1)).text() mustBe p1
+    }
   }
 }

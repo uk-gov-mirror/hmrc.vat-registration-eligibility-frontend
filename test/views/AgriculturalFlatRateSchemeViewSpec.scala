@@ -16,21 +16,15 @@
 
 package views
 
-import controllers.routes
 import forms.AgriculturalFlatRateSchemeFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.agriculturalFlatRateScheme
-import views.newbehaviours.YesNoViewBehaviours
 
-class AgriculturalFlatRateSchemeViewSpec extends YesNoViewBehaviours {
+class AgriculturalFlatRateSchemeViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "agriculturalFlatRateScheme"
   val form = new AgriculturalFlatRateSchemeFormProvider()()
-  implicit val msgs = messages
 
-  val continueButton = "Continue"
   val h1 = "Is the business applying for the Agricultural Flat Rate Scheme?"
   val p1 = "The scheme is a different type of VAT registration for farmers."
   val afrsLinkText1 = "Find out more about the"
@@ -40,31 +34,35 @@ class AgriculturalFlatRateSchemeViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  def createView: () => HtmlFormat.Appendable =
-    () => agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
   "AgriculturalFlatRateScheme view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createViewUsingForm(form))
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.AgriculturalFlatRateSchemeController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
-  }
+    lazy val doc = asDocument(agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
-  "have the correct heading" in {
-    val doc = asDocument(createViewUsingForm(form))
-    doc.select(Selectors.h1).text() mustBe h1
-  }
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
 
-  "have the first paragraph" in {
-    val doc = asDocument(createViewUsingForm(form))
-    doc.select(Selectors.p(1)).text() mustBe p1
-  }
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
 
-  "have the second paragraph with the correct url link" in {
-    val doc = asDocument(createViewUsingForm(form))
-    doc.select(Selectors.p(2)).select("a").attr("href") mustBe afrsLink
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
+      doc.select(Selectors.p(1)).text() mustBe p1
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
+    }
+
+    "have the second paragraph with the correct url link" in {
+      doc.select(Selectors.p(2)).select("a").attr("href") mustBe afrsLink
+    }
   }
 }

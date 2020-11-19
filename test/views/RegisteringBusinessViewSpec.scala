@@ -16,37 +16,40 @@
 
 package views
 
-import controllers.routes
 import forms.RegisteringBusinessFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.registeringBusiness
-import views.newbehaviours.YesNoViewBehaviours
 
-class RegisteringBusinessViewSpec extends YesNoViewBehaviours {
+class RegisteringBusinessViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "registeringBusiness"
   val form = new RegisteringBusinessFormProvider()()
-  implicit val msgs = messages
 
   object Selectors extends BaseSelectors
 
-  val button = "Continue"
-
-  def createView: () => HtmlFormat.Appendable =
-    () => registeringBusiness(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => registeringBusiness(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+  val h1 = "Do you want to register your business or someone else’s?"
 
   "RegisteringBusiness view" must {
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.RegisteringBusinessController.onSubmit().url)
+    lazy val doc = asDocument(registeringBusiness(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
-    "have a continue button" in {
-      val doc = asDocument(createViewUsingForm(form))
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
 
-      doc.select(Selectors.button).text() mustBe button
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
     }
   }
 }

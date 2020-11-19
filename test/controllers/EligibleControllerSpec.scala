@@ -48,7 +48,7 @@ class EligibleControllerSpec extends ControllerSpecBase with TrafficManagementSe
     mockTrafficManagementService
   )
 
-  val viewAsString = eligible()(fakeRequest, messages, frontendAppConfig).toString
+  def viewAsString = eligible()(fakeRequest, messages, frontendAppConfig).toString
 
   val testInternalId = "id"
   val testRegId = "regId"

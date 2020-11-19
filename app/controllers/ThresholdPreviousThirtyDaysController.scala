@@ -21,7 +21,7 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.ThresholdPreviousThirtyDaysFormProvider
 import identifiers.ThresholdPreviousThirtyDaysId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.{ConditionalDateFormElement, NormalMode}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
@@ -33,6 +33,7 @@ import views.html.thresholdPreviousThirtyDays
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class ThresholdPreviousThirtyDaysController @Inject()(mcc: MessagesControllerComponents,
                                                       dataCacheConnector: DataCacheConnector,
                                                       navigator: Navigator,
@@ -41,8 +42,8 @@ class ThresholdPreviousThirtyDaysController @Inject()(mcc: MessagesControllerCom
                                                       requireData: DataRequiredAction,
                                                       thresholdService: ThresholdService,
                                                       formProvider: ThresholdPreviousThirtyDaysFormProvider
-                                                     )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
-
+                                                     )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -59,7 +60,7 @@ class ThresholdPreviousThirtyDaysController @Inject()(mcc: MessagesControllerCom
         (formWithErrors: Form[_]) => {
           Future.successful(BadRequest(thresholdPreviousThirtyDays(formWithErrors, NormalMode, thresholdService)))
         },
-        (formValue) =>
+        formValue =>
           dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdPreviousThirtyDaysId.toString, formValue).flatMap {
             cacheMap =>
               val userAnswers = new UserAnswers(cacheMap)

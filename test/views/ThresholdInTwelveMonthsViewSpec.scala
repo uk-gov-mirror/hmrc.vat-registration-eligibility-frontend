@@ -22,23 +22,18 @@ import config.FrontendAppConfig
 import forms.ThresholdInTwelveMonthsFormProvider
 import javax.inject.Inject
 import models.NormalMode
-import play.api.data.Form
-import play.api.i18n.MessagesApi
-import views.html.thresholdInTwelveMonths
 import services.ThresholdService
 import utils.TimeMachine
-import views.newbehaviours.ViewBehaviours
+import views.html.thresholdInTwelveMonths
 
 
-
-class ThresholdInTwelveMonthsViewSpec @Inject()(implicit appConfig: FrontendAppConfig)  extends ViewBehaviours {
+class ThresholdInTwelveMonthsViewSpec @Inject()(implicit appConfig: FrontendAppConfig) extends ViewSpecBase {
 
   object TestTimeMachine extends TimeMachine {
     override def today: LocalDate = LocalDate.parse("2020-01-01")
   }
 
   val messageKeyPrefix = "thresholdInTwelveMonths"
-  implicit val msgs = messages
   val form = new ThresholdInTwelveMonthsFormProvider(TestTimeMachine)()
 
   val thresholdService: ThresholdService = app.injector.instanceOf[ThresholdService]
@@ -52,34 +47,35 @@ class ThresholdInTwelveMonthsViewSpec @Inject()(implicit appConfig: FrontendAppC
 
   object Selectors extends BaseSelectors
 
-  def createView = () => thresholdInTwelveMonths(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
-  def createViewUsingForm = (form: Form[_]) => thresholdInTwelveMonths(form, NormalMode,thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
   "ThresholdNextThirtyDays view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
+    val doc = asDocument(thresholdInTwelveMonths(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have a heading" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.h1).text() mustBe h1
     }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
     "have a paragraph" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.p(1)).text() mustBe paragraph
     }
 
     "have bullet points" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.bullet(1)).text() mustBe bullet1
       doc.select(Selectors.bullet(2)).text() mustBe bullet2
     }
 
     "have a continue button" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.button).text() mustBe button
     }
+
     "contain a legend for the question" in {
-      val doc = asDocument(createViewUsingForm(form))
       val legends = doc.getElementsByTag("valueDate")
       legends.size mustBe 1
       legends.first.text mustBe h2

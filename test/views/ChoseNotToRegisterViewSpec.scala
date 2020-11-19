@@ -16,23 +16,34 @@
 
 package views
 
-import views.newbehaviours.ViewBehaviours
 import views.html.choseNotToRegister
 
-class ChoseNotToRegisterViewSpec extends ViewBehaviours {
+class ChoseNotToRegisterViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "choseNotToRegister"
-  implicit val msgs = messages
 
   val h1 = "You have chosen not to register the business for VAT"
   val finishButton = "Finish"
 
-  def createView = () => choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)
+  object Selectors extends BaseSelectors
 
   "ChoseNotToRegister view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createView())
-    behave like pageWithHeading(createView(), h1)
-    behave like pageWithSubmitButton(createView(), finishButton)
+    lazy val doc = asDocument(choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig))
+
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe finishButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
   }
 }
