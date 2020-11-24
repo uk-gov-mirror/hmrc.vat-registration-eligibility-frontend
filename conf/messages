@@ -195,10 +195,10 @@ eligibility.international.link3 = Use the other VAT registration service
 internationalActivities.heading = Will the business do any of the following international activities over the next 12 months?
 internationalActivities.error.required = Tell us if the business will do any of these international activities over the next 12 months
 internationalActivities.bulletText = Tell us if the business will:
-internationalActivities.bullet1 = export goods or services to EU countries
-internationalActivities.bullet2 = import goods or services from EU countries
+internationalActivities.bullet1 = bring goods or services in from EU countries
+internationalActivities.bullet2 = send goods or services to EU countries
 internationalActivities.bullet3 = sell assets that it bought from a country outside the EU and claimed a VAT refund on
-internationalActivities.bullet4 = do all of its business outside the UK
+internationalActivities.bullet4 = do all its business outside the UK
 internationalActivities.bullet5 = have its head office outside the UK
 
 zeroRatedSales.heading = Does the business sell mainly zero-rated goods or services?
