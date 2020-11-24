@@ -21,17 +21,18 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.RegisteringBusinessFormProvider
 import identifiers.RegisteringBusinessId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.I18nSupport
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.registeringBusiness
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class RegisteringBusinessController @Inject()(mcc: MessagesControllerComponents,
                                               dataCacheConnector: DataCacheConnector,
                                               navigator: Navigator,
@@ -39,25 +40,24 @@ class RegisteringBusinessController @Inject()(mcc: MessagesControllerComponents,
                                               getData: DataRetrievalAction,
                                               requireData: DataRequiredAction,
                                               formProvider: RegisteringBusinessFormProvider
-                                             )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                             )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
-  val form: Form[Boolean] = formProvider()
-
-  def onPageLoad() = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.registeringBusiness match {
-        case None => form
-        case Some(value) => form.fill(value)
+        case None => formProvider()
+        case Some(value) => formProvider().fill(value)
       }
       Ok(registeringBusiness(preparedForm, NormalMode))
   }
 
-  def onSubmit() = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      form.bindFromRequest().fold(
+      formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(registeringBusiness(formWithErrors, NormalMode))),
-        (value) =>
+        value =>
           dataCacheConnector.save[Boolean](request.internalId, RegisteringBusinessId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(RegisteringBusinessId, NormalMode)(new UserAnswers(cacheMap))))
       )

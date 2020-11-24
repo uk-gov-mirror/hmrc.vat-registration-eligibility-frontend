@@ -17,11 +17,13 @@
 package forms
 
 import forms.mappings.Mappings
+import javax.inject.Singleton
 import models._
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 
+@Singleton
 class BusinessEntityFormProvider extends FormErrorHelper with Mappings {
 
   val businessEntity: String = "value"

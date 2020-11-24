@@ -16,16 +16,14 @@
 
 package views
 
-import controllers.routes
 import forms.AnnualAccountingSchemeFormProvider
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import views.newbehaviours.YesNoViewBehaviours
 import views.html.annualAccountingScheme
 
-class AnnualAccountingSchemeViewSpec extends YesNoViewBehaviours {
+class AnnualAccountingSchemeViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "annualAccountingScheme"
   val form = new AnnualAccountingSchemeFormProvider()()
@@ -41,6 +39,7 @@ class AnnualAccountingSchemeViewSpec extends YesNoViewBehaviours {
   val linkText = "Annual Accounting Scheme (opens in new tab)"
   val para2 = s"Find out more about the $linkText"
   val button = "Continue"
+  val h1 = "Is the business applying for the Annual Accounting Scheme?"
 
   object Selectors extends BaseSelectors
 
@@ -51,18 +50,30 @@ class AnnualAccountingSchemeViewSpec extends YesNoViewBehaviours {
     (form: Form[_]) => annualAccountingScheme(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "AnnualAccountingScheme view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like yesNoPage(
-      form,
-      createViewUsingForm,
-      messageKeyPrefix,
-      routes.AnnualAccountingSchemeController.onSubmit().url
-    )
+    lazy val doc = asDocument(createViewUsingForm(form))
 
-    val doc = asDocument(createViewUsingForm(form))
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
 
-    "have a paragraph" in {
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
       doc.select(Selectors.p(1)).text() mustBe para
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
     }
 
     "have bullets with text" in {
@@ -77,11 +88,6 @@ class AnnualAccountingSchemeViewSpec extends YesNoViewBehaviours {
 
     "have a link" in {
       doc.select(Selectors.p(4)).text() mustBe para2
-    }
-
-    "have a continue button" in {
-      val doc = asDocument(createViewUsingForm(form))
-      doc.select(Selectors.button).text() mustBe button
     }
   }
 }

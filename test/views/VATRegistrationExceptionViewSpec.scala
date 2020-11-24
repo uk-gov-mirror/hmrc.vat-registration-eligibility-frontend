@@ -16,45 +16,44 @@
 
 package views
 
-import controllers.routes
 import forms.VATRegistrationExceptionFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.vatRegistrationException
-import views.newbehaviours.YesNoViewBehaviours
 
-class VATRegistrationExceptionViewSpec extends YesNoViewBehaviours {
+class VATRegistrationExceptionViewSpec extends ViewSpecBase {
   val messageKeyPrefix = "vatRegistrationException"
   val form = new VATRegistrationExceptionFormProvider()()
-  implicit val msgs = messages
 
-  val continueButton = "Continue"
   val h1 = "Would you like to apply for a VAT registration exception?"
   val paragraph = "You can apply for a registration exception if the business goes over the VAT threshold temporarily."
 
   object Selectors extends BaseSelectors
 
-  def createView: () => HtmlFormat.Appendable =
-    () => vatRegistrationException(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => vatRegistrationException(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
   "VATRegistrationException view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createViewUsingForm(form))
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VATRegistrationExceptionController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
+    lazy val doc = asDocument(vatRegistrationException(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
 
     "have the correct heading" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.h1).text() mustBe h1
     }
 
-    "have the first paragraph " in {
-      val doc = asDocument(createViewUsingForm(form))
+    "have the first paragraph" in {
       doc.select(Selectors.p(1)).text() mustBe paragraph
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
     }
   }
 }

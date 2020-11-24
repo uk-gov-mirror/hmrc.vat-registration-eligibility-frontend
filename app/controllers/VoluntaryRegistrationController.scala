@@ -21,17 +21,18 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.VoluntaryRegistrationFormProvider
 import identifiers.VoluntaryRegistrationId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.I18nSupport
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.voluntaryRegistration
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class VoluntaryRegistrationController @Inject()(mcc: MessagesControllerComponents,
                                                 dataCacheConnector: DataCacheConnector,
                                                 navigator: Navigator,
@@ -39,25 +40,24 @@ class VoluntaryRegistrationController @Inject()(mcc: MessagesControllerComponent
                                                 getData: DataRetrievalAction,
                                                 requireData: DataRequiredAction,
                                                 formProvider: VoluntaryRegistrationFormProvider
-                                               )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                               )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
-  val form: Form[Boolean] = formProvider()
-
-  def onPageLoad() = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.voluntaryRegistration match {
-        case None => form
-        case Some(value) => form.fill(value)
+        case None => formProvider()
+        case Some(value) => formProvider().fill(value)
       }
       Ok(voluntaryRegistration(preparedForm, NormalMode))
   }
 
-  def onSubmit() = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      form.bindFromRequest().fold(
+      formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
           Future.successful(BadRequest(voluntaryRegistration(formWithErrors, NormalMode))),
-        (value) =>
+        value =>
           dataCacheConnector.save[Boolean](request.internalId, VoluntaryRegistrationId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(VoluntaryRegistrationId, NormalMode)(new UserAnswers(cacheMap))))
       )

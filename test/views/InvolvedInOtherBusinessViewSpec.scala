@@ -16,34 +16,52 @@
 
 package views
 
-import controllers.routes
 import forms.InvolvedInOtherBusinessFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
-import views.newbehaviours.YesNoViewBehaviours
 import views.html.involvedInOtherBusiness
 
-class InvolvedInOtherBusinessViewSpec extends YesNoViewBehaviours {
+class InvolvedInOtherBusinessViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "involvedInOtherBusiness"
   val form = new InvolvedInOtherBusinessFormProvider().form
-  implicit val msgs = messages
 
-  def createView(): HtmlFormat.Appendable = involvedInOtherBusiness(form, NormalMode)(fakeRequest, messages, frontendAppConfig)
+  val h1 = "Have you been involved with another business or taken over a VAT-registered business?"
 
-  def createViewUsingForm(): Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => involvedInOtherBusiness(form, NormalMode)(fakeRequest, messages, frontendAppConfig)
+  val bullet1 = "over the past 2 years, you have had another self-employed business in the UK or Isle of Man (do not tell us if your only source of self-employed income was from being a landlord)"
+  val bullet2 = "over the past 2 years, you have been a partner or director with a different business in the UK or Isle of Man"
+  val bullet4 = "the company used to be a different type of VAT-registered business, for example a sole trader"
+  val bullet5 = "the company has taken over another VAT-registered company that was making a profit"
+
+  object Selectors extends BaseSelectors
 
   "InvolvedInOtherBusiness view with no acting on behalf of officer" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like yesNoPage(form, createViewUsingForm(), messageKeyPrefix, routes.InvolvedInOtherBusinessController.onSubmit().url)
+    lazy val doc = asDocument(involvedInOtherBusiness(form, NormalMode)(fakeRequest, messages, frontendAppConfig))
 
-    "display the right headings and bullets correctly" in {
-      val doc = asDocument(createView())
-      doc.select("h1").text() mustBe "Have you been involved with another business or taken over a VAT-registered business?"
-      doc.select("li:nth-of-type(1)").first().text() mustBe "over the past 2 years, you have had another self-employed business in the UK or Isle of Man (do not tell us if your only source of self-employed income was from being a landlord)"
-      doc.select("li:nth-of-type(5)").first().text() mustBe "the company has taken over another VAT-registered company that was making a profit"
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
+    }
+
+    "display the bullet text correctly" in {
+      doc.select(Selectors.bullet(1)).first().text() mustBe bullet1
+      doc.select(Selectors.bullet(2)).first().text() mustBe bullet2
+      doc.select(Selectors.bullet(4)).first().text() mustBe bullet4
+      doc.select(Selectors.bullet(5)).first().text() mustBe bullet5
     }
   }
 

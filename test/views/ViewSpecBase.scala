@@ -19,9 +19,16 @@ package views
 import base.SpecBase
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import play.api.i18n.Messages
 import play.twirl.api.Html
 
 trait ViewSpecBase extends SpecBase {
+
+  lazy val continueButton = "Continue"
+  lazy val backLink = "Back"
+
+  def title(heading: String) =
+    s"$heading - Register for VAT - GOV.UK"
 
   def asDocument(html: Html): Document = Jsoup.parse(html.toString())
 

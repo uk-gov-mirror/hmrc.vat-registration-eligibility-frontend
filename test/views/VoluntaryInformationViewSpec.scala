@@ -18,28 +18,18 @@ package views
 
 import forms.VoluntaryInformationFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.voluntaryInformation
-import views.newbehaviours.ViewBehaviours
 
-class VoluntaryInformationViewSpec extends ViewBehaviours {
-
+class VoluntaryInformationViewSpec extends ViewSpecBase {
   val messageKeyPrefix = "voluntaryInformation"
   val form = new VoluntaryInformationFormProvider()()
 
   object Selectors extends BaseSelectors
 
-  def createView: () => HtmlFormat.Appendable =
-    () => voluntaryInformation(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => voluntaryInformation(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
   "BusinessEntity view" must {
 
     "have a set of radio inputs" which {
-      val doc = asDocument(createViewUsingForm(form))
+      lazy val doc = asDocument(voluntaryInformation(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
       "for the option 'Yes, I would like to sign up to Making Tax Digital'" should {
 

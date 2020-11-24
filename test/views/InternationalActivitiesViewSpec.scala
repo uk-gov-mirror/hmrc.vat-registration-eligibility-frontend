@@ -16,21 +16,17 @@
 
 package views
 
-import controllers.routes
 import forms.InternationalActivitiesFormProvider
 import models.NormalMode
 import play.api.data.Form
 import play.twirl.api.HtmlFormat
 import views.html.internationalActivities
-import views.newbehaviours.YesNoViewBehaviours
 
-class InternationalActivitiesViewSpec extends YesNoViewBehaviours {
+class InternationalActivitiesViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "internationalActivities"
   val form = new InternationalActivitiesFormProvider()()
-  implicit val msgs = messages
 
-  val continueButton = "Continue"
   val h1 = "Will the business do any of the following international activities over the next 12 months?"
   val paragraph = "Tell us if the business will:"
   val bullet1 = "export goods or services to EU countries"
@@ -41,30 +37,34 @@ class InternationalActivitiesViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  def createView: () => HtmlFormat.Appendable =
-    () => internationalActivities(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => internationalActivities(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
   "InternationalActivities view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createViewUsingForm(form))
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.InternationalActivitiesController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), continueButton)
+    lazy val doc = asDocument(internationalActivities(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
-    "have the correct heading " in {
-      val doc = asDocument(createViewUsingForm(form))
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
       doc.select(Selectors.h1).text() mustBe h1
     }
 
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
+    }
+
     "have the correct paragraph" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.p(1)).text() mustBe paragraph
     }
 
     "display the bullet text correctly" in {
-      val doc = asDocument(createViewUsingForm(form))
       doc.select(Selectors.bullet(1)).first().text() mustBe bullet1
       doc.select(Selectors.bullet(2)).first().text() mustBe bullet2
       doc.select(Selectors.bullet(3)).first().text() mustBe bullet3

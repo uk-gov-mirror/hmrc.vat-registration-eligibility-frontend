@@ -16,20 +16,15 @@
 
 package views
 
-import controllers.routes
-import deprecated.DeprecatedConstants
 import forms.ZeroRatedSalesFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.zeroRatedSales
-import views.newbehaviours.YesNoViewBehaviours
 
-class ZeroRatedSalesViewSpec extends YesNoViewBehaviours {
+class ZeroRatedSalesViewSpec extends ViewSpecBase {
   val messageKeyPrefix = "zeroRatedSales"
   val form = new ZeroRatedSalesFormProvider()()
-  implicit val msgs = messages
 
+  val h1 = "Does the business sell mainly zero-rated goods or services?"
   val detailsSummary = "Examples of zero-rated goods or services"
   val linkText = "VAT rates on different goods and services (opens in new tab)"
   val line1 = "Zero-rated goods and services are VAT-taxable but the VAT rate on them is 0%."
@@ -43,22 +38,28 @@ class ZeroRatedSalesViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
-  def createView: () => HtmlFormat.Appendable =
-    () => zeroRatedSales(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => zeroRatedSales(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
   "ZeroRatedSales view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like yesNoPage(
-      form,
-      createViewUsingForm,
-      messageKeyPrefix,
-      routes.ZeroRatedSalesController.onSubmit().url
-    )
+    lazy val doc = asDocument(zeroRatedSales(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
-    val doc = asDocument(createViewUsingForm(form))
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
+    }
 
     "have a dropdown summary" in {
       doc.select(Selectors.detailsSummary).text() mustBe detailsSummary

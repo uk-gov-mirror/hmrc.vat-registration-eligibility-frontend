@@ -20,17 +20,17 @@ import com.google.inject.Inject
 import connectors.DataCacheConnector
 import models.requests.{CacheIdentifierRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import utils.UserAnswers
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class DataRetrievalActionImpl @Inject()(val dataCacheConnector: DataCacheConnector)
                                        (implicit val executionContext: ExecutionContext) extends DataRetrievalAction {
 
   override protected def transform[A](request: CacheIdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
-    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     dataCacheConnector.fetch(request.cacheId).map {
       case None => OptionalDataRequest(request.request, request.cacheId, request.currentProfile, None)

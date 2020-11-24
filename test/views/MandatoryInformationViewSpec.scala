@@ -17,32 +17,44 @@
 package views
 
 import views.html.mandatoryInformation
-import views.newbehaviours.ViewBehaviours
 
-class MandatoryInformationViewSpec extends ViewBehaviours with BaseSelectors {
+class MandatoryInformationViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "mandatoryInformation"
-  implicit val msgs = messages
 
-  val h1Text = "You must sign up for Making Tax Digital for VAT"
+  val h1 = "You must sign up for Making Tax Digital for VAT"
   val p1Text = "Most VAT registered businesses with a taxable turnover above £85,000 must use compatible software to keep VAT records and send VAT returns."
   val p2Text = "As your taxable turnover is above, or will go above, £85,000 in a rolling 12 month period, you will sign up for Making Tax Digital for VAT as part of the registration process."
   val buttonText = "Continue to register for VAT"
 
-  def createView = () => mandatoryInformation()(fakeRequest, messages, frontendAppConfig)
+  object Selectors extends BaseSelectors
 
-  lazy val doc = asDocument(createView())
 
   "Introduction view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithHeading(createView(), h1Text)
-    behave like pageWithSubmitButton(createView(), buttonText)
+    lazy val doc = asDocument(mandatoryInformation()(fakeRequest, messages, frontendAppConfig))
+
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe buttonText
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
 
     "have the correct paragraph" in {
-      doc.select(p(1)).first.text mustBe p1Text
+      doc.select(Selectors.p(1)).first.text mustBe p1Text
     }
+
     "have the correct 2nd paragraph" in {
-      doc.select(indent).first.text mustBe p2Text
+      doc.select(Selectors.indent).first.text mustBe p2Text
     }
   }
 }

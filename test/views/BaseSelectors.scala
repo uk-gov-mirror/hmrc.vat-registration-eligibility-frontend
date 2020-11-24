@@ -21,6 +21,8 @@ trait BaseSelectors {
   val panelHeading = "main div.govuk-panel.govuk-panel--confirmation h1"
   val panelBody = "main div.govuk-panel.govuk-panel--confirmation div.govuk-panel__body"
   val h1: String = "h1"
+  val title: String = "title"
+  val backLink: String = "back-link"
   def h2(n: Int) = s"main h2:nth-of-type($n)"
   def h2ConfirmationPage(n: Int) = s"#main-content > div > div > h2:nth-of-type($n)"
   val p: Int => String = i => s"main p:nth-of-type($i)"

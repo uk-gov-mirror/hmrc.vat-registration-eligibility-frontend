@@ -21,7 +21,7 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.InvolvedInOtherBusinessFormProvider
 import identifiers.InvolvedInOtherBusinessId
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.NormalMode
 import play.api.data.Form
 import play.api.i18n.I18nSupport
@@ -32,6 +32,7 @@ import views.html.involvedInOtherBusiness
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class InvolvedInOtherBusinessController @Inject()(mcc: MessagesControllerComponents,
                                                   dataCacheConnector: DataCacheConnector,
                                                   navigator: Navigator,
@@ -39,7 +40,8 @@ class InvolvedInOtherBusinessController @Inject()(mcc: MessagesControllerCompone
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
                                                   formProvider: InvolvedInOtherBusinessFormProvider
-                                                 )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                                 )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>

@@ -16,15 +16,23 @@
 
 package views
 
-import views.newbehaviours.ViewBehaviours
 import views.html.unauthorised
 
-class UnauthorisedViewSpec extends ViewBehaviours {
+class UnauthorisedViewSpec extends ViewSpecBase {
 
-  def view = () => unauthorised()(fakeRequest, messages, frontendAppConfig)
-  implicit val msgs = messages
+  val h1 = "You can't access this service with this account"
+
+  object Selectors extends BaseSelectors
 
   "Unauthorised view" must {
-    behave like normalPage(view(), "unauthorised")
+    lazy val doc = asDocument(unauthorised()(fakeRequest, messages, frontendAppConfig))
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
   }
 }

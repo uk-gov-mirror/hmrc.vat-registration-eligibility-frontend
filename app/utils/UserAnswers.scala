@@ -17,10 +17,12 @@
 package utils
 
 import identifiers._
+import javax.inject.Singleton
 import models._
 import play.api.libs.json.{JsValue, Reads}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
+@Singleton
 class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
   def businessEntity: Option[BusinessEntity] = cacheMap.getEntry[BusinessEntity](BusinessEntityId.toString)
 

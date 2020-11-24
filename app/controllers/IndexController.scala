@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions.{CacheIdentifierAction, DataRetrievalAction}
 import identifiers.Identifier
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -28,6 +28,7 @@ import utils.Navigator
 
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class IndexController @Inject()(mcc: MessagesControllerComponents,
                                 navigator: Navigator,
                                 dataCacheConnector: DataCacheConnector,
@@ -42,7 +43,7 @@ class IndexController @Inject()(mcc: MessagesControllerComponents,
     Redirect(routes.IntroductionController.onPageLoad())
   }
 
-  def navigateToPageId(pageId: String) = Action { implicit request =>
+  def navigateToPageId(pageId: String): Action[AnyContent] = Action { implicit request =>
     Redirect(navigator.pageIdToPageLoad(new Identifier {
       override def toString: String = pageId
     }))

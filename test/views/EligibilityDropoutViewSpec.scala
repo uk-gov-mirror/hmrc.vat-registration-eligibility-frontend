@@ -16,21 +16,30 @@
 
 package views
 
-import play.twirl.api.HtmlFormat
-import views.newbehaviours.ViewBehaviours
 import views.html.eligibilityDropout
 
-class EligibilityDropoutViewSpec extends ViewBehaviours {
+class EligibilityDropoutViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "eligibilityDropout"
-  implicit val msgs = messages
 
-  def createView: () => HtmlFormat.Appendable =
-    () => eligibilityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig)
+  val h1 = "The business must register for VAT using a different service"
+
+  object Selectors extends BaseSelectors
 
   "EligibilityDropout view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createView())
+    lazy val doc = asDocument(eligibilityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig))
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
   }
 
 }

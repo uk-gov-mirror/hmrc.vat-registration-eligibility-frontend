@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import identifiers._
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.RegistrationInformation
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -29,6 +29,7 @@ import views.html._
 
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
                                              identify: CacheIdentifierAction,
                                              getData: DataRetrievalAction,
@@ -37,7 +38,7 @@ class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
                                             )(implicit appConfig: FrontendAppConfig,
                                               executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
-  def onPageLoad(mode: String) = identify {
+  def onPageLoad(mode: String): Action[AnyContent] = identify {
     implicit request =>
       mode match {
         case InternationalActivitiesId.toString => Ok(internationalActivityDropout())

@@ -18,7 +18,7 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.{CacheIdentifierAction, DataRequiredAction, DataRetrievalAction}
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.RegistrationInformation
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -28,13 +28,15 @@ import views.html.eligible
 
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class EligibleController @Inject()(mcc: MessagesControllerComponents,
                                    identify: CacheIdentifierAction,
                                    getData: DataRetrievalAction,
                                    requireData: DataRequiredAction,
                                    vatRegistrationService: VatRegistrationService,
-                                  trafficManagementService: TrafficManagementService
-                                  )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                   trafficManagementService: TrafficManagementService
+                                  )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
   val frontendUrl = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
 
@@ -46,7 +48,7 @@ class EligibleController @Inject()(mcc: MessagesControllerComponents,
     vatRegistrationService.submitEligibility(request.internalId)(hc, implicitly[ExecutionContext], request).flatMap { _ =>
       trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = false).map {
         case RegistrationInformation(_, _, _, _, _) =>
-        Redirect(frontendUrl)
+          Redirect(frontendUrl)
       }
     }
   }

@@ -17,13 +17,14 @@
 package forms
 
 import forms.mappings.Mappings
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.{TurnoverEstimate, TurnoverEstimateFormElement}
 import play.api.data.Form
 import play.api.data.Forms.mapping
 import uk.gov.hmrc.play.mappers.StopOnFirstFail
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 
+@Singleton
 class TurnoverEstimateFormProvider @Inject() extends FormErrorHelper with Mappings {
 
   val turnoverEstimateAmount = s"turnoverEstimateAmount"

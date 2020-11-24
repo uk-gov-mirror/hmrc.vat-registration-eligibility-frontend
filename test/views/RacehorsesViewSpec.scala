@@ -16,15 +16,11 @@
 
 package views
 
-import controllers.routes
 import forms.RacehorsesFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.racehorses
-import views.newbehaviours.YesNoViewBehaviours
 
-class RacehorsesViewSpec extends YesNoViewBehaviours {
+class RacehorsesViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "racehorses"
   val form = new RacehorsesFormProvider()()
@@ -32,38 +28,41 @@ class RacehorsesViewSpec extends YesNoViewBehaviours {
 
   object Selectors extends BaseSelectors
 
+  val h1 = "Will the business be doing any of the following?"
   val paragraph = "Tell us if the business will:"
   val bullet1 = "buy, sell or rent out land or property as a business activity (not just to have its own premises)"
   val bullet2 = "own one or more racehorses"
-  val button = "Continue"
-
-  def createView: () => HtmlFormat.Appendable =
-    () => racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "Racehorses view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.RacehorsesController.onSubmit().url)
+    lazy val doc = asDocument(racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
-    "have a paragraph" in {
-      val doc = asDocument(createViewUsingForm(form))
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
 
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
       doc.select(Selectors.p(1)).text() mustBe paragraph
     }
 
-    "have bullets" in {
-      val doc = asDocument(createViewUsingForm(form))
-
-      doc.select(Selectors.bullet(1)).text() mustBe bullet1
-      doc.select(Selectors.bullet(2)).text() mustBe bullet2
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
     }
 
-    "have a continue button" in {
-      val doc = asDocument(createViewUsingForm(form))
-
-      doc.select(Selectors.button).text() mustBe button
+    "have bullets" in {
+      doc.select(Selectors.bullet(1)).text() mustBe bullet1
+      doc.select(Selectors.bullet(2)).text() mustBe bullet2
     }
   }
 }

@@ -16,34 +16,40 @@
 
 package views
 
-import controllers.routes
 import forms.NinoFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.nino
-import views.newbehaviours.YesNoViewBehaviours
 
-class NinoViewSpec extends YesNoViewBehaviours {
+class NinoViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "nino"
   val form = new NinoFormProvider()()
-  implicit val msgs = messages
 
-  val button = "Continue"
+  val h1 = "Do you have a UK National Insurance number?"
 
   object Selectors extends BaseSelectors
 
-  def createView: () => HtmlFormat.Appendable =
-    () => nino(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => nino(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
-
   "Nino view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createViewUsingForm(form))
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.NinoController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), button)
+    lazy val doc = asDocument(nino(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
+    }
   }
 }

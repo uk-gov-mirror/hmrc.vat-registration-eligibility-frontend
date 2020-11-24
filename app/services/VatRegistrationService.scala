@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 
 import connectors.{DataCacheConnector, VatRegistrationConnector}
 import identifiers._
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.BusinessEntity.businessEntityToString
 import models._
 import models.requests.DataRequest
@@ -32,6 +32,7 @@ import utils.{JsonSummaryRow, MessagesUtils, PageIdBinding}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector,
                                        val dataCacheConnector: DataCacheConnector,
                                        val thresholdService: ThresholdService,
@@ -46,7 +47,7 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
     }
   }
 
-  val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+  val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
   private[services] def prepareQuestionData(key: String, data: Boolean)(implicit r: DataRequest[_]): List[JsValue] = {
     JsonSummaryRow(key, messages(s"$key.heading"), messages(s"site.${if (data) "yes" else "no"}"), Json.toJson(data))
@@ -66,14 +67,14 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
     JsonSummaryRow(key, messages(s"$key.heading"), data, Json.toJson(data))
   }
 
-  private[services] def prepareQuestionData(key: String, data: ConditionalDateFormElement)()(implicit r: DataRequest[_]): List[JsValue] = {
+  private[services] def prepareQuestionData(key: String, data: ConditionalDateFormElement)(implicit r: DataRequest[_]): List[JsValue] = {
     val value = JsonSummaryRow(s"$key-value", messages(s"$key.heading"), messages(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
     val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messages(s"$key.heading2"), date.format(formatter), Json.toJson(date)))
 
     dataObj.foldLeft(value)((old, list) => old ++ list)
   }
 
-  private[services] def prepareThresholdInTwelveMonths(key: String, data: ConditionalDateFormElement)()
+  private[services] def prepareThresholdInTwelveMonths(key: String, data: ConditionalDateFormElement)
                                                       (implicit r: DataRequest[_]): List[JsValue] = {
     val value = JsonSummaryRow(
       questionId = s"$key-value",
@@ -94,18 +95,18 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
     dataObj.foldLeft(value)((old, list) => old ++ list)
   }
 
-  private[services] def prepareThresholdPreviousThirty(key: String, data: ConditionalDateFormElement)()(implicit r: DataRequest[_]): List[JsValue] = {
+  private[services] def prepareThresholdPreviousThirty(key: String, data: ConditionalDateFormElement)(implicit r: DataRequest[_]): List[JsValue] = {
     val value = JsonSummaryRow(s"$key-value", thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious), messages(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
     val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messages(s"$key.heading2"), date.format(formatter), Json.toJson(date)))
 
     dataObj.foldLeft(value)((old, list) => old ++ list)
   }
 
-  private[services] def prepareBusinessEntity(key: String, data: BusinessEntity)()(implicit r: DataRequest[_]): List[JsValue] = {
+  private[services] def prepareBusinessEntity(key: String, data: BusinessEntity)(implicit r: DataRequest[_]): List[JsValue] = {
     JsonSummaryRow(s"$key-value", messages(s"$key.heading"), businessEntityToString(data)(messages), Json.toJson(data.toString))
   }
 
-  private[services] def prepareDateData(key: String, data: ConditionalDateFormElement)()(implicit r: DataRequest[_]): List[JsValue] = {
+  private[services] def prepareDateData(key: String, data: ConditionalDateFormElement)(implicit r: DataRequest[_]): List[JsValue] = {
     val value = JsonSummaryRow(s"$key-value", messages(s"$key.heading"), messages(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
     val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messages(s"$key.heading2"), date.format(formatter), Json.toJson(date)))
 

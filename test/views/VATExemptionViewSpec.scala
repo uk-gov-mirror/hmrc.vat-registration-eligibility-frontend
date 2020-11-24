@@ -16,31 +16,44 @@
 
 package views
 
-import controllers.routes
 import forms.VATExemptionFormProvider
 import models.NormalMode
-import play.api.data.Form
-import play.twirl.api.HtmlFormat
 import views.html.vatExemption
-import views.newbehaviours.YesNoViewBehaviours
 
-class VATExemptionViewSpec extends YesNoViewBehaviours {
-
-  val button = "Continue"
+class VATExemptionViewSpec extends ViewSpecBase {
   val messageKeyPrefix = "vatExemption"
   val form = new VATExemptionFormProvider()()
-  implicit val msgs = messages
 
-  def createView: () => HtmlFormat.Appendable =
-    () => vatExemption(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
+  val h1 = "Does the business want to apply for a VAT exemption?"
+  val paragraph = "The business may not have to register for VAT if it sells mainly or only zero-rated goods or services."
 
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => vatExemption(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig)
+  object Selectors extends BaseSelectors
 
   "VATExemption view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithBackLink(createViewUsingForm(form))
-    behave like yesNoPage(form, createViewUsingForm, messageKeyPrefix, routes.VATExemptionController.onSubmit().url)
-    behave like pageWithSubmitButton(createViewUsingForm(form), button)
+    lazy val doc = asDocument(vatExemption(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
+
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
+      doc.select(Selectors.p(1)).text() mustBe paragraph
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(1)).text() mustBe h1
+    }
   }
 }

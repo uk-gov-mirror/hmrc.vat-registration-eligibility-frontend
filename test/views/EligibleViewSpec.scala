@@ -17,27 +17,29 @@
 package views
 
 import views.html.eligible
-import views.newbehaviours.ViewBehaviours
 
-class EligibleViewSpec extends ViewBehaviours with BaseSelectors {
+class EligibleViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "eligible"
-  implicit val msgs = messages
 
-  val h1Text = "You can register for VAT online"
-  val p1Text = "Based on your answers, you can register for VAT using the online service."
-  val buttonText = "Continue to VAT registration"
+  val h1 = "You can register for VAT online"
+  val p1 = "Based on your answers, you can register for VAT using the online service."
 
-  def createView = () => eligible()(fakeRequest, messages, frontendAppConfig)
-  lazy val doc = asDocument(createView())
+  object Selectors extends BaseSelectors
 
   "Introduction view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
-    behave like pageWithHeading(createView(), h1Text)
-    behave like pageWithSubmitButton(createView(), buttonText)
+    lazy val doc = asDocument(eligible()(fakeRequest, messages, frontendAppConfig))
 
-    "have the correct paragraph" in {
-      doc.select(p(1)).first.text mustBe p1Text
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
+      doc.select(Selectors.p(1)).text() mustBe p1
     }
   }
 }

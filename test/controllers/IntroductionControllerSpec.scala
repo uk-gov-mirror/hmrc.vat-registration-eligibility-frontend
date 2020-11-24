@@ -27,7 +27,7 @@ class IntroductionControllerSpec extends ControllerSpecBase {
     identify = FakeCacheIdentifierAction
   )
 
-  val viewAsString = introduction()(fakeRequest, messages, frontendAppConfig).toString
+  def viewAsString = introduction()(fakeRequest, messages, frontendAppConfig).toString
 
   "onPageLoad" must {
     "return OK with the correct view" in {

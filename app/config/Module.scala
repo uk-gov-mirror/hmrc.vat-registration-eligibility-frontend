@@ -23,10 +23,8 @@ import controllers.actions.{CacheIdentifierAction, CacheIdentifierActionImpl, Da
 class Module extends AbstractModule {
 
   override def configure(): Unit = {
-
     bind(classOf[CacheIdentifierAction]).to(classOf[CacheIdentifierActionImpl]).asEagerSingleton()
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
-
   }
 
 }

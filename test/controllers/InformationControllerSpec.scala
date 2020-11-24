@@ -27,7 +27,7 @@ class InformationControllerSpec extends ControllerSpecBase {
     identify = FakeCacheIdentifierAction
   )
 
-  val viewAsString = mandatoryInformation()(fakeRequest, messages, frontendAppConfig).toString
+  def viewAsString = mandatoryInformation()(fakeRequest, messages, frontendAppConfig).toString
 
   "onPageLoad" must {
     "return OK with the correct view" in {

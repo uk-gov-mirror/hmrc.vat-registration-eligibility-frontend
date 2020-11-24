@@ -18,18 +18,14 @@ package views
 
 import java.time.LocalDate
 
-import controllers.routes
 import forms.ThresholdPreviousThirtyDaysFormProvider
 import models.NormalMode
-import play.api.data.Form
 import play.api.i18n.Messages
-import play.twirl.api.HtmlFormat
 import services.ThresholdService
 import utils.TimeMachine
 import views.html.thresholdPreviousThirtyDays
-import views.newbehaviours.ViewBehaviours
 
-class ThresholdPreviousThirtyDaysViewSpec extends ViewBehaviours {
+class ThresholdPreviousThirtyDaysViewSpec extends ViewSpecBase {
 
   object TestTimeMachine extends TimeMachine {
     override def today: LocalDate = LocalDate.parse("2020-01-01")
@@ -39,25 +35,39 @@ class ThresholdPreviousThirtyDaysViewSpec extends ViewBehaviours {
   val form = new ThresholdPreviousThirtyDaysFormProvider(TestTimeMachine)()
   implicit val msgs: Messages = messages
 
+  val h1 = "Did the business expect its taxable-turnover to go over £85,000 in any 30 day period in the past?"
+  val legend = "When did the business go over the threshold?"
+  val paragraph = "This could happen if, for example, a business planned to run an exhibition and anticipated selling so many tickets it expected to go over the VAT threshold. The business must register for VAT when you expected it to go over the threshold, not when it actually went over the threshold."
+
   val thresholdService: ThresholdService = app.injector.instanceOf[ThresholdService]
 
   object Selectors extends BaseSelectors
 
-  val button = "Continue"
-
-  def createView: () => HtmlFormat.Appendable = () =>
-      thresholdPreviousThirtyDays(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable = (form: Form[_]) =>
-      thresholdPreviousThirtyDays(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig)
-
   "ThresholdPreviousThirtyDays view" must {
-    behave like normalPage(createView(), messageKeyPrefix)
+    lazy val doc = asDocument(thresholdPreviousThirtyDays(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
-    "have a continue button" in {
-      val doc = asDocument(createViewUsingForm(form))
+    "have the correct continue button" in {
+      doc.select(Selectors.button).text() mustBe continueButton
+    }
 
-      doc.select(Selectors.button).text() mustBe button
+    "have the correct back link" in {
+      doc.getElementById(Selectors.backLink).text() mustBe backLink
+    }
+
+    "have the correct browser title" in {
+      doc.select(Selectors.title).text() mustBe title(h1)
+    }
+
+    "have the correct heading" in {
+      doc.select(Selectors.h1).text() mustBe h1
+    }
+
+    "have the first paragraph" in {
+      doc.select(Selectors.p(2)).text() mustBe paragraph
+    }
+
+    "have the correct legend" in {
+      doc.select(Selectors.legend(2)).text() mustBe legend
     }
   }
 }
