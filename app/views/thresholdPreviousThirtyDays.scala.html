@@ -30,7 +30,7 @@
 
 @layout(pageTitle = Some(title(form, messages("thresholdPreviousThirtyDays.heading"))), backLink = true) {
 
-    @errorSummary(form.errors)
+    @errorSummary(form.errors, Some(Map("thresholdPreviousThirtyDaysDate" -> "day")))
 
     @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious))
     @p{ @thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1Previous) }

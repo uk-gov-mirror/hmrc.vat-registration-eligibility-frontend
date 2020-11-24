@@ -40,7 +40,7 @@
 
 @layout(pageTitle = Some(title(form, messages("thresholdNextThirtyDays.heading"))), backLink = true) {
 
-    @errorSummary(form.errors)
+    @errorSummary(form.errors, Some(Map("thresholdNextThirtyDaysDate" -> "day")))
 
     @h1(messages("thresholdNextThirtyDays.heading"))
     @p{ @messages("thresholdNextThirtyDays.text") }

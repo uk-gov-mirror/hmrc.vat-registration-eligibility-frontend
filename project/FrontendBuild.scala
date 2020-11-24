@@ -32,8 +32,8 @@ private object AppDependencies {
   private val reactivemongoTestVersion = "4.21.0-play-26"
 
 
-  private val playGovukFrontendVersion = "0.50.0-play-26"
-  private val playHmrcFrontendVersion = "0.19.0-play-26"
+  private val playGovukFrontendVersion = "0.53.0-play-26"
+  private val playHmrcFrontendVersion = "0.27.0-play-26"
   private val govukFrontendVersion = "3.7.0"
 
   val compile = Seq(
