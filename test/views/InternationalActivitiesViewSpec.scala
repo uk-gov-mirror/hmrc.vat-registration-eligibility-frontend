@@ -29,10 +29,10 @@ class InternationalActivitiesViewSpec extends ViewSpecBase {
 
   val h1 = "Will the business do any of the following international activities over the next 12 months?"
   val paragraph = "Tell us if the business will:"
-  val bullet1 = "export goods or services to EU countries"
-  val bullet2 = "import goods or services from EU countries"
+  val bullet1 = "bring goods or services in from EU countries"
+  val bullet2 = "send goods or services to EU countries"
   val bullet3 = "sell assets that it bought from a country outside the EU and claimed a VAT refund on"
-  val bullet4 = "do all of its business outside the UK"
+  val bullet4 = "do all its business outside the UK"
   val bullet5 = "have its head office outside the UK"
 
   object Selectors extends BaseSelectors
