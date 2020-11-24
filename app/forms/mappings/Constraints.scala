@@ -35,7 +35,7 @@ trait Constraints {
           .getOrElse(Valid)
     }
 
-  private def tupleToDate(dateTuple: (String,String,String)) = {
+  private def tupleToDate(dateTuple: (String, String, String)) = {
     LocalDate.parse(s"${dateTuple._1}-${dateTuple._2}-${dateTuple._3}", DateTimeFormatter.ofPattern("d-M-uuuu").withResolverStyle(ResolverStyle.STRICT))
   }
 
@@ -52,12 +52,12 @@ trait Constraints {
 
   protected def nonEmptyPartialDate(errKey: String, args: Seq[String] = Seq()): Constraint[(String, String)] = Constraint {
     case (_, "") | ("", _) => Invalid(errKey, args: _*)
-    case _        => Valid
+    case _ => Valid
   }
 
   protected def nonEmptyDate(errKey: String, args: Seq[String] = Seq()): Constraint[(String, String, String)] = Constraint {
     case (_, _, "") | ("", _, _) | (_, "", _) => Invalid(errKey, args: _*)
-    case _        => Valid
+    case _ => Valid
   }
 
   protected def validPartialDate(errKey: String, args: Seq[String] = Seq()): Constraint[(String, String)] = Constraint {
@@ -91,10 +91,10 @@ trait Constraints {
                                 minArgs: Seq[String] = Seq(), maxArgs: Seq[String] = Seq()
                                ): Constraint[LocalDate] =
     Constraint { date: LocalDate =>
-      if(date.isEqual(minDate) || date.isAfter(minDate)) {
+      if (date.isEqual(minDate) || date.isAfter(minDate)) {
         if (date.isEqual(maxDate) || date.isBefore(maxDate)) Valid else Invalid(ValidationError(afterMaxErr, maxArgs: _*))
       } else {
-        Invalid(ValidationError(beforeMinErr, minArgs:_*))
+        Invalid(ValidationError(beforeMinErr, minArgs: _*))
       }
     }
 
@@ -155,7 +155,7 @@ trait Constraints {
     Constraint { bigIntStr =>
       Try(BigInt(bigIntStr)) match {
         case Success(_) => Valid
-        case _          => Invalid(errorKey)
+        case _ => Invalid(errorKey)
       }
     }
 
@@ -166,24 +166,25 @@ trait Constraints {
       regex.unapplySeq(str).map(_ => Valid).getOrElse(Invalid(errorKey))
     }
 
-  protected def bigIntRange(errorKeyLess: String, errorKeyMore : String, low: BigInt, high : BigInt): Constraint[String] =
+  protected def bigIntRange(errorKeyLess: String, errorKeyMore: String, low: BigInt, high: BigInt): Constraint[String] =
     Constraint { bigIntStr =>
       BigInt(bigIntStr) match {
-        case e if e > high => Invalid(errorKeyLess, Seq(high):_*)
-        case e if e <= low   => Invalid(errorKeyMore, Seq(low):_*)
-        case _              => Valid
+        case e if e > high => Invalid(errorKeyLess, Seq(high): _*)
+        case e if e <= low => Invalid(errorKeyMore, Seq(low): _*)
+        case _ => Valid
       }
     }
 
-  protected def matchesRadioSeq(radioSeq : Set[RadioOption], errKey : String): Constraint[String] = {
+  protected def matchesRadioSeq(radioSeq: Set[RadioOption], errKey: String): Constraint[String] = {
     Constraint {
-      input : String => if (radioSeq.exists {
-        option => option.value == input
-      }) {
-        Valid
-      } else {
-        Invalid(errKey)
-      }
+      input: String =>
+        if (radioSeq.exists {
+          option => option.value == input
+        }) {
+          Valid
+        } else {
+          Invalid(errKey)
+        }
     }
   }
 

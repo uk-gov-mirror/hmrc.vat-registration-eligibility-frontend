@@ -36,7 +36,7 @@
     @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths))
     @p{ @thresholdService.returnThresholdDateResult[String](thresholdService.returnHelpText1TwelveMonths) }
 
-    @helpers.form(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off") {
+    @helpers.form(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
         @conditionalYesNoRadio(
             form = form,
             headingKey = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths),

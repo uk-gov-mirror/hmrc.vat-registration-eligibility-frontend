@@ -45,7 +45,7 @@
     @h1(messages("thresholdNextThirtyDays.heading"))
     @p{ @messages("thresholdNextThirtyDays.text") }
 
-    @helpers.form(action = ThresholdNextThirtyDaysController.onSubmit(), 'autoComplete -> "off") {
+    @helpers.form(action = ThresholdNextThirtyDaysController.onSubmit(), 'autoComplete -> "off",'novalidate -> "novalidate") {
         @conditionalYesNoRadio(
             form = form,
             headingKey = "thresholdNextThirtyDays.heading",
