@@ -80,7 +80,7 @@ thresholdNextThirtyDays.dateHint                    = For example, 13 02 2017
 thresholdNextThirtyDays.error.required              = Select yes if the business expected to make more than £85,000 in a single month or 30-day period
 thresholdNextThirtyDays.error.date.required         = Enter the date when the business expected to make more than £85,000 in a single month or 30-day period
 thresholdNextThirtyDays.error.date.inFuture         = Enter a date that is in the past
-thresholdNextThirtyDays.error.date.invalid          = Enter a valid date
+thresholdNextThirtyDays.error.date.invalid          = Enter a date in the correct format
 
 thresholdPreviousThirtyDays.heading                 = Did the business expect its taxable-turnover to go over £85,000 in any 30 day period in the past?
 thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17 = Did the business expect its taxable-turnover to go over £85,000 in any 30 day period in the past?
@@ -96,7 +96,7 @@ thresholdPreviousThirtyDays.heading2                = What date did the business
 thresholdPreviousThirtyDays.error.required          = Select yes if the business expects to make more than £85,000 in VAT-taxable sales in a single 30-day period
 thresholdPreviousThirtyDays.error.date.required     = Enter a date for when the business first thought it would go over the threshold in a 30-day period
 thresholdPreviousThirtyDays.error.date.inFuture     = Enter a date that is in the past
-thresholdPreviousThirtyDays.error.date.invalid      = Enter a valid date
+thresholdPreviousThirtyDays.error.date.invalid      = Enter a date in the correct format
 
 voluntaryRegistration.heading               = Would you like to voluntarily register the business for VAT?
 voluntaryRegistration.summary.heading       = Does the business want to register for VAT voluntarily?
@@ -129,7 +129,7 @@ thresholdInTwelveMonths.error.required              = Select yes if the business
 thresholdInTwelveMonths.error.date.required         = Enter a date for when the business went over the threshold in a 12-month period
 thresholdInTwelveMonths.error.date.inFuture         = Enter a date that is in the past
 thresholdInTwelveMonths.error.date.beforeIncorp     = Enter a date that''s after the date the business was set up: {0}
-thresholdInTwelveMonths.error.date.invalid          = Enter a valid date
+thresholdInTwelveMonths.error.date.invalid          = Enter a date in the correct format
 thresholdInTwelveMonths.firstHelpTextIncorpMore12m  = £85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales {0} can make before it has to register for VAT.
 thresholdInTwelveMonths.firstHelpTextIncorpLess12m  = You must monitor your turnover every month and add up the total amount to cover the last 12 months. This is called a ‘rolling 12 month period’. If one month’s turnover takes you over £85,000 in any rolling 12 month period, you must register for VAT.
 thresholdInTwelveMonths.firstHelpTextNotIncorp      = £85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales sole traders can make before they have to register for VAT.

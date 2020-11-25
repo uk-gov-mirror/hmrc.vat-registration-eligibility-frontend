@@ -15,15 +15,15 @@
  *@
 
 @(form: Form[_],
-  legendContent: String,
-  legendClasses: String = "govuk-fieldset__legend--xl",
-  id: String = "date",
-  hintText: Option[String] = None,
-  legendAsPageHeading: Boolean = true,
-  includeDay: Boolean = true,
-  attributesDay: Map[String, String] = Map.empty,
-  attributesMonth: Map[String, String] = Map.empty,
-  attributesYear: Map[String, String] = Map.empty)(implicit messages: Messages)
+        legendContent: String,
+        legendClasses: String = "govuk-fieldset__legend--xl",
+        id: String = "date",
+        hintText: Option[String] = None,
+        legendAsPageHeading: Boolean = true,
+        includeDay: Boolean = true,
+        attributesDay: Map[String, String] = Map.empty,
+        attributesMonth: Map[String, String] = Map.empty,
+        attributesYear: Map[String, String] = Map.empty)(implicit messages: Messages)
 
 @GovukDateInput(DateInput(
     fieldset = Some(Fieldset(
@@ -37,11 +37,11 @@
     )),
     id = id,
     items = {
-        if (includeDay) {
+        if(includeDay) {
             Some(InputItem(
                 id = s"$id.day",
                 classes = s"govuk-input--width-2${if(form(id).hasErrors || form.errors.exists(_.key.isEmpty)) " govuk-input--error" else ""}",
-                name =  s"$id.day",
+                name = s"$id.day",
                 label = Some(messages("date.day")),
                 value = form(s"$id.day").value,
                 attributes = attributesDay
@@ -68,5 +68,5 @@
         )
     ),
     hint = hintText.map(hint => Hint(content = Text(messages(hint)))),
-    errorMessage = form(id).error.fold(form.errors.find(_.key.isEmpty))(err => Some(err)).map(err => ErrorMessage(content = Text(messages(err.message, err.args:_*))))
+    errorMessage = form(id).error.fold(form.errors.find(_.key.isEmpty))(err => Some(err)).map(err => ErrorMessage(content = Text(messages(err.message, err.args: _*))))
 ))

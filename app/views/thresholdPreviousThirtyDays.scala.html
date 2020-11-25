@@ -36,7 +36,7 @@
     @p{ @thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1Previous) }
     @p{ @messages("thresholdPreviousThirtyDays.p1") }
 
-    @helpers.form(action = ThresholdPreviousThirtyDaysController.onSubmit(), 'autoComplete -> "off") {
+    @helpers.form(action = ThresholdPreviousThirtyDaysController.onSubmit(), 'autoComplete -> "off",'novalidate -> "novalidate") {
         @conditionalYesNoRadio(
             form = form,
             headingKey = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious),
