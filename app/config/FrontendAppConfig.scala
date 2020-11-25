@@ -32,6 +32,9 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
 
   private def loadConfig(key: String) = servicesConfig.getString(key)
 
+  lazy val timeout: Int = servicesConfig.getInt("timeout.timeout")
+  lazy val countdown: Int = servicesConfig.getInt("timeout.countdown")
+
   private lazy val contactFrontendUrl: String = loadConfig("microservice.services.contact-frontend.url")
   lazy val contactFormServiceIdentifier = "vrs"
 
