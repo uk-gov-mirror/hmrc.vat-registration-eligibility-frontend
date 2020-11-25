@@ -35,6 +35,8 @@ private object AppDependencies {
   private val playGovukFrontendVersion = "0.53.0-play-26"
   private val playHmrcFrontendVersion = "0.27.0-play-26"
   private val govukFrontendVersion = "3.7.0"
+  private val hmrcFrontendVersion = "1.20.0"
+
 
   val compile = Seq(
     ws,
@@ -49,7 +51,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-language" % playLanguageVersion,
     "uk.gov.hmrc" %% "play-frontend-govuk" % playGovukFrontendVersion,
     "uk.gov.hmrc" %% "play-frontend-hmrc" % playHmrcFrontendVersion,
-    "org.webjars.npm" % "govuk-frontend" % govukFrontendVersion
+    "org.webjars.npm" % "govuk-frontend" % govukFrontendVersion,
+    "org.webjars.npm" % "hmrc-frontend" % hmrcFrontendVersion
   )
 
   trait TestDependencies {
