@@ -1,12 +1,5 @@
 import sbt._
 
-object FrontendBuild extends Build with MicroService {
-
-  val appName = "vat-registration-eligibility-frontend"
-
-  override lazy val appDependencies: Seq[ModuleID] = AppDependencies()
-}
-
 private object AppDependencies {
 
   import play.core.PlayVersion
@@ -30,7 +23,6 @@ private object AppDependencies {
   private val scoverageVersion = "1.3.1"
   private val wireMockVersion = "2.26.3"
   private val reactivemongoTestVersion = "4.21.0-play-26"
-
 
   private val playGovukFrontendVersion = "0.50.0-play-26"
   private val playHmrcFrontendVersion = "0.19.0-play-26"
@@ -78,7 +70,7 @@ private object AppDependencies {
       "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusPlayVersion % scope,
       "com.github.tomakehurst" % "wiremock-jre8" % wireMockVersion % scope,
       "org.jsoup" % "jsoup" % jsoupVersion % scope,
-      "org.scoverage" % "scalac-scoverage-runtime_2.11" % scoverageVersion % scope,
+      "org.scoverage" % "scalac-scoverage-runtime_2.12" % scoverageVersion % scope,
       "uk.gov.hmrc" %% "reactivemongo-test" % reactivemongoTestVersion % scope
     )
 
