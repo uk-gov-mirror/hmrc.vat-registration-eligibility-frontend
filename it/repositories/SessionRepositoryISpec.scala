@@ -27,7 +27,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
 
 
   "dropCollectionIndexTemp" should {
-    "drop collection , create index, drop index using dropCollectionIndexTemp then attempt to create index again Successfully" in new Setup {
+    "drop collection, create index, drop index using dropCollectionIndexTemp then attempt to create index again Successfully" in new Setup {
       await(newMongoInstance.drop)
       await(newMongoInstance.collection.indexesManager.list()).isEmpty mustBe true
       await(newMongoInstance.createIndex(newMongoInstance.fieldName, newMongoInstance.createdIndexName,10))

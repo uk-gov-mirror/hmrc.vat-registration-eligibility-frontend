@@ -18,7 +18,7 @@ package mocks
 
 import connectors.{AllocationResponse, TrafficManagementConnector}
 import models.RegistrationInformation
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.Suite
 import org.scalatestplus.mockito.MockitoSugar
@@ -32,15 +32,15 @@ trait TrafficManagementConnectorMock extends MockitoSugar {
   val mockTrafficManagementConnector = mock[TrafficManagementConnector]
 
   def mockAllocation(regId: String)(response: Future[AllocationResponse]) =
-    when(mockTrafficManagementConnector.allocate(Matchers.eq(regId))(Matchers.any[HeaderCarrier]))
+    when(mockTrafficManagementConnector.allocate(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]))
       .thenReturn(response)
 
   def mockGetRegistrationInformation()(response: Future[Option[RegistrationInformation]]) =
-    when(mockTrafficManagementConnector.getRegistrationInformation()(Matchers.any[HeaderCarrier]))
+    when(mockTrafficManagementConnector.getRegistrationInformation()(ArgumentMatchers.any[HeaderCarrier]))
       .thenReturn(response)
 
   def mockUpsertRegistrationInformation(regInfo: RegistrationInformation)(response: Future[RegistrationInformation]) =
-    when(mockTrafficManagementConnector.upsertRegistrationInformation(Matchers.eq(regInfo))(Matchers.any[HeaderCarrier], Matchers.any()))
+    when(mockTrafficManagementConnector.upsertRegistrationInformation(ArgumentMatchers.eq(regInfo))(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any()))
       .thenReturn(response)
 
 }

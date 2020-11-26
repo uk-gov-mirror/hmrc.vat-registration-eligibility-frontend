@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package filters
+package utils
 
-import com.google.inject.Inject
-import play.api.http.DefaultHttpFilters
-import uk.gov.hmrc.play.bootstrap.filters.FrontendFilters
+object ExtraSessionKeys {
 
-class Filters @Inject()(sessionIdFilter: SessionIdFilter,
-                        frontendFilters: FrontendFilters
-                       ) extends DefaultHttpFilters(frontendFilters.filters :+ sessionIdFilter: _*)
+  val token = "token"
+  val userId = "userId"
+  val authProvider = "authProvider"
+
+}

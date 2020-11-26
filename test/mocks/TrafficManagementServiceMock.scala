@@ -18,11 +18,10 @@ package mocks
 
 import connectors.AllocationResponse
 import models.RegistrationInformation
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.Suite
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.mvc.Request
 import services.TrafficManagementService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -35,19 +34,19 @@ trait TrafficManagementServiceMock extends MockitoSugar {
   val mockTrafficManagementService: TrafficManagementService = mock[TrafficManagementService]
 
   def mockServiceAllocation(regId: String)(response: Future[AllocationResponse]) =
-    when(mockTrafficManagementService.allocate(Matchers.any[String])(Matchers.any[HeaderCarrier], Matchers.any()))
+    when(mockTrafficManagementService.allocate(ArgumentMatchers.any[String])(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any()))
       .thenReturn(response)
 
   def mockGetRegistrationInformation()(response: Future[Option[RegistrationInformation]]) =
-    when(mockTrafficManagementService.getRegistrationInformation()(Matchers.any[HeaderCarrier]))
+    when(mockTrafficManagementService.getRegistrationInformation()(ArgumentMatchers.any[HeaderCarrier]))
       .thenReturn(response)
 
   def mockUpsertRegistrationInformation(internalId: String, regId: String, isOtrs: Boolean)(response: Future[RegistrationInformation]) =
     when(mockTrafficManagementService.upsertRegistrationInformation(
-      Matchers.eq(internalId),
-      Matchers.eq(regId),
-      Matchers.eq(isOtrs)
+      ArgumentMatchers.eq(internalId),
+      ArgumentMatchers.eq(regId),
+      ArgumentMatchers.eq(isOtrs)
     )(
-      Matchers.any[HeaderCarrier])
+      ArgumentMatchers.any[HeaderCarrier])
     ).thenReturn(response)
 }

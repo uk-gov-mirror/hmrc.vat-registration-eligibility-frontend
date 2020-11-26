@@ -5,6 +5,7 @@ import play.api.http.HeaderNames
 import play.api.libs.json.Json
 import support.SessionCookieBaker
 import uk.gov.hmrc.http.SessionKeys
+import utils.ExtraSessionKeys
 
 trait AuthHelper {
 
@@ -15,9 +16,9 @@ trait AuthHelper {
   private def cookieData(additionalData: Map[String, String], userId: String = defaultUser): Map[String, String] = {
     Map(
       SessionKeys.sessionId -> sessionId,
-      SessionKeys.userId -> userId,
-      SessionKeys.token -> "token",
-      SessionKeys.authProvider -> "GGW",
+      ExtraSessionKeys.userId -> userId,
+      ExtraSessionKeys.token -> "token",
+      ExtraSessionKeys.authProvider -> "GGW",
       SessionKeys.lastRequestTimestamp -> new java.util.Date().getTime.toString
     ) ++ additionalData
   }

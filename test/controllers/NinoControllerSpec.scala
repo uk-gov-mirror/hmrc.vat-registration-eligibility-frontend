@@ -26,7 +26,7 @@ import identifiers.NinoId
 import mocks.TrafficManagementServiceMock
 import models.requests.DataRequest
 import models._
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.data.Form
 import play.api.libs.json.JsBoolean
@@ -94,11 +94,11 @@ class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with T
       mockGetRegistrationInformation()(Future.successful(Some(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg))))
       when(
         mockAuthConnector.authorise(
-          Matchers.any,
-          Matchers.eq(Retrievals.credentials)
+          ArgumentMatchers.any,
+          ArgumentMatchers.eq(Retrievals.credentials)
         )(
-          Matchers.any[HeaderCarrier],
-          Matchers.any[ExecutionContext])
+          ArgumentMatchers.any[HeaderCarrier],
+          ArgumentMatchers.any[ExecutionContext])
       ).thenReturn(Future.successful(Some(testCredentials)))
 
       val result = controller().onSubmit()(testPostRequest("value" -> "true"))
@@ -132,11 +132,11 @@ class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with T
       mockGetRegistrationInformation()(Future.successful(Some(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), OTRS))))
       when(
         mockAuthConnector.authorise(
-          Matchers.any,
-          Matchers.eq(Retrievals.credentials)
+          ArgumentMatchers.any,
+          ArgumentMatchers.eq(Retrievals.credentials)
         )(
-          Matchers.any[HeaderCarrier],
-          Matchers.any[ExecutionContext])
+          ArgumentMatchers.any[HeaderCarrier],
+          ArgumentMatchers.any[ExecutionContext])
       ).thenReturn(Future.successful(Some(testCredentials)))
 
       val result = controller().onSubmit()(testPostRequest("value" -> "true"))
@@ -153,11 +153,11 @@ class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with T
 
       when(
         mockAuthConnector.authorise(
-          Matchers.any,
-          Matchers.eq(Retrievals.credentials)
+          ArgumentMatchers.any,
+          ArgumentMatchers.eq(Retrievals.credentials)
         )(
-          Matchers.any[HeaderCarrier],
-          Matchers.any[ExecutionContext])
+          ArgumentMatchers.any[HeaderCarrier],
+          ArgumentMatchers.any[ExecutionContext])
       ).thenReturn(Future.successful(Some(testCredentials)))
 
       val result = controller().onSubmit()(testPostRequest("value" -> "true"))

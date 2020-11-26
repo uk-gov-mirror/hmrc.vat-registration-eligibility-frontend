@@ -19,25 +19,22 @@ package utils
 import java.time.LocalDate
 
 import org.joda.time.{LocalDate => JodaLocalDate}
-import uk.gov.hmrc.time.DateTimeUtils
-
 
 object VATDateHelper {
 
-  private val convertFromJavaToJoda = (date: LocalDate) => new JodaLocalDate(date.getYear,date.getMonthValue,date.getDayOfMonth)
+  // TODO make these checks part of threshold service if they're still required at all
+  private val firstApril2017 = LocalDate.of(2017,4,1)
+  private val firstApril2016 = LocalDate.of(2016, 4, 1)
+  private val endMarch2016 = LocalDate.of(2016,3,31)
+  private val endMarch2015 = LocalDate.of(2015, 3, 31)
+  private val twelveMonthsAgo = LocalDate.now.minusYears(1)
 
-  val dateEqualOrAfter201741 = (l:LocalDate) => DateTimeUtils.isEqualOrAfter(new JodaLocalDate(2017,4,1), convertFromJavaToJoda(l))
+  val dateEqualOrAfter201741 = (date: LocalDate) => !date.isBefore(firstApril2017)
 
-  val dateBefore201741After2016331 = (l:LocalDate) => {
-    val jDate = convertFromJavaToJoda(l)
-    jDate.isBefore(new JodaLocalDate(2017,4,1)) && jDate.isAfter(new JodaLocalDate(2016,3,31))
-  }
-  val dateBefore201641After2015331 = (l:LocalDate) => {
-    val jDate = convertFromJavaToJoda(l)
-    jDate.isBefore(new JodaLocalDate(2016,4,1)) && jDate.isAfter(new JodaLocalDate(2015,3,31))
-  }
-  val lessThan12Months = (l:LocalDate) => {
-    val jDate = convertFromJavaToJoda(l)
-    jDate.isAfter(new JodaLocalDate(JodaLocalDate.now.minusMonths(12)))
-  }
+  val dateBefore201741After2016331 = (date: LocalDate) => date.isBefore(firstApril2017) && date.isAfter(endMarch2016)
+
+  val dateBefore201641After2015331 = (date: LocalDate) => date.isBefore(firstApril2016) && date.isAfter(endMarch2015)
+
+  val lessThan12Months = (date: LocalDate) => date.isAfter(twelveMonthsAgo)
+
 }

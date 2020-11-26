@@ -22,7 +22,7 @@ import base.SpecBase
 import connectors.{Allocated, QuotaReached}
 import mocks.TrafficManagementConnectorMock
 import models.{Draft, RegistrationInformation, VatReg}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.{verify, when}
 import play.api.libs.json.Json
 import play.api.mvc.Request
@@ -63,11 +63,11 @@ class TrafficManagementServiceSpec extends SpecBase
       mockAllocation(testRegId)(Future.successful(Allocated))
       when(
         mockAuthConnector.authorise(
-          Matchers.any,
-          Matchers.eq(Retrievals.credentials)
+          ArgumentMatchers.any,
+          ArgumentMatchers.eq(Retrievals.credentials)
         )(
-          Matchers.any[HeaderCarrier],
-          Matchers.any[ExecutionContext]
+          ArgumentMatchers.any[HeaderCarrier],
+          ArgumentMatchers.any[ExecutionContext]
         )
       ).thenReturn(Future.successful(Some(testCredentials)))
 
@@ -87,10 +87,10 @@ class TrafficManagementServiceSpec extends SpecBase
 
       res mustBe Allocated
       verify(mockAuditConnector).sendExtendedEvent(
-        Matchers.eq(testAuditEvent)
+        ArgumentMatchers.eq(testAuditEvent)
       )(
-        Matchers.any[HeaderCarrier],
-        Matchers.any[ExecutionContext]
+        ArgumentMatchers.any[HeaderCarrier],
+        ArgumentMatchers.any[ExecutionContext]
       )
     }
 
@@ -98,11 +98,11 @@ class TrafficManagementServiceSpec extends SpecBase
       mockAllocation(testRegId)(Future.successful(QuotaReached))
       when(
         mockAuthConnector.authorise(
-          Matchers.any,
-          Matchers.eq(Retrievals.credentials)
+          ArgumentMatchers.any,
+          ArgumentMatchers.eq(Retrievals.credentials)
         )(
-          Matchers.any[HeaderCarrier],
-          Matchers.any[ExecutionContext])
+          ArgumentMatchers.any[HeaderCarrier],
+          ArgumentMatchers.any[ExecutionContext])
       ).thenReturn(Future.successful(Some(testCredentials)))
 
       val res = await(Service.allocate(testRegId))

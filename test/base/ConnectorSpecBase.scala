@@ -16,7 +16,7 @@
 
 package base
 
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HttpResponse
@@ -26,44 +26,44 @@ import scala.concurrent.Future
 
 trait ConnectorSpecBase extends CommonSpecBase {
   def mockGet[T](url: String, thenReturn: T) = {
-    when(mockHttpClient.GET[T](Matchers.eq(url))(Matchers.any(), Matchers.any(), Matchers.any()))
+    when(mockHttpClient.GET[T](ArgumentMatchers.eq(url))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(thenReturn))
   }
 
   def mockPost[T, O](url: String, thenReturn: O) = {
-    when(mockHttpClient.POST[T, O](Matchers.eq(url), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
+    when(mockHttpClient.POST[T, O](ArgumentMatchers.eq(url), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(thenReturn))
   }
 
   def mockGet(url: String, status: Int, body: Option[JsValue] = None) = {
-    when(mockHttpClient.GET[HttpResponse](Matchers.eq(url))(Matchers.any(), Matchers.any(), Matchers.any()))
+    when(mockHttpClient.GET[HttpResponse](ArgumentMatchers.eq(url))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(HttpResponse(status, body)))
   }
 
   def mockPost[T](url: String, status: Int, body: Option[JsValue] = None) = {
-    when(mockHttpClient.POST[T, HttpResponse](Matchers.eq(url), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
+    when(mockHttpClient.POST[T, HttpResponse](ArgumentMatchers.eq(url), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(HttpResponse(status, body)))
   }
 
   def mockPatch[T](url: String, status: Int, body: Option[JsValue] = None) = {
-    when(mockHttpClient.PATCH[T, HttpResponse](Matchers.eq(url), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
+    when(mockHttpClient.PATCH[T, HttpResponse](ArgumentMatchers.eq(url), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(HttpResponse(status, body)))
   }
 
   def mockFailedGet(url: String, exception: Exception) = {
-    when(mockHttpClient.GET[HttpResponse](Matchers.eq(url))(Matchers.any(), Matchers.any(), Matchers.any()))
+    when(mockHttpClient.GET[HttpResponse](ArgumentMatchers.eq(url))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.failed(exception))
   }
 
   def verifyGetCalled[T](url: String, count: Int = 1) = {
-    verify(mockHttpClient, times(count)).GET[Option[T]](Matchers.eq(url))(Matchers.any(), Matchers.any(), Matchers.any())
+    verify(mockHttpClient, times(count)).GET[Option[T]](ArgumentMatchers.eq(url))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
   }
 
   def verifyPostCalled[T, O](url: String, count: Int = 1) = {
-    verify(mockHttpClient, times(count)).POST[Option[T], O](Matchers.eq(url), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())
+    verify(mockHttpClient, times(count)).POST[Option[T], O](ArgumentMatchers.eq(url), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
   }
 
   def verifyPatchCalled[T, O](url: String, count: Int = 1) = {
-    verify(mockHttpClient, times(count)).PATCH[Option[T], O](Matchers.eq(url), Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any())
+    verify(mockHttpClient, times(count)).PATCH[Option[T], O](ArgumentMatchers.eq(url), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
   }
 }
