@@ -18,7 +18,7 @@ package services
 
 import base.CommonSpecBase
 import models.CurrentProfile
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,11 +37,11 @@ class CurrentProfileServiceSpec extends CommonSpecBase {
   "buildCurrentProfile" should {
     "build a profile" when {
       "it hasn't been built" in new Setup {
-        when(mockDataCacheConnector.getEntry[CurrentProfile](Matchers.any(), Matchers.any())(Matchers.any()))
+        when(mockDataCacheConnector.getEntry[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
-        when(mockVatRegConnector.getRegistrationId()(Matchers.any[HeaderCarrier], Matchers.any[ExecutionContext]))
+        when(mockVatRegConnector.getRegistrationId()(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[ExecutionContext]))
           .thenReturn(Future.successful(regId))
-        when(mockDataCacheConnector.save[CurrentProfile](Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any()))
+        when(mockDataCacheConnector.save[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(CacheMap("test", Map("test" -> Json.obj()))))
 
         await(service.fetchOrBuildCurrentProfile(testIntId)) mustBe CurrentProfile(regId)
@@ -50,7 +50,7 @@ class CurrentProfileServiceSpec extends CommonSpecBase {
       "it has been built" in new Setup {
         private val profile = CurrentProfile(regId)
 
-        when(mockDataCacheConnector.getEntry[CurrentProfile](Matchers.any(), Matchers.any())(Matchers.any()))
+        when(mockDataCacheConnector.getEntry[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(profile)))
 
         await(service.fetchOrBuildCurrentProfile(testIntId)) mustBe profile

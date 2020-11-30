@@ -26,6 +26,7 @@ import play.api.mvc.AnyContentAsFormUrlEncoded
 import play.api.test.FakeRequest
 import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
 import uk.gov.hmrc.http.SessionKeys
+import utils.ExtraSessionKeys
 
 object SessionCookieBaker extends IntegrationSpecBase {
 
@@ -69,15 +70,15 @@ object SessionCookieBaker extends IntegrationSpecBase {
   def cookieData(userId: String = "anyUserId"): Map[String, String] = {
     Map(
       SessionKeys.sessionId -> "session-ac4ed3e7-dbc3-4150-9574-40771c4285c1",
-      SessionKeys.token -> "RANDOMTOKEN",
-      SessionKeys.userId -> userId)
+      ExtraSessionKeys.token -> "RANDOMTOKEN",
+      ExtraSessionKeys.userId -> userId)
   }
 
   def requestWithSession(req: FakeRequest[AnyContentAsFormUrlEncoded], userId: String): FakeRequest[AnyContentAsFormUrlEncoded] =
     req.withSession(
       SessionKeys.sessionId -> "session-ac4ed3e7-dbc3-4150-9574-40771c4285c1",
-      SessionKeys.token -> "RANDOMTOKEN",
-      SessionKeys.userId -> userId)
+      ExtraSessionKeys.token -> "RANDOMTOKEN",
+      ExtraSessionKeys.userId -> userId)
 
   def getSessionCookie(additionalData: Map[String, String] = Map(), timeStampRollback: Long = 0) = {
     cookieValue(cookieData())

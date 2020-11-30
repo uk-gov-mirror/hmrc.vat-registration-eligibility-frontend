@@ -23,7 +23,7 @@ import deprecated.DeprecatedConstants._
 import identifiers.VoluntaryRegistrationId
 import models.CurrentProfile
 import models.requests.DataRequest
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc.AnyContentAsEmpty

@@ -25,7 +25,7 @@ import forms.ThresholdInTwelveMonthsFormProvider
 import identifiers.ThresholdInTwelveMonthsId
 import mocks.TrafficManagementServiceMock
 import models.{ConditionalDateFormElement, Draft, NormalMode, RegistrationInformation, VatReg}
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.data.Form
 import play.api.libs.json.Json

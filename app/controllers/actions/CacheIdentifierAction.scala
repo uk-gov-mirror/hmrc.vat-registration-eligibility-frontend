@@ -30,6 +30,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
+
 class CacheIdentifierActionImpl @Inject()(override val authConnector: AuthConnector,
                                           config: FrontendAppConfig,
                                           val currentProfileService: CurrentProfileService,

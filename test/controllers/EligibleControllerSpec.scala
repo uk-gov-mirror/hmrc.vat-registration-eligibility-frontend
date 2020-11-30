@@ -18,17 +18,15 @@ package controllers
 
 import java.time.LocalDate
 
-import controllers.actions.{DataRequiredAction, FakeCacheIdentifierAction, FakeDataRetrievalAction}
+import controllers.actions.{DataRequiredAction, FakeCacheIdentifierAction}
 import mocks.TrafficManagementServiceMock
-import models.{CurrentProfile, Draft, RegistrationInformation, VatReg}
 import models.requests.DataRequest
-import org.mockito.Matchers
+import models.{Draft, RegistrationInformation, VatReg}
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.UserAnswers
 import views.html.eligible
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -64,7 +62,7 @@ class EligibleControllerSpec extends ControllerSpecBase with TrafficManagementSe
 
   "onSubmit" must {
     "redirect to VAT reg frontend" in {
-      when(mockVRService.submitEligibility(Matchers.any[String])(Matchers.any[HeaderCarrier], Matchers.any[ExecutionContext], Matchers.any[DataRequest[_]]))
+      when(mockVRService.submitEligibility(ArgumentMatchers.any[String])(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[ExecutionContext], ArgumentMatchers.any[DataRequest[_]]))
         .thenReturn(Future.successful(Json.obj()))
 
       mockUpsertRegistrationInformation(testInternalId, testRegId, false)(

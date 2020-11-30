@@ -20,8 +20,8 @@ import base.{SpecBase, VATEligiblityMocks}
 import identifiers._
 import models.UKCompany
 import models.requests.DataRequest
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.i18n.Messages
 import play.api.libs.json._
@@ -29,7 +29,6 @@ import play.api.mvc.AnyContentAsEmpty
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.collection.immutable.ListMap
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
@@ -44,10 +43,10 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
 
     val mockMessages: Messages = mock[Messages]
 
-    when(mockMessagesAPI.preferred(Matchers.any[DataRequest[_]]()))
+    when(mockMessagesAPI.preferred(ArgumentMatchers.any[DataRequest[_]]()))
       .thenReturn(mockMessages)
 
-    when(mockMessages.apply(Matchers.anyString(), Matchers.any()))
+    when(mockMessages.apply(ArgumentMatchers.anyString(), ArgumentMatchers.any()))
       .thenReturn("mocked message")
 
     when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
