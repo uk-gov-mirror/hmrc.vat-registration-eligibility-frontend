@@ -62,7 +62,7 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase with TrafficMa
     }
 
     "return OK and the International Dropout view for a GET" in {
-      val result = controller().onPageLoad(InternationalActivitiesId.toString)(fakeRequest)
+      val result = controller().internationalActivitiesDropout(fakeRequest)
 
       status(result) mustBe OK
       contentAsString(result) mustBe internationalView()
