@@ -183,23 +183,24 @@ eligibility.divisionDropout.link = use the VAT 1 form.
 eligibility.exception.link = Find out how to apply for an exception
 
 eligibility.international.special.text = If the business:
-eligibility.international.bullet0 = is exporting goods or services to EU countries -
-eligibility.international.link = register using form VAT1
-eligibility.international.bullet1 = is importing goods or services from EU countries -
+eligibility.international.bullet0 = is selling or moving goods from Northern Ireland to an EU member state -
+eligibility.international.link = register using form VAT1A
+eligibility.international.bullet1 = is bringing goods into Northern Ireland from an EU member state -
 eligibility.international.link1 = register using form VAT1B
 eligibility.international.bullet2 = is selling assets that it bought from a country outside the EU and claimed a VAT refund on -
 eligibility.international.link2 = register using form VAT1C
-eligibility.international.bullet3 =  does all of its business outside the UK or has its head office outside the UK -
+eligibility.international.bullet3 = does all of its business outside the UK or has its head office outside the UK -
 eligibility.international.link3 = Use the other VAT registration service
 
-internationalActivities.heading = Will the business do any of the following international activities over the next 12 months?
-internationalActivities.error.required = Tell us if the business will do any of these international activities over the next 12 months
+internationalActivities.heading = Will the business do any of the following activities over the next 12 months?
+internationalActivities.error.required = Tell us if the business will do any of these activities over the next 12 months
 internationalActivities.bulletText = Tell us if the business will:
-internationalActivities.bullet1 = bring goods or services in from EU countries
-internationalActivities.bullet2 = send goods or services to EU countries
-internationalActivities.bullet3 = sell assets that it bought from a country outside the EU and claimed a VAT refund on
-internationalActivities.bullet4 = do all its business outside the UK
-internationalActivities.bullet5 = have its head office outside the UK
+internationalActivities.bullet1 = sell assets bought from outside the UK and claimed a VAT refund on
+internationalActivities.bullet2 = do all its business outside the UK
+internationalActivities.bullet3 = have its head office outside the UK
+internationalActivities.bullet4 = bring goods into Northern Ireland from an EU Member state
+internationalActivities.bullet5 = sell goods located in Northern Ireland at the time of sale
+internationalActivities.bullet6 = sell or move goods from Northern Ireland to an EU member state
 
 zeroRatedSales.heading = Does the business sell mainly zero-rated goods or services?
 zeroRatedSales.error.required = Select yes if the business sells mainly zero-rated goods or services

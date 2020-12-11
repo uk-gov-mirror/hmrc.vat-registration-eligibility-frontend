@@ -27,13 +27,14 @@ class InternationalActivitiesViewSpec extends ViewSpecBase {
   val messageKeyPrefix = "internationalActivities"
   val form = new InternationalActivitiesFormProvider()()
 
-  val h1 = "Will the business do any of the following international activities over the next 12 months?"
+  val h1 = "Will the business do any of the following activities over the next 12 months?"
   val paragraph = "Tell us if the business will:"
-  val bullet1 = "bring goods or services in from EU countries"
-  val bullet2 = "send goods or services to EU countries"
-  val bullet3 = "sell assets that it bought from a country outside the EU and claimed a VAT refund on"
-  val bullet4 = "do all its business outside the UK"
-  val bullet5 = "have its head office outside the UK"
+  val bullet1 = "sell assets bought from outside the UK and claimed a VAT refund on"
+  val bullet2 = "do all its business outside the UK"
+  val bullet3 = "have its head office outside the UK"
+  val bullet4 = "bring goods into Northern Ireland from an EU Member state"
+  val bullet5 = "sell goods located in Northern Ireland at the time of sale"
+  val bullet6 = "sell or move goods from Northern Ireland to an EU member state"
 
   object Selectors extends BaseSelectors
 
@@ -70,6 +71,7 @@ class InternationalActivitiesViewSpec extends ViewSpecBase {
       doc.select(Selectors.bullet(3)).first().text() mustBe bullet3
       doc.select(Selectors.bullet(4)).first().text() mustBe bullet4
       doc.select(Selectors.bullet(5)).first().text() mustBe bullet5
+      doc.select(Selectors.bullet(6)).first().text() mustBe bullet6
     }
 
   }

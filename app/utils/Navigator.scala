@@ -47,7 +47,10 @@ class Navigator @Inject()() {
     case VATExceptionKickoutId => routes.VATExceptionKickoutController.onPageLoad()
     case VATRegistrationExceptionId => routes.VATRegistrationExceptionController.onPageLoad()
     case ApplyInWritingId => routes.ApplyInWritingController.onPageLoad()
-    case EligibilityDropoutId(mode) => routes.EligibilityDropoutController.onPageLoad(mode)
+    case EligibilityDropoutId(mode) => mode match {
+      case InternationalActivitiesId.toString => routes.EligibilityDropoutController.internationalActivitiesDropout()
+      case mode => routes.EligibilityDropoutController.onPageLoad(mode)
+    }
     case AgriculturalFlatRateSchemeId => routes.AgriculturalFlatRateSchemeController.onPageLoad()
     case RacehorsesId => routes.RacehorsesController.onPageLoad()
     case VoluntaryInformationId => routes.VoluntaryInformationController.onPageLoad()

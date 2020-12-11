@@ -41,12 +41,16 @@ class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
   def onPageLoad(mode: String): Action[AnyContent] = identify {
     implicit request =>
       mode match {
-        case InternationalActivitiesId.toString => Ok(internationalActivityDropout())
         case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout())
         case VATExceptionKickoutId.toString => Ok(vatExceptionDropout())
         case BusinessEntityId.toString => Ok(vatDivisionDropout())
         case _ => Ok(eligibilityDropout())
       }
+  }
+
+  def internationalActivitiesDropout: Action[AnyContent] = identify {
+    implicit request =>
+      Ok(internationalActivityDropout())
   }
 
   def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>

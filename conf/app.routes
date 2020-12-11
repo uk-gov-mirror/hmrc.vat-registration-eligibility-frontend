@@ -51,10 +51,11 @@ GET        /involved-more-business-changing-status      controllers.InvolvedInOt
 POST       /involved-more-business-changing-status      controllers.InvolvedInOtherBusinessController.onSubmit()
 
 GET        /cant-register/:inelligibleType              controllers.EligibilityDropoutController.onPageLoad(inelligibleType: String)
+GET        /errors/business-activities-next-12-months   controllers.EligibilityDropoutController.internationalActivitiesDropout()
 POST       /cant-register                               controllers.EligibilityDropoutController.onSubmit()
 
-GET        /international-business                      controllers.InternationalActivitiesController.onPageLoad()
-POST       /international-business                      controllers.InternationalActivitiesController.onSubmit()
+GET        /business-activities-next-12-months          controllers.InternationalActivitiesController.onPageLoad()
+POST       /business-activities-next-12-months          controllers.InternationalActivitiesController.onSubmit()
 
 GET        /zero-rated-sales                            controllers.ZeroRatedSalesController.onPageLoad()
 POST       /zero-rated-sales                            controllers.ZeroRatedSalesController.onSubmit()
