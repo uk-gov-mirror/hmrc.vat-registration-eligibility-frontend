@@ -17,6 +17,7 @@
 @import config.FrontendAppConfig
 @import views.html.newcomponents.siteHeader
 @import uk.gov.hmrc.hmrcfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
 
 @(pageTitle: Option[String] = None, beforeContentBlock: Option[Html] = None, backLink: Boolean = false, signOutLink: Boolean = true, timeout:Boolean = true)(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -78,6 +79,6 @@
     beforeContentBlock = Some(beforeContentBlock),
     bodyEndBlock = Some(bodyEndBlock),
     headerBlock = Some(siteHeader(signOutLink)),
-    footerBlock = Some(HmrcFooter()),
+    footerBlock = Some(HmrcStandardFooter()),
     scriptsBlock = Some(scripts)
 )(getHelpForm)
