@@ -29,12 +29,13 @@ class InternationalActivitiesViewSpec extends ViewSpecBase {
 
   val h1 = "Will the business do any of the following activities over the next 12 months?"
   val paragraph = "Tell us if the business will:"
-  val bullet1 = "sell assets bought from outside the UK and claimed a VAT refund on"
-  val bullet2 = "do all its business outside the UK"
-  val bullet3 = "have its head office outside the UK"
-  val bullet4 = "bring goods into Northern Ireland from an EU Member state"
-  val bullet5 = "sell goods located in Northern Ireland at the time of sale"
-  val bullet6 = "sell or move goods from Northern Ireland to an EU member state"
+  val bullet1 = "do all its business outside the UK"
+  val bullet2 = "have its head office outside the UK"
+  val bullet3 = "sell assets bought from outside the UK and claim a repayment of VAT under Directive 2008/9EC or Thirteenth VAT Directive"
+  val bullet4 = "sell goods located in Northern Ireland at the time of sale"
+  val bullet5 = "sell or move goods from Northern Ireland to an EU member state"
+  val bullet6 = "bring goods into Northern Ireland from an EU member state"
+  val bullet7 = "sell goods into Northern Ireland from an EU member state"
 
   object Selectors extends BaseSelectors
 
@@ -71,7 +72,6 @@ class InternationalActivitiesViewSpec extends ViewSpecBase {
       doc.select(Selectors.bullet(3)).first().text() mustBe bullet3
       doc.select(Selectors.bullet(4)).first().text() mustBe bullet4
       doc.select(Selectors.bullet(5)).first().text() mustBe bullet5
-      doc.select(Selectors.bullet(6)).first().text() mustBe bullet6
     }
 
   }
