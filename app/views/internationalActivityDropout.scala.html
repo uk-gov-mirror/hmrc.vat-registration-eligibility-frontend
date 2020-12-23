@@ -28,12 +28,8 @@
 
     <ul class="govuk-list govuk-list--bullet">
         <li>
-            @messages("eligibility.international.bullet0")
-            @link( appConfig.VAT1AFormURL, messages("eligibility.international.link"))
-        </li>
-        <li>
             @messages("eligibility.international.bullet1")
-            @link(appConfig.VAT1BFormURL, messages("eligibility.international.link1"))
+            @link( appConfig.otrsUrl, messages("eligibility.international.link1"))
         </li>
         <li>
             @messages("eligibility.international.bullet2")
@@ -42,6 +38,18 @@
         <li>
             @messages("eligibility.international.bullet3")
             @link(appConfig.otrsUrl, messages("eligibility.international.link3"))
+        </li>
+        <li>
+            @messages("eligibility.international.bullet4")
+            @link(appConfig.otrsUrl, messages("eligibility.international.link4"))
+        </li>
+        <li>
+            @messages("eligibility.international.bullet5")
+            @link(appConfig.VAT1BFormURL, messages("eligibility.international.link5"))
+        </li>
+        <li>
+            @messages("eligibility.international.bullet6")
+            @link(appConfig.VAT1AFormURL, messages("eligibility.international.link6"))
         </li>
     </ul>
 
