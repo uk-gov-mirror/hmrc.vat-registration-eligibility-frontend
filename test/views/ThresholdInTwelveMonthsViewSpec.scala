@@ -27,10 +27,10 @@ import utils.TimeMachine
 import views.html.thresholdInTwelveMonths
 
 
-class ThresholdInTwelveMonthsViewSpec @Inject()(implicit appConfig: FrontendAppConfig) extends ViewSpecBase {
+class ThresholdInTwelveMonthsViewSpec extends ViewSpecBase {
 
   object TestTimeMachine extends TimeMachine {
-    override def today: LocalDate = LocalDate.parse("2020-01-01")
+    override def today: LocalDate = LocalDate.parse("2021-01-01")
   }
 
   val messageKeyPrefix = "thresholdInTwelveMonths"
@@ -38,16 +38,16 @@ class ThresholdInTwelveMonthsViewSpec @Inject()(implicit appConfig: FrontendAppC
 
   val thresholdService: ThresholdService = app.injector.instanceOf[ThresholdService]
 
-  val h1 = "In any 12-month period has the business gone over the VAT-registration threshold?"
-  val paragraph = "£85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales the business can make before it has to register for VAT."
+  val h1 = "Has the business’s taxable turnover gone over £85,000 in any 12 month period?"
+  val paragraph = "You must monitor your turnover every month and add up the total amount to cover the last 12 months. This is called a ‘rolling 12 month period’. If one month’s turnover takes you over £85,000 in any rolling 12 month period, you must register for VAT."
   val bullet1 = "Yes"
   val bullet2 = "No"
-  val h2 = "In any 12-month period has the business gone over the VAT-registration threshold?"
+  val h2 = "Has the business’s taxable turnover gone over £85,000 in any 12 month period? When did the business go over the threshold?"
   val button = "Continue"
 
   object Selectors extends BaseSelectors
 
-  "ThresholdNextThirtyDays view" must {
+  "ThresholdInTwelveMonths view" must {
     val doc = asDocument(thresholdInTwelveMonths(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have a heading" in {
@@ -66,19 +66,12 @@ class ThresholdInTwelveMonthsViewSpec @Inject()(implicit appConfig: FrontendAppC
       doc.select(Selectors.p(1)).text() mustBe paragraph
     }
 
-    "have bullet points" in {
-      doc.select(Selectors.bullet(1)).text() mustBe bullet1
-      doc.select(Selectors.bullet(2)).text() mustBe bullet2
-    }
-
     "have a continue button" in {
       doc.select(Selectors.button).text() mustBe button
     }
 
     "contain a legend for the question" in {
-      val legends = doc.getElementsByTag("valueDate")
-      legends.size mustBe 1
-      legends.first.text mustBe h2
+      doc.select(Selectors.legend(1)).text() mustBe h2
     }
   }
 }
