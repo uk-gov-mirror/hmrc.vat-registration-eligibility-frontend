@@ -6,7 +6,7 @@ private object AppDependencies {
   import play.sbt.PlayImport._
 
   private val govukTemplateVersion = "5.60.0-play-26"
-  private val playUiVersion = "8.11.0-play-26"
+  private val playUiVersion = "8.15.0-play-26"
   private val scalaTestPlusPlayVersion = "3.1.3"
   private val pegdownVersion = "1.6.0"
   private val mockitoVersion = "2.13.0"
@@ -21,7 +21,7 @@ private object AppDependencies {
   private val wireMockVersion = "2.26.3"
   private val reactivemongoTestVersion = "4.21.0-play-26"
 
-  private val playGovukFrontendVersion = "0.55.0-play-26"
+  private val playGovukFrontendVersion = "0.56.0-play-26"
   private val playHmrcFrontendVersion = "0.27.0-play-26"
 
   private val govukFrontendVersion = "3.7.0"
