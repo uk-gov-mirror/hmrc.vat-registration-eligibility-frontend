@@ -96,6 +96,4 @@ class FrontendAppConfig @Inject()(val runModeConfiguration: Configuration,
   lazy val privacy: String = host + servicesConfig.getString("urls.footer.privacy")
   lazy val termsConditions: String = host + servicesConfig.getString("urls.footer.termsConditions")
   lazy val govukHelp: String = servicesConfig.getString("urls.footer.govukHelp")
-  lazy val googleTagManagerId = loadConfig(s"google-tag-manager.id")
-  lazy val isGtmEnabled = loadConfig(s"google-tag-manager.enabled")
 }
