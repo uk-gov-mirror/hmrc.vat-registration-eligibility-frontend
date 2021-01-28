@@ -24,7 +24,7 @@ import identifiers.{AgriculturalFlatRateSchemeId, InternationalActivitiesId}
 import mocks.TrafficManagementServiceMock
 import models.{Draft, RegistrationInformation, VatReg}
 import play.api.test.Helpers._
-import views.html.{agriculturalDropout, eligibilityDropout, internationalActivityDropout}
+import views.html.{agriculturalDropout, internationalActivityDropout}
 
 import scala.concurrent.Future
 
@@ -46,19 +46,17 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase with TrafficMa
   val testRegId = "regId"
   val testDate = LocalDate.now
 
-  def viewAsString(default: Boolean) = eligibilityDropout(default)(fakeCacheDataRequestIncorped, messages, appConfig).toString
-
   def internationalView() = internationalActivityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
 
   def agricultureView() = agriculturalDropout()(fakeCacheDataRequestIncorped, messages, appConfig).toString
 
   "EligibilityDropout Controller" must {
 
-    "return OK and the default view for a GET" in {
+    "return SeeOther and the default view for a GET" in {
       val result = controller().onPageLoad("default")(fakeRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString(default = true)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(appConfig.otrsUrl)
     }
 
     "return OK and the International Dropout view for a GET" in {

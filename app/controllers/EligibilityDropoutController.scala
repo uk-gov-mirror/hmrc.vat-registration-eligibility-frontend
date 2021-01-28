@@ -44,7 +44,7 @@ class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
         case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout())
         case VATExceptionKickoutId.toString => Ok(vatExceptionDropout())
         case BusinessEntityId.toString => Ok(vatDivisionDropout())
-        case _ => Ok(eligibilityDropout())
+        case _ => SeeOther(appConfig.otrsUrl)
       }
   }
 
