@@ -30,7 +30,6 @@ class PageIdBindingSpec extends PlaySpec {
     s"$BusinessEntityId" -> JsString(UKCompany.toString),
     s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
     s"$ThresholdNextThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
-    s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
     s"$VoluntaryRegistrationId" -> JsBoolean(true),
     s"$TurnoverEstimateId" -> Json.obj("amount" -> JsString("50000")),
     s"$InternationalActivitiesId" -> JsBoolean(false),
@@ -109,7 +108,6 @@ class PageIdBindingSpec extends PlaySpec {
     val mapOfValuesToBeTested = List(
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdNextThirtyDaysId" -> JsBoolean(false),
-      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$VATExemptionId" -> JsBoolean(false),
       s"$ZeroRatedSalesId" -> JsBoolean(true)
     )
@@ -127,11 +125,41 @@ class PageIdBindingSpec extends PlaySpec {
     )
     intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
   }
+  "throw exception if thresholdInTwelveMonths is false and thresholdInPreviousThirtyDays is true" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VoluntaryRegistrationId" -> JsBoolean(false),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
+  }
+  "throw exception if thresholdInTwelveMonths is true and thresholdInPreviousThirtyDays does not exist" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VoluntaryRegistrationId" -> JsBoolean(true),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
+  }
+  "throw exception if thresholdInPreviousThirtyDays exists but thresholdInTwelveMonths does not exist" in {
+    val mapOfValuesToBeTested = List(
+      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
+      s"$VoluntaryRegistrationId" -> JsBoolean(false),
+      s"$VATExemptionId" -> JsBoolean(false),
+      s"$ZeroRatedSalesId" -> JsBoolean(true),
+      s"$VATRegistrationExceptionId" -> JsBoolean(false)
+    )
+    intercept[Exception](PageIdBinding.sectionBindings(new CacheMap("test", listMapWithoutFieldsToBeTested.++:(mapOfValuesToBeTested))))
+  }
   "throw exception if ThresholdTwelveMonths == false, Exception Exists" in {
     val mapOfValuesToBeTested = List(
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdNextThirtyDaysId" -> JsBoolean(false),
-      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$VoluntaryRegistrationId" -> JsBoolean(true),
       s"$VATExemptionId" -> JsBoolean(false),
       s"$ZeroRatedSalesId" -> JsBoolean(true),
@@ -144,7 +172,6 @@ class PageIdBindingSpec extends PlaySpec {
       s"$BusinessEntityId" -> JsString(UKCompany.toString),
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdNextThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
-      s"$ThresholdPreviousThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
       s"$VoluntaryRegistrationId" -> JsBoolean(true),
       s"$VATExemptionId" -> JsBoolean(false),
       s"$ZeroRatedSalesId" -> JsBoolean(true),
