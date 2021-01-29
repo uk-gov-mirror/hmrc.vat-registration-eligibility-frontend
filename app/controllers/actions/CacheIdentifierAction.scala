@@ -25,7 +25,7 @@ import play.api.mvc._
 import services.CurrentProfileService
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UnauthorizedException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,6 +49,8 @@ class CacheIdentifierActionImpl @Inject()(override val authConnector: AuthConnec
             )
       }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
     } recover {
+      case ex: NotFoundException =>
+        Redirect(s"${config.vatRegFEURL}${config.vatRegFEURI}")
       case ex: NoActiveSession =>
         Redirect(config.loginUrl, Map("continue" -> Seq(config.postSignInUrl)))
       case ex: InsufficientEnrolments =>

@@ -20,12 +20,15 @@ import base.SpecBase
 import controllers.routes
 import models.CurrentProfile
 import models.requests.CacheIdentifierRequest
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.when
 import play.api.mvc._
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,6 +48,29 @@ class CacheIdentifierActionSpec extends SpecBase {
 
 
     "Auth Action" when {
+      "the user hasn't started the journey" must {
+        "redirect the user to the start of the journey" in {
+          val authAction = new CacheIdentifierActionImpl(mockAuthConnector, frontendAppConfig, mockCurrentProfileService, parser)
+          val controller = new Harness(authAction, parser)
+          val testInternalId = "testInternalId"
+
+          when(
+            mockAuthConnector.authorise(
+              ArgumentMatchers.any,
+              ArgumentMatchers.eq(Retrievals.internalId)
+            )(
+              ArgumentMatchers.any[HeaderCarrier],
+              ArgumentMatchers.any[ExecutionContext]
+            )
+          ).thenReturn(Future.successful(Some(testInternalId)))
+          when(mockCurrentProfileService.fetchOrBuildCurrentProfile(ArgumentMatchers.eq(testInternalId)))
+            .thenReturn(throw new NotFoundException(""))
+
+          val result = controller.onPageLoad()(fakeRequest)
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).get mustBe Some(s"${frontendAppConfig.vatRegFEURL}${frontendAppConfig.vatRegFEURI}")
+        }
+      }
 
       "the user hasn't logged in" must {
         "redirect the user to log in " in {
