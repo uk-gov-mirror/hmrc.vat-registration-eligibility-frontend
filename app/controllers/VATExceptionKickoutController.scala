@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
-import forms.VATRegistrationExceptionFormProvider
+import forms.VATExceptionKickoutFormProvider
 import identifiers.VATExceptionKickoutId
 import javax.inject.{Inject, Singleton}
 import models.{NormalMode, RegistrationInformation}
@@ -40,7 +40,7 @@ class VATExceptionKickoutController @Inject()(mcc: MessagesControllerComponents,
                                               identify: CacheIdentifierAction,
                                               getData: DataRetrievalAction,
                                               requireData: DataRequiredAction,
-                                              formProvider: VATRegistrationExceptionFormProvider,
+                                              formProvider: VATExceptionKickoutFormProvider,
                                               trafficManagementService: TrafficManagementService
                                              )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {

@@ -16,21 +16,23 @@
 
 package views
 
-import forms.VATRegistrationExceptionFormProvider
+import forms.VATExceptionKickoutFormProvider
 import models.NormalMode
-import views.html.vatRegistrationException
+import views.html.vatExceptionKickout
 
 class VATExceptionKickoutViewSpec extends ViewSpecBase {
   val messageKeyPrefix = "vatRegistrationException"
-  val form = new VATRegistrationExceptionFormProvider()()
+  val form = new VATExceptionKickoutFormProvider()()
 
-  val h1 = "Would you like to apply for a VAT registration exception?"
-  val paragraph = "You can apply for a registration exception if the business goes over the VAT threshold temporarily."
+  val h1 = "You can ask for an exception if you have only temporarily gone over the VAT threshold"
+  val paragraph = "An exception means you will not have to register for VAT if you can provide evidence that your VAT taxable turnover will not go over the deregistration threshold of £83,000 in the next 12 months. To ask for an exception, you will need to write to HMRC."
+  val yesText = "I want to ask for an exception"
+  val noText = "I do not want to ask for an exception"
 
   object Selectors extends BaseSelectors
 
   "VATRegistrationException view" must {
-    lazy val doc = asDocument(vatRegistrationException(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(vatExceptionKickout(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton
@@ -54,6 +56,11 @@ class VATExceptionKickoutViewSpec extends ViewSpecBase {
 
     "have the correct legend" in {
       doc.select(Selectors.legend(1)).text() mustBe h1
+    }
+
+    "have the correct radio text" in {
+      doc.select(Selectors.radioYes).text() mustBe yesText
+      doc.select(Selectors.radioNo).text() mustBe noText
     }
   }
 }

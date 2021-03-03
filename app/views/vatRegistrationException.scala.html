@@ -31,14 +31,15 @@
 
     @h1(messages("vatRegistrationException.heading"))
     @p{ @messages("vatRegistrationException.p1") }
-    @p{ @messages("vatRegistrationException.p2") }
 
     @helpers.form(action = VATRegistrationExceptionController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "vatRegistrationException.heading",
             isPageHeading = false,
-            classes = "govuk-visually-hidden"
+            classes = "govuk-visually-hidden",
+            yesText = Some(messages("vatRegistrationException.yesText")),
+            noText = Some(messages("vatRegistrationException.noText"))
         )
 
         @button(messages("site.continue"))
