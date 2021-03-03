@@ -38,5 +38,8 @@ trait BaseSelectors {
   val button = ".govuk-button"
   val detailsSummary = ".govuk-details__summary-text"
   val detailsContent = ".govuk-details__text"
+  val radioYes = "label[for=value]"
+  val radioNo = "label[for=value-no]"
+
 
 }

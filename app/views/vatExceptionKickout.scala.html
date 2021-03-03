@@ -25,20 +25,21 @@
 
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@layout(pageTitle = Some(title(form, messages("vatRegistrationException.title"))), backLink = true) {
+@layout(pageTitle = Some(title(form, messages("vatExceptionKickout.title"))), backLink = true) {
 
     @errorSummary(form.errors)
 
-    @h1(messages("vatRegistrationException.heading"))
-    @p{ @messages("vatRegistrationException.p1") }
-    @p{ @messages("vatRegistrationException.p2") }
+    @h1(messages("vatExceptionKickout.heading"))
+    @p{ @messages("vatExceptionKickout.p1") }
 
     @helpers.form(action = VATExceptionKickoutController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
-            headingKey = "vatRegistrationException.heading",
+            headingKey = "vatExceptionKickout.heading",
             isPageHeading = false,
-            classes = "govuk-visually-hidden"
+            classes = "govuk-visually-hidden",
+            yesText = Some(messages("vatExceptionKickout.yesText")),
+            noText = Some(messages("vatExceptionKickout.noText"))
         )
 
         @button(messages("site.continue"))

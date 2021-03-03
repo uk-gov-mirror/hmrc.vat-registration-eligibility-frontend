@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import connectors.FakeDataCacheConnector
 import controllers.actions._
-import forms.VATRegistrationExceptionFormProvider
+import forms.VATExceptionKickoutFormProvider
 import identifiers.VATExceptionKickoutId
 import mocks.TrafficManagementServiceMock
 import models.{Draft, NormalMode, RegistrationInformation, VatReg}
@@ -37,7 +37,7 @@ class VATExceptionKickoutControllerSpec extends ControllerSpecBase with TrafficM
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
-  val formProvider = new VATRegistrationExceptionFormProvider()
+  val formProvider = new VATExceptionKickoutFormProvider()
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
 
