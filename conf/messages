@@ -244,12 +244,11 @@ vatExemption.heading = Does the business want to apply for a VAT exemption?
 vatExemption.error.required = Select yes if the business wants to apply for a VAT exemption
 vatExemption.text = The business may not have to register for VAT if it sells mainly or only zero-rated goods or services.
 
-vatRegistrationException.title = You can ask for an exception if you have only temporarily gone over the VAT threshold
-vatRegistrationException.heading = You can ask for an exception if you have only temporarily gone over the VAT threshold
-vatRegistrationException.error.required = Select if you want to ask for an exception or not
-vatRegistrationException.p1 = An exception means you will not have to register for VAT if you can provide evidence that your VAT taxable turnover will not go over the deregistration threshold of £83,000 in the next 12 months. To ask for an exception, you will need to write to HMRC.
-vatRegistrationException.yesText = I want to ask for an exception
-vatRegistrationException.noText = I do not want to ask for an exception
+vatRegistrationException.title = Would you like to apply for a VAT registration exception?
+vatRegistrationException.heading = Would you like to apply for a VAT registration exception?
+vatRegistrationException.error.required = Select yes if the business is applying for a VAT registration exception
+vatRegistrationException.p1 = You can apply for a registration exception if the business goes over the VAT threshold temporarily.
+vatRegistrationException.p2 = If you apply for an exception and are successful, we will contact you to tell you your request has been accepted.
 
 vatExceptionKickout.title = You can ask for an exception if you have only temporarily gone over the VAT threshold
 vatExceptionKickout.heading = You can ask for an exception if you have only temporarily gone over the VAT threshold
