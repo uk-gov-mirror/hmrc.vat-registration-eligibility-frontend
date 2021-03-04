@@ -24,10 +24,9 @@ class VATRegistrationExceptionViewSpec extends ViewSpecBase {
   val messageKeyPrefix = "vatRegistrationException"
   val form = new VATRegistrationExceptionFormProvider()()
 
-  val h1 = "You can ask for an exception if you have only temporarily gone over the VAT threshold"
-  val paragraph = "An exception means you will not have to register for VAT if you can provide evidence that your VAT taxable turnover will not go over the deregistration threshold of £83,000 in the next 12 months. To ask for an exception, you will need to write to HMRC."
-  val yesText = "I want to ask for an exception"
-  val noText = "I do not want to ask for an exception"
+  val h1 = "Would you like to apply for a VAT registration exception?"
+  val p1 = "You can apply for a registration exception if the business goes over the VAT threshold temporarily."
+  val p2 = "If you apply for an exception and are successful, we will contact you to tell you your request has been accepted."
 
   object Selectors extends BaseSelectors
 
@@ -51,16 +50,15 @@ class VATRegistrationExceptionViewSpec extends ViewSpecBase {
     }
 
     "have the first paragraph" in {
-      doc.select(Selectors.p(1)).text() mustBe paragraph
+      doc.select(Selectors.p(1)).text() mustBe p1
+    }
+
+    "have the second paragraph" in {
+      doc.select(Selectors.p(2)).text() mustBe p2
     }
 
     "have the correct legend" in {
       doc.select(Selectors.legend(1)).text() mustBe h1
-    }
-
-    "have the correct radio text" in {
-      doc.select(Selectors.radioYes).text() mustBe yesText
-      doc.select(Selectors.radioNo).text() mustBe noText
     }
   }
 }

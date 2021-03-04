@@ -19,7 +19,6 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import identifiers._
-import javax.inject.{Inject, Singleton}
 import models.RegistrationInformation
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -27,6 +26,7 @@ import services.TrafficManagementService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -42,7 +42,7 @@ class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
     implicit request =>
       mode match {
         case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout())
-        case VATExceptionKickoutId.toString => Ok(vatExceptionDropout())
+        case VATExceptionKickoutId.toString => SeeOther(appConfig.VATWriteInURL)
         case BusinessEntityId.toString => Ok(vatDivisionDropout())
         case _ => SeeOther(appConfig.otrsUrl)
       }
