@@ -55,16 +55,11 @@
     <script src="@controllers.routes.Assets.versioned("javascripts/backLink.js")"></script>
 }
 
-@getHelpForm = {
-    <div class="govuk-!-margin-bottom-6">
-        @contentBlock
-    </div>
+@content = {
 
-    <div class="govuk-body">
-        <a lang="en" hreflang="en" class="govuk-link " target="_blank" href="@{appConfig.reportAProblemNonJSUrl}">
-            @messages("getHelp.linkText")
-        </a>
-    </div>
+    @contentBlock
+
+    @HmrcReportTechnicalIssueHelper()
 }
 
 @GovukLayout(
@@ -75,4 +70,4 @@
     headerBlock = Some(siteHeader(signOutLink)),
     footerBlock = Some(HmrcStandardFooter()),
     scriptsBlock = Some(scripts)
-)(getHelpForm)
+)(content)
