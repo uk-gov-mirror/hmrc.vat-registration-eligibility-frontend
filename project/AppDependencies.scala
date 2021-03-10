@@ -22,7 +22,7 @@ private object AppDependencies {
   private val reactivemongoTestVersion = "4.21.0-play-26"
 
   private val playGovukFrontendVersion = "0.56.0-play-26"
-  private val playHmrcFrontendVersion = "0.27.0-play-26"
+  private val playHmrcFrontendVersion = "0.31.0-play-26"
 
   private val govukFrontendVersion = "3.7.0"
   private val hmrcFrontendVersion = "1.20.0"
