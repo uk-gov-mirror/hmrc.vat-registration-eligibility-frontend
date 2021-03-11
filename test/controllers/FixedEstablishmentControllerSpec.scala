@@ -19,19 +19,18 @@ package controllers
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.FixedEstablishmentFormProvider
-import identifiers.RacehorsesId
-import models.NormalMode
+import identifiers.FixedEstablishmentId
 import play.api.data.Form
 import play.api.libs.json.JsBoolean
 import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeNavigator
-import views.html.{fixedEstablishment, racehorses}
+import views.html.fixedEstablishment
 
 class FixedEstablishmentControllerSpec extends ControllerSpecBase {
 
-  def onwardRoute: Call = routes.EligibleController.onPageLoad()
+  def onwardRoute: Call = routes.BusinessEntityController.onPageLoad()
 
   val formProvider = new FixedEstablishmentFormProvider()
   val form: Form[Boolean] = formProvider()
@@ -58,14 +57,14 @@ class FixedEstablishmentControllerSpec extends ControllerSpecBase {
       contentAsString(result) mustBe viewAsString()
     }
 
-//    "populate the view correctly on a GET when the question has previously been answered" in {
-//      val validData = Map(RacehorsesId.toString -> JsBoolean(true))
-//      val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
-//
-//      val result = controller(getRelevantData).onPageLoad()(fakeRequest)
-//
-//      contentAsString(result) mustBe viewAsString(form.fill(true))
-//    }
+    "populate the view correctly on a GET when the question has previously been answered" in {
+      val validData = Map(FixedEstablishmentId.toString -> JsBoolean(true))
+      val getRelevantData = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
+
+      val result = controller(getRelevantData).onPageLoad()(fakeRequest)
+
+      contentAsString(result) mustBe viewAsString(form.fill(true))
+    }
 
     "redirect to the next page when valid data is submitted" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true")

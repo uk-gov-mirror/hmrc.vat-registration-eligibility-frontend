@@ -90,6 +90,7 @@ object PageIdBinding {
         ).collect(ThresholdSectionValidationAndConstruction),
       "Special situations" ->
         Seq(
+          (FixedEstablishmentId, userAnswers.fixedEstablishment),
           (BusinessEntityId, userAnswers.businessEntity),
           (AgriculturalFlatRateSchemeId, userAnswers.agriculturalFlatRateScheme),
           (InternationalActivitiesId, userAnswers.internationalActivities),

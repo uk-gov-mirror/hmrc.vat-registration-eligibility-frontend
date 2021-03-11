@@ -30,6 +30,7 @@ import utils.DefaultImplicitJsonReads.BooleanReads
 class Navigator @Inject()() {
 
   def pageIdToPageLoad(pageId: Identifier): Call = pageId match {
+    case FixedEstablishmentId => routes.FixedEstablishmentController.onPageLoad()
     case BusinessEntityId => routes.BusinessEntityController.onPageLoad()
     case ThresholdNextThirtyDaysId => routes.ThresholdNextThirtyDaysController.onPageLoad()
     case ThresholdPreviousThirtyDaysId => routes.ThresholdPreviousThirtyDaysController.onPageLoad()
@@ -159,6 +160,11 @@ class Navigator @Inject()() {
       fromPage = AgriculturalFlatRateSchemeId,
       onSuccessPage = InternationalActivitiesId,
       onFailPage = EligibilityDropoutId(AgriculturalFlatRateSchemeId.toString)
+    ),
+    nextOn(true,
+      fromPage = FixedEstablishmentId,
+      onSuccessPage = BusinessEntityId,
+      onFailPage = EligibilityDropoutId(InternationalActivitiesId.toString)
     ),
     checkBusinessEntity(
       fromPage = InternationalActivitiesId,

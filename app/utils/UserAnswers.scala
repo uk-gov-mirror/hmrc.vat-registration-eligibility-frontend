@@ -24,6 +24,8 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 @Singleton
 class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
+  def fixedEstablishment: Option[Boolean] = cacheMap.getEntry[Boolean](FixedEstablishmentId.toString)
+
   def businessEntity: Option[BusinessEntity] = cacheMap.getEntry[BusinessEntity](BusinessEntityId.toString)
 
   def racehorses: Option[Boolean] = cacheMap.getEntry[Boolean](RacehorsesId.toString)

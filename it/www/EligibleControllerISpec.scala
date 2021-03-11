@@ -39,6 +39,7 @@ class EligibleControllerISpec extends IntegrationSpecBase
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
       stubAudits()
+      cacheSessionData[Boolean]("testInternalId", s"$FixedEstablishmentId", true)
       cacheSessionData[BusinessEntity]("testInternalId", s"$BusinessEntityId", UKCompany)
       cacheSessionData[ConditionalDateFormElement]("testInternalId", s"$ThresholdInTwelveMonthsId", ConditionalDateFormElement(false, None))
       cacheSessionData[ConditionalDateFormElement]("testInternalId", s"$ThresholdNextThirtyDaysId", ConditionalDateFormElement(false, None))
