@@ -20,10 +20,12 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions.{CacheIdentifierAction, DataRequiredAction, DataRetrievalAction}
 import forms.FixedEstablishmentFormProvider
+import identifiers.FixedEstablishmentId
+import models.NormalMode
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import utils.Navigator
+import utils.{Navigator, UserAnswers}
 import views.html.fixedEstablishment
 
 import javax.inject.{Inject, Singleton}
@@ -40,18 +42,24 @@ class FixedEstablishmentController @Inject()(mcc: MessagesControllerComponents,
                                             )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      Ok(fixedEstablishment(formProvider()))
+      val preparedForm = request.userAnswers.fixedEstablishment match {
+        case None => formProvider()
+        case Some(value) => formProvider().fill(value)
+      }
+      Ok(fixedEstablishment(preparedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(fixedEstablishment(formWithErrors))),
         value =>
-          Future.successful(Redirect(controllers.routes.BusinessEntityController.onPageLoad()))
+          dataCacheConnector.save[Boolean](request.internalId, FixedEstablishmentId.toString, value) map { cacheMap =>
+            Redirect(navigator.nextPage(FixedEstablishmentId, NormalMode)(new UserAnswers(cacheMap)))
+          }
       )
   }
 

@@ -84,6 +84,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
   "submitEligibility" should {
     val fullListMapHappyPathTwelveMonthsFalse: ListMap[String, JsValue] = ListMap[String, JsValue](
       "" -> JsString(""),
+      s"$FixedEstablishmentId" -> JsBoolean(true),
       s"$BusinessEntityId" -> JsString(UKCompany.toString),
       s"$ThresholdInTwelveMonthsId" -> Json.obj("value" -> JsBoolean(false)),
       s"$ThresholdNextThirtyDaysId" -> Json.obj("value" -> JsBoolean(false)),
@@ -116,7 +117,8 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
           | {"questionId":"voluntaryInformation","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"turnoverEstimate-value","question":"mocked message","answer":"£50,000","answerValue":50000}]},
           | {"title":"Special situations",
-          | "data":[{"questionId":"businessEntity-value","question":"mocked message","answer":"mocked message","answerValue":"uk-company"},
+          | "data":[{"questionId":"fixedEstablishment","question":"mocked message","answer":"mocked message","answerValue":true},
+          | {"questionId":"businessEntity-value","question":"mocked message","answer":"mocked message","answerValue":"uk-company"},
           | {"questionId":"agriculturalFlatRateScheme","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"internationalActivities","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"involvedInOtherBusiness","question":"mocked message","answer":"mocked message","answerValue":false},
