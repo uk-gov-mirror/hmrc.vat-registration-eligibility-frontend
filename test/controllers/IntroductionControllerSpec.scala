@@ -38,11 +38,11 @@ class IntroductionControllerSpec extends ControllerSpecBase {
   }
 
   "onSubmit" must {
-    "redirect to the ThresholdInTwelveMonths controller" in {
+    "redirect to the FixedEstablishment controller" in {
       val res = Controller.onSubmit()(fakeRequest)
 
       status(res) mustBe SEE_OTHER
-      redirectLocation(res) must contain(routes.BusinessEntityController.onPageLoad().url)
+      redirectLocation(res) must contain(routes.FixedEstablishmentController.onPageLoad().url)
     }
   }
 }

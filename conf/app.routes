@@ -20,6 +20,9 @@ GET        /unauthorised                                controllers.Unauthorised
 
 GET        /feedback                                    controllers.FeedbackController.show()
 
+GET        /fixed-establishment                         controllers.FixedEstablishmentController.onPageLoad()
+POST       /fixed-establishment                         controllers.FixedEstablishmentController.onSubmit()
+
 GET        /business-entity                             controllers.BusinessEntityController.onPageLoad()
 POST       /business-entity                             controllers.BusinessEntityController.onSubmit()
 

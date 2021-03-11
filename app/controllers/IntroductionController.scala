@@ -34,7 +34,7 @@ class IntroductionController @Inject()(mcc: MessagesControllerComponents,
   }
 
   def onSubmit: Action[AnyContent] = identify { implicit request =>
-    Redirect(controllers.routes.BusinessEntityController.onPageLoad())
+    Redirect(controllers.routes.FixedEstablishmentController.onPageLoad())
   }
 
 }
