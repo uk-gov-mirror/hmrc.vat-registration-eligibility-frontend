@@ -274,3 +274,10 @@ racehorses.bullet2 = own one or more racehorses
 eligible.heading = You can register for VAT online
 eligible.p1 = Based on your answers, you can register for VAT using the online service.
 eligible.button = Continue to VAT registration
+
+fixedEstablishment.title = Does the business have a fixed establishment in the UK?
+fixedEstablishment.heading = Does the business have a fixed establishment in the UK?
+fixedEstablishment.error.required = Select yes if the business has a fixed establishment in the UK
+fixedEstablishment.para = A UK establishment exists if either the:
+fixedEstablishment.bullet1 = place where essential management decisions are made and the business’s central administration is carried out is in the UK
+fixedEstablishment.bullet2 = business has a permanent physical presence with the human and technical resources to make or receive taxable supplies in the UK
