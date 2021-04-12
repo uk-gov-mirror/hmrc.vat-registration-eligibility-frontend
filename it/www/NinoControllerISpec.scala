@@ -1,14 +1,15 @@
 package www
 
 import java.time.LocalDate
-
 import featureswitch.core.config.{FeatureSwitching, TrafficManagement}
 import helpers.{AuthHelper, IntegrationSpecBase, SessionStub, TrafficManagementStub}
 import models.{Draft, RegistrationInformation, VatReg}
-import play.api.Application
+import play.api.{Application, data}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.{CREATED, OK, TOO_MANY_REQUESTS}
 import play.mvc.Http.HeaderNames
+import com.github.tomakehurst.wiremock.client.WireMock._
+import play.api.libs.json.Json
 
 class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with SessionStub with FeatureSwitching with TrafficManagementStub {
 
@@ -38,6 +39,7 @@ class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with Sessi
       disable(TrafficManagement)
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
+      stubUpsertRegistrationInformation(RegistrationInformation(testInternalId, testRegId, Draft, Some(LocalDate.now), VatReg))
       stubAudits()
 
       val request = buildClient("/have-nino").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
@@ -54,6 +56,8 @@ class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with Sessi
       stubSuccessfulRegIdGet()
       stubAudits()
       stubAllocation(testRegId)(CREATED)
+      stubFor(put(urlMatching("/save4later/vat-registration-eligibility-frontend/testRegId/data/eligibility-data"))
+        .willReturn(aResponse.withStatus(CREATED).withBody(Json.stringify(Json.obj("id" -> testRegId, "data" -> Json.obj())))))
 
       val request = buildClient("/have-nino").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")
         .post(Map(
