@@ -38,6 +38,7 @@ class NinoControllerISpec extends IntegrationSpecBase with AuthHelper with Sessi
       disable(TrafficManagement)
       stubSuccessfulLogin()
       stubSuccessfulRegIdGet()
+      stubUpsertRegistrationInformation(RegistrationInformation(testInternalId, testRegId, Draft, Some(LocalDate.now), VatReg))
       stubAudits()
 
       val request = buildClient("/have-nino").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck")

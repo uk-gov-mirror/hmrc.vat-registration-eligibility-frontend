@@ -17,19 +17,18 @@
 package controllers
 
 import java.time.LocalDate
-
 import connectors.{Allocated, FakeDataCacheConnector, QuotaReached}
 import controllers.actions._
 import featureswitch.core.config.{FeatureSwitching, TrafficManagement}
 import forms.NinoFormProvider
 import identifiers.NinoId
-import mocks.TrafficManagementServiceMock
+import mocks.{MockS4LService, TrafficManagementServiceMock}
 import models.requests.DataRequest
 import models._
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.data.Form
-import play.api.libs.json.JsBoolean
+import play.api.libs.json.{Format, JsBoolean, Json}
 import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.retrieve.Credentials
@@ -41,7 +40,7 @@ import views.html.nino
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with TrafficManagementServiceMock {
+class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with TrafficManagementServiceMock with MockS4LService {
 
   def onwardRoute: Call = routes.ThresholdInTwelveMonthsController.onPageLoad()
 
@@ -54,24 +53,25 @@ class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with T
   val timeMachine = new FakeTimeMachine
   val idGenerator = new FakeIdGenerator
 
-  val testInternalId = "testInternalId"
-  val testRegId = "testRegId"
+  val testInternalId = "id"
+  val testRegId = "regId"
   val testProviderId: String = "testProviderID"
   val testProviderType: String = "GovernmentGateway"
   val testCredentials: Credentials = Credentials(testProviderId, testProviderType)
+  val testCacheMap = CacheMap(testRegId, Map(NinoId.toString -> JsBoolean(true)))
+  val testRegistrationInformation = RegistrationInformation(testInternalId, testRegId, Draft, regStartDate = Some(testDate), VatReg)
   val testDate = LocalDate.now
 
   def testPostRequest(postData: (String, String)*) =
-    DataRequest(fakeRequest.withFormUrlEncodedBody(postData:_*), "1", CurrentProfile(testRegId), new UserAnswers(CacheMap("1", Map())))
+    DataRequest(fakeRequest.withFormUrlEncodedBody(postData:_*), testInternalId, CurrentProfile(testRegId), new UserAnswers(CacheMap(testRegId, Map())))
 
   def controller(dataRetrievalAction: DataRetrievalAction = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, Map())))) =
-    new NinoController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
+    new NinoController(controllerComponents, FakeDataCacheConnector, mockS4LService, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
       dataRetrievalAction, dataRequiredAction, formProvider, mockTrafficManagementService)
 
   def viewAsString(form: Form[_] = form) = nino(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig).toString
 
   "Nino Controller" must {
-
     "return OK and the correct view for a GET" in {
       val result = controller().onPageLoad()(fakeRequest)
 
@@ -92,6 +92,7 @@ class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with T
       enable(TrafficManagement)
       mockServiceAllocation(testRegId)(Future.successful(Allocated))
       mockGetRegistrationInformation()(Future.successful(Some(RegistrationInformation(testInternalId, testRegId, Draft, Some(testDate), VatReg))))
+      mockS4LSave(testRegId, "eligibility-data", Json.toJson(testCacheMap))(Future.successful(testCacheMap))
       when(
         mockAuthConnector.authorise(
           ArgumentMatchers.any,
@@ -118,7 +119,9 @@ class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with T
 
     "redirect to the next page when the Traffic Management is disabled" in {
       disable(TrafficManagement)
-      val postRequest = fakeRequest.withFormUrlEncodedBody(("value", "true"))
+
+      mockUpsertRegistrationInformation(testInternalId, testRegId, isOtrs = false)(Future.successful(testRegistrationInformation))
+      val postRequest = testPostRequest("value" -> "true")
 
       val result = controller().onSubmit()(postRequest)
 
