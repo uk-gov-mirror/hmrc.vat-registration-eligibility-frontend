@@ -17,8 +17,31 @@
 package config
 
 import org.slf4j.{Logger, LoggerFactory}
+import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig}
+import uk.gov.hmrc.http.cache.client.{ShortLivedCache, ShortLivedHttpCaching}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+
+import javax.inject.{Inject, Singleton}
 
 
 trait Logging {
   val logger: Logger = LoggerFactory.getLogger(getClass)
+}
+
+class VatShortLivedHttpCaching @Inject()(val http: HttpClient, config: ServicesConfig) extends ShortLivedHttpCaching {
+
+  override lazy val defaultSource = config.getString("appName")
+  override lazy val baseUri       = config.baseUrl("cachable.short-lived-cache")
+  override lazy val domain        = config.getConfString("cachable.short-lived-cache.domain",
+    throw new Exception(s"Could not find config 'cachable.short-lived-cache.domain'"))
+
+}
+
+@Singleton
+class VatShortLivedCache @Inject()(val shortLiveCache: ShortLivedHttpCaching,
+                                   applicationCrypto: ApplicationCrypto) extends ShortLivedCache {
+
+  override implicit lazy val crypto: CryptoWithKeysFromConfig = applicationCrypto.JsonCrypto
+
 }
