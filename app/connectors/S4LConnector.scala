@@ -35,5 +35,6 @@ class S4LConnector @Inject()(val shortCache: ShortLivedCache)
 
   def clear(Id: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = shortCache.remove(Id)
 
-  def fetchAll(Id: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = shortCache.fetch(Id)
+  def fetchCacheMap(Id: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = shortCache.fetch(Id)
+
 }

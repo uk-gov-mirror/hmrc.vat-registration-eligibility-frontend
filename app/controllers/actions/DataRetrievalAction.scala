@@ -17,7 +17,7 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import connectors.DataCacheConnector
+import connectors.{DataCacheConnector, S4LConnector}
 import models.requests.{CacheIdentifierRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
 import uk.gov.hmrc.http.HeaderCarrier
@@ -26,15 +26,25 @@ import utils.UserAnswers
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRetrievalActionImpl @Inject()(val dataCacheConnector: DataCacheConnector)
+class DataRetrievalActionImpl @Inject()(val dataCacheConnector: DataCacheConnector,
+                                        s4LConnector: S4LConnector)
                                        (implicit val executionContext: ExecutionContext) extends DataRetrievalAction {
 
   override protected def transform[A](request: CacheIdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    dataCacheConnector.fetch(request.cacheId).map {
-      case None => OptionalDataRequest(request.request, request.cacheId, request.currentProfile, None)
-      case Some(data) => OptionalDataRequest(request.request, request.cacheId, request.currentProfile, Some(new UserAnswers(data)))
+    dataCacheConnector.fetch(request.cacheId).flatMap {
+      case None =>
+        s4LConnector.fetchCacheMap(request.cacheId) flatMap {
+          case Some(data) =>
+            dataCacheConnector.save(data) map { savedCacheMap =>
+              OptionalDataRequest(request.request, request.cacheId, request.currentProfile, Some(new UserAnswers(savedCacheMap)))
+            }
+          case _ =>
+            Future.successful(OptionalDataRequest(request.request, request.cacheId, request.currentProfile, None))
+        }
+      case Some(data) =>
+        Future.successful(OptionalDataRequest(request.request, request.cacheId, request.currentProfile, Some(new UserAnswers(data))))
     }
   }
 }
