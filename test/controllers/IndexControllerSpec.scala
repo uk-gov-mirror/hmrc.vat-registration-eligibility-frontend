@@ -17,31 +17,43 @@
 package controllers
 
 import config.FrontendAppConfig
+import connectors.mocks.{MockDataCacheConnector, MockS4lConnector}
 import controllers.actions.FakeCacheIdentifierAction
+import models.CurrentProfile
+import models.requests.OptionalDataRequest
 import play.api.test.Helpers._
 import utils.FakeNavigator
 
-class IndexControllerSpec extends ControllerSpecBase {
+import scala.concurrent.Future
+
+class IndexControllerSpec extends ControllerSpecBase with MockS4lConnector with MockDataCacheConnector{
 
   implicit val appConfig: FrontendAppConfig = frontendAppConfig
+
+  val testCacheId = "id"
+  val testRegId = "regId"
+  val request = OptionalDataRequest(fakeRequest, testCacheId, CurrentProfile(testRegId), None)
 
   class Setup {
     val controller = new IndexController(
       controllerComponents,
       new FakeNavigator(desiredRoute = routes.ThresholdInTwelveMonthsController.onPageLoad()),
-      mockDataCacheConnector,
+      dataCacheConnectorMock,
+      mockS4LConnector,
       FakeCacheIdentifierAction,
       getEmptyCacheMap
     )
   }
 
-  "Index Controller" must {
-    "return 200 for a GET" in new Setup {
-      val result = controller.onPageLoad()(fakeRequest)
+  "onPageLoad" must {
+    "Redirect to the Introduction page for a GET" in new Setup {
+      mockClearSession(testCacheId)(Future.successful(true))
+      mockS4LClear()
+      val result = controller.onPageLoad()(request)
       redirectLocation(result) mustBe Some(routes.IntroductionController.onPageLoad().url)
     }
-    "navigateToPage with a page id takes user to page in navigator" in new Setup {
-      val result = controller.navigateToPageId("foo")(fakeRequest)
-    }
+  }
+  "navigateToPage with a page id takes user to page in navigator" in new Setup {
+    val result = controller.navigateToPageId("foo")(fakeRequest)
   }
 }

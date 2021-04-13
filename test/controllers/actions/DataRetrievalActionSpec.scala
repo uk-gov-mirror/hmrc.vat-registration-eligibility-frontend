@@ -26,26 +26,49 @@ import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
+import connectors.mocks.MockS4lConnector
+import play.api.libs.json.Json
 
-class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutures {
+class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutures with MockS4lConnector {
 
-  class Harness(dataCacheConnector: DataCacheConnector) extends DataRetrievalActionImpl(dataCacheConnector) {
+  class Harness(dataCacheConnector: DataCacheConnector) extends DataRetrievalActionImpl(dataCacheConnector, mockS4LConnector) {
     def callTransform[A](request: CacheIdentifierRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
   val testProfile = CurrentProfile("regId")
+  val testCacheMap = CacheMap("id", Map("some" -> Json.obj("existing" -> "value")))
 
   "Data Retrieval Action" when {
-    "there is no data in the cache" must {
-      "set userAnswers to 'None' in the request" in {
-        val dataCacheConnector = mock[DataCacheConnector]
-        when(dataCacheConnector.fetch("id")) thenReturn Future(None)
-        val action = new Harness(dataCacheConnector)
+    "there is no data in the cache" when {
+      "when there is data in S4L" must {
+        "set userAnswers to 'None' in the request" in {
+          val dataCacheConnector = mock[DataCacheConnector]
+          when(dataCacheConnector.fetch("id")) thenReturn Future(None)
+          mockS4LFetchAll(Some(testCacheMap))
+          when(dataCacheConnector.save(testCacheMap)) thenReturn Future(testCacheMap)
 
-        val futureResult = action.callTransform(new CacheIdentifierRequest(fakeRequest, "id", testProfile))
+          val action = new Harness(dataCacheConnector)
 
-        whenReady(futureResult) { result =>
-          result.userAnswers.isEmpty mustBe true
+          val futureResult = action.callTransform(new CacheIdentifierRequest(fakeRequest, "id", testProfile))
+
+          whenReady(futureResult) { result =>
+            result.userAnswers.isEmpty mustBe false
+          }
+        }
+      }
+      "when there is no data in S4L" must {
+        "set userAnswers to 'None' in the request" in {
+          val dataCacheConnector = mock[DataCacheConnector]
+          when(dataCacheConnector.fetch("id")) thenReturn Future(None)
+          mockS4LFetchAll(None)
+
+          val action = new Harness(dataCacheConnector)
+
+          val futureResult = action.callTransform(new CacheIdentifierRequest(fakeRequest, "id", testProfile))
+
+          whenReady(futureResult) { result =>
+            result.userAnswers.isEmpty mustBe true
+          }
         }
       }
     }

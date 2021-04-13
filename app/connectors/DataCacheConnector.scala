@@ -17,9 +17,11 @@
 package connectors
 
 import com.google.inject.{ImplementedBy, Inject}
+
 import javax.inject.Singleton
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, JsError, JsSuccess, JsValue, Json}
 import repositories.SessionRepository
+import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.CascadeUpsert
 
@@ -35,6 +37,9 @@ class DataCacheConnectorImpl @Inject()(val sessionRepository: SessionRepository,
       sessionRepository().upsert(updatedCacheMap).map { _ => updatedCacheMap }
     }
   }
+
+  def save(cacheMap: CacheMap): Future[CacheMap] =
+    sessionRepository().upsert(cacheMap) map (_ => cacheMap)
 
   def removeEntry(cacheId: String, key: String): Future[CacheMap] = {
     sessionRepository().removeEntry(cacheId, key)
@@ -89,6 +94,8 @@ class DataCacheConnectorImpl @Inject()(val sessionRepository: SessionRepository,
 @ImplementedBy(classOf[DataCacheConnectorImpl])
 trait DataCacheConnector {
   def save[A](cacheId: String, key: String, value: A)(implicit fmt: Format[A]): Future[CacheMap]
+
+  def save(cacheMap: CacheMap): Future[CacheMap]
 
   def removeEntry(cacheId: String, key: String): Future[CacheMap]
 

@@ -17,9 +17,10 @@
 package controllers
 
 import config.FrontendAppConfig
-import connectors.DataCacheConnector
+import connectors.{DataCacheConnector, S4LConnector}
 import controllers.actions.{CacheIdentifierAction, DataRetrievalAction}
 import identifiers.Identifier
+
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,15 +33,17 @@ import scala.concurrent.ExecutionContext
 class IndexController @Inject()(mcc: MessagesControllerComponents,
                                 navigator: Navigator,
                                 dataCacheConnector: DataCacheConnector,
+                                s4LConnector: S4LConnector,
                                 identify: CacheIdentifierAction,
                                 getData: DataRetrievalAction
                                )(implicit appConfig: FrontendAppConfig,
                                  executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData) { implicit request =>
-    dataCacheConnector.delete(request.internalId) //TODO Remove as part of SAR-6520
-
-    Redirect(routes.IntroductionController.onPageLoad())
+  def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    for {
+      _ <- dataCacheConnector.delete(request.internalId) //TODO Remove as part of SAR-6520
+      _ <- s4LConnector.clear(request.internalId)
+    } yield Redirect(routes.IntroductionController.onPageLoad())
   }
 
   def navigateToPageId(pageId: String): Action[AnyContent] = Action { implicit request =>
