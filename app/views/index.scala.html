@@ -17,12 +17,12 @@
 @import config.FrontendAppConfig
 
 @import views.html.layouts.layout
-@import views.html.newcomponents._
+@import views.html.components._
 
 @this(
         layout: views.html.layouts.layout,
-        h1: newcomponents.h1,
-        p: newcomponents.p
+        h1: components.h1,
+        p: components.p
 )
 
 @()(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)

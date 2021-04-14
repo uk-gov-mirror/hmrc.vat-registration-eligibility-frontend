@@ -19,7 +19,6 @@ package views
 import base.SpecBase
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.i18n.Messages
 import play.twirl.api.Html
 
 trait ViewSpecBase extends SpecBase {

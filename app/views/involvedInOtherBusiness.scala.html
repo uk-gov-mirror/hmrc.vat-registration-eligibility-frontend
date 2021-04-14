@@ -21,13 +21,13 @@
 
 @this(
     layout: views.html.layouts.layout,
-        errorSummary: newcomponents.errorSummary,
-        h1: newcomponents.h1,
-        p: newcomponents.p,
-        link: newcomponents.link,
+        errorSummary: components.errorSummary,
+        h1: components.h1,
+        p: components.p,
+        link: components.link,
         formWithCsrf: FormWithCSRF,
-        yesNoRadio: newcomponents.yesNoRadio,
-        button: newcomponents.button
+        yesNoRadio: components.yesNoRadio,
+        button: components.button
 )
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)

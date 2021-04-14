@@ -17,12 +17,12 @@
 package forms
 
 import forms.mappings.Mappings
-import javax.inject.{Inject, Singleton}
-import models.{TurnoverEstimate, TurnoverEstimateFormElement}
+import models.TurnoverEstimateFormElement
 import play.api.data.Form
 import play.api.data.Forms.mapping
-import uk.gov.hmrc.play.mappers.StopOnFirstFail
-import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
+import play.api.data.validation.{Constraint, Invalid, Valid}
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class TurnoverEstimateFormProvider @Inject() extends FormErrorHelper with Mappings {
@@ -34,14 +34,20 @@ class TurnoverEstimateFormProvider @Inject() extends FormErrorHelper with Mappin
   val amountMoreThan = s"$errorKeyRoot.amount.giveMoreThan"
   val amountNumbers = s"$errorKeyRoot.amount.numbers"
 
+  def constraints: Constraint[String] = Constraint { field =>
+    List(
+      validBigIntConversion(amountNumbers),
+      bigIntRange(amountLessThan, amountMoreThan, BigInt("0"), BigInt("999999999999999"))
+    ).dropWhile (_.apply(field) == Valid) match {
+      case Nil             => Valid
+      case constraint :: _ => constraint(field)
+    }
+  }
+
   def apply(): Form[TurnoverEstimateFormElement] = Form(
     mapping(
       turnoverEstimateAmount ->
-        text(valueRequiredKey)
-          .verifying(StopOnFirstFail(
-            validBigIntConversion(amountNumbers),
-            bigIntRange(amountLessThan, amountMoreThan, BigInt("0"), BigInt("999999999999999"))
-          ))
+        text(valueRequiredKey).verifying(constraints)
     )(TurnoverEstimateFormElement.apply)(TurnoverEstimateFormElement.unapply)
   )
 }

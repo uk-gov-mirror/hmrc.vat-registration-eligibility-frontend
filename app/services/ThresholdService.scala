@@ -33,9 +33,9 @@ import scala.concurrent.Future
 @Singleton
 class ThresholdService @Inject()(val messagesApi: MessagesApi,
                                  val dataCacheConnector: DataCacheConnector,
-                                 p: views.html.newcomponents.p,
-                                 bullets: views.html.newcomponents.bullets,
-                                 link: views.html.newcomponents.link
+                                 p: views.html.components.p,
+                                 bullets: views.html.components.bullets,
+                                 link: views.html.components.link
                                 )(implicit val appConfig: FrontendAppConfig) extends MessagesUtils {
 
   def removeVoluntaryAndNextThirtyDays(implicit request: DataRequest[_]): Future[CacheMap] = {

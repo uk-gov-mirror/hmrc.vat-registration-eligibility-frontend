@@ -18,11 +18,11 @@
 
 @this(
         layout: views.html.layouts.layout,
-        errorSummary: newcomponents.errorSummary,
-        h1: newcomponents.h1,
+        errorSummary: components.errorSummary,
+        h1: components.h1,
         formWithCsrf: FormWithCSRF,
-        button: newcomponents.button,
-        inputRadio: newcomponents.inputRadio
+        button: components.button,
+        inputRadio: components.inputRadio
 )
 
 @(businessEntityForm: Form[BusinessEntity], postAction: Call)(implicit request: Request[_], messages: Messages, appconfig: FrontendAppConfig)
