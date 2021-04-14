@@ -33,9 +33,10 @@ class AgriculturalFlatRateSchemeViewSpec extends ViewSpecBase {
   val p2 = s"$afrsLinkText1 $afrsLinkText2"
 
   object Selectors extends BaseSelectors
+  val view = app.injector.instanceOf[agriculturalFlatRateScheme]
 
   "AgriculturalFlatRateScheme view" must {
-    lazy val doc = asDocument(agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

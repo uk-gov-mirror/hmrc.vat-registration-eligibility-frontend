@@ -15,10 +15,17 @@
  *@
 
 @import config.FrontendAppConfig
-@import uk.gov.hmrc.play.views.html._
 @import controllers.routes._
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+
+@this(
+    layout: views.html.layouts.layout,
+    h1: newcomponents.h1,
+    p: newcomponents.p,
+    panelIndent: newcomponents.panelIndent,
+    formWithCsrf: FormWithCSRF,
+    link: newcomponents.link,
+    button: newcomponents.button
+)
 
 @()(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -33,7 +40,7 @@
         @messages("mandatoryInformation.text2")
     }
 
-    @helpers.form(action = MandatoryInformationController.onSubmit(), 'autoComplete -> "off") {
+    @formWithCsrf(action = MandatoryInformationController.onSubmit(), 'autoComplete -> "off") {
         @p {
             @link(appConfig.VATMandatoryInformationGroup ,"mandatoryInformation.linkText", isExternal = true)
         }

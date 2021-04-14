@@ -14,9 +14,13 @@
  * limitations under the License.
  *@
 
+@this(
+  details: GovukDetails
+)
+
 @(summary: String, content: Html)
 
-@GovukDetails(Details(
+@details(Details(
     summary = Text(summary),
     content = HtmlContent(content)
 ))

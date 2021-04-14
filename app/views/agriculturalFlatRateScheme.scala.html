@@ -18,11 +18,18 @@
 @import uk.gov.hmrc.play.views.html._
 @import controllers.routes._
 @import models.Mode
-@import utils.FormHelpers
 @import models.requests.DataRequest
 
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+@this(
+    layout: views.html.layouts.layout,
+    errorSummary: newcomponents.errorSummary,
+    h1: newcomponents.h1,
+    p: newcomponents.p,
+    formWithCsrf: FormWithCSRF,
+    link: newcomponents.link,
+    yesNoRadio: newcomponents.yesNoRadio,
+    button: newcomponents.button
+)
 
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -37,7 +44,7 @@
         @link(appConfig.VATNotice700_46agriculturalURL, "agriculturalFlatRateScheme.linkText", isExternal = true)
     }
 
-    @helpers.form(action = AgriculturalFlatRateSchemeController.onSubmit(), 'autoComplete -> "off") {
+    @formWithCsrf(action = AgriculturalFlatRateSchemeController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "agriculturalFlatRateScheme.heading",

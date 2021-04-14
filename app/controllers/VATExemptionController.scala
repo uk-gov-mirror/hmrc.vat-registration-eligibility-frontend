@@ -39,7 +39,8 @@ class VATExemptionController @Inject()(mcc: MessagesControllerComponents,
                                        identify: CacheIdentifierAction,
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
-                                       formProvider: VATExemptionFormProvider
+                                       formProvider: VATExemptionFormProvider,
+                                       view: vatExemption
                                       )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -49,14 +50,14 @@ class VATExemptionController @Inject()(mcc: MessagesControllerComponents,
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(vatExemption(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(vatExemption(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, VATExemptionId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(VATExemptionId, NormalMode)(new UserAnswers(cacheMap))))

@@ -39,7 +39,8 @@ class AgriculturalFlatRateSchemeController @Inject()(mcc: MessagesControllerComp
                                                      identify: CacheIdentifierAction,
                                                      getData: DataRetrievalAction,
                                                      requireData: DataRequiredAction,
-                                                     formProvider: AgriculturalFlatRateSchemeFormProvider
+                                                     formProvider: AgriculturalFlatRateSchemeFormProvider,
+                                                     view: agriculturalFlatRateScheme
                                                     )(implicit appConfig: FrontendAppConfig,
                                                       executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
@@ -49,14 +50,14 @@ class AgriculturalFlatRateSchemeController @Inject()(mcc: MessagesControllerComp
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(agriculturalFlatRateScheme(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(agriculturalFlatRateScheme(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, AgriculturalFlatRateSchemeId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(AgriculturalFlatRateSchemeId, NormalMode)(new UserAnswers(cacheMap))))

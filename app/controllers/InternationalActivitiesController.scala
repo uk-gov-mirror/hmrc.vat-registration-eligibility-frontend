@@ -39,7 +39,8 @@ class InternationalActivitiesController @Inject()(mcc: MessagesControllerCompone
                                                   identify: CacheIdentifierAction,
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
-                                                  formProvider: InternationalActivitiesFormProvider
+                                                  formProvider: InternationalActivitiesFormProvider,
+                                                  view: internationalActivities
                                                  )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -49,14 +50,14 @@ class InternationalActivitiesController @Inject()(mcc: MessagesControllerCompone
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(internationalActivities(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(internationalActivities(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, InternationalActivitiesId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(InternationalActivitiesId, NormalMode)(new UserAnswers(cacheMap))))

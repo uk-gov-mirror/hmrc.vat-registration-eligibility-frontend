@@ -24,7 +24,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.TrafficManagementService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html._
+import views.html.{vatDivisionDropout, _}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -34,23 +34,26 @@ class EligibilityDropoutController @Inject()(mcc: MessagesControllerComponents,
                                              identify: CacheIdentifierAction,
                                              getData: DataRetrievalAction,
                                              requireData: DataRequiredAction,
-                                             trafficManagementService: TrafficManagementService
+                                             trafficManagementService: TrafficManagementService,
+                                             internationalActivityDropoutView: internationalActivityDropout,
+                                             agriculturalDropoutView: agriculturalDropout,
+                                             vatDivisionDropoutView: vatDivisionDropout
                                             )(implicit appConfig: FrontendAppConfig,
                                               executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(mode: String): Action[AnyContent] = identify {
     implicit request =>
       mode match {
-        case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropout())
+        case AgriculturalFlatRateSchemeId.toString => Ok(agriculturalDropoutView())
         case VATExceptionKickoutId.toString => SeeOther(appConfig.VATWriteInURL)
-        case BusinessEntityId.toString => Ok(vatDivisionDropout())
+        case BusinessEntityId.toString => Ok(vatDivisionDropoutView())
         case _ => SeeOther(appConfig.otrsUrl)
       }
   }
 
   def internationalActivitiesDropout: Action[AnyContent] = identify {
     implicit request =>
-      Ok(internationalActivityDropout())
+      Ok(internationalActivityDropoutView())
   }
 
   def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>

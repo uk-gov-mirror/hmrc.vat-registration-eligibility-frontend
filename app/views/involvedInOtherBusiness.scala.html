@@ -15,12 +15,20 @@
  *@
 
 @import config.FrontendAppConfig
-@import uk.gov.hmrc.play.views.html._
 @import controllers.routes._
 @import models.Mode
 
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+
+@this(
+    layout: views.html.layouts.layout,
+        errorSummary: newcomponents.errorSummary,
+        h1: newcomponents.h1,
+        p: newcomponents.p,
+        link: newcomponents.link,
+        formWithCsrf: FormWithCSRF,
+        yesNoRadio: newcomponents.yesNoRadio,
+        button: newcomponents.button
+)
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -42,7 +50,7 @@
         <li id="involveBullet5">@messages(s"involvedInOtherBusiness.bullet5")</li>
     </ul>
 
-    @helpers.form(action = InvolvedInOtherBusinessController.onSubmit(), 'autoComplete -> "off") {
+    @formWithCsrf(action = InvolvedInOtherBusinessController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "involvedInOtherBusiness.heading",

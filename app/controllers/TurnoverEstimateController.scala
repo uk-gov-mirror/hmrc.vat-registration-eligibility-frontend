@@ -39,7 +39,8 @@ class TurnoverEstimateController @Inject()(mcc: MessagesControllerComponents,
                                            identify: CacheIdentifierAction,
                                            getData: DataRetrievalAction,
                                            requireData: DataRequiredAction,
-                                           formProvider: TurnoverEstimateFormProvider
+                                           formProvider: TurnoverEstimateFormProvider,
+                                           view: turnoverEstimate
                                           )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport with Enumerable.Implicits {
 
@@ -49,14 +50,14 @@ class TurnoverEstimateController @Inject()(mcc: MessagesControllerComponents,
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(turnoverEstimate(preparedForm, mode))
+      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(turnoverEstimate(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode))),
         value =>
           dataCacheConnector.save[TurnoverEstimateFormElement](request.internalId, TurnoverEstimateId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(TurnoverEstimateId, mode)(new UserAnswers(cacheMap))))

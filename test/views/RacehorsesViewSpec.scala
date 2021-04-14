@@ -33,8 +33,10 @@ class RacehorsesViewSpec extends ViewSpecBase {
   val bullet1 = "buy, sell or rent out land or property as a business activity (not just to have its own premises)"
   val bullet2 = "own one or more racehorses"
 
+  val view = app.injector.instanceOf[racehorses]
+
   "Racehorses view" must {
-    lazy val doc = asDocument(racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

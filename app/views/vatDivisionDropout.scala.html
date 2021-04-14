@@ -16,8 +16,15 @@
 
 @import config.FrontendAppConfig
 @import models.requests.CacheIdentifierRequest
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+
+@this(
+        layout: views.html.layouts.layout,
+        errorSummary: newcomponents.errorSummary,
+        h1: newcomponents.h1,
+        p: newcomponents.p,
+        link: newcomponents.link
+)
+
 
 @()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -26,8 +33,8 @@
     @h1(messages("eligibilityDropout.heading"))
 
     @p{
-    @messages("eligibility.divisionDropout.text")
-    @link(appConfig.VATDivisionURL, messages("eligibility.divisionDropout.link"))
+        @messages("eligibility.divisionDropout.text")
+        @link(appConfig.VATDivisionURL, messages("eligibility.divisionDropout.link"))
     }
 
 }

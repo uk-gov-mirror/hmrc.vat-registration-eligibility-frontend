@@ -22,12 +22,15 @@ import views.html.introduction
 
 class IntroductionControllerSpec extends ControllerSpecBase {
 
+  val view = app.injector.instanceOf[introduction]
+
   object Controller extends IntroductionController(
     controllerComponents,
-    identify = FakeCacheIdentifierAction
+    identify = FakeCacheIdentifierAction,
+    view
   )
 
-  def viewAsString = introduction()(fakeRequest, messages, frontendAppConfig).toString
+  def viewAsString = view()(fakeRequest, messages, frontendAppConfig).toString
 
   "onPageLoad" must {
     "return OK with the correct view" in {

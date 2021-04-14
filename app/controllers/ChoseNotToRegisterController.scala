@@ -26,12 +26,13 @@ import views.html.choseNotToRegister
 
 @Singleton
 class ChoseNotToRegisterController @Inject()(mcc: MessagesControllerComponents,
-                                             identify: CacheIdentifierAction
+                                             identify: CacheIdentifierAction,
+                                             view: choseNotToRegister
                                             )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = identify {
     implicit request =>
-      Ok(choseNotToRegister())
+      Ok(view())
   }
 
   def onSubmit: Action[AnyContent] = Action { implicit request =>

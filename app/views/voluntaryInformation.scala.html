@@ -15,12 +15,20 @@
  *@
 
 @import config.FrontendAppConfig
-@import uk.gov.hmrc.play.views.html._
 @import controllers.routes._
 @import models.Mode
 @import models.requests.DataRequest
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+
+@this(
+        layout: views.html.layouts.layout,
+        errorSummary: newcomponents.errorSummary,
+        h1: newcomponents.h1,
+        p: newcomponents.p,
+        formWithCsrf: FormWithCSRF,
+        yesNoRadio: newcomponents.yesNoRadio,
+        link: newcomponents.link,
+        button: newcomponents.button
+)
 
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -36,7 +44,7 @@
 
 
 
-    @helpers.form(action = VoluntaryInformationController.onSubmit(), 'autoComplete -> "off") {
+    @formWithCsrf(action = VoluntaryInformationController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "voluntaryBusiness.heading",

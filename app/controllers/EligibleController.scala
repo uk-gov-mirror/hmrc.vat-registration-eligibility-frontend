@@ -34,14 +34,15 @@ class EligibleController @Inject()(mcc: MessagesControllerComponents,
                                    getData: DataRetrievalAction,
                                    requireData: DataRequiredAction,
                                    vatRegistrationService: VatRegistrationService,
-                                   trafficManagementService: TrafficManagementService
+                                   trafficManagementService: TrafficManagementService,
+                                   view: eligible
                                   )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
   val frontendUrl = s"${appConfig.vatRegFEURL}${appConfig.vatRegFEURI}${appConfig.vatRegFEFirstPage}"
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    Ok(eligible())
+    Ok(view())
   }
 
   def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>

@@ -15,9 +15,15 @@
  *@
 
 @import config.FrontendAppConfig
-@import views.html.layouts.layout
-@import views.html.newcomponents._
-@import uk.gov.hmrc.play.views.html.helpers.form
+
+@this(
+        layout: views.html.layouts.layout,
+        errorSummary: newcomponents.errorSummary,
+        h1: newcomponents.h1,
+        formWithCsrf: FormWithCSRF,
+        button: newcomponents.button,
+        inputRadio: newcomponents.inputRadio
+)
 
 @(businessEntityForm: Form[BusinessEntity], postAction: Call)(implicit request: Request[_], messages: Messages, appconfig: FrontendAppConfig)
 
@@ -25,7 +31,7 @@
 
     @errorSummary(businessEntityForm.errors, errorId = Some("uk-company"))
 
-    @form(action = postAction) {
+    @formWithCsrf(action = postAction) {
         @inputRadio(
             form = businessEntityForm,
             legend = Messages("businessEntity.heading"),

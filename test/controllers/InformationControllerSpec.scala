@@ -22,12 +22,15 @@ import views.html.mandatoryInformation
 
 class InformationControllerSpec extends ControllerSpecBase {
 
+  val view = app.injector.instanceOf[mandatoryInformation]
+
   object Controller extends MandatoryInformationController(
     controllerComponents,
-    identify = FakeCacheIdentifierAction
+    identify = FakeCacheIdentifierAction,
+    view
   )
 
-  def viewAsString = mandatoryInformation()(fakeRequest, messages, frontendAppConfig).toString
+  def viewAsString = view()(fakeRequest, messages, frontendAppConfig).toString
 
   "onPageLoad" must {
     "return OK with the correct view" in {

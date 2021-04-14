@@ -40,7 +40,8 @@ class ThresholdNextThirtyDaysController @Inject()(mcc: MessagesControllerCompone
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
                                                   thresholdService: ThresholdService,
-                                                  formProvider: ThresholdNextThirtyDaysFormProvider
+                                                  formProvider: ThresholdNextThirtyDaysFormProvider,
+                                                  view: thresholdNextThirtyDays
                                                  )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -50,14 +51,14 @@ class ThresholdNextThirtyDaysController @Inject()(mcc: MessagesControllerCompone
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(thresholdNextThirtyDays(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(thresholdNextThirtyDays(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         formValue =>
           dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdNextThirtyDaysId.toString, formValue).flatMap {
             cacheMap =>

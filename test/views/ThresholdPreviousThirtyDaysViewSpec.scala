@@ -40,11 +40,12 @@ class ThresholdPreviousThirtyDaysViewSpec extends ViewSpecBase {
   val paragraph = "This could happen if, for example, a business planned to run an exhibition and anticipated selling so many tickets it expected to go over the VAT threshold. The business must register for VAT when you expected it to go over the threshold, not when it actually went over the threshold."
 
   val thresholdService: ThresholdService = app.injector.instanceOf[ThresholdService]
+  val view = app.injector.instanceOf[thresholdPreviousThirtyDays]
 
   object Selectors extends BaseSelectors
 
   "ThresholdPreviousThirtyDays view" must {
-    lazy val doc = asDocument(thresholdPreviousThirtyDays(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

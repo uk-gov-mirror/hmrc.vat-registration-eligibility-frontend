@@ -24,13 +24,14 @@ class RegisteringBusinessViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "registeringBusiness"
   val form = new RegisteringBusinessFormProvider()()
+  val view = app.injector.instanceOf[registeringBusiness]
 
   object Selectors extends BaseSelectors
 
   val h1 = "Do you want to register your business or someone else’s?"
 
   "RegisteringBusiness view" must {
-    lazy val doc = asDocument(registeringBusiness(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

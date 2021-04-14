@@ -35,6 +35,7 @@ class ThresholdInTwelveMonthsViewSpec extends ViewSpecBase {
 
   val messageKeyPrefix = "thresholdInTwelveMonths"
   val form = new ThresholdInTwelveMonthsFormProvider(TestTimeMachine)()
+  val view = app.injector.instanceOf[thresholdInTwelveMonths]
 
   val thresholdService: ThresholdService = app.injector.instanceOf[ThresholdService]
 
@@ -48,7 +49,7 @@ class ThresholdInTwelveMonthsViewSpec extends ViewSpecBase {
   object Selectors extends BaseSelectors
 
   "ThresholdInTwelveMonths view" must {
-    val doc = asDocument(thresholdInTwelveMonths(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    val doc = asDocument(view(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have a heading" in {
       doc.select(Selectors.h1).text() mustBe h1

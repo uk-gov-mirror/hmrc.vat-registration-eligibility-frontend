@@ -39,7 +39,8 @@ class VATRegistrationExceptionController @Inject()(mcc: MessagesControllerCompon
                                                    identify: CacheIdentifierAction,
                                                    getData: DataRetrievalAction,
                                                    requireData: DataRequiredAction,
-                                                   formProvider: VATRegistrationExceptionFormProvider
+                                                   formProvider: VATRegistrationExceptionFormProvider,
+                                                   view: vatRegistrationException
                                                   )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -49,14 +50,14 @@ class VATRegistrationExceptionController @Inject()(mcc: MessagesControllerCompon
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(vatRegistrationException(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(vatRegistrationException(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, VATRegistrationExceptionId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(VATRegistrationExceptionId, NormalMode)(new UserAnswers(cacheMap))))

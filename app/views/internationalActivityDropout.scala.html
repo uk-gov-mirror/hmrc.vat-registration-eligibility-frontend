@@ -16,8 +16,13 @@
 
 @import config.FrontendAppConfig
 @import models.requests.CacheIdentifierRequest
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+
+@this(
+    layout: views.html.layouts.layout,
+    h1: newcomponents.h1,
+    p: newcomponents.p,
+    link: newcomponents.link,
+)
 
 @()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 

@@ -32,7 +32,10 @@ import scala.concurrent.Future
 
 @Singleton
 class ThresholdService @Inject()(val messagesApi: MessagesApi,
-                                 val dataCacheConnector: DataCacheConnector
+                                 val dataCacheConnector: DataCacheConnector,
+                                 p: views.html.newcomponents.p,
+                                 bullets: views.html.newcomponents.bullets,
+                                 link: views.html.newcomponents.link
                                 )(implicit val appConfig: FrontendAppConfig) extends MessagesUtils {
 
   def removeVoluntaryAndNextThirtyDays(implicit request: DataRequest[_]): Future[CacheMap] = {
@@ -98,36 +101,36 @@ class ThresholdService @Inject()(val messagesApi: MessagesApi,
     enum match {
       case (limitedIncorpedEqualOrAfter20170401() | limitedIncorpedLessThan12MonthsAgo()) => Html("")
       case limitedIncorpedTaxYear2016to2017() => HtmlFormat.fill(collection.immutable.Seq(
-        views.html.newcomponents.p {
+        p {
           Html(messages("thresholdPreviousThirtyDays.text"))
         },
-        views.html.newcomponents.bullets(
+        bullets(
           messages("thresholdPreviousThirtyDays.bullet1"),
           messages("thresholdPreviousThirtyDays.bullet2")
         )
       ))
       case limitedIncorpedTaxYear2015to2016() => HtmlFormat.fill(collection.immutable.Seq(
-        views.html.newcomponents.p {
+        p {
           Html(messages("thresholdPreviousThirtyDays.text"))
         },
-        views.html.newcomponents.bullets(
+        bullets(
           messages("thresholdPreviousThirtyDays.bullet1"),
           messages("thresholdPreviousThirtyDays.bullet2"),
           messages("thresholdPreviousThirtyDays.bullet3")
         )
       ))
       case _ => HtmlFormat.fill(collection.immutable.Seq(
-        views.html.newcomponents.p {
+        p {
           Html(messages("thresholdPreviousThirtyDays.text"))
         },
-        views.html.newcomponents.bullets(
+        bullets(
           messages("thresholdPreviousThirtyDays.bullet1"),
           messages("thresholdPreviousThirtyDays.bullet2"),
           messages("thresholdPreviousThirtyDays.bullet3")
         ),
-        views.html.newcomponents.p {
+        p {
           Html(messages("thresholdPreviousThirtyDays.beforeLinkText"))
-          views.html.newcomponents.link(appConfig.VATNotice700_1supplementURL, messages("thresholdPreviousThirtyDays.linkText"))
+          link(appConfig.VATNotice700_1supplementURL, messages("thresholdPreviousThirtyDays.linkText"))
           Html(".")
         }
       )

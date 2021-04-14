@@ -35,6 +35,8 @@ class EligibleControllerSpec extends ControllerSpecBase with TrafficManagementSe
 
   implicit val appConfig = frontendAppConfig
 
+  val view = app.injector.instanceOf[eligible]
+
   val dataRequiredAction = new DataRequiredAction
 
   object Controller extends EligibleController(
@@ -43,10 +45,11 @@ class EligibleControllerSpec extends ControllerSpecBase with TrafficManagementSe
     getData = fakeDataRetrievalAction,
     requireData = dataRequiredAction,
     vatRegistrationService = mockVRService,
-    mockTrafficManagementService
+    mockTrafficManagementService,
+    view
   )
 
-  def viewAsString = eligible()(fakeRequest, messages, frontendAppConfig).toString
+  def viewAsString = view()(fakeRequest, messages, frontendAppConfig).toString
 
   val testInternalId = "id"
   val testRegId = "regId"

@@ -27,10 +27,12 @@ class NinoViewSpec extends ViewSpecBase {
 
   val h1 = "Do you have a UK National Insurance number?"
 
+  val view = app.injector.instanceOf[nino]
+
   object Selectors extends BaseSelectors
 
   "Nino view" must {
-    lazy val doc = asDocument(nino(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

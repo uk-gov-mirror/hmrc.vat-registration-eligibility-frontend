@@ -15,17 +15,21 @@
  *@
 
 @import config.FrontendAppConfig
-@import uk.gov.hmrc.play.views.html._
 @import controllers.routes._
 @import models.Mode
-@import utils.FormHelpers
 @import models.requests.DataRequest
-@import utils.VATDateHelper
-@import java.time.LocalDate
-@import java.time.format.DateTimeFormatter
 @import services.ThresholdService
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+
+@this(
+        layout: views.html.layouts.layout,
+        errorSummary: newcomponents.errorSummary,
+        h1: newcomponents.h1,
+        p: newcomponents.p,
+        formWithCsrf: FormWithCSRF,
+        conditionalYesNoRadio: newcomponents.conditionalYesNoRadio,
+        inputDate: newcomponents.inputDate,
+        button: newcomponents.button
+)
 
 @(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -36,7 +40,7 @@
     @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths))
     @p{ @thresholdService.returnThresholdDateResult[String](thresholdService.returnHelpText1TwelveMonths) }
 
-    @helpers.form(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
+    @formWithCsrf(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
         @conditionalYesNoRadio(
             form = form,
             headingKey = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths),

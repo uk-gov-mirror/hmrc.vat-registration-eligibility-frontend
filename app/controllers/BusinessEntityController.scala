@@ -38,7 +38,8 @@ class BusinessEntityController @Inject()(mcc: MessagesControllerComponents,
                                          identify: CacheIdentifierAction,
                                          getData: DataRetrievalAction,
                                          requireData: DataRequiredAction,
-                                         formProvider: BusinessEntityFormProvider
+                                         formProvider: BusinessEntityFormProvider,
+                                         view: businessEntity
                                         )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -48,14 +49,14 @@ class BusinessEntityController @Inject()(mcc: MessagesControllerComponents,
         case None => formProvider()
         case Some(businessEntity) => formProvider().fill(businessEntity)
       }
-      Ok(businessEntity(preparedForm, controllers.routes.BusinessEntityController.onSubmit()))
+      Ok(view(preparedForm, controllers.routes.BusinessEntityController.onSubmit()))
   }
 
   def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     formProvider().bindFromRequest.fold(
       formWithErrors =>
         Future.successful(
-          BadRequest(businessEntity(formWithErrors, routes.BusinessEntityController.onSubmit()))
+          BadRequest(view(formWithErrors, routes.BusinessEntityController.onSubmit()))
         ),
       entityType => {
         dataCacheConnector.save[BusinessEntity](request.internalId, BusinessEntityId.toString, entityType) map { cacheMap =>

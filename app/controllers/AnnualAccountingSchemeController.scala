@@ -39,7 +39,8 @@ class AnnualAccountingSchemeController @Inject()(mcc: MessagesControllerComponen
                                                  identify: CacheIdentifierAction,
                                                  getData: DataRetrievalAction,
                                                  requireData: DataRequiredAction,
-                                                 formProvider: AnnualAccountingSchemeFormProvider
+                                                 formProvider: AnnualAccountingSchemeFormProvider,
+                                                 view: annualAccountingScheme
                                                 )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -50,14 +51,14 @@ class AnnualAccountingSchemeController @Inject()(mcc: MessagesControllerComponen
         case Some(value) => formProvider().fill(value)
       }
 
-      Ok(annualAccountingScheme(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(annualAccountingScheme(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, AnnualAccountingSchemeId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(AnnualAccountingSchemeId, NormalMode)(new UserAnswers(cacheMap))))

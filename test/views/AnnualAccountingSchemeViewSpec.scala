@@ -43,11 +43,13 @@ class AnnualAccountingSchemeViewSpec extends ViewSpecBase {
 
   object Selectors extends BaseSelectors
 
+  val view = app.injector.instanceOf[annualAccountingScheme]
+
   def createView: () => HtmlFormat.Appendable =
-    () => annualAccountingScheme(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+    () => view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => annualAccountingScheme(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
+    (form: Form[_]) => view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig)
 
   "AnnualAccountingScheme view" must {
     lazy val doc = asDocument(createViewUsingForm(form))

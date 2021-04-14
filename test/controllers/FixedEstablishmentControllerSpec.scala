@@ -32,6 +32,8 @@ class FixedEstablishmentControllerSpec extends ControllerSpecBase {
 
   def onwardRoute: Call = routes.BusinessEntityController.onPageLoad()
 
+  val view = app.injector.instanceOf[fixedEstablishment]
+
   val formProvider = new FixedEstablishmentFormProvider()
   val form: Form[Boolean] = formProvider()
 
@@ -43,11 +45,12 @@ class FixedEstablishmentControllerSpec extends ControllerSpecBase {
       FakeCacheIdentifierAction,
       dataRetrievalAction,
       new DataRequiredAction,
-      formProvider
+      formProvider,
+      view
     )
 
   def viewAsString(form: Form[_] = form): String =
-    fixedEstablishment(form)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+    view(form)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "FixedEstablishment Controller" must {
     "return OK and the correct view for a GET" in {

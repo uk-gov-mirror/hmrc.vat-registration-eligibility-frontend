@@ -21,6 +21,8 @@ import models.NormalMode
 import views.html.vatExemption
 
 class VATExemptionViewSpec extends ViewSpecBase {
+
+  val view = app.injector.instanceOf[vatExemption]
   val messageKeyPrefix = "vatExemption"
   val form = new VATExemptionFormProvider()()
 
@@ -30,7 +32,7 @@ class VATExemptionViewSpec extends ViewSpecBase {
   object Selectors extends BaseSelectors
 
   "VATExemption view" must {
-    lazy val doc = asDocument(vatExemption(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

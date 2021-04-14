@@ -16,22 +16,24 @@
 
 package controllers
 
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.session_expired
 
 class SessionExpiredControllerSpec extends ControllerSpecBase {
 
   implicit val appConfig = frontendAppConfig
+  val view = app.injector.instanceOf[session_expired]
 
   "SessionExpired Controller" must {
     "return 200 for a GET" in {
-      val result = new SessionExpiredController(controllerComponents).onPageLoad()(fakeRequest)
+      val result = new SessionExpiredController(controllerComponents, view).onPageLoad()(fakeRequest)
       status(result) mustBe OK
     }
 
     "return the correct view for a GET" in {
-      val result = new SessionExpiredController(controllerComponents).onPageLoad()(fakeRequest)
-      contentAsString(result) mustBe session_expired()(fakeRequest, messages, appConfig).toString
+      val result = new SessionExpiredController(controllerComponents, view).onPageLoad()(fakeRequest)
+      contentAsString(result) mustBe view()(fakeRequest, messages, appConfig).toString
     }
   }
 }

@@ -23,6 +23,7 @@ import views.html.turnoverEstimate
 class TurnoverEstimateViewSpec extends ViewSpecBase {
 
   object Selectors extends BaseSelectors
+  val view = app.injector.instanceOf[turnoverEstimate]
 
   implicit val msgs = messages
   val messageKeyPrefix = "turnoverEstimate"
@@ -36,7 +37,7 @@ class TurnoverEstimateViewSpec extends ViewSpecBase {
   val form = new TurnoverEstimateFormProvider()()
 
   "TurnoverEstimate view" must {
-    lazy val doc = asDocument(turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

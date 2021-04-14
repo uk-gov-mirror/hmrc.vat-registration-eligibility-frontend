@@ -14,6 +14,10 @@
  * limitations under the License.
  *@
 
+@this(
+    input: GovukInput
+)
+
 @(form: Form[_],
         id: String,
         name: String,
@@ -24,7 +28,7 @@
         classes: Option[String] = None
 )(implicit messages: Messages)
 
-@GovukInput(Input(
+@input(Input(
     id,
     name,
     inputType = "text",

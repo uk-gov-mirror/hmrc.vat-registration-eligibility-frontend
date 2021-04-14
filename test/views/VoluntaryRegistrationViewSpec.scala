@@ -33,10 +33,12 @@ class VoluntaryRegistrationViewSpec extends ViewSpecBase {
   val h2 = "Does the business want to register voluntarily?"
   val indentText = "Only register voluntarily if the company intends to start reporting VAT in the next 3 months."
 
+  val view = app.injector.instanceOf[voluntaryRegistration]
+
   object Selectors extends BaseSelectors
 
   "VoluntaryRegistration view" must {
-    lazy val doc = asDocument(voluntaryRegistration(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

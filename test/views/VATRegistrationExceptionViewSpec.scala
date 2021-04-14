@@ -28,10 +28,12 @@ class VATRegistrationExceptionViewSpec extends ViewSpecBase {
   val p1 = "You can apply for a registration exception if the business goes over the VAT threshold temporarily."
   val p2 = "If you apply for an exception and are successful, we will contact you to tell you your request has been accepted."
 
+  val view = app.injector.instanceOf[vatRegistrationException]
+
   object Selectors extends BaseSelectors
 
   "VATRegistrationException view" must {
-    lazy val doc = asDocument(vatRegistrationException(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

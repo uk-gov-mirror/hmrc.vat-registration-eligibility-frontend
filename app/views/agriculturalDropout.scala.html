@@ -16,9 +16,14 @@
 
 @import config.FrontendAppConfig
 @import models.requests.CacheIdentifierRequest
-@import uk.gov.hmrc.play.views.html.helpers.form
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+
+@this(
+    layout: views.html.layouts.layout,
+    h1: newcomponents.h1,
+    p: newcomponents.p,
+    form: FormWithCSRF,
+    link: newcomponents.link
+)
 
 @()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 

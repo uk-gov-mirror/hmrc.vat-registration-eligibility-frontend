@@ -38,6 +38,8 @@ import scala.concurrent.Future
 
 class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
 
+  val view = app.injector.instanceOf[thresholdNextThirtyDays]
+
   def onwardRoute: Call = routes.IndexController.onPageLoad()
 
   object TestTimeMachine extends TimeMachine {
@@ -59,10 +61,11 @@ class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
       dataRetrievalAction,
       dataRequiredAction,
       mockThresholdService,
-      formProvider
+      formProvider,
+      view
     )
 
-  def viewAsString(form: Form[_] = form): String = thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form): String = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "ThresholdNextThirtyDays Controller" must {
     when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")

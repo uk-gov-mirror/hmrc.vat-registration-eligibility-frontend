@@ -32,6 +32,7 @@ import views.html.businessEntity
 class BusinessEntityControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
+  val view = app.injector.instanceOf[businessEntity]
 
   val formProvider = new BusinessEntityFormProvider()
   val form = formProvider()
@@ -44,9 +45,9 @@ class BusinessEntityControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new BusinessEntityController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, view)
 
-  def viewAsString(form: Form[BusinessEntity] = form) = businessEntity(form, postAction)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[BusinessEntity] = form) = view(form, postAction)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "RegisteringBusiness Controller" must {
 

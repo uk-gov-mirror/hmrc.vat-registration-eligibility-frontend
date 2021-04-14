@@ -24,6 +24,7 @@ class FixedEstablishmentViewSpec extends ViewSpecBase {
 
   val form = new FixedEstablishmentFormProvider()()
   implicit val msgs = messages
+  val view = app.injector.instanceOf[fixedEstablishment]
 
   object Selectors extends BaseSelectors
 
@@ -33,7 +34,7 @@ class FixedEstablishmentViewSpec extends ViewSpecBase {
   val bullet2 = "business has a permanent physical presence with the human and technical resources to make or receive taxable supplies in the UK"
 
   "FixedEstablishment view" must {
-    lazy val doc = asDocument(fixedEstablishment(form)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

@@ -39,6 +39,8 @@ import scala.concurrent.Future
 
 class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase with TrafficManagementServiceMock {
 
+  val view = app.injector.instanceOf[thresholdInTwelveMonths]
+
   def onwardRoute = routes.IndexController.onPageLoad()
 
   object TestTimeMachine extends TimeMachine {
@@ -53,9 +55,9 @@ class ThresholdInTwelveMonthsControllerSpec extends ControllerSpecBase with Traf
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new ThresholdInTwelveMonthsController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, mockThresholdService, formProvider, mockTrafficManagementService)
+      dataRetrievalAction, dataRequiredAction, mockThresholdService, formProvider, mockTrafficManagementService, view)
 
-  def viewAsString(form: Form[_] = form) = thresholdInTwelveMonths(form, NormalMode, mockThresholdService)(fakeDataRequestIncorpedOver12m, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode, mockThresholdService)(fakeDataRequestIncorpedOver12m, messages, frontendAppConfig).toString
 
   val testInternalId = "id"
   val testRegId = "regId"

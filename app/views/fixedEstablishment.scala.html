@@ -15,10 +15,18 @@
  *@
 
 @import config.FrontendAppConfig
-@import uk.gov.hmrc.play.views.html._
-@import views.html.layouts.layout
-@import views.html.newcomponents._
 @import models.requests.DataRequest
+
+@this(
+    layout: views.html.layouts.layout,
+    errorSummary: newcomponents.errorSummary,
+    h1: newcomponents.h1,
+    p: newcomponents.p,
+    bullets: newcomponents.bullets,
+    formWithCsrf: FormWithCSRF,
+    yesNoRadio: newcomponents.yesNoRadio,
+    button: newcomponents.button
+)
 
 @(form: Form[_])(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -30,7 +38,7 @@
     @p{ @messages("fixedEstablishment.para") }
     @bullets("fixedEstablishment.bullet1","fixedEstablishment.bullet2")
 
-    @helpers.form(action = routes.FixedEstablishmentController.onSubmit(), 'autoComplete -> "off") {
+    @formWithCsrf(action = routes.FixedEstablishmentController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "fixedEstablishment.heading",

@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@this(errorSummary: GovukErrorSummary)
+
 @(errors: Seq[FormError], errorFieldSuffix: Option[Map[String, String]] = None, errorId: Option[String] = None)(implicit messages: Messages)
 
     @if(errors.nonEmpty) {
@@ -28,7 +30,7 @@
                 content = Text(messages(error.message, error.args:_*))
             )
         }) { errorLinks =>
-            @GovukErrorSummary(ErrorSummary(
+            @errorSummary(ErrorSummary(
                 errorList = errorLinks,
                 title = Text(messages("error.summary.title"))
             ))

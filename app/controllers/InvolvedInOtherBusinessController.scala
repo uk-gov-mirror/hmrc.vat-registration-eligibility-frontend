@@ -39,7 +39,8 @@ class InvolvedInOtherBusinessController @Inject()(mcc: MessagesControllerCompone
                                                   identify: CacheIdentifierAction,
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
-                                                  formProvider: InvolvedInOtherBusinessFormProvider
+                                                  formProvider: InvolvedInOtherBusinessFormProvider,
+                                                  view: involvedInOtherBusiness
                                                  )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -49,14 +50,14 @@ class InvolvedInOtherBusinessController @Inject()(mcc: MessagesControllerCompone
         case None => formProvider.form
         case Some(value) => formProvider.form.fill(value)
       }
-      Future.successful(Ok(involvedInOtherBusiness(preparedForm, NormalMode)))
+      Future.successful(Ok(view(preparedForm, NormalMode)))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider.form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(involvedInOtherBusiness(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, InvolvedInOtherBusinessId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(InvolvedInOtherBusinessId, NormalMode)(new UserAnswers(cacheMap))))
