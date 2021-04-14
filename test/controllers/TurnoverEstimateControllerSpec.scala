@@ -32,6 +32,8 @@ class TurnoverEstimateControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
+  val view = app.injector.instanceOf[turnoverEstimate]
+
   val formProvider = new TurnoverEstimateFormProvider()
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
@@ -40,9 +42,9 @@ class TurnoverEstimateControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new TurnoverEstimateController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, view)
 
-  def viewAsString(form: Form[_] = form) = turnoverEstimate(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "TurnoverEstimate Controller" must {
 

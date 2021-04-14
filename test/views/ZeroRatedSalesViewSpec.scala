@@ -36,10 +36,12 @@ class ZeroRatedSalesViewSpec extends ViewSpecBase {
   val bullet4 = "children's clothes and shoes"
   val bullet5 = "most goods you export to non-EU countries"
 
+  val view = app.injector.instanceOf[zeroRatedSales]
+
   object Selectors extends BaseSelectors
 
   "ZeroRatedSales view" must {
-    lazy val doc = asDocument(zeroRatedSales(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

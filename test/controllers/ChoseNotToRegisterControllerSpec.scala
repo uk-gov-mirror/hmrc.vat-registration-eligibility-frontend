@@ -24,12 +24,14 @@ class ChoseNotToRegisterControllerSpec extends ControllerSpecBase {
 
   implicit val appConfig = frontendAppConfig
 
+  val view = app.injector.instanceOf[choseNotToRegister]
+
   def onwardRoute = routes.ChoseNotToRegisterController.onPageLoad()
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ChoseNotToRegisterController(controllerComponents, FakeCacheIdentifierAction)
+    new ChoseNotToRegisterController(controllerComponents, FakeCacheIdentifierAction, view)
 
-  def viewAsString() = choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString() = view()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
 
   val questionnaireUrl = frontendAppConfig.exitSurveyUrl
 

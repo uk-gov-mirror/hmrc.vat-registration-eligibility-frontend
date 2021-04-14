@@ -30,6 +30,8 @@ import views.html.internationalActivities
 
 class InternationalActivitiesControllerSpec extends ControllerSpecBase {
 
+  val view = app.injector.instanceOf[internationalActivities]
+
   def onwardRoute = routes.IndexController.onPageLoad()
 
   val formProvider = new InternationalActivitiesFormProvider()
@@ -40,9 +42,9 @@ class InternationalActivitiesControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new InternationalActivitiesController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, view)
 
-  def viewAsString(form: Form[_] = form) = internationalActivities(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "InternationalActivities Controller" must {
 

@@ -44,6 +44,8 @@ class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with T
 
   def onwardRoute: Call = routes.ThresholdInTwelveMonthsController.onPageLoad()
 
+  val view = app.injector.instanceOf[nino]
+
   val formProvider = new NinoFormProvider()
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
@@ -67,9 +69,9 @@ class NinoControllerSpec extends ControllerSpecBase with FeatureSwitching with T
 
   def controller(dataRetrievalAction: DataRetrievalAction = new FakeDataRetrievalAction(Some(CacheMap(cacheMapId, Map())))) =
     new NinoController(controllerComponents, FakeDataCacheConnector, mockS4LService, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider, mockTrafficManagementService)
+      dataRetrievalAction, dataRequiredAction, formProvider, mockTrafficManagementService, view)
 
-  def viewAsString(form: Form[_] = form) = nino(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig).toString
 
   "Nino Controller" must {
     "return OK and the correct view for a GET" in {

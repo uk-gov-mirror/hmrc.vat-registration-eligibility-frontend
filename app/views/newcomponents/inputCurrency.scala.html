@@ -17,6 +17,11 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.{toClasses => govukToClasses}
 @import play.twirl.api.HtmlFormat
 
+@this(
+    govukLabel: GovukLabel,
+    govukHint: GovukHint,
+    govukErrorMessage: GovukErrorMessage
+)
 
 @(form: Form[_],
         id: String,
@@ -31,11 +36,11 @@
 <div class="@govukToClasses("govuk-form-group", if(form(id).hasErrors) "govuk-form-group--error" else "")">
 
     @if(label.isDefined){
-        @GovukLabel(Label(
-        forAttr = Some(id),
-        isPageHeading = isPageHeading,
-        classes = if(isPageHeading) "govuk-label--xl " + labelClasses.fold("")(cls => cls) else labelClasses.fold("")(cls => cls),
-        content = Text(messages(label.get))
+        @govukLabel(Label(
+            forAttr = Some(id),
+            isPageHeading = isPageHeading,
+            classes = if(isPageHeading) "govuk-label--xl " + labelClasses.fold("")(cls => cls) else labelClasses.fold("")(cls => cls),
+            content = Text(messages(label.get))
         ))
     }
 
@@ -47,7 +52,7 @@
         val hintId = s"$id-hint"
         val describedBy1 = s"$describedBy $hintId"
         val hintHtml =
-            GovukHint(Hint(
+            govukHint(Hint(
                 id = Some(hintId),
                 content = HtmlContent(hint)
             ))
@@ -60,7 +65,7 @@
         val errorId = s"$id-error"
         val describedBy1 = s"$describedBy $errorId"
         val errorMessageHtml =
-            GovukErrorMessage(ErrorMessage(
+            govukErrorMessage(ErrorMessage(
                 id = Some(errorId),
                 content = Text(messages(errorMessage.message, errorMessage.args:_*))
             ))

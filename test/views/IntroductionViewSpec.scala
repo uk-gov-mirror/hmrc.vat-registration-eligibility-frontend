@@ -25,10 +25,12 @@ class IntroductionViewSpec extends ViewSpecBase {
   val h1 = "Check if you can register for VAT online"
   val p1 = "We will ask you some questions about the nature of the business to check if this is the best way for you to register."
 
+  val view = app.injector.instanceOf[introduction]
+
   object Selectors extends BaseSelectors
 
   "Introduction view" must {
-    lazy val doc = asDocument(introduction()(fakeRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view()(fakeRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

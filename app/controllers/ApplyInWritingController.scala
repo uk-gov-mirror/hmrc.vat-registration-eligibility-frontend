@@ -26,12 +26,13 @@ import views.html.applyInWriting
 
 @Singleton
 class ApplyInWritingController @Inject()(mcc: MessagesControllerComponents,
-                                         identify: CacheIdentifierAction
+                                         identify: CacheIdentifierAction,
+                                         view: applyInWriting
                                         )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = identify {
     implicit request =>
-      Ok(applyInWriting())
+      Ok(view())
   }
 
   def onSubmit: Action[AnyContent] = Action { implicit request =>

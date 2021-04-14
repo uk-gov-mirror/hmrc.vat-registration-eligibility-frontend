@@ -15,13 +15,18 @@
  *@
 
 @import config.FrontendAppConfig
-@import uk.gov.hmrc.play.views.html._
 @import controllers.routes._
 @import models.Mode
-@import utils.FormHelpers
 @import models.requests.DataRequest
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+
+@this(
+        layout: views.html.layouts.layout,
+        errorSummary: newcomponents.errorSummary,
+        formWithCsrf: FormWithCSRF,
+        link: newcomponents.link,
+        yesNoRadio: newcomponents.yesNoRadio,
+        button: newcomponents.button
+)
 
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -29,7 +34,7 @@
 
     @errorSummary(form.errors)
 
-    @helpers.form(action = RegisteringBusinessController.onSubmit(), 'autoComplete -> "off") {
+    @formWithCsrf(action = RegisteringBusinessController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "registeringBusiness.heading",

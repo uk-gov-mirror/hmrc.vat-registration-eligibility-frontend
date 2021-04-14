@@ -41,8 +41,10 @@ class ThresholdNextThirtyDaysViewSpec extends ViewSpecBase {
   val testHint = "For example, 13 02 2017"
   val testButton = "Continue"
 
+  val view = app.injector.instanceOf[thresholdNextThirtyDays]
+
   "ThresholdNextThirtyDays view" must {
-    val doc = asDocument(thresholdNextThirtyDays(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    val doc = asDocument(view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

@@ -42,7 +42,8 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
                                                   requireData: DataRequiredAction,
                                                   thresholdService: ThresholdService,
                                                   formProvider: ThresholdInTwelveMonthsFormProvider,
-                                                  trafficManagementService: TrafficManagementService
+                                                  trafficManagementService: TrafficManagementService,
+                                                  view: thresholdInTwelveMonths
                                                  )(implicit appConfig: FrontendAppConfig,
                                                    executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
@@ -52,14 +53,14 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(thresholdInTwelveMonths(preparedForm, NormalMode, thresholdService))
+      Ok(view(preparedForm, NormalMode, thresholdService))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(thresholdInTwelveMonths(formWithErrors, NormalMode, thresholdService))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode, thresholdService))),
         formValue =>
           dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap { cacheMap =>
             if (formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException

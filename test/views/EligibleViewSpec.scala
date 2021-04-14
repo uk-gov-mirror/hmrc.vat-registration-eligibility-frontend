@@ -24,11 +24,12 @@ class EligibleViewSpec extends ViewSpecBase {
 
   val h1 = "You can register for VAT online"
   val p1 = "Based on your answers, you can register for VAT using the online service."
+  val view = app.injector.instanceOf[eligible]
 
   object Selectors extends BaseSelectors
 
   "Introduction view" must {
-    lazy val doc = asDocument(eligible()(fakeRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view()(fakeRequest, messages, frontendAppConfig))
 
     "have the correct browser title" in {
       doc.select(Selectors.title).text() mustBe title(h1)

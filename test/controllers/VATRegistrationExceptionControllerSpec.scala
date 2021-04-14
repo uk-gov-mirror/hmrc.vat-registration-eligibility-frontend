@@ -32,6 +32,8 @@ class VATRegistrationExceptionControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
+  val view = app.injector.instanceOf[vatRegistrationException]
+
   val formProvider = new VATRegistrationExceptionFormProvider()
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
@@ -40,9 +42,9 @@ class VATRegistrationExceptionControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new VATRegistrationExceptionController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, view)
 
-  def viewAsString(form: Form[_] = form) = vatRegistrationException(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "VATRegistrationException Controller" must {
 

@@ -24,11 +24,12 @@ class ChoseNotToRegisterViewSpec extends ViewSpecBase {
 
   val h1 = "You have chosen not to register the business for VAT"
   val finishButton = "Finish"
+  val view = app.injector.instanceOf[choseNotToRegister]
 
   object Selectors extends BaseSelectors
 
   "ChoseNotToRegister view" must {
-    lazy val doc = asDocument(choseNotToRegister()(fakeCacheDataRequestIncorped, messages, frontendAppConfig))
+    lazy val doc = asDocument(view()(fakeCacheDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe finishButton

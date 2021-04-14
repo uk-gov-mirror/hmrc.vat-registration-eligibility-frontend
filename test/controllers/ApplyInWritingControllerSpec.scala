@@ -23,13 +23,14 @@ import views.html.applyInWriting
 class ApplyInWritingControllerSpec extends ControllerSpecBase {
 
   implicit val appConfig = frontendAppConfig
+  val view = app.injector.instanceOf[applyInWriting]
 
   def onwardRoute = routes.ApplyInWritingController.onPageLoad()
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
-    new ApplyInWritingController(controllerComponents, FakeCacheIdentifierAction)
+    new ApplyInWritingController(controllerComponents, FakeCacheIdentifierAction, view)
 
-  def viewAsString() = applyInWriting()(fakeRequest, messages, frontendAppConfig).toString
+  def viewAsString() = view()(fakeRequest, messages, frontendAppConfig).toString
 
   "ApplyInWriting Controller" must {
 

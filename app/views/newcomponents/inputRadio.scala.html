@@ -14,6 +14,10 @@
  * limitations under the License.
  *@
 
+@this(
+    radios: GovukRadios
+)
+
 @(      form: Form[_],
         legend: String,
         items: Seq[RadioItem],
@@ -23,7 +27,7 @@
         inline: Boolean = false
 )(implicit messages: Messages)
 
-@GovukRadios(Radios(
+@radios(Radios(
     classes = s"${if(inline){"govuk-radios--inline"}}",
     name = "value",
     fieldset = Some(Fieldset(

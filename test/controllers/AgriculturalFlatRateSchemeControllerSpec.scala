@@ -35,6 +35,7 @@ class AgriculturalFlatRateSchemeControllerSpec extends ControllerSpecBase {
 
   val formProvider = new AgriculturalFlatRateSchemeFormProvider()
   val form: Form[Boolean] = formProvider()
+  val view = app.injector.instanceOf[agriculturalFlatRateScheme]
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new AgriculturalFlatRateSchemeController(
@@ -44,10 +45,11 @@ class AgriculturalFlatRateSchemeControllerSpec extends ControllerSpecBase {
       FakeCacheIdentifierAction,
       dataRetrievalAction,
       new DataRequiredAction,
-      formProvider
+      formProvider,
+      view
     )
 
-  def viewAsString(form: Form[_] = form): String = agriculturalFlatRateScheme(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form): String = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "AgriculturalFlatRateScheme Controller" must {
 

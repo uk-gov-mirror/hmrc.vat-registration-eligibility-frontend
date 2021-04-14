@@ -23,9 +23,10 @@ class IndexViewSpec extends ViewSpecBase {
   object Selectors extends BaseSelectors
 
   val h1 = "vat-registration-eligibility-frontend"
+  val view = app.injector.instanceOf[index]
 
   "Index view" must {
-    lazy val doc = asDocument(index()(fakeRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view()(fakeRequest, messages, frontendAppConfig))
 
     "have the correct browser title" in {
       doc.select(Selectors.title).text() mustBe title(h1)

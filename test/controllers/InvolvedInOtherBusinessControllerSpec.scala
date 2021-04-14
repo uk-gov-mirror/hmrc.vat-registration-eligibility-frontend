@@ -29,6 +29,8 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
+  val view = app.injector.instanceOf[involvedInOtherBusiness]
+
   val formProvider = new InvolvedInOtherBusinessFormProvider()
   val form = formProvider.form
   implicit val appConfig = frontendAppConfig
@@ -37,9 +39,9 @@ class InvolvedInOtherBusinessControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new InvolvedInOtherBusinessController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, view)
 
-  def viewAsString(form: Form[_] = form, officer: Option[String] = None) = involvedInOtherBusiness(form, NormalMode)(fakeRequest, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form, officer: Option[String] = None) = view(form, NormalMode)(fakeRequest, messages, frontendAppConfig).toString
 
   "InvolvedInOtherBusiness Controller" must {
     "return OK and the correct view for a GET" in {

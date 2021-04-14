@@ -37,6 +37,8 @@ class VATExceptionKickoutControllerSpec extends ControllerSpecBase with TrafficM
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
+  val view = app.injector.instanceOf[vatExceptionKickout]
+
   val formProvider = new VATExceptionKickoutFormProvider()
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
@@ -45,9 +47,9 @@ class VATExceptionKickoutControllerSpec extends ControllerSpecBase with TrafficM
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new VATExceptionKickoutController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider, mockTrafficManagementService)
+      dataRetrievalAction, dataRequiredAction, formProvider, mockTrafficManagementService, view)
 
-  def viewAsString(form: Form[_] = form) = vatExceptionKickout(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   val testInternalId = "id"
   val testRegId = "regId"

@@ -16,11 +16,21 @@
 
 @import config.FrontendAppConfig
 @import uk.gov.hmrc.play.views.html._
-@import views.html.layouts.layout
-@import views.html.newcomponents._
 @import controllers.routes._
 @import models.Mode
 @import models.requests.DataRequest
+
+@this(
+        layout: views.html.layouts.layout,
+        errorSummary: newcomponents.errorSummary,
+        h1: newcomponents.h1,
+        p: newcomponents.p,
+        formWithCsrf: FormWithCSRF,
+        link: newcomponents.link,
+        bullets: newcomponents.bullets,
+        button: newcomponents.button,
+        yesNoRadio: newcomponents.yesNoRadio
+)
 
 @(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -47,8 +57,7 @@
         @link(appConfig.VATAnnualAccountingSchemeURL, "annualAccountingScheme.linkText", isExternal = true)
     }
 
-    @helpers.form(action = AnnualAccountingSchemeController.onSubmit(), 'autoComplete -> "off") {
-
+    @formWithCsrf(action = AnnualAccountingSchemeController.onSubmit(), 'autoComplete -> "off") {
         @yesNoRadio(
             form = form,
             headingKey = "annualAccountingScheme.heading",

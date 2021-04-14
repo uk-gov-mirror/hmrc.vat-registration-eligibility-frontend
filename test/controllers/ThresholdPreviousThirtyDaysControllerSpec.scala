@@ -40,6 +40,8 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
 
   def onwardRoute: Call = routes.IndexController.onPageLoad()
 
+  val view = app.injector.instanceOf[thresholdPreviousThirtyDays]
+
   object TimeMachine extends TimeMachine {
     override def today: LocalDate = LocalDate.parse("2020-01-01")
   }
@@ -52,9 +54,9 @@ class ThresholdPreviousThirtyDaysControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new ThresholdPreviousThirtyDaysController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, mockThresholdService, formProvider)
+      dataRetrievalAction, dataRequiredAction, mockThresholdService, formProvider, view)
 
-  def viewAsString(form: Form[_] = form) = thresholdPreviousThirtyDays(form, NormalMode, mockThresholdService)(fakeDataRequest, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode, mockThresholdService)(fakeDataRequest, messages, frontendAppConfig).toString
 
 
   "ThresholdPreviousThirtyDaysController" must {

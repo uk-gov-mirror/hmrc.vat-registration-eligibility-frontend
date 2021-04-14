@@ -32,6 +32,8 @@ class RegisteringBusinessControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.IndexController.onPageLoad()
 
+  val view = app.injector.instanceOf[registeringBusiness]
+
   val formProvider = new RegisteringBusinessFormProvider()
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
@@ -40,9 +42,9 @@ class RegisteringBusinessControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new RegisteringBusinessController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, view)
 
-  def viewAsString(form: Form[_] = form) = registeringBusiness(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "RegisteringBusiness Controller" must {
 

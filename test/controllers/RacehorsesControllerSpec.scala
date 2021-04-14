@@ -32,6 +32,8 @@ class RacehorsesControllerSpec extends ControllerSpecBase {
 
   def onwardRoute = routes.EligibleController.onPageLoad()
 
+  val view = app.injector.instanceOf[racehorses]
+
   val formProvider = new RacehorsesFormProvider()
   val form = formProvider()
   implicit val appConfig = frontendAppConfig
@@ -40,9 +42,9 @@ class RacehorsesControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new RacehorsesController(controllerComponents, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeCacheIdentifierAction,
-      dataRetrievalAction, dataRequiredAction, formProvider)
+      dataRetrievalAction, dataRequiredAction, formProvider, view)
 
-  def viewAsString(form: Form[_] = form) = racehorses(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form) = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "Racehorses Controller" must {
     "return OK and the correct view for a GET" in {

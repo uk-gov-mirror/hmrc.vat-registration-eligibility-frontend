@@ -27,8 +27,10 @@ class ApplyInWritingViewSpec extends ViewSpecBase {
   val h1 = "You must apply in writing"
   val p1 = "Please use form VAT1 to apply for an exemption from VAT registration."
 
+  val view = app.injector.instanceOf[applyInWriting]
+
   "ApplyInWriting view" must {
-    lazy val doc = asDocument(applyInWriting()(fakeRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view()(fakeRequest, messages, frontendAppConfig))
 
     "have the correct back link" in {
       doc.getElementById(Selectors.backLink).text() mustBe backLink

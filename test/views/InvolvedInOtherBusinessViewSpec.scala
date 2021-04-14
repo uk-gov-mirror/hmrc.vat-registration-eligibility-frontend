@@ -32,10 +32,12 @@ class InvolvedInOtherBusinessViewSpec extends ViewSpecBase {
   val bullet4 = "the company used to be a different type of VAT-registered business, for example a sole trader"
   val bullet5 = "the company has taken over another VAT-registered company that was making a profit"
 
+  val view = app.injector.instanceOf[involvedInOtherBusiness]
+
   object Selectors extends BaseSelectors
 
   "InvolvedInOtherBusiness view with no acting on behalf of officer" must {
-    lazy val doc = asDocument(involvedInOtherBusiness(form, NormalMode)(fakeRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

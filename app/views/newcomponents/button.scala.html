@@ -14,9 +14,13 @@
  * limitations under the License.
  *@
 
+@this(
+  button: GovukButton
+)
+
 @(msg: String)(implicit messages: Messages)
 
-@GovukButton(Button(
+@button(Button(
     content = Text(messages(msg)),
     preventDoubleClick = true
 ))

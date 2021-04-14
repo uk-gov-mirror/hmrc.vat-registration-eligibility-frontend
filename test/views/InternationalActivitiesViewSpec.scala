@@ -37,10 +37,12 @@ class InternationalActivitiesViewSpec extends ViewSpecBase {
   val bullet6 = "bring goods into Northern Ireland from an EU member state"
   val bullet7 = "sell goods into Northern Ireland from an EU member state"
 
+  val view = app.injector.instanceOf[internationalActivities]
+
   object Selectors extends BaseSelectors
 
   "InternationalActivities view" must {
-    lazy val doc = asDocument(internationalActivities(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton

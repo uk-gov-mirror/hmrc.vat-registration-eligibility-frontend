@@ -14,6 +14,10 @@
  * limitations under the License.
  *@
 
+@this(
+    radios: GovukRadios
+)
+
 @(      form: Form[_],
         headingKey: String,
         ifYes: Option[Html] = None,
@@ -24,7 +28,7 @@
         classes: String = "govuk-fieldset__legend--xl"
 )(implicit messages: Messages)
 
-@GovukRadios(Radios(
+@radios(Radios(
     classes = "govuk-radios--inline",
     idPrefix = None,
     name = "value",

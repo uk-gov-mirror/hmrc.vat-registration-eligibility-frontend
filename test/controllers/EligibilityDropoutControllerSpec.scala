@@ -24,13 +24,17 @@ import identifiers.{AgriculturalFlatRateSchemeId, InternationalActivitiesId}
 import mocks.TrafficManagementServiceMock
 import models.{Draft, RegistrationInformation, VatReg}
 import play.api.test.Helpers._
-import views.html.{agriculturalDropout, internationalActivityDropout}
+import views.html.{agriculturalDropout, internationalActivityDropout, vatDivisionDropout}
 
 import scala.concurrent.Future
 
 class EligibilityDropoutControllerSpec extends ControllerSpecBase with TrafficManagementServiceMock {
 
   def onwardRoute = routes.EligibilityDropoutController.onPageLoad("")
+
+  val internationalDropoutView = app.injector.instanceOf[internationalActivityDropout]
+  val agriculturalDropoutView = app.injector.instanceOf[agriculturalDropout]
+  val vatDivisionDropoutView = app.injector.instanceOf[vatDivisionDropout]
 
   implicit val appConfig = app.injector.instanceOf[FrontendAppConfig]
 
@@ -40,15 +44,18 @@ class EligibilityDropoutControllerSpec extends ControllerSpecBase with TrafficMa
       FakeCacheIdentifierAction,
       fakeDataRetrievalAction,
       new DataRequiredAction,
-      mockTrafficManagementService)
+      mockTrafficManagementService,
+      internationalDropoutView,
+      agriculturalDropoutView,
+      vatDivisionDropoutView)
 
   val testInternalId = "id"
   val testRegId = "regId"
   val testDate = LocalDate.now
 
-  def internationalView() = internationalActivityDropout()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
+  def internationalView() = internationalDropoutView()(fakeCacheDataRequestIncorped, messages, frontendAppConfig).toString
 
-  def agricultureView() = agriculturalDropout()(fakeCacheDataRequestIncorped, messages, appConfig).toString
+  def agricultureView() = agriculturalDropoutView()(fakeCacheDataRequestIncorped, messages, appConfig).toString
 
   "EligibilityDropout Controller" must {
 

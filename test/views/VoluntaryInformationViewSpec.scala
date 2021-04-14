@@ -24,12 +24,14 @@ class VoluntaryInformationViewSpec extends ViewSpecBase {
   val messageKeyPrefix = "voluntaryInformation"
   val form = new VoluntaryInformationFormProvider()()
 
+  val view = app.injector.instanceOf[voluntaryInformation]
+
   object Selectors extends BaseSelectors
 
   "BusinessEntity view" must {
 
     "have a set of radio inputs" which {
-      lazy val doc = asDocument(voluntaryInformation(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+      lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
       "for the option 'Yes, I would like to sign up to Making Tax Digital'" should {
 

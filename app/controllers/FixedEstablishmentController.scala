@@ -38,7 +38,8 @@ class FixedEstablishmentController @Inject()(mcc: MessagesControllerComponents,
                                              identify: CacheIdentifierAction,
                                              getData: DataRetrievalAction,
                                              requireData: DataRequiredAction,
-                                             formProvider: FixedEstablishmentFormProvider
+                                             formProvider: FixedEstablishmentFormProvider,
+                                             view: fixedEstablishment
                                             )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -48,14 +49,14 @@ class FixedEstablishmentController @Inject()(mcc: MessagesControllerComponents,
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(fixedEstablishment(preparedForm))
+      Ok(view(preparedForm))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(fixedEstablishment(formWithErrors))),
+          Future.successful(BadRequest(view(formWithErrors))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, FixedEstablishmentId.toString, value) map { cacheMap =>
             Redirect(navigator.nextPage(FixedEstablishmentId, NormalMode)(new UserAnswers(cacheMap)))

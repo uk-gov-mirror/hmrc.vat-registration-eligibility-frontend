@@ -14,9 +14,13 @@
  * limitations under the License.
  *@
 
+@this(
+    fieldset: GovukFieldset
+)
+
 @(legend: String, asHeading: Boolean = true)(content: Html)(implicit messages: Messages)
 
-@GovukFieldset(Fieldset(
+@fieldset(Fieldset(
     legend = Some(Legend(
         content = Text(messages(legend)),
         classes = if(asHeading) "govuk-fieldset__legend--xl" else "",

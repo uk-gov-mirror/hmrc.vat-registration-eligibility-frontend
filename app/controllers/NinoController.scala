@@ -46,7 +46,8 @@ class NinoController @Inject()(mcc: MessagesControllerComponents,
                                getData: DataRetrievalAction,
                                requireData: DataRequiredAction,
                                formProvider: NinoFormProvider,
-                               trafficManagementService: TrafficManagementService
+                               trafficManagementService: TrafficManagementService,
+                               view: nino
                               )(implicit appConfig: FrontendAppConfig,
                                 executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport with FeatureSwitching {
@@ -57,7 +58,7 @@ class NinoController @Inject()(mcc: MessagesControllerComponents,
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(nino(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -65,7 +66,7 @@ class NinoController @Inject()(mcc: MessagesControllerComponents,
       implicit val profile = request.currentProfile
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(nino(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, NinoId.toString, value).flatMap { cacheMap =>
             if (!value) {

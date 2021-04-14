@@ -28,12 +28,13 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class MandatoryInformationController @Inject()(mcc: MessagesControllerComponents,
-                                               identify: CacheIdentifierAction
+                                               identify: CacheIdentifierAction,
+                                               view: mandatoryInformation
                                               )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = identify { implicit request =>
-    Ok(mandatoryInformation())
+    Ok(view())
   }
 
   def onSubmit: Action[AnyContent] = identify { implicit request =>

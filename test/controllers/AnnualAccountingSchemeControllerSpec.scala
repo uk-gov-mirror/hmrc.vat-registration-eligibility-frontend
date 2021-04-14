@@ -35,6 +35,7 @@ class AnnualAccountingSchemeControllerSpec extends ControllerSpecBase {
 
   val formProvider = new AnnualAccountingSchemeFormProvider()
   val form: Form[Boolean] = formProvider()
+  val view = app.injector.instanceOf[annualAccountingScheme]
 
   val dataRequiredAction = new DataRequiredAction
 
@@ -46,10 +47,11 @@ class AnnualAccountingSchemeControllerSpec extends ControllerSpecBase {
       FakeCacheIdentifierAction,
       dataRetrievalAction,
       dataRequiredAction,
-      formProvider
+      formProvider,
+      view
     )(frontendAppConfig, executionContext)
 
-  def viewAsString(form: Form[_] = form): String = annualAccountingScheme(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
+  def viewAsString(form: Form[_] = form): String = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "AnnualAccountingScheme Controller" must {
     "return OK and the correct view for a GET" in {

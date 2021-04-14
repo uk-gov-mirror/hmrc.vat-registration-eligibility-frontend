@@ -39,7 +39,8 @@ class RegisteringBusinessController @Inject()(mcc: MessagesControllerComponents,
                                               identify: CacheIdentifierAction,
                                               getData: DataRetrievalAction,
                                               requireData: DataRequiredAction,
-                                              formProvider: RegisteringBusinessFormProvider
+                                              formProvider: RegisteringBusinessFormProvider,
+                                              view: registeringBusiness
                                              )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -49,14 +50,14 @@ class RegisteringBusinessController @Inject()(mcc: MessagesControllerComponents,
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(registeringBusiness(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(registeringBusiness(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, RegisteringBusinessId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(RegisteringBusinessId, NormalMode)(new UserAnswers(cacheMap))))

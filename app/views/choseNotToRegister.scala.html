@@ -15,11 +15,14 @@
  *@
 
 @import config.FrontendAppConfig
-@import uk.gov.hmrc.play.views.html.helpers.{form}
 @import models.requests.CacheIdentifierRequest
 
-@import views.html.layouts.layout
-@import views.html.newcomponents._
+@this(
+        layout: views.html.layouts.layout,
+        h1: newcomponents.h1,
+        formWithCsrf: FormWithCSRF,
+        button: newcomponents.button
+)
 
 @()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -27,7 +30,7 @@
 
     @h1(messages("choseNotToRegister.heading"))
 
-    @form(action = controllers.routes.ChoseNotToRegisterController.onSubmit()) {
+    @formWithCsrf(action = controllers.routes.ChoseNotToRegisterController.onSubmit()) {
         @button(messages("site.finish"))
     }
 

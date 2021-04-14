@@ -26,11 +26,12 @@ import views.html.introduction
 
 @Singleton
 class IntroductionController @Inject()(mcc: MessagesControllerComponents,
-                                       identify: CacheIdentifierAction
+                                       identify: CacheIdentifierAction,
+                                       view: introduction
                                       )(implicit appConfig: FrontendAppConfig) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = identify { implicit request =>
-    Ok(introduction())
+    Ok(view())
   }
 
   def onSubmit: Action[AnyContent] = identify { implicit request =>

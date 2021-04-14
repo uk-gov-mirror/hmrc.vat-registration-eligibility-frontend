@@ -39,7 +39,8 @@ class VoluntaryInformationController @Inject()(mcc: MessagesControllerComponents
                                                identify: CacheIdentifierAction,
                                                getData: DataRetrievalAction,
                                                requireData: DataRequiredAction,
-                                               formProvider: VoluntaryInformationFormProvider
+                                               formProvider: VoluntaryInformationFormProvider,
+                                               view: voluntaryInformation
                                               )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
   extends FrontendController(mcc) with I18nSupport {
 
@@ -49,14 +50,14 @@ class VoluntaryInformationController @Inject()(mcc: MessagesControllerComponents
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(voluntaryInformation(preparedForm, NormalMode))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(voluntaryInformation(formWithErrors, NormalMode))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         value =>
           dataCacheConnector.save[Boolean](request.internalId, VoluntaryInformationId.toString, value).map(cacheMap =>
             Redirect(navigator.nextPage(VoluntaryInformationId, NormalMode)(new UserAnswers(cacheMap))))

@@ -27,11 +27,13 @@ class MandatoryInformationViewSpec extends ViewSpecBase {
   val p2Text = "As your taxable turnover is above, or will go above, £85,000 in a rolling 12 month period, you will sign up for Making Tax Digital for VAT as part of the registration process."
   val buttonText = "Continue to register for VAT"
 
+  val view = app.injector.instanceOf[mandatoryInformation]
+
   object Selectors extends BaseSelectors
 
 
   "Introduction view" must {
-    lazy val doc = asDocument(mandatoryInformation()(fakeRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view()(fakeRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe buttonText

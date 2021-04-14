@@ -21,6 +21,7 @@ import models.NormalMode
 import views.html.vatExceptionKickout
 
 class VATExceptionKickoutViewSpec extends ViewSpecBase {
+  val view = app.injector.instanceOf[vatExceptionKickout]
   val messageKeyPrefix = "vatRegistrationException"
   val form = new VATExceptionKickoutFormProvider()()
 
@@ -32,7 +33,7 @@ class VATExceptionKickoutViewSpec extends ViewSpecBase {
   object Selectors extends BaseSelectors
 
   "VATRegistrationException view" must {
-    lazy val doc = asDocument(vatExceptionKickout(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequest, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton
