@@ -17,14 +17,14 @@
 package controllers
 
 import java.time.LocalDate
-
 import config.FrontendAppConfig
 import connectors.FakeDataCacheConnector
 import controllers.actions._
 import forms.ThresholdNextThirtyDaysFormProvider
-import identifiers.ThresholdNextThirtyDaysId
+import identifiers.{ThresholdNextThirtyDaysId, VoluntaryRegistrationId}
 import models.{ConditionalDateFormElement, NormalMode}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{times, verify, when}
 import play.api.data.Form
 import play.api.libs.json.Json
@@ -60,7 +60,6 @@ class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
       FakeCacheIdentifierAction,
       dataRetrievalAction,
       dataRequiredAction,
-      mockThresholdService,
       formProvider,
       view
     )
@@ -68,7 +67,7 @@ class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
   def viewAsString(form: Form[_] = form): String = view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig).toString
 
   "ThresholdNextThirtyDays Controller" must {
-    when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
+    when(mockDataCacheConnector.removeEntry(anyString(), ArgumentMatchers.eq(VoluntaryRegistrationId.toString))) thenReturn Future.successful(emptyCacheMap)
     "return OK and the correct view for a GET" in {
       val result = controller().onPageLoad()(fakeDataRequestIncorped)
 
@@ -86,7 +85,6 @@ class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to the next page when valid data is submitted with answer true" in {
-      when(mockThresholdService.removeVoluntaryRegistration(any())) thenReturn Future.successful(emptyCacheMap)
       val date = LocalDate.parse("2020-01-01")
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "true",
         "thresholdNextThirtyDaysDate.year" -> date.getYear.toString,
@@ -98,7 +96,6 @@ class ThresholdNextThirtyDaysControllerSpec extends ControllerSpecBase {
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(onwardRoute.url)
-      verify(mockThresholdService, times(1)).removeVoluntaryRegistration(any())
     }
 
     "redirect to the next page when valid data is submitted with answer false" in {

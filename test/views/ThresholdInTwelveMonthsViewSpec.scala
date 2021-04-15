@@ -16,15 +16,12 @@
 
 package views
 
-import java.time.LocalDate
-
-import config.FrontendAppConfig
 import forms.ThresholdInTwelveMonthsFormProvider
-import javax.inject.Inject
 import models.NormalMode
-import services.ThresholdService
 import utils.TimeMachine
 import views.html.thresholdInTwelveMonths
+
+import java.time.LocalDate
 
 
 class ThresholdInTwelveMonthsViewSpec extends ViewSpecBase {
@@ -37,8 +34,6 @@ class ThresholdInTwelveMonthsViewSpec extends ViewSpecBase {
   val form = new ThresholdInTwelveMonthsFormProvider(TestTimeMachine)()
   val view = app.injector.instanceOf[thresholdInTwelveMonths]
 
-  val thresholdService: ThresholdService = app.injector.instanceOf[ThresholdService]
-
   val h1 = "Has the business’s taxable turnover gone over £85,000 in any 12 month period?"
   val paragraph = "You must monitor your turnover every month and add up the total amount to cover the last 12 months. This is called a ‘rolling 12 month period’. If one month’s turnover takes you over £85,000 in any rolling 12 month period, you must register for VAT."
   val bullet1 = "Yes"
@@ -49,7 +44,7 @@ class ThresholdInTwelveMonthsViewSpec extends ViewSpecBase {
   object Selectors extends BaseSelectors
 
   "ThresholdInTwelveMonths view" must {
-    val doc = asDocument(view(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    val doc = asDocument(view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have a heading" in {
       doc.select(Selectors.h1).text() mustBe h1

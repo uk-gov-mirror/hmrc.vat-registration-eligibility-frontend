@@ -37,12 +37,12 @@ object PageIdBinding {
       } else {
         e
       }
+      case e@(ThresholdNextThirtyDaysId, None) if !twelveMonthsValue => elemMiss(e._1)
       case e@(ThresholdPreviousThirtyDaysId, Some(_)) => if (!twelveMonthsValue) {
         illegalState(e._1)
       } else {
         e
       }
-      case e@(ThresholdNextThirtyDaysId, None) if !twelveMonthsValue => elemMiss(e._1)
       case e@(ThresholdPreviousThirtyDaysId, None) if twelveMonthsValue => elemMiss(e._1)
       case e@(VATRegistrationExceptionId, Some(_)) => if (!twelveMonthsValue && (nextThirtyDaysValue == None || nextThirtyDaysValue == (ThresholdNextThirtyDaysId, Some(false)))) {
         illegalState(e._1)
@@ -75,7 +75,6 @@ object PageIdBinding {
       case (Some(ConditionalDateFormElement(false, _)), Some(ConditionalDateFormElement(false, _))) => true
       case _ => false
     }
-
 
     Map(
       "VAT-taxable sales" ->

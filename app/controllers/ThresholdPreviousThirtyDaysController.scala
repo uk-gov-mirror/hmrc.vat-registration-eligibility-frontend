@@ -20,13 +20,13 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import forms.ThresholdPreviousThirtyDaysFormProvider
-import identifiers.ThresholdPreviousThirtyDaysId
+import identifiers.{ThresholdPreviousThirtyDaysId, VoluntaryRegistrationId}
+
 import javax.inject.{Inject, Singleton}
 import models.{ConditionalDateFormElement, NormalMode}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.ThresholdService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, ThresholdHelper, UserAnswers}
 import views.html.thresholdPreviousThirtyDays
@@ -40,7 +40,6 @@ class ThresholdPreviousThirtyDaysController @Inject()(mcc: MessagesControllerCom
                                                       identify: CacheIdentifierAction,
                                                       getData: DataRetrievalAction,
                                                       requireData: DataRequiredAction,
-                                                      thresholdService: ThresholdService,
                                                       formProvider: ThresholdPreviousThirtyDaysFormProvider,
                                                       view: thresholdPreviousThirtyDays
                                                      )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
@@ -52,24 +51,24 @@ class ThresholdPreviousThirtyDaysController @Inject()(mcc: MessagesControllerCom
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(view(preparedForm, NormalMode, thresholdService))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) => {
-          Future.successful(BadRequest(view(formWithErrors, NormalMode, thresholdService)))
+          Future.successful(BadRequest(view(formWithErrors, NormalMode)))
         },
         formValue =>
           dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdPreviousThirtyDaysId.toString, formValue).flatMap {
             cacheMap =>
               val userAnswers = new UserAnswers(cacheMap)
               if (ThresholdHelper.q1DefinedAndTrue(userAnswers) | formValue.value | userAnswers.thresholdNextThirtyDays.fold(false)(_.value)) {
-                thresholdService.removeVoluntaryRegistration
+                dataCacheConnector.removeEntry(request.internalId, VoluntaryRegistrationId.toString)
               } else {
                 Future.successful(cacheMap)
               }
-          }.map(cMap => Redirect(navigator.nextPage(ThresholdPreviousThirtyDaysId, NormalMode)(new UserAnswers(cMap)))))
+          }.map(cacheMap => Redirect(navigator.nextPage(ThresholdPreviousThirtyDaysId, NormalMode)(new UserAnswers(cacheMap)))))
   }
 }

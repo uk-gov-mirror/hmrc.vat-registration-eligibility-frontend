@@ -1,9 +1,5 @@
 site.govuk = GOV.UK
 
-checkYourAnswers.title = Check Your Answers
-checkYourAnswers.heading = Check Your Answers
-checkYourAnswers.guidance = Guidance for check your answers
-
 date.day = Day
 date.month = Month
 date.year = Year
@@ -18,7 +14,6 @@ error.date.month_invalid = Give a correct month using numbers 1 to 12
 error.date.year_blank = Enter a year
 error.date.year_invalid = Give a correct year
 error.integer = Give an answer in whole numbers
-error.non_numeric = Give a value using only numbers
 error.number = Please enter a valid number
 error.required = Please enter a value
 error.summary.title = There is a problem
@@ -42,10 +37,7 @@ site.no = No
 site.yes = Yes
 site.save_and_continue = Save and continue
 site.continue = Continue
-site.service_name = Register for VAT
 service.name = Register for VAT
-site.use_other_service = Use the other service
-site.textarea.char_limit = (Limit is {0} characters)
 site.opensInNewTab = (opens in new tab)
 
 common.feedbackFirst                                                = This is a new service - your
@@ -82,7 +74,6 @@ thresholdNextThirtyDays.error.date.inFuture         = Enter a date that is in th
 thresholdNextThirtyDays.error.date.invalid          = Enter a date in the correct format
 
 thresholdPreviousThirtyDays.heading                 = Did the business expect its taxable-turnover to go over £85,000 in any 30 day period in the past?
-thresholdPreviousThirtyDays.headingLtdAndIncorpAfterApr17 = Did the business expect its taxable-turnover to go over £85,000 in any 30 day period in the past?
 thresholdPreviousThirtyDays.p1                      = This could happen if, for example, a business planned to run an exhibition and anticipated selling so many tickets it expected to go over the VAT threshold. The business must register for VAT when you expected it to go over the threshold, not when it actually went over the threshold.
 thresholdPreviousThirtyDays.text                    = VAT-registration thresholds can change. Recent ones include:
 thresholdPreviousThirtyDays.bullet1                 = 1 April 2017 to present: £85,000
@@ -91,14 +82,12 @@ thresholdPreviousThirtyDays.bullet3                 = 1 April 2015 and 31 March 
 thresholdPreviousThirtyDays.beforeLinkText          = Before this, use these
 thresholdPreviousThirtyDays.linkText                = previous VAT registration thresholds
 thresholdPreviousThirtyDays.dateHint                = For example, 13 02 2017
-thresholdPreviousThirtyDays.heading2                = What date did the business first go over the threshold?
 thresholdPreviousThirtyDays.error.required          = Select yes if the business expects to make more than £85,000 in VAT-taxable sales in a single 30-day period
 thresholdPreviousThirtyDays.error.date.required     = Enter a date for when the business first thought it would go over the threshold in a 30-day period
 thresholdPreviousThirtyDays.error.date.inFuture     = Enter a date that is in the past
 thresholdPreviousThirtyDays.error.date.invalid      = Enter a date in the correct format
 
 voluntaryRegistration.heading               = Would you like to voluntarily register the business for VAT?
-voluntaryRegistration.summary.heading       = Does the business want to register for VAT voluntarily?
 voluntaryRegistration.error.required        = Select yes if you want to register voluntarily for VAT
 voluntaryRegistration.heading2              = Does the business want to register voluntarily?
 voluntaryRegistration.text                  = Only register voluntarily if the company intends to start reporting VAT in the next 3 months.
@@ -120,31 +109,15 @@ mandatoryInformation.text2                 = As your taxable turnover is above, 
 mandatoryInformation.linkText              = Find out more about Making Tax Digital for VAT
 mandatoryInformation.button                = Continue to register for VAT
 
-
 thresholdInTwelveMonths.title                       = Has the business’s taxable turnover gone over £85,000 in any 12 month period?
 thresholdInTwelveMonths.headingIncorpMore12m        = Has the business’s taxable turnover gone over £85,000 in any 12 month period?
-thresholdInTwelveMonths.headingIncorpLess12m        = Has the business’s taxable turnover gone over £85,000 in any 12 month period?
 thresholdInTwelveMonths.error.required              = Select yes if the business has gone over the VAT-registration threshold in any 12-month period
 thresholdInTwelveMonths.error.date.required         = Enter a date for when the business went over the threshold in a 12-month period
 thresholdInTwelveMonths.error.date.inFuture         = Enter a date that is in the past
-thresholdInTwelveMonths.error.date.beforeIncorp     = Enter a date that''s after the date the business was set up: {0}
 thresholdInTwelveMonths.error.date.invalid          = Enter a date in the correct format
 thresholdInTwelveMonths.firstHelpTextIncorpMore12m  = You must monitor your turnover every month and add up the total amount to cover the last 12 months. This is called a ‘rolling 12 month period’. If one month’s turnover takes you over £85,000 in any rolling 12 month period, you must register for VAT.
-thresholdInTwelveMonths.firstHelpTextIncorpLess12m  = You must monitor your turnover every month and add up the total amount to cover the last 12 months. This is called a ‘rolling 12 month period’. If one month’s turnover takes you over £85,000 in any rolling 12 month period, you must register for VAT.
-thresholdInTwelveMonths.firstHelpTextNotIncorp      = £85,000 is the current VAT-registration threshold. It is the amount of VAT-taxable sales sole traders can make before they have to register for VAT.
-thresholdInTwelveMonths.over85kThreshold            = Answer ''yes'' if the business''s VAT-taxable sales went over £85,000 between 1 April 2017 and today.
-thresholdInTwelveMonths.overAnyOtherThresholds      = Answer ''yes'' if the business''s VAT-taxable sales went over any of the following:
-thresholdInTwelveMonths.overEitherOtherThresholds   = Answer ''yes'' if the business''s VAT-taxable sales went over either of the following:
-thresholdInTwelveMonths.bullet1                     = £85,000 between 1 April 2017 and today
-thresholdInTwelveMonths.bullet2                     = £83,000 between 1 April 2016 and 31 March 2017
-thresholdInTwelveMonths.bullet3                     = £82,000 between 1 April 2015 and 31 March 2016
-thresholdInTwelveMonths.linkText                    = Find out more about which goods and services are exempt from VAT
-thresholdInTwelveMonths.beforeLinkText2             = Before this,
-thresholdInTwelveMonths.linkText2                   = use these previous VAT registration thresholds
 thresholdInTwelveMonths.heading2                    = When did the business go over the threshold?
 thresholdInTwelveMonths.dateHint                    = For example, 02 2017
-thresholdInTwelveMonths.dropdownText                = What to include as VAT-taxable sales?
-thresholdInTwelveMonths.disclosureText              = Assume the business is already VAT-registered. Include the sale of all goods and services that are not exempt from VAT. You must include goods and services that have a 0% VAT rate.
 
 turnoverEstimate.title                  = What do you think the business’s VAT-taxable turnover will be for the next 12 months?
 turnoverEstimate.heading                = What do you think the business’s VAT-taxable turnover will be for the next 12 months?

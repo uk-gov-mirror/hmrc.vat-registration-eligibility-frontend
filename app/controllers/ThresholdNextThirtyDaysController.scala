@@ -20,12 +20,12 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import forms.ThresholdNextThirtyDaysFormProvider
-import identifiers.ThresholdNextThirtyDaysId
+import identifiers.{ThresholdNextThirtyDaysId, VoluntaryRegistrationId}
+
 import javax.inject.{Inject, Singleton}
 import models.{ConditionalDateFormElement, NormalMode}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.ThresholdService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.thresholdNextThirtyDays
@@ -39,7 +39,6 @@ class ThresholdNextThirtyDaysController @Inject()(mcc: MessagesControllerCompone
                                                   identify: CacheIdentifierAction,
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
-                                                  thresholdService: ThresholdService,
                                                   formProvider: ThresholdNextThirtyDaysFormProvider,
                                                   view: thresholdNextThirtyDays
                                                  )(implicit appConfig: FrontendAppConfig, executionContext: ExecutionContext)
@@ -63,7 +62,7 @@ class ThresholdNextThirtyDaysController @Inject()(mcc: MessagesControllerCompone
           dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdNextThirtyDaysId.toString, formValue).flatMap {
             cacheMap =>
               if (formValue.value) {
-                thresholdService.removeVoluntaryRegistration
+                dataCacheConnector.removeEntry(request.internalId, VoluntaryRegistrationId.toString)
               } else {
                 Future.successful(cacheMap)
               }

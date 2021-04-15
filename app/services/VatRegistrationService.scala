@@ -35,7 +35,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector,
                                        val dataCacheConnector: DataCacheConnector,
-                                       val thresholdService: ThresholdService,
                                        val messagesApi: MessagesApi) extends MessagesUtils {
 
   def submitEligibility(internalId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, r: DataRequest[_]): Future[JsObject] = {
@@ -78,7 +77,7 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
                                                       (implicit r: DataRequest[_]): List[JsValue] = {
     val value = JsonSummaryRow(
       questionId = s"$key-value",
-      question = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths),
+      question = messages("thresholdInTwelveMonths.headingIncorpMore12m"),
       answer = messages(if (data.value) s"site.yes" else "site.no"),
       answerValue = Json.toJson(data.value)
     )
@@ -86,7 +85,7 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
     val dataObj = data.optionalData.map(date =>
       JsonSummaryRow(
         s"$key-optionalData",
-        thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry),
+        messages("thresholdInTwelveMonths.heading2"),
         date.format(formatter),
         Json.toJson(date)
       )
@@ -96,7 +95,7 @@ class VatRegistrationService @Inject()(val vrConnector: VatRegistrationConnector
   }
 
   private[services] def prepareThresholdPreviousThirty(key: String, data: ConditionalDateFormElement)(implicit r: DataRequest[_]): List[JsValue] = {
-    val value = JsonSummaryRow(s"$key-value", thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious), messages(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
+    val value = JsonSummaryRow(s"$key-value", messages("thresholdPreviousThirtyDays.heading"), messages(if (data.value) s"site.yes" else "site.no"), Json.toJson(data.value))
     val dataObj = data.optionalData.map(date => JsonSummaryRow(s"$key-optionalData", messages(s"$key.heading2"), date.format(formatter), Json.toJson(date)))
 
     dataObj.foldLeft(value)((old, list) => old ++ list)
