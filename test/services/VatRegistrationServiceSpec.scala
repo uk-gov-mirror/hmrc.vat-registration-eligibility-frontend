@@ -37,7 +37,6 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
     val service = new VatRegistrationService(
       mockVatRegConnector,
       mockDataCacheConnector,
-      mockThresholdService,
       mockMessagesAPI
     )
 
@@ -48,8 +47,6 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
 
     when(mockMessages.apply(ArgumentMatchers.anyString(), ArgumentMatchers.any()))
       .thenReturn("mocked message")
-
-    when(mockThresholdService.returnThresholdDateResult[String](any())(any())).thenReturn("foo")
   }
 
   implicit val r: DataRequest[AnyContentAsEmpty.type] = fakeDataRequestIncorped
@@ -111,7 +108,7 @@ class VatRegistrationServiceSpec extends SpecBase with VATEligiblityMocks {
           |{"sections":[
           |{"title":"VAT-taxable sales",
           | "data":[
-          | {"questionId":"thresholdInTwelveMonths-value","question":"foo","answer":"mocked message","answerValue":false},
+          | {"questionId":"thresholdInTwelveMonths-value","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"thresholdNextThirtyDays-value","question":"mocked message","answer":"mocked message","answerValue":false},
           | {"questionId":"voluntaryRegistration","question":"mocked message","answer":"mocked message","answerValue":true},
           | {"questionId":"voluntaryInformation","question":"mocked message","answer":"mocked message","answerValue":true},

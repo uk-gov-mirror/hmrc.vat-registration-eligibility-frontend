@@ -18,33 +18,47 @@
 @import controllers.routes._
 @import models.Mode
 @import models.requests.DataRequest
-@import services.ThresholdService
 
 @this(
         layout: views.html.layouts.layout,
         errorSummary: components.errorSummary,
         h1: components.h1,
         p: components.p,
+        bullets: components.bullets,
+        link: components.link,
         formWithCsrf: FormWithCSRF,
         conditionalYesNoRadio: components.conditionalYesNoRadio,
         inputDate: components.inputDate,
         button: components.button
 )
 
-@(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @layout(pageTitle = Some(title(form, messages("thresholdPreviousThirtyDays.heading"))), backLink = true) {
 
     @errorSummary(form.errors, Some(Map("thresholdPreviousThirtyDaysDate" -> "day")))
 
-    @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious))
-    @p{ @thresholdService.returnThresholdDateResult[Html](thresholdService.returnHelpText1Previous) }
+    @h1(messages("thresholdPreviousThirtyDays.heading"))
+
+    @p { @messages("thresholdPreviousThirtyDays.text") }
+
+    @bullets(
+        messages("thresholdPreviousThirtyDays.bullet1"),
+        messages("thresholdPreviousThirtyDays.bullet2"),
+        messages("thresholdPreviousThirtyDays.bullet3")
+    )
+
+    @p {
+        @(messages("thresholdPreviousThirtyDays.beforeLinkText"))
+        @link(appConfig.VATNotice700_1supplementURL, messages("thresholdPreviousThirtyDays.linkText")).
+    }
+
     @p{ @messages("thresholdPreviousThirtyDays.p1") }
 
     @formWithCsrf(action = ThresholdPreviousThirtyDaysController.onSubmit(), 'autoComplete -> "off",'novalidate -> "novalidate") {
         @conditionalYesNoRadio(
             form = form,
-            headingKey = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingPrevious),
+            headingKey = messages("thresholdPreviousThirtyDays.heading"),
             ifYes = Some(hiddenYesContent),
             isPageHeading = false,
             classes = "govuk-visually-hidden"
@@ -57,7 +71,7 @@
 
 @hiddenYesContent = {
     @inputDate(form = form,
-        legendContent = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry),
+        legendContent = messages("thresholdInTwelveMonths.heading2"),
         hintText = Some("thresholdPreviousThirtyDays.dateHint"),
         legendClasses = "govuk-fieldset__legend--m",
         id = "thresholdPreviousThirtyDaysDate",

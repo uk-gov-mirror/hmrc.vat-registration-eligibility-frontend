@@ -18,7 +18,6 @@
 @import controllers.routes._
 @import models.Mode
 @import models.requests.DataRequest
-@import services.ThresholdService
 
 @this(
         layout: views.html.layouts.layout,
@@ -31,19 +30,19 @@
         button: components.button
 )
 
-@(form: Form[_], mode: Mode, thresholdService: ThresholdService)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[_], mode: Mode)(implicit request: DataRequest[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @layout(pageTitle = Some(title(form, messages("thresholdInTwelveMonths.title"))), backLink = true) {
 
     @errorSummary(form.errors, Some(Map("valueDate" -> "month")))
 
-    @h1(thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths))
-    @p{ @thresholdService.returnThresholdDateResult[String](thresholdService.returnHelpText1TwelveMonths) }
+    @h1(messages("thresholdInTwelveMonths.headingIncorpMore12m"))
+    @p{ @messages("thresholdInTwelveMonths.firstHelpTextIncorpMore12m") }
 
     @formWithCsrf(action = ThresholdInTwelveMonthsController.onSubmit(), 'autoComplete -> "off", 'novalidate -> "novalidate") {
         @conditionalYesNoRadio(
             form = form,
-            headingKey = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingTwelveMonths),
+            headingKey = messages("thresholdInTwelveMonths.headingIncorpMore12m"),
             ifYes = Some(hiddenYesContent),
             isPageHeading = false,
             classes = "govuk-visually-hidden"
@@ -56,7 +55,7 @@
 
 @hiddenYesContent = {
     @inputDate(form = form,
-        legendContent = thresholdService.returnThresholdDateResult[String](thresholdService.returnHeadingForTwelveMonthsDateEntry),
+        legendContent = messages("thresholdInTwelveMonths.heading2"),
         hintText = Some("thresholdInTwelveMonths.dateHint"),
         legendClasses = "govuk-fieldset__legend--m",
         id = "valueDate",

@@ -20,17 +20,17 @@ import config.FrontendAppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import forms.ThresholdInTwelveMonthsFormProvider
-import identifiers.ThresholdInTwelveMonthsId
-import javax.inject.{Inject, Singleton}
+import identifiers.{ThresholdInTwelveMonthsId, ThresholdNextThirtyDaysId, VATRegistrationExceptionId, VoluntaryRegistrationId}
 import models.{ConditionalDateFormElement, NormalMode, RegistrationInformation}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.{ThresholdService, TrafficManagementService}
+import services.TrafficManagementService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{Navigator, UserAnswers}
 import views.html.thresholdInTwelveMonths
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -40,7 +40,6 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
                                                   identify: CacheIdentifierAction,
                                                   getData: DataRetrievalAction,
                                                   requireData: DataRequiredAction,
-                                                  thresholdService: ThresholdService,
                                                   formProvider: ThresholdInTwelveMonthsFormProvider,
                                                   trafficManagementService: TrafficManagementService,
                                                   view: thresholdInTwelveMonths
@@ -53,21 +52,27 @@ class ThresholdInTwelveMonthsController @Inject()(mcc: MessagesControllerCompone
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
       }
-      Ok(view(preparedForm, NormalMode, thresholdService))
+      Ok(view(preparedForm, NormalMode))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       formProvider().bindFromRequest().fold(
         (formWithErrors: Form[_]) =>
-          Future.successful(BadRequest(view(formWithErrors, NormalMode, thresholdService))),
+          Future.successful(BadRequest(view(formWithErrors, NormalMode))),
         formValue =>
-          dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap { cacheMap =>
-            if (formValue.value) thresholdService.removeVoluntaryAndNextThirtyDays else thresholdService.removeException
-          }.flatMap(cMap =>
+          dataCacheConnector.save[ConditionalDateFormElement](request.internalId, ThresholdInTwelveMonthsId.toString, formValue).flatMap { _ =>
+            if (formValue.value) {
+              dataCacheConnector.removeEntry(request.internalId, VoluntaryRegistrationId.toString).flatMap {
+                _ => dataCacheConnector.removeEntry(request.internalId, ThresholdNextThirtyDaysId.toString)
+              }
+            } else {
+              dataCacheConnector.removeEntry(request.internalId, VATRegistrationExceptionId.toString)
+            }
+          }.flatMap(cacheMap =>
             trafficManagementService.upsertRegistrationInformation(request.internalId, request.currentProfile.registrationID, isOtrs = false).map {
               case RegistrationInformation(_, _, _, _, _) =>
-                Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cMap)))
+                Redirect(navigator.nextPage(ThresholdInTwelveMonthsId, NormalMode)(new UserAnswers(cacheMap)))
             }
           ))
   }

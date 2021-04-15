@@ -16,14 +16,13 @@
 
 package views
 
-import java.time.LocalDate
-
 import forms.ThresholdPreviousThirtyDaysFormProvider
 import models.NormalMode
 import play.api.i18n.Messages
-import services.ThresholdService
 import utils.TimeMachine
 import views.html.thresholdPreviousThirtyDays
+
+import java.time.LocalDate
 
 class ThresholdPreviousThirtyDaysViewSpec extends ViewSpecBase {
 
@@ -39,13 +38,12 @@ class ThresholdPreviousThirtyDaysViewSpec extends ViewSpecBase {
   val legend = "When did the business go over the threshold?"
   val paragraph = "This could happen if, for example, a business planned to run an exhibition and anticipated selling so many tickets it expected to go over the VAT threshold. The business must register for VAT when you expected it to go over the threshold, not when it actually went over the threshold."
 
-  val thresholdService: ThresholdService = app.injector.instanceOf[ThresholdService]
   val view = app.injector.instanceOf[thresholdPreviousThirtyDays]
 
   object Selectors extends BaseSelectors
 
   "ThresholdPreviousThirtyDays view" must {
-    lazy val doc = asDocument(view(form, NormalMode, thresholdService)(fakeDataRequestIncorped, messages, frontendAppConfig))
+    lazy val doc = asDocument(view(form, NormalMode)(fakeDataRequestIncorped, messages, frontendAppConfig))
 
     "have the correct continue button" in {
       doc.select(Selectors.button).text() mustBe continueButton
@@ -64,7 +62,7 @@ class ThresholdPreviousThirtyDaysViewSpec extends ViewSpecBase {
     }
 
     "have the first paragraph" in {
-      doc.select(Selectors.p(2)).text() mustBe paragraph
+      doc.select(Selectors.p(3)).text() mustBe paragraph
     }
 
     "have the correct legend" in {
