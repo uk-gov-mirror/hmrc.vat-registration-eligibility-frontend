@@ -49,7 +49,7 @@ site.textarea.char_limit = (Limit is {0} characters)
 site.opensInNewTab = (opens in new tab)
 
 common.feedbackFirst                                                = This is a new service - your
-common.feedbackSecond                                               = feedback (opens in new tab)
+common.feedbackSecond                                               = feedback
 common.feedbackThird                                                = will help us to improve it.
 
 footer.cookies         = Cookies

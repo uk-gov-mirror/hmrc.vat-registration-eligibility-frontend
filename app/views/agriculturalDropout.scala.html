@@ -19,10 +19,10 @@
 
 @this(
     layout: views.html.layouts.layout,
-    h1: newcomponents.h1,
-    p: newcomponents.p,
+    h1: components.h1,
+    p: components.p,
     form: FormWithCSRF,
-    link: newcomponents.link
+    link: components.link
 )
 
 @()(implicit request: CacheIdentifierRequest[_], messages: Messages, appConfig: FrontendAppConfig)

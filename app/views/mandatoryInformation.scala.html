@@ -19,12 +19,12 @@
 
 @this(
     layout: views.html.layouts.layout,
-    h1: newcomponents.h1,
-    p: newcomponents.p,
-    panelIndent: newcomponents.panelIndent,
+    h1: components.h1,
+    p: components.p,
+    panelIndent: components.panelIndent,
     formWithCsrf: FormWithCSRF,
-    link: newcomponents.link,
-    button: newcomponents.button
+    link: components.link,
+    button: components.button
 )
 
 @()(implicit request: Request[_], messages: Messages, appConfig: FrontendAppConfig)

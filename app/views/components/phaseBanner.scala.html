@@ -14,15 +14,20 @@
  * limitations under the License.
  *@
 
-@(dropdownKey: String, dropdownContentList : Seq[String])(implicit messages: Messages)
+@this(
+    phaseBanner: GovukPhaseBanner,
+    link: components.link
+)
 
-<div class="form-group">
-    <details>
-        <summary><span class="summary">@Messages(dropdownKey)</span></summary>
-        <div class="panel panel-border-narrow">
-            @for(content <- dropdownContentList) {
-            <p>@Messages(content)</p>
-            }
-        </div>
-    </details>
-</div>
+@(phase: String)(implicit request: Request[_], messages: Messages, appConfig: config.FrontendAppConfig)
+
+@feedbackBanner = {
+    @messages("common.feedbackFirst")
+    @link(controllers.routes.FeedbackController.show.url, "common.feedbackSecond", isExternal = true, id = Some("phase-banner-feedback-url"))
+    @messages("common.feedbackThird")
+}
+
+@phaseBanner(PhaseBanner(
+    tag = Some(Tag(content = Text(phase))),
+    content = HtmlContent(feedbackBanner)
+))

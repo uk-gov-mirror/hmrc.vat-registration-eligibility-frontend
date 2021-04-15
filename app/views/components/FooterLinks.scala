@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package views.newcomponents
+package views.components
 
 import config.FrontendAppConfig
 import play.api.i18n.Messages
