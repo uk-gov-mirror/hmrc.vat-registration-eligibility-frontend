@@ -16,12 +16,11 @@
 
 package repositories
 
-import javax.inject.{Inject, Singleton}
+import config.FrontendAppConfig
 import org.joda.time.{DateTime, DateTimeZone}
+import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Logger}
-import play.modules.reactivemongo.MongoDbConnection
-import reactivemongo.api.DefaultDB
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.ImplicitBSONHandlers._
@@ -29,6 +28,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -43,13 +43,14 @@ object DatedCacheMap {
   def apply(cacheMap: CacheMap): DatedCacheMap = DatedCacheMap(cacheMap.id, cacheMap.data)
 }
 
-class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
-  extends ReactiveRepository[DatedCacheMap, BSONObjectID](config.getString("appName").get, mongo, DatedCacheMap.formats) {
+@Singleton
+class SessionRepository @Inject()(config: FrontendAppConfig, mongo: ReactiveMongoComponent)
+  extends ReactiveRepository[DatedCacheMap, BSONObjectID](config.servicesConfig.getString("appName"), mongo.mongoConnector.db, DatedCacheMap.formats) {
 
   val fieldName = "lastUpdated"
   val createdIndexName = "userAnswersExpiry"
   val expireAfterSeconds = "expireAfterSeconds"
-  val timeToLiveInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds").get
+  val timeToLiveInSeconds: Int = config.servicesConfig.getInt("mongodb.timeToLiveInSeconds")
 
   dropCollectionIndexTemp.map(_ => createIndex(fieldName, createdIndexName, timeToLiveInSeconds))
 
@@ -106,12 +107,3 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
     collection.find(Json.obj("id" -> id)).one[CacheMap]
 }
 
-@Singleton
-class SessionRepository @Inject()(config: Configuration) {
-
-  class DbConnection extends MongoDbConnection
-
-  private lazy val sessionRepository = new ReactiveMongoRepository(config, new DbConnection().db)
-
-  def apply(): ReactiveMongoRepository = sessionRepository
-}

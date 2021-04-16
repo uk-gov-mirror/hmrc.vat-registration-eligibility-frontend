@@ -16,7 +16,7 @@
 
 package services
 
-import base.CommonSpecBase
+import base.SpecBase
 import models.CurrentProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CurrentProfileServiceSpec extends CommonSpecBase {
+class CurrentProfileServiceSpec extends SpecBase {
 
   class Setup {
     val service = new CurrentProfileService(mockDataCacheConnector, mockVatRegConnector)
